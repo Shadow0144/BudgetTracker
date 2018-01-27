@@ -1,5 +1,6 @@
 package cc.corbin.budgettracker;
 
+import android.content.Intent;
 import android.os.Environment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -41,7 +42,7 @@ public class DayViewActivity extends AppCompatActivity
     private Button _previousDay;
     private Button _nextDay;
 
-    private Date _currentDate;
+    private Calendar _currentDate;
 
     private int _year;
     private int _month;
@@ -63,17 +64,18 @@ public class DayViewActivity extends AppCompatActivity
 
         loadCategories();
 
-        _currentDate = new Date();
-        _currentDate.setTime(getIntent().getLongExtra(DATE_INTENT, Calendar.getInstance().getTimeInMillis()));
+        _currentDate = Calendar.getInstance();
+
+        _currentDate.setTimeInMillis(getIntent().getLongExtra(DATE_INTENT, Calendar.getInstance().getTimeInMillis()));
         SimpleDateFormat simpleDate =  new SimpleDateFormat("dd/MM/yyyy");
 
-        _dateView.setText("Expenditures for: " + simpleDate.format(_currentDate));
+        _dateView.setText("Expenditures for: " + simpleDate.format(_currentDate.getTime()));
 
-        _year = _currentDate.getYear();
-        _month = _currentDate.getMonth();
-        _day = _currentDate.getDate();
+        _year = _currentDate.get(Calendar.YEAR);
+        _month = _currentDate.get(Calendar.MONTH);
+        _day = _currentDate.get(Calendar.DATE);
 
-        _adapter = new DayFragmentPagerAdapter(getSupportFragmentManager(), _currentDate.getMonth(), _currentDate.getYear());
+        _adapter = new DayFragmentPagerAdapter(getSupportFragmentManager(), _currentDate.get(Calendar.MONTH), _currentDate.get(Calendar.YEAR));
         _pagerView.setAdapter(_adapter);
         _pagerView.setCurrentItem(_day);
 
@@ -93,40 +95,69 @@ public class DayViewActivity extends AppCompatActivity
     {
         _day--;
 
-        updateDay();
+        if (_day == 0)
+        {
+            Intent intent = new Intent(getApplicationContext(), DayViewActivity.class);
+            Calendar date = Calendar.getInstance();
+            date.set(_year, _month, 1);
+            date.add(Calendar.DATE, -1);
+
+            intent.putExtra(DATE_INTENT, date.getTimeInMillis());
+            startActivity(intent);
+            finish();
+        }
+        else
+        {
+            updateDay();
+        }
     }
 
     public void nextDay(View v)
     {
         _day++;
 
-        updateDay();
+        if (_day == (_adapter.lastDay()+1))
+        {
+            Intent intent = new Intent(getApplicationContext(), DayViewActivity.class);
+            Calendar date = Calendar.getInstance();
+            date.set(_year, _month, _adapter.lastDay());
+            date.add(Calendar.DATE, 1);
+
+            intent.putExtra(DATE_INTENT, date.getTimeInMillis());
+            startActivity(intent);
+            finish();
+        }
+        else
+        {
+            updateDay();
+        }
     }
 
     private void updateDay()
     {
         _pagerView.setCurrentItem(_day);
 
-        if (_day == 1)
+        /*if (_day == 1)
         {
-            _previousDay.setEnabled(false);
-            _nextDay.setEnabled(true);
+            _previousDay.setText("<<");
+            _nextDay.setText(">");
         }
         else if (_day == _adapter.lastDay())
         {
-            _previousDay.setEnabled(true);
-            _nextDay.setEnabled(false);
+            _previousDay.setText("<");
+            _nextDay.setText(">>");
         }
         else
         {
-            _previousDay.setEnabled(true);
-            _nextDay.setEnabled(true);
-        }
+            _previousDay.setText("<");
+            _nextDay.setText(">");
+        }*/
 
-        _currentDate = new Date(_year, _month, _day);
+        _currentDate = Calendar.getInstance();
+        _currentDate.set(_year, _month, _day);
         SimpleDateFormat simpleDate =  new SimpleDateFormat("dd/MM/yyyy");
 
-        _dateView.setText("Expenditures for: " + simpleDate.format(_currentDate));
+        _dateView.setText("Expenditures for: " + simpleDate.format(_currentDate.getTime()));
     }
 
     public void addItem(View v)
