@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Budget Tracker</string>
+    <string name="add_item">Add Item</string>
+    <string name="yesterday">&lt;</string>
+    <string name="tomorrow">&gt;</string>
+    <string name="x">X</string>
+    <string-array name="currencies">
+        <item>₩</item>
+        <item>$</item>
+        <item>¥</item>
+        <item>€</item>
+    </string-array>
+    <string-array name="default_categories">
+        <item>Food</item>
+        <item>Other</item>
+    </string-array>
+</resources>
