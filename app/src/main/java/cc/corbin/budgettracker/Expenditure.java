@@ -6,16 +6,16 @@ package cc.corbin.budgettracker;
 
 public class Expenditure
 {
-    public int cost;
+    public float cost;
     public String category;
 
     public Expenditure()
     {
-        this.cost = 0;
+        this.cost = 0.0f;
         this.category = DayViewActivity.getCategories()[DayViewActivity.getCategories().length-1];
     }
 
-    public Expenditure(int cost, String category)
+    public Expenditure(float cost, String category)
     {
         this.cost = cost;
         this.category = category;

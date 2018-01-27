@@ -252,7 +252,7 @@ public class DayViewActivity extends AppCompatActivity
                         parser.nextTag();
                         parser.require(XmlPullParser.START_TAG, null, "cost");
                         parser.next();
-                        int cost = Integer.parseInt(parser.getText());
+                        float cost = Float.parseFloat(parser.getText());
                         parser.nextTag();
                         parser.require(XmlPullParser.END_TAG, null, "cost");
                         parser.nextTag();

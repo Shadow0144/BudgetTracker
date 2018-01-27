@@ -2,13 +2,18 @@ package cc.corbin.budgettracker;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.InputFilter;
 import android.text.Layout;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -74,21 +79,21 @@ public class DayFragment extends Fragment
 
     public void addExpenditure()
     {
-        addExpenditure(new Expenditure());
+        addExpenditure(new Expenditure(), true);
     }
 
-    public void addExpenditure(int cost, String category)
+    public void addExpenditure(float cost, String category)
     {
-        addExpenditure(new Expenditure(cost, category));
+        addExpenditure(new Expenditure(cost, category), false);
     }
 
-    public void addExpenditure(Expenditure exp)
+    public void addExpenditure(Expenditure exp, boolean empty)
     {
         _expenditures.add(exp);
 
         if (_visible)
         {
-            addExpenditureView(exp, (_expenditures.size()-1));
+            addExpenditureView(exp, (_expenditures.size()-1), empty);
         }
     }
 
@@ -100,24 +105,80 @@ public class DayFragment extends Fragment
         {
             Expenditure exp = _expenditures.get(i);
 
-            addExpenditureView(exp, i);
+            addExpenditureView(exp, i, false);
         }
     }
 
-    private void addExpenditureView(Expenditure exp, int index)
+    private void addExpenditureView(Expenditure exp, int index, boolean empty)
     {
         View view = getLayoutInflater().inflate(R.layout.item, null);
         view.setId(index);
 
-        // Add listener for currency changed
+        final Spinner currSpinner = view.findViewById(R.id.currencySelector);
+        currSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+            {
+                /// TODO
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent)
+            {
+
+            }
+        });
 
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
                 getContext(), android.R.layout.simple_spinner_item, DayViewActivity.getCategories());
-        Spinner catSpinner = view.findViewById(R.id.itemCategorySelector);
+        final Spinner catSpinner = view.findViewById(R.id.itemCategorySelector);
         catSpinner.setAdapter(spinnerArrayAdapter);
-        // Add listener for item changed
+        catSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+            {
+                _expenditures.get(((ViewGroup)(parent.getParent())).getId()).category = ((String)(((Spinner)(parent)).getItemAtPosition(position)));
+            }
 
-        // Add listener for cost changed
+            @Override
+            public void onNothingSelected(AdapterView<?> parent)
+            {
+
+            }
+        });
+
+        final EditText costText = view.findViewById(R.id.valueEditText);
+        costText.setFilters(new InputFilter[]{new MoneyValueFilter()});
+        costText.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
+                int id = ((ViewGroup)(costText.getParent())).getId();
+                _expenditures.get(id).cost = Float.parseFloat(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s)
+            {
+
+            }
+        });
+
+        if (!empty)
+        {
+            String cost = String.format("%.02f", exp.cost);
+            costText.setText("" + cost);
+        }
+        else { }
 
         Button removeButton = view.findViewById(R.id.removeButton);
         removeButton.setOnClickListener(new View.OnClickListener()
@@ -163,7 +224,7 @@ public class DayFragment extends Fragment
         int count = expenditures.size();
         for (int i = 0; i < count; i++)
         {
-            addExpenditure(expenditures.get(i));
+            addExpenditure(expenditures.get(i), false);
         }
     }
 }
