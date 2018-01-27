@@ -4,6 +4,7 @@
     <string name="yesterday">&lt;</string>
     <string name="tomorrow">&gt;</string>
     <string name="x">X</string>
+    <string name="expenses">Expenses for:&#160;</string>
     <string-array name="currencies">
         <item>₩</item>
         <item>$</item>

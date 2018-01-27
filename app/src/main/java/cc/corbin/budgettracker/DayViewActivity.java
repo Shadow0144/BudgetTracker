@@ -69,7 +69,7 @@ public class DayViewActivity extends AppCompatActivity
         _currentDate.setTimeInMillis(getIntent().getLongExtra(DATE_INTENT, Calendar.getInstance().getTimeInMillis()));
         SimpleDateFormat simpleDate =  new SimpleDateFormat("dd/MM/yyyy");
 
-        _dateView.setText("Expenditures for: " + simpleDate.format(_currentDate.getTime()));
+        _dateView.setText(getString(R.string.expenses) + simpleDate.format(_currentDate.getTime()));
 
         _year = _currentDate.get(Calendar.YEAR);
         _month = _currentDate.get(Calendar.MONTH);
@@ -137,7 +137,7 @@ public class DayViewActivity extends AppCompatActivity
     {
         _pagerView.setCurrentItem(_day);
 
-        /*if (_day == 1)
+        if (_day == 1)
         {
             _previousDay.setText("<<");
             _nextDay.setText(">");
@@ -151,13 +151,13 @@ public class DayViewActivity extends AppCompatActivity
         {
             _previousDay.setText("<");
             _nextDay.setText(">");
-        }*/
+        }
 
         _currentDate = Calendar.getInstance();
         _currentDate.set(_year, _month, _day);
         SimpleDateFormat simpleDate =  new SimpleDateFormat("dd/MM/yyyy");
 
-        _dateView.setText("Expenditures for: " + simpleDate.format(_currentDate.getTime()));
+        _dateView.setText(getString(R.string.expenses) + simpleDate.format(_currentDate.getTime()));
     }
 
     public void addItem(View v)
