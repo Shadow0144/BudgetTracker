@@ -12,12 +12,21 @@
         android:layout_weight="0"
         android:entries="@array/currencies" />
 
+    <TextView
+        android:id="@+id/negativeView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:text="-"
+        android:textSize="24sp" />
+
     <EditText
         android:id="@+id/valueEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:ems="10"
+        android:hint="0"
         android:inputType="numberDecimal"
         android:maxLines="1" />
 

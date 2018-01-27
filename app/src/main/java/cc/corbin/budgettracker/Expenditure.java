@@ -7,17 +7,17 @@ package cc.corbin.budgettracker;
 public class Expenditure
 {
     public int cost;
-    public String type;
+    public String category;
 
     public Expenditure()
     {
         this.cost = 0;
-        this.type = DayViewActivity.getCategories()[0];
+        this.category = DayViewActivity.getCategories()[DayViewActivity.getCategories().length-1];
     }
 
-    public Expenditure(int cost, String type)
+    public Expenditure(int cost, String category)
     {
         this.cost = cost;
-        this.type = type;
+        this.category = category;
     }
 }

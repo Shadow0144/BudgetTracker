@@ -77,4 +77,17 @@ public class DayFragmentPagerAdapter extends FragmentPagerAdapter
     {
         return "Day " + (position + 1);
     }
+
+    public void setExpenditures(ArrayList<ArrayList<Expenditure>> dailyExpenditures)
+    {
+        for (int i = 0; i < _count; i++)
+        {
+            _fragments.get(i).setExpenditures(dailyExpenditures.get(i));
+        }
+    }
+
+    public ArrayList<Expenditure> getExpenditures(int index)
+    {
+        return _fragments.get(index).getExpenditures();
+    }
 }
