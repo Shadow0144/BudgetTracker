@@ -165,6 +165,13 @@ public class DayViewActivity extends AppCompatActivity
         _adapter.addExpenditure(_pagerView.getCurrentItem());
     }
 
+    public void moveToMonthView(View v)
+    {
+        Intent intent = new Intent(getApplicationContext(), MonthViewActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
     private void loadCategories()
     {
         _categories = getResources().getStringArray(R.array.default_categories);
