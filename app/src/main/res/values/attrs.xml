@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="TableCell">
+        <attr name="cellType" format="enum">
+            <enum name="defaultCell" value="0"/>
+            <enum name="headerCell" value="1"/>
+            <enum name="titleCell" value="2"/>
+        </attr>
+    </declare-styleable>
+    <declare-styleable name="MonthTable">
+        <attr name="month" format="integer"/>
+        <attr name="year" format="integer"/>
     </declare-styleable>
 </resources>
