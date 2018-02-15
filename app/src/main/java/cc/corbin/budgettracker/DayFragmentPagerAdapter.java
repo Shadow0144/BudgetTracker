@@ -8,6 +8,7 @@ import android.util.Log;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * Created by Corbin on 1/26/2018.
@@ -60,6 +61,11 @@ public class DayFragmentPagerAdapter extends FragmentPagerAdapter
         _fragments.get(index).addExpenditure();
     }
 
+    public void updateExpenditureDatabase(int index)
+    {
+        _fragments.get(index).updateExpenditureDatabase();
+    }
+
     @Override
     public Fragment getItem(int position)
     {
@@ -78,7 +84,7 @@ public class DayFragmentPagerAdapter extends FragmentPagerAdapter
         return "Day " + (position + 1);
     }
 
-    public void setExpenditures(ArrayList<ArrayList<Expenditure>> dailyExpenditures)
+    public void setExpenditures(List<List<ExpenditureEntity>> dailyExpenditures)
     {
         for (int i = 0; i < _count; i++)
         {
@@ -86,7 +92,7 @@ public class DayFragmentPagerAdapter extends FragmentPagerAdapter
         }
     }
 
-    public ArrayList<Expenditure> getExpenditures(int index)
+    public List<ExpenditureEntity> getExpenditures(int index)
     {
         return _fragments.get(index).getExpenditures();
     }

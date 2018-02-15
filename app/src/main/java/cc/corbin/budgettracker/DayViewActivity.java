@@ -79,8 +79,6 @@ public class DayViewActivity extends AppCompatActivity
         _pagerView.setAdapter(_adapter);
         _pagerView.setCurrentItem(_day);
 
-        loadMonthData();
-
         updateDay();
     }
 
@@ -88,7 +86,8 @@ public class DayViewActivity extends AppCompatActivity
     protected void onPause()
     {
         super.onPause();
-        saveMonthData();
+
+        _adapter.updateExpenditureDatabase(_pagerView.getCurrentItem());
     }
 
     public void previousDay(View v)
@@ -162,7 +161,14 @@ public class DayViewActivity extends AppCompatActivity
 
     public void addItem(View v)
     {
-        _adapter.addExpenditure(_pagerView.getCurrentItem());
+        try
+        {
+            _adapter.addExpenditure(_pagerView.getCurrentItem());
+        }
+        catch (IllegalStateException e)
+        {
+            Log.e(TAG, "Key was not unique");
+        }
     }
 
     public void moveToMonthView(View v)
@@ -180,145 +186,6 @@ public class DayViewActivity extends AppCompatActivity
     public static String[] getCategories()
     {
         return _categories;
-    }
-
-    private void saveMonthData()
-    {
-        try
-        {
-            File records;
-            if (isExternalStorageReadable())
-            {
-                records = new File(getFilesDir() + "/" + _year + "_" + _month + ".xml");
-            }
-            else
-            {
-                records = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/" + _year + "_" + _month + ".xml");
-            }
-
-            OutputStream outputStream = new FileOutputStream(records);
-
-            String text;
-
-            text = "<" + "month" + ">";
-            outputStream.write(text.getBytes());
-
-            int count = _adapter.getCount();
-            for (int i = 0; i < count; i++)
-            {
-                ArrayList<Expenditure> expenditure = _adapter.getExpenditures(i);
-                int exp = expenditure.size();
-                text = "<" + "day" + ">";
-                outputStream.write(text.getBytes());
-                for (int j = 0; j < exp; j++)
-                {
-                    text = "<" + "item" + ">";
-                    outputStream.write(text.getBytes());
-
-                    text = "<" + "cost" + ">";
-                    outputStream.write(text.getBytes());
-
-                    text = "" + expenditure.get(j).cost;
-                    outputStream.write(text.getBytes());
-
-                    text = "</" + "cost" + ">";
-                    outputStream.write(text.getBytes());
-
-                    text = "<" + "category" + ">";
-                    outputStream.write(text.getBytes());
-
-                    text = "" + expenditure.get(j).category;
-                    outputStream.write(text.getBytes());
-
-                    text = "</" + "category" + ">";
-                    outputStream.write(text.getBytes());
-
-                    text = "</" + "item" + ">";
-                    outputStream.write(text.getBytes());
-                }
-                text = "</" + "day" + ">";
-                outputStream.write(text.getBytes());
-            }
-
-            text = "</" + "month" + ">";
-            outputStream.write(text.getBytes());
-
-            outputStream.close();
-        }
-        catch (Exception e)
-        {
-            Log.e(TAG, e.toString());
-        }
-    }
-
-    private void loadMonthData()
-    {
-        try
-        {
-            XmlPullParser parser = Xml.newPullParser();
-
-            File records;
-            if (isExternalStorageReadable())
-            {
-                records = new File(getFilesDir() + "/" + _year + "_" + _month + ".xml");
-            }
-            else
-            {
-                records = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/" + _year + "_" + _month + ".xml");
-            }
-
-            if (records.exists())
-            {
-                InputStream inputStream = new FileInputStream(records);
-                parser.setInput(inputStream, null);
-
-                parser.next();
-                parser.require(XmlPullParser.START_TAG, null, "month");
-
-                ArrayList<ArrayList<Expenditure>> dailyExpenditures = new ArrayList<ArrayList<Expenditure>>();
-                int count = _adapter.getCount();
-                for (int i = 0; i < count; i++)
-                {
-                    ArrayList<Expenditure> expenditures = new ArrayList<Expenditure>();
-
-                    parser.nextTag();
-                    parser.require(XmlPullParser.START_TAG, null, "day");
-                    while (parser.nextTag() != XmlPullParser.END_TAG)
-                    {
-                        // Item
-                        parser.require(XmlPullParser.START_TAG, null, "item");
-                        parser.nextTag();
-                        parser.require(XmlPullParser.START_TAG, null, "cost");
-                        parser.next();
-                        float cost = Float.parseFloat(parser.getText());
-                        parser.nextTag();
-                        parser.require(XmlPullParser.END_TAG, null, "cost");
-                        parser.nextTag();
-                        parser.require(XmlPullParser.START_TAG, null, "category");
-                        parser.next();
-                        String cat = parser.getText();
-                        parser.nextTag();
-                        parser.require(XmlPullParser.END_TAG, null, "category");
-                        parser.nextTag();
-                        parser.require(XmlPullParser.END_TAG, null, "item");
-
-                        expenditures.add(new Expenditure(cost, cat));
-                    }
-                    parser.require(XmlPullParser.END_TAG, null, "day");
-
-                    dailyExpenditures.add(expenditures);
-                }
-
-                inputStream.close();
-
-                _adapter.setExpenditures(dailyExpenditures);
-            }
-            else { }
-        }
-        catch (Exception e)
-        {
-            Log.e(TAG, e.toString());
-        }
     }
 
     /* Checks if external storage is available for read and write */

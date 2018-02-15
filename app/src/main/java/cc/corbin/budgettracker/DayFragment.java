@@ -20,7 +20,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Corbin on 1/26/2018.
@@ -34,7 +36,7 @@ public class DayFragment extends Fragment
 
     private LinearLayout _itemsContainer;
 
-    private ArrayList<Expenditure> _expenditures;
+    private List<ExpenditureEntity> _expenditureEntities;
 
     private DayFragmentPagerAdapter _parent;
 
@@ -44,14 +46,16 @@ public class DayFragment extends Fragment
 
     private boolean _visible;
 
+    private long _date;
+    private long _uid;
+    private ExpenditureDatabase _db;
+
     public void setParameters(DayFragmentPagerAdapter parent, int year, int month, int day)
     {
         _parent = parent;
         _year = year;
         _month = month;
         _day = day;
-
-        _expenditures = new ArrayList<Expenditure>();
     }
 
     @Override
@@ -65,6 +69,23 @@ public class DayFragment extends Fragment
 
         _visible = true;
 
+        Calendar c = Calendar.getInstance();
+        c.set(_year, _month-1, _day, 0, 0, 0);
+        c.set(Calendar.MILLISECOND, 0);
+        _date = c.getTimeInMillis();
+
+        _db = ExpenditureDatabase.getExpenditureDatabase(getContext());
+        _expenditureEntities = _db.expenditureDao().getAll(_date);
+
+        if (_expenditureEntities.size() > 0)
+        {
+            _uid = _expenditureEntities.get(_expenditureEntities.size() - 1).getDate() + 1;
+        }
+        else
+        {
+            _uid = _date;
+        }
+
         setUpExpenditures();
 
         return v;
@@ -77,39 +98,48 @@ public class DayFragment extends Fragment
         _visible = false;
     }
 
+    public void updateExpenditureDatabase()
+    {
+        _db.expenditureDao().update(_expenditureEntities);
+    }
+
     public void addExpenditure()
     {
-        addExpenditure(new Expenditure(), true);
+        String category = DayViewActivity.getCategories()[DayViewActivity.getCategories().length-1];
+        ExpenditureEntity exp = new ExpenditureEntity(_uid++, 0, 0, category);
+        _db.expenditureDao().insertAll(exp);
+
+        addExpenditure(exp, true);
     }
 
     public void addExpenditure(float cost, String category)
     {
-        addExpenditure(new Expenditure(cost, category), false);
+        addExpenditure(new ExpenditureEntity(_uid++, 0, cost, category), false);
     }
 
-    public void addExpenditure(Expenditure exp, boolean empty)
+    public void addExpenditure(ExpenditureEntity exp, boolean empty)
     {
-        _expenditures.add(exp);
+        _expenditureEntities.add(exp);
 
         if (_visible)
         {
-            addExpenditureView(exp, (_expenditures.size()-1), empty);
+            addExpenditureView(exp, (_expenditureEntities.size()-1), empty);
         }
     }
 
     private void setUpExpenditures()
     {
-        int count = _expenditures.size();
+        int count = _expenditureEntities.size();
 
         for (int i = 0; i < count; i++)
         {
-            Expenditure exp = _expenditures.get(i);
+            ExpenditureEntity exp = _expenditureEntities.get(i);
 
             addExpenditureView(exp, i, false);
         }
     }
 
-    private void addExpenditureView(Expenditure exp, int index, boolean empty)
+    private void addExpenditureView(ExpenditureEntity exp, int index, boolean empty)
     {
         View view = getLayoutInflater().inflate(R.layout.item, null);
         view.setId(index);
@@ -139,7 +169,7 @@ public class DayFragment extends Fragment
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
             {
-                _expenditures.get(((ViewGroup)(parent.getParent())).getId()).category = ((String)(((Spinner)(parent)).getItemAtPosition(position)));
+                _expenditureEntities.get(((ViewGroup)(parent.getParent())).getId()).setExpenseType(((String)(((Spinner)(parent)).getItemAtPosition(position))));
             }
 
             @Override
@@ -163,7 +193,14 @@ public class DayFragment extends Fragment
             public void onTextChanged(CharSequence s, int start, int before, int count)
             {
                 int id = ((ViewGroup)(costText.getParent())).getId();
-                _expenditures.get(id).cost = Float.parseFloat(s.toString());
+                if (s.toString().length() > 0)
+                {
+                    _expenditureEntities.get(id).setAmount(Float.parseFloat(s.toString()));
+                }
+                else
+                {
+                    _expenditureEntities.get(id).setAmount(0);
+                }
             }
 
             @Override
@@ -175,7 +212,7 @@ public class DayFragment extends Fragment
 
         if (!empty)
         {
-            String cost = String.format("%.02f", exp.cost);
+            String cost = String.format("%.02f", exp.getAmount());
             costText.setText("" + cost);
         }
         else { }
@@ -187,8 +224,16 @@ public class DayFragment extends Fragment
             public void onClick(View v)
             {
                 ViewGroup parent = ((ViewGroup) (v.getParent()));
-                ((ViewGroup) (parent.getParent())).removeView(parent);
-                _expenditures.remove(parent.getId());
+                ViewGroup pParent = ((ViewGroup) (parent.getParent()));
+                pParent.removeView(parent);
+                ExpenditureEntity exp = _expenditureEntities.remove(parent.getId());
+                _db.expenditureDao().delete(exp);
+                // Rename all the views
+                int count = pParent.getChildCount();
+                for (int i = 0; i < count; i++)
+                {
+                    pParent.getChildAt(i).setId(i);
+                }
             }
         });
 
@@ -196,7 +241,7 @@ public class DayFragment extends Fragment
         boolean set = false;
         for (int j = 0; j < cats; j++)
         {
-            if (exp.category.equals(DayViewActivity.getCategories()[j]))
+            if (exp.getExpenseType().equals(DayViewActivity.getCategories()[j]))
             {
                 catSpinner.setSelection(j);
                 set = true;
@@ -206,7 +251,7 @@ public class DayFragment extends Fragment
         }
         if (!set)
         {
-            exp.category = DayViewActivity.getCategories()[cats-1];
+            exp.setExpenseType(DayViewActivity.getCategories()[cats-1]);
             catSpinner.setSelection(cats-1);
         }
         else { }
@@ -214,12 +259,12 @@ public class DayFragment extends Fragment
         _itemsContainer.addView(view);
     }
 
-    public ArrayList<Expenditure> getExpenditures()
+    public List<ExpenditureEntity> getExpenditures()
     {
-        return _expenditures;
+        return _expenditureEntities;
     }
 
-    public void setExpenditures(ArrayList<Expenditure> expenditures)
+    public void setExpenditures(List<ExpenditureEntity> expenditures)
     {
         int count = expenditures.size();
         for (int i = 0; i < count; i++)
