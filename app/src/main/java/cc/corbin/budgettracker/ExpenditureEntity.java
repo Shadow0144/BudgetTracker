@@ -24,6 +24,9 @@ public class ExpenditureEntity
     @ColumnInfo
     private String expenseType;
 
+    @Ignore
+    private int expenseTypeNumber;
+
     // Must have a date set as this is the PRIMARY_KEY
 
     @Ignore
@@ -81,5 +84,17 @@ public class ExpenditureEntity
     public void setExpenseType(String expenseType)
     {
         this.expenseType = expenseType;
+    }
+
+    @Ignore
+    public int getExpenseTypeNumber()
+    {
+        return expenseTypeNumber;
+    }
+
+    @Ignore
+    public void setExpenseTypeNumber(int expenseTypeNumber)
+    {
+        this.expenseTypeNumber = expenseTypeNumber;
     }
 }

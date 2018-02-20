@@ -147,16 +147,31 @@ public class DayFragment extends Fragment
         // Setup the amount edit
         final EditText amountEditText = costView.findViewById(R.id.valueEditText);
         MoneyValueFilter moneyValueFilter = new MoneyValueFilter();
-        moneyValueFilter.setDigits(Currencies.integer[Currencies.default_currency] ? 0 : 2);
-        amountEditText.setFilters(new InputFilter[]{moneyValueFilter});
-        if (Currencies.integer[Currencies.default_currency])
+        if (editing)
         {
-            amountEditText.setHint("0");
+            moneyValueFilter.setDigits(Currencies.integer[_expenditure.getCurrency()] ? 0 : 2);
+            if (Currencies.integer[_expenditure.getCurrency()])
+            {
+                amountEditText.setHint("0");
+            }
+            else
+            {
+                amountEditText.setHint("0.00");
+            }
         }
         else
         {
-            amountEditText.setHint("0.00");
+            moneyValueFilter.setDigits(Currencies.integer[Currencies.default_currency] ? 0 : 2);
+            if (Currencies.integer[Currencies.default_currency])
+            {
+                amountEditText.setHint("0");
+            }
+            else
+            {
+                amountEditText.setHint("0.00");
+            }
         }
+        amountEditText.setFilters(new InputFilter[]{moneyValueFilter});
 
         // Setup the cancel button
         final Button cancelButton = costView.findViewById(R.id.cancelButton);
@@ -202,7 +217,16 @@ public class DayFragment extends Fragment
         if (editing)
         {
             symbolSpinner.setSelection(_expenditure.getCurrency());
-            amountEditText.setText(""+_expenditure.getAmount());
+            String cost;
+            if (Currencies.integer[_expenditure.getCurrency()])
+            {
+                cost = String.format("%.00f", _expenditure.getAmount());
+            }
+            else
+            {
+                cost = String.format("%.02f", _expenditure.getAmount());
+            }
+            amountEditText.setText(cost, TextView.BufferType.EDITABLE);
         }
         else { }
 
@@ -221,7 +245,7 @@ public class DayFragment extends Fragment
         // Setup the categories
         final RadioGroup categoriesHolder = categoryView.findViewById(R.id.categoriesHolder);
         Context context = getContext();
-        String[] categories = DayViewActivity.getCategories();
+        final String[] categories = DayViewActivity.getCategories();
         int count = categories.length;
         for (int i = 0; i < count; i++)
         {
@@ -251,6 +275,7 @@ public class DayFragment extends Fragment
             {
                 final RadioButton button = categoryView.findViewById(categoriesHolder.getCheckedRadioButtonId());
                 _expenditure.setExpenseType(button.getText().toString());
+                _expenditure.setExpenseTypeNumber(categoriesHolder.getCheckedRadioButtonId());
                 _popupWindow.dismiss();
                 if (!editing)
                 {
@@ -491,11 +516,11 @@ public class DayFragment extends Fragment
         String cost;
         if (Currencies.integer[_expenditure.getCurrency()])
         {
-            cost = String.format("%.02f", _expenditure.getAmount());
+            cost = String.format("%.00f", _expenditure.getAmount());
         }
         else
         {
-            cost = String.format("%.00f", _expenditure.getAmount());
+            cost = String.format("%.02f", _expenditure.getAmount());
         }
         costView.setText(cost);
         _parent.updateTotal();
