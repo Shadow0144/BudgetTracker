@@ -1,12 +1,19 @@
 package cc.corbin.budgettracker;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.support.v7.widget.AppCompatTextView;
 import android.text.Layout;
+import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
+import android.view.ViewGroup;
+import android.widget.RelativeLayout;
+
+import org.w3c.dom.Text;
 
 /**
  * Created by Corbin on 1/29/2018.
@@ -88,6 +95,8 @@ public class TableCell extends AppCompatTextView
     {
         setGravity(Gravity.CENTER);
         setPadding(BUFFER, BUFFER, BUFFER, BUFFER);
+        setEllipsize(TextUtils.TruncateAt.END);
+        setLines(1);
 
         switch (cellType)
         {

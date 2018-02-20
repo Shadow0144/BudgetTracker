@@ -204,7 +204,7 @@ public class DayViewActivity extends AppCompatActivity
         intent.putExtra(MonthViewActivity.MONTH_INTENT, _month);
         intent.putExtra(MonthViewActivity.YEAR_INTENT, _year);
         startActivity(intent);
-        finish();
+        //finish();
     }
 
     private void loadCategories()

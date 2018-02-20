@@ -291,8 +291,14 @@ public class DayFragment extends Fragment
         // Setup the values if they already exist
         if (editing)
         {
-            // TODO
-            //categoriesHolder.check(_expenditure.getExpenseType());
+            for (int i = 0; i < count; i++)
+            {
+                Log.e(TAG, "" + i + " " + ((RadioButton)(categoriesHolder.getChildAt(i))).getText().toString());
+                if (categories[i] == ((RadioButton)(categoriesHolder.getChildAt(i))).getText())
+                {
+                    categoriesHolder.check(i);
+                }
+            }
         }
         else { }
 
@@ -355,20 +361,6 @@ public class DayFragment extends Fragment
                 editExpenditureAmount(v);
             }
         });
-        /*currSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-        {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-            {
-                /// TODO
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent)
-            {
-
-            }
-        });*/
         currencyView.setText(Currencies.symbols[exp.getCurrency()]);
 
         final TextView categoryView = view.findViewById(R.id.categoryView);
@@ -380,21 +372,6 @@ public class DayFragment extends Fragment
                 editExpenditureCategory(v);
             }
         });
-        /*catSpinner.setAdapter(spinnerArrayAdapter);
-        catSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-        {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-            {
-                _expenditureEntities.get(((ViewGroup)(parent.getParent())).getId()).setExpenseType(((String)(((Spinner)(parent)).getItemAtPosition(position))));
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent)
-            {
-
-            }
-        });*/
         categoryView.setText(exp.getExpenseType());
 
         final TextView costView = view.findViewById(R.id.costView);
@@ -406,43 +383,6 @@ public class DayFragment extends Fragment
                 editExpenditureAmount(v);
             }
         });
-        /*costText.setFilters(new InputFilter[]{new MoneyValueFilter()});
-        costText.addTextChangedListener(new TextWatcher()
-        {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after)
-            {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count)
-            {
-                int id = ((ViewGroup)(costText.getParent())).getId();
-                if (s.toString().length() > 0)
-                {
-                    try
-                    {
-                        _expenditureEntities.get(id).setAmount(Float.parseFloat(s.toString()));
-                    }
-                    catch (Exception e)
-                    {
-                        _expenditureEntities.get(id).setAmount(0);
-                    }
-                }
-                else
-                {
-                    _expenditureEntities.get(id).setAmount(0);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s)
-            {
-
-            }
-        });*/
-        //costView.setText(""+exp.getAmount());
 
         String cost;
         if (Currencies.integer[exp.getCurrency()])

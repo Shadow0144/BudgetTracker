@@ -5,7 +5,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.text.DateFormatSymbols;
@@ -25,19 +28,22 @@ public class MonthViewActivity extends AppCompatActivity
     private int _month;
     private int _year;
 
-    private LinearLayout _monthsContainer;
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_month_view);
 
-        _monthsContainer = findViewById(R.id.monthsLayout);
+        FrameLayout monthsContainer = findViewById(R.id.monthHolder);
         _month = getIntent().getIntExtra(MONTH_INTENT, Calendar.getInstance().get(Calendar.MONTH)+1);
         _year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
         MonthTable table = new MonthTable(this, _month, _year);
-        _monthsContainer.addView(table);
+        monthsContainer.addView(table);
+
+        FrameLayout budgetContainer = findViewById(R.id.budgetHolder);
+        TableLayout budgetTable = new TableLayout(this);
+        setupBudgetTable(budgetTable);
+        budgetContainer.addView(budgetTable);
 
         TextView header = findViewById(R.id.monthView);
         DateFormatSymbols dfs = new DateFormatSymbols();
@@ -76,5 +82,42 @@ public class MonthViewActivity extends AppCompatActivity
         }
         startActivity(intent);
         finish();
+    }
+
+    private void setupBudgetTable(TableLayout budgetTable)
+    {
+        String[] categories = DayViewActivity.getCategories();
+        int count = categories.length;
+
+        TableRow titleRow = new TableRow(this);
+        TableCell titleCell = new TableCell(this, TableCell.TITLE_CELL);
+        titleCell.setText(R.string.budget_title);
+
+        TableRow.LayoutParams params = new TableRow.LayoutParams(
+                TableRow.LayoutParams.MATCH_PARENT,
+                TableRow.LayoutParams.WRAP_CONTENT
+        );
+        params.span = 2;
+        titleCell.setLayoutParams(params);
+
+        titleRow.addView(titleCell);
+        budgetTable.addView(titleRow);
+
+        budgetTable.setColumnStretchable(1, true);
+
+        for (int i = 0; i < count; i++)
+        {
+            TableRow tableRow = new TableRow(this);
+            TableCell headerCell = new TableCell(this, TableCell.HEADER_CELL);
+            TableCell contentCell = new TableCell(this, TableCell.DEFAULT_CELL);
+
+            headerCell.setText(categories[i]);
+            contentCell.setText("0");
+
+            tableRow.addView(headerCell);
+            tableRow.addView(contentCell);
+
+            budgetTable.addView(tableRow);
+        }
     }
 }

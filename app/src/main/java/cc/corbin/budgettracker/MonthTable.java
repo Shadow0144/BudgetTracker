@@ -2,12 +2,14 @@ package cc.corbin.budgettracker;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
@@ -92,7 +94,9 @@ public class MonthTable extends TableLayout implements View.OnClickListener
 
     private void setup()
     {
-        setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)); // TODO
+        setStretchAllColumns(true);
+        setColumnShrinkable(0, true);
 
         String[] categories = DayViewActivity.getCategories();
         int rows = categories.length;
@@ -101,18 +105,17 @@ public class MonthTable extends TableLayout implements View.OnClickListener
         c.set(_year, _month-1, 1);
         int maxDays = c.getActualMaximum(Calendar.DATE);
 
-        /*TableRow titleRow = new TableRow(_context);
+        TableRow titleRow = new TableRow(_context);
         TableCell titleCell = new TableCell(_context, TableCell.TITLE_CELL);
-        TableRow.LayoutParams params = new TableRow.LayoutParams();
+        titleCell.setText(R.string.month_title);
+        TableRow.LayoutParams params = new TableRow.LayoutParams(
+                TableRow.LayoutParams.MATCH_PARENT,
+                TableRow.LayoutParams.WRAP_CONTENT
+        );
         params.span = 7;
         titleCell.setLayoutParams(params);
-
-        // Set the text
-        DateFormatSymbols dfs = new DateFormatSymbols();
-        titleCell.setText(dfs.getMonths()[_month] + " " + _year);
-
         titleRow.addView(titleCell);
-        addView(titleRow);*/
+        addView(titleRow);
 
         TableRow headerRow = new TableRow(_context);
         TableCell week0 = new TableCell(_context, TableCell.HEADER_CELL);
@@ -124,7 +127,7 @@ public class MonthTable extends TableLayout implements View.OnClickListener
         TableCell week6 = new TableCell(_context, TableCell.HEADER_CELL);
 
         // Set the text
-        week0.setText("");
+        week0.setText(Currencies.symbols[Currencies.default_currency]);
         week1.setText("Week 1");
         week2.setText("Week 2");
         week3.setText("Week 3");
@@ -194,12 +197,24 @@ public class MonthTable extends TableLayout implements View.OnClickListener
             monthTotal += categoryTotal;
 
             week0.setText(category);
-            week1.setText(String.format("%.02f", week1V));
-            week2.setText(String.format("%.02f", week2V));
-            week3.setText(String.format("%.02f", week3V));
-            week4.setText(String.format("%.02f", week4V));
-            week5.setText(String.format("%.02f", week5V));
-            week6.setText(String.format("%.02f", categoryTotal));
+            if (Currencies.integer[Currencies.default_currency])
+            {
+                week1.setText(String.format("%.00f", week1V));
+                week2.setText(String.format("%.00f", week2V));
+                week3.setText(String.format("%.00f", week3V));
+                week4.setText(String.format("%.00f", week4V));
+                week5.setText(String.format("%.00f", week5V));
+                week6.setText(String.format("%.00f", categoryTotal));
+            }
+            else
+            {
+                week1.setText(String.format("%.02f", week1V));
+                week2.setText(String.format("%.02f", week2V));
+                week3.setText(String.format("%.02f", week3V));
+                week4.setText(String.format("%.02f", week4V));
+                week5.setText(String.format("%.02f", week5V));
+                week6.setText(String.format("%.02f", categoryTotal));
+            }
 
             categoryRow.addView(week0);
             categoryRow.addView(week1);
@@ -221,13 +236,25 @@ public class MonthTable extends TableLayout implements View.OnClickListener
         week5 = new TableCell(_context, TableCell.TOTAL_CELL);
         week6 = new TableCell(_context, TableCell.GRAND_TOTAL_CELL);
 
-        week0.setText("Total: ");
-        week1.setText(String.format("%.02f", week1Total));
-        week2.setText(String.format("%.02f", week2Total));
-        week3.setText(String.format("%.02f", week3Total));
-        week4.setText(String.format("%.02f", week4Total));
-        week5.setText(String.format("%.02f", week5Total));
-        week6.setText(String.format("%.02f", monthTotal));
+        week0.setText(R.string.total);
+        if (Currencies.integer[Currencies.default_currency])
+        {
+            week1.setText(String.format("%.00f", week1Total));
+            week2.setText(String.format("%.00f", week2Total));
+            week3.setText(String.format("%.00f", week3Total));
+            week4.setText(String.format("%.00f", week4Total));
+            week5.setText(String.format("%.00f", week5Total));
+            week6.setText(String.format("%.00f", monthTotal));
+        }
+        else
+        {
+            week1.setText(String.format("%.02f", week1Total));
+            week2.setText(String.format("%.02f", week2Total));
+            week3.setText(String.format("%.02f", week3Total));
+            week4.setText(String.format("%.02f", week4Total));
+            week5.setText(String.format("%.02f", week5Total));
+            week6.setText(String.format("%.02f", monthTotal));
+        }
 
         totalRow.addView(week0);
         totalRow.addView(week1);

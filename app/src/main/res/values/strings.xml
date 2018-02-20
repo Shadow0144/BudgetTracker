@@ -5,7 +5,7 @@
     <string name="next">&gt;</string>
     <string name="pprevious">&lt;&lt;</string>
     <string name="nnext">&gt;&gt;</string>
-    <string name="total">Total: </string>
+    <string name="total">Total</string>
     <string name="x">X</string>
     <string name="expenses">Expenses for:&#160;</string>
     <string-array name="default_categories">
@@ -20,4 +20,6 @@
     <string name="alert_body">Confirm Removing Expense</string>
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
+    <string name="month_title">Expenditures</string>
+    <string name="budget_title">Monthly Budget Limits</string>
 </resources>
