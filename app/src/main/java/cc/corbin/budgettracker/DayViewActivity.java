@@ -8,9 +8,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.Xml;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -28,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class DayViewActivity extends AppCompatActivity
 {
@@ -72,12 +75,18 @@ public class DayViewActivity extends AppCompatActivity
         _dateView.setText(getString(R.string.expenses) + simpleDate.format(_currentDate.getTime()));
 
         _year = _currentDate.get(Calendar.YEAR);
-        _month = _currentDate.get(Calendar.MONTH);
+        _month = _currentDate.get(Calendar.MONTH)+1;
         _day = _currentDate.get(Calendar.DATE);
 
-        _adapter = new DayFragmentPagerAdapter(getSupportFragmentManager(), _currentDate.get(Calendar.MONTH), _currentDate.get(Calendar.YEAR));
+        _adapter = new DayFragmentPagerAdapter(this, getSupportFragmentManager(), _month, _year);
         _pagerView.setAdapter(_adapter);
         _pagerView.setCurrentItem(_day);
+
+        final Spinner totalCurrencySpinner = findViewById(R.id.totalCurrencySpinner);
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
+                this, android.R.layout.simple_spinner_item, Currencies.symbols);
+        totalCurrencySpinner.setAdapter(spinnerArrayAdapter);
+        totalCurrencySpinner.setSelection(Currencies.default_currency);
 
         updateDay();
     }
@@ -92,13 +101,14 @@ public class DayViewActivity extends AppCompatActivity
 
     public void previousDay(View v)
     {
+        _adapter.updateExpenditureDatabase(_pagerView.getCurrentItem());
         _day--;
 
         if (_day == 0)
         {
             Intent intent = new Intent(getApplicationContext(), DayViewActivity.class);
             Calendar date = Calendar.getInstance();
-            date.set(_year, _month, 1);
+            date.set(_year, _month-1, 1);
             date.add(Calendar.DATE, -1);
 
             intent.putExtra(DATE_INTENT, date.getTimeInMillis());
@@ -109,17 +119,20 @@ public class DayViewActivity extends AppCompatActivity
         {
             updateDay();
         }
+
+        updateTotal();
     }
 
     public void nextDay(View v)
     {
+        _adapter.updateExpenditureDatabase(_pagerView.getCurrentItem());
         _day++;
 
         if (_day == (_adapter.lastDay()+1))
         {
             Intent intent = new Intent(getApplicationContext(), DayViewActivity.class);
             Calendar date = Calendar.getInstance();
-            date.set(_year, _month, _adapter.lastDay());
+            date.set(_year, _month-1, _adapter.lastDay());
             date.add(Calendar.DATE, 1);
 
             intent.putExtra(DATE_INTENT, date.getTimeInMillis());
@@ -130,6 +143,8 @@ public class DayViewActivity extends AppCompatActivity
         {
             updateDay();
         }
+
+        updateTotal();
     }
 
     private void updateDay()
@@ -138,25 +153,25 @@ public class DayViewActivity extends AppCompatActivity
 
         if (_day == 1)
         {
-            _previousDay.setText("<<");
-            _nextDay.setText(">");
+            _previousDay.setText(getString(R.string.pprevious));
+            _nextDay.setText(getString(R.string.next));
         }
         else if (_day == _adapter.lastDay())
         {
-            _previousDay.setText("<");
-            _nextDay.setText(">>");
+            _previousDay.setText(getString(R.string.previous));
+            _nextDay.setText(getString(R.string.nnext));
         }
         else
         {
-            _previousDay.setText("<");
-            _nextDay.setText(">");
+            _previousDay.setText(getString(R.string.previous));
+            _nextDay.setText(getString(R.string.next));
         }
 
         _currentDate = Calendar.getInstance();
-        _currentDate.set(_year, _month, _day);
+        _currentDate.set(_year, _month-1, _day);
         SimpleDateFormat simpleDate =  new SimpleDateFormat("dd/MM/yyyy");
 
-        _dateView.setText(getString(R.string.expenses) + simpleDate.format(_currentDate.getTime()));
+        _dateView.setText(simpleDate.format(_currentDate.getTime()));
     }
 
     public void addItem(View v)
@@ -174,6 +189,8 @@ public class DayViewActivity extends AppCompatActivity
     public void moveToMonthView(View v)
     {
         Intent intent = new Intent(getApplicationContext(), MonthViewActivity.class);
+        intent.putExtra(MonthViewActivity.MONTH_INTENT, _month);
+        intent.putExtra(MonthViewActivity.YEAR_INTENT, _year);
         startActivity(intent);
         finish();
     }
@@ -186,6 +203,33 @@ public class DayViewActivity extends AppCompatActivity
     public static String[] getCategories()
     {
         return _categories;
+    }
+
+    public void updateTotal()
+    {
+        float total = 0.0f;
+        final TextView totalAmountTextView = findViewById(R.id.totalAmountTextView);
+        final Spinner totalCurrencySpinner = findViewById(R.id.totalCurrencySpinner);
+        List<ExpenditureEntity> expenditureEntities = _adapter.getExpenditures(_day);
+        if (expenditureEntities != null)
+        {
+            int count = expenditureEntities.size();
+            for (int i = 0; i < count; i++)
+            {
+                total += expenditureEntities.get(i).getAmount();
+            }
+            String cost;
+            if (Currencies.integer[totalCurrencySpinner.getSelectedItemPosition()])
+            {
+                cost = String.format("%.00f", total);
+            }
+            else
+            {
+                cost = String.format("%.02f", total);
+            }
+            totalAmountTextView.setText(cost);
+        }
+        else { }
     }
 
     /* Checks if external storage is available for read and write */

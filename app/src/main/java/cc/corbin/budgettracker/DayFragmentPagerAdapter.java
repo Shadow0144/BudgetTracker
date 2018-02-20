@@ -18,6 +18,7 @@ public class DayFragmentPagerAdapter extends FragmentPagerAdapter
 {
     private static final String TAG = "DayFragmentPagerAdapter";
 
+    private DayViewActivity _parent;
     private FragmentManager _fm;
 
     private int _month;
@@ -27,10 +28,11 @@ public class DayFragmentPagerAdapter extends FragmentPagerAdapter
 
     private ArrayList<DayFragment> _fragments;
 
-    DayFragmentPagerAdapter(FragmentManager fm, int month, int year)
+    DayFragmentPagerAdapter(DayViewActivity parent, FragmentManager fm, int month, int year)
     {
         super(fm);
 
+        _parent = parent;
         _fm = fm;
 
         _month = month;
@@ -58,7 +60,7 @@ public class DayFragmentPagerAdapter extends FragmentPagerAdapter
 
     public void addExpenditure(int index)
     {
-        _fragments.get(index).addExpenditure();
+        _fragments.get(index).addNewExpenditure();
     }
 
     public void updateExpenditureDatabase(int index)
@@ -95,5 +97,10 @@ public class DayFragmentPagerAdapter extends FragmentPagerAdapter
     public List<ExpenditureEntity> getExpenditures(int index)
     {
         return _fragments.get(index).getExpenditures();
+    }
+
+    public void updateTotal()
+    {
+        _parent.updateTotal();
     }
 }

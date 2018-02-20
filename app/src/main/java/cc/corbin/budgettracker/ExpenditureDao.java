@@ -19,7 +19,13 @@ public interface ExpenditureDao
     List<ExpenditureEntity> getAll();
 
     @Query("SELECT * FROM expenditureentity WHERE date BETWEEN (:date) AND (:date+86400000-1)")
-    List<ExpenditureEntity> getAll(long date);
+    List<ExpenditureEntity> getDay(long date);
+
+    @Query("SELECT * FROM expenditureentity WHERE date BETWEEN (:sDate) AND (:eDate+86400000-1)")
+    List<ExpenditureEntity> getWeek(long sDate, long eDate);
+
+    @Query("SELECT * FROM expenditureentity WHERE date BETWEEN (:sDate) AND (:eDate+86400000-1) AND expenseType = (:category)")
+    List<ExpenditureEntity> getWeek(long sDate, long eDate, String category);
 
     @Query("SELECT * FROM expenditureentity WHERE date IN (:expenditureIds)")
     List<ExpenditureEntity> loadAllByIds(int[] expenditureIds);

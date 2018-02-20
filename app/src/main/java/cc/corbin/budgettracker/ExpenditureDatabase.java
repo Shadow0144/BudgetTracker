@@ -9,7 +9,7 @@ import android.content.Context;
  * Created by Corbin on 2/14/2018.
  */
 
-@Database(entities = {ExpenditureEntity.class}, version = 4)
+@Database(entities = {ExpenditureEntity.class}, version = 5)
 public abstract class ExpenditureDatabase extends RoomDatabase
 {
     public abstract ExpenditureDao expenditureDao();

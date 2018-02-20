@@ -1,18 +1,23 @@
 <resources>
     <string name="app_name">Budget Tracker</string>
     <string name="add_item">Add Item</string>
-    <string name="yesterday">&lt;</string>
-    <string name="tomorrow">&gt;</string>
+    <string name="previous">&lt;</string>
+    <string name="next">&gt;</string>
+    <string name="pprevious">&lt;&lt;</string>
+    <string name="nnext">&gt;&gt;</string>
+    <string name="total">Total: </string>
     <string name="x">X</string>
     <string name="expenses">Expenses for:&#160;</string>
-    <string-array name="currencies">
-        <item>₩</item>
-        <item>$</item>
-        <item>¥</item>
-        <item>€</item>
-    </string-array>
     <string-array name="default_categories">
         <item>Food</item>
+        <item>Essentials</item>
+        <item>Transportation</item>
+        <item>Accomodation</item>
         <item>Other</item>
     </string-array>
+    <string name="recompense">Recompense</string>
+    <string name="alert_title">Remove Expense</string>
+    <string name="alert_body">Confirm Removing Expense</string>
+    <string name="accept">Accept</string>
+    <string name="cancel">Cancel</string>
 </resources>

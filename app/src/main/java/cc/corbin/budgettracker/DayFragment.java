@@ -1,12 +1,17 @@
 package cc.corbin.budgettracker;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Layout;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +21,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -50,6 +58,11 @@ public class DayFragment extends Fragment
     private long _uid;
     private ExpenditureDatabase _db;
 
+    private boolean _addingNewExpenditure;
+
+    private PopupWindow _popupWindow;
+    private ExpenditureEntity _expenditure;
+
     public void setParameters(DayFragmentPagerAdapter parent, int year, int month, int day)
     {
         _parent = parent;
@@ -75,7 +88,7 @@ public class DayFragment extends Fragment
         _date = c.getTimeInMillis();
 
         _db = ExpenditureDatabase.getExpenditureDatabase(getContext());
-        _expenditureEntities = _db.expenditureDao().getAll(_date);
+        _expenditureEntities = _db.expenditureDao().getDay(_date);
 
         if (_expenditureEntities.size() > 0)
         {
@@ -85,6 +98,8 @@ public class DayFragment extends Fragment
         {
             _uid = _date;
         }
+
+        _addingNewExpenditure = false;
 
         setUpExpenditures();
 
@@ -103,28 +118,190 @@ public class DayFragment extends Fragment
         _db.expenditureDao().update(_expenditureEntities);
     }
 
-    public void addExpenditure()
+    // Begin popups to add a new expenditure
+    public void addNewExpenditure()
     {
-        String category = DayViewActivity.getCategories()[DayViewActivity.getCategories().length-1];
-        ExpenditureEntity exp = new ExpenditureEntity(_uid++, 0, 0, category);
-        _db.expenditureDao().insertAll(exp);
-
-        addExpenditure(exp, true);
+        if (!_addingNewExpenditure)
+        {
+            _expenditure = new ExpenditureEntity(_uid++);
+            selectExpenditureAmount(false, null);
+        }
+        else { } // Ignore
     }
 
-    public void addExpenditure(float cost, String category)
+    // Initial popup to select amount and currency type
+    private void selectExpenditureAmount(final boolean editing, final ViewGroup parent)
     {
-        addExpenditure(new ExpenditureEntity(_uid++, 0, cost, category), false);
+        _addingNewExpenditure = true;
+
+        final View costView = getLayoutInflater().inflate(R.layout.amount, null);
+
+        // Setup the currency type spinner
+        final Spinner symbolSpinner = costView.findViewById(R.id.currencySelector);
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
+                getContext(), android.R.layout.simple_spinner_item, Currencies.symbols);
+        symbolSpinner.setAdapter(spinnerArrayAdapter);
+        symbolSpinner.setSelection(Currencies.default_currency);
+        // TODO Allow the symbolSpinner to change the number of decimals
+
+        // Setup the amount edit
+        final EditText amountEditText = costView.findViewById(R.id.valueEditText);
+        MoneyValueFilter moneyValueFilter = new MoneyValueFilter();
+        moneyValueFilter.setDigits(Currencies.integer[Currencies.default_currency] ? 0 : 2);
+        amountEditText.setFilters(new InputFilter[]{moneyValueFilter});
+        if (Currencies.integer[Currencies.default_currency])
+        {
+            amountEditText.setHint("0");
+        }
+        else
+        {
+            amountEditText.setHint("0.00");
+        }
+
+        // Setup the cancel button
+        final Button cancelButton = costView.findViewById(R.id.cancelButton);
+        cancelButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                cancelAddingExpenditure();
+            }
+        });
+
+        // Setup the accept button
+        final Button okButton = costView.findViewById(R.id.okButton);
+        okButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                _expenditure.setCurrency(symbolSpinner.getSelectedItemPosition());
+                try
+                {
+                    _expenditure.setAmount(Float.parseFloat(amountEditText.getText().toString()));
+                }
+                catch (Exception e) // TODO
+                {
+                    Log.e(TAG, "Failure to parse");
+                    _expenditure.setAmount(0.0f);
+                }
+                _popupWindow.dismiss();
+                if (!editing) // Launch the next step if not editing the amount or currency type
+                {
+                    selectExpenditureCategory(editing, null);
+                }
+                else
+                {
+                    refreshExpenditureView(parent);
+                }
+            }
+        });
+
+        // Setup the values if they exist already
+        if (editing)
+        {
+            symbolSpinner.setSelection(_expenditure.getCurrency());
+            amountEditText.setText(""+_expenditure.getAmount());
+        }
+        else { }
+
+        _popupWindow = new PopupWindow(costView,
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        _popupWindow.setFocusable(true);
+        _popupWindow.update();
+        _popupWindow.showAtLocation(_itemsContainer, Gravity.CENTER, 0, 0);
     }
 
-    public void addExpenditure(ExpenditureEntity exp, boolean empty)
+    // Final popup to select the expenditure category
+    private void selectExpenditureCategory(final boolean editing, final ViewGroup parent)
+    {
+        final View categoryView = getLayoutInflater().inflate(R.layout.category, null);
+
+        // Setup the categories
+        final RadioGroup categoriesHolder = categoryView.findViewById(R.id.categoriesHolder);
+        Context context = getContext();
+        String[] categories = DayViewActivity.getCategories();
+        int count = categories.length;
+        for (int i = 0; i < count; i++)
+        {
+            final RadioButton button = new RadioButton(context);
+            button.setText(categories[i]);
+            categoriesHolder.addView(button);
+            button.setChecked(true);
+        }
+
+        // Setup the cancel button
+        final Button cancelButton = categoryView.findViewById(R.id.cancelButton);
+        cancelButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                cancelAddingExpenditure();
+            }
+        });
+
+        // Setup the accept button
+        final Button okButton = categoryView.findViewById(R.id.okButton);
+        okButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                final RadioButton button = categoryView.findViewById(categoriesHolder.getCheckedRadioButtonId());
+                _expenditure.setExpenseType(button.getText().toString());
+                _popupWindow.dismiss();
+                if (!editing)
+                {
+                    succeedAddingExpenditure();
+                }
+                else
+                {
+                    refreshExpenditureView(parent);
+                }
+            }
+        });
+
+        // Setup the values if they already exist
+        if (editing)
+        {
+            // TODO
+            //categoriesHolder.check(_expenditure.getExpenseType());
+        }
+        else { }
+
+        _popupWindow = new PopupWindow(categoryView,
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        _popupWindow.setFocusable(true);
+        _popupWindow.update();
+        _popupWindow.showAtLocation(_itemsContainer, Gravity.CENTER, 0, 0);
+    }
+
+    private void cancelAddingExpenditure()
+    {
+        _popupWindow.dismiss();
+        _addingNewExpenditure = false;
+    }
+
+    private void succeedAddingExpenditure()
+    {
+        _db.expenditureDao().insertAll(_expenditure);
+
+        addExpenditure(_expenditure);
+
+        _addingNewExpenditure = false;
+    }
+
+    public void addExpenditure(ExpenditureEntity exp)
     {
         _expenditureEntities.add(exp);
 
         if (_visible)
         {
-            addExpenditureView(exp, (_expenditureEntities.size()-1), empty);
+            addExpenditureView(exp, (_expenditureEntities.size()-1));
         }
+        else { }
     }
 
     private void setUpExpenditures()
@@ -135,17 +312,25 @@ public class DayFragment extends Fragment
         {
             ExpenditureEntity exp = _expenditureEntities.get(i);
 
-            addExpenditureView(exp, i, false);
+            addExpenditureView(exp, i);
         }
     }
 
-    private void addExpenditureView(ExpenditureEntity exp, int index, boolean empty)
+    private void addExpenditureView(ExpenditureEntity exp, int index)
     {
-        View view = getLayoutInflater().inflate(R.layout.item, null);
+        final View view = getLayoutInflater().inflate(R.layout.item, null);
         view.setId(index);
 
-        final Spinner currSpinner = view.findViewById(R.id.currencySelector);
-        currSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        final TextView currencyView = view.findViewById(R.id.currencyView);
+        currencyView.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                editExpenditureAmount(v);
+            }
+        });
+        /*currSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
@@ -158,12 +343,19 @@ public class DayFragment extends Fragment
             {
 
             }
-        });
+        });*/
+        currencyView.setText(Currencies.symbols[exp.getCurrency()]);
 
-        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
-                getContext(), android.R.layout.simple_spinner_item, DayViewActivity.getCategories());
-        final Spinner catSpinner = view.findViewById(R.id.itemCategorySelector);
-        catSpinner.setAdapter(spinnerArrayAdapter);
+        final TextView categoryView = view.findViewById(R.id.categoryView);
+        categoryView.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                editExpenditureCategory(v);
+            }
+        });
+        /*catSpinner.setAdapter(spinnerArrayAdapter);
         catSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
             @Override
@@ -177,10 +369,19 @@ public class DayFragment extends Fragment
             {
 
             }
-        });
+        });*/
+        categoryView.setText(exp.getExpenseType());
 
-        final EditText costText = view.findViewById(R.id.valueEditText);
-        costText.setFilters(new InputFilter[]{new MoneyValueFilter()});
+        final TextView costView = view.findViewById(R.id.costView);
+        costView.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                editExpenditureAmount(v);
+            }
+        });
+        /*costText.setFilters(new InputFilter[]{new MoneyValueFilter()});
         costText.addTextChangedListener(new TextWatcher()
         {
             @Override
@@ -195,7 +396,14 @@ public class DayFragment extends Fragment
                 int id = ((ViewGroup)(costText.getParent())).getId();
                 if (s.toString().length() > 0)
                 {
-                    _expenditureEntities.get(id).setAmount(Float.parseFloat(s.toString()));
+                    try
+                    {
+                        _expenditureEntities.get(id).setAmount(Float.parseFloat(s.toString()));
+                    }
+                    catch (Exception e)
+                    {
+                        _expenditureEntities.get(id).setAmount(0);
+                    }
                 }
                 else
                 {
@@ -208,55 +416,89 @@ public class DayFragment extends Fragment
             {
 
             }
-        });
+        });*/
+        //costView.setText(""+exp.getAmount());
 
-        if (!empty)
+        String cost;
+        if (Currencies.integer[exp.getCurrency()])
         {
-            String cost = String.format("%.02f", exp.getAmount());
-            costText.setText("" + cost);
+            cost = String.format("%.00f", exp.getAmount());
         }
-        else { }
+        else
+        {
+            cost = String.format("%.02f", exp.getAmount());
+        }
+        costView.setText(cost);
 
-        Button removeButton = view.findViewById(R.id.removeButton);
+        TextView removeButton = view.findViewById(R.id.removeButton);
         removeButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                ViewGroup parent = ((ViewGroup) (v.getParent()));
-                ViewGroup pParent = ((ViewGroup) (parent.getParent()));
-                pParent.removeView(parent);
-                ExpenditureEntity exp = _expenditureEntities.remove(parent.getId());
-                _db.expenditureDao().delete(exp);
-                // Rename all the views
-                int count = pParent.getChildCount();
-                for (int i = 0; i < count; i++)
-                {
-                    pParent.getChildAt(i).setId(i);
-                }
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle(R.string.alert_title);
+                builder.setMessage(R.string.alert_body);
+                builder.setPositiveButton(R.string.accept, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                acceptRemove(view);
+                            }
+                        });
+                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                cancelRemove(view);
+                            }
+                        });
+                // Create the AlertDialog object and return it
+                AlertDialog alert = builder.create();
+                alert.show();
             }
         });
 
-        int cats = DayViewActivity.getCategories().length;
-        boolean set = false;
-        for (int j = 0; j < cats; j++)
-        {
-            if (exp.getExpenseType().equals(DayViewActivity.getCategories()[j]))
-            {
-                catSpinner.setSelection(j);
-                set = true;
-                break;
-            }
-            else { }
-        }
-        if (!set)
-        {
-            exp.setExpenseType(DayViewActivity.getCategories()[cats-1]);
-            catSpinner.setSelection(cats-1);
-        }
-        else { }
-
         _itemsContainer.addView(view);
+        _parent.updateTotal();
+    }
+
+    private void cancelRemove(View v)
+    {
+        // Do nothing
+    }
+
+    private void acceptRemove(View v)
+    {
+        ViewGroup parent = ((ViewGroup) (v.getParent()));
+        parent.removeView(v);
+        ExpenditureEntity exp = _expenditureEntities.remove(v.getId());
+        _db.expenditureDao().delete(exp);
+        // Rename all the views
+        int count = parent.getChildCount();
+        for (int i = 0; i < count; i++)
+        {
+            parent.getChildAt(i).setId(i);
+        }
+        _parent.updateTotal();
+    }
+
+    private void refreshExpenditureView(ViewGroup view)
+    {
+        final TextView currencyView = view.findViewById(R.id.currencyView);
+        currencyView.setText(Currencies.symbols[_expenditure.getCurrency()]);
+
+        final TextView categoryView = view.findViewById(R.id.categoryView);
+        categoryView.setText(_expenditure.getExpenseType());
+
+        final TextView costView = view.findViewById(R.id.costView);
+        String cost;
+        if (Currencies.integer[_expenditure.getCurrency()])
+        {
+            cost = String.format("%.02f", _expenditure.getAmount());
+        }
+        else
+        {
+            cost = String.format("%.00f", _expenditure.getAmount());
+        }
+        costView.setText(cost);
+        _parent.updateTotal();
     }
 
     public List<ExpenditureEntity> getExpenditures()
@@ -269,7 +511,21 @@ public class DayFragment extends Fragment
         int count = expenditures.size();
         for (int i = 0; i < count; i++)
         {
-            addExpenditure(expenditures.get(i), false);
+            addExpenditure(expenditures.get(i));
         }
+    }
+
+    public void editExpenditureAmount(View v)
+    {
+        ViewGroup parent = ((ViewGroup) (v.getParent()));
+        _expenditure = _expenditureEntities.get(parent.getId());
+        selectExpenditureAmount(true, parent);
+    }
+
+    public void editExpenditureCategory(View v)
+    {
+        ViewGroup parent = ((ViewGroup) (v.getParent()));
+        _expenditure = _expenditureEntities.get(parent.getId());
+        selectExpenditureCategory(true, parent);
     }
 }

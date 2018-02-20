@@ -2,6 +2,7 @@ package cc.corbin.budgettracker;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
 /**
@@ -22,6 +23,17 @@ public class ExpenditureEntity
 
     @ColumnInfo
     private String expenseType;
+
+    // Must have a date set as this is the PRIMARY_KEY
+
+    @Ignore
+    public ExpenditureEntity(long date)
+    {
+        this.date = date;
+        this.currency = 0;
+        this.amount = 0.0f;
+        this.expenseType = "";
+    }
 
     public ExpenditureEntity(long date, int currency, float amount, String expenseType)
     {

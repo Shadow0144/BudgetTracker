@@ -2,6 +2,7 @@ package cc.corbin.budgettracker;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Typeface;
 import android.support.v7.widget.AppCompatTextView;
 import android.text.Layout;
 import android.util.AttributeSet;
@@ -18,6 +19,8 @@ public class TableCell extends AppCompatTextView
     public final static int DEFAULT_CELL = 0;
     public final static int HEADER_CELL = 1;
     public final static int TITLE_CELL = 2;
+    public final static int TOTAL_CELL = 3;
+    public final static int GRAND_TOTAL_CELL = 4;
 
     private final int BUFFER = 20;
 
@@ -99,6 +102,16 @@ public class TableCell extends AppCompatTextView
             case TITLE_CELL: // Title
                 setBackground(context.getDrawable(R.drawable.title_cell_shape));
                 setTextColor(context.getColor(R.color.white));
+                break;
+            case TOTAL_CELL: // Total
+                setBackground(context.getDrawable(R.drawable.cell_shape));
+                setTypeface(null, Typeface.BOLD);
+                setTextColor(context.getColor(R.color.black));
+                break;
+            case GRAND_TOTAL_CELL: // Grand Total
+                setBackground(context.getDrawable(R.drawable.cell_shape));
+                setTypeface(null, Typeface.BOLD);
+                setTextColor(context.getColor(R.color.blue));
                 break;
             default:
                 setBackground(context.getDrawable(R.drawable.cell_shape));
