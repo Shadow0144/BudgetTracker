@@ -88,6 +88,18 @@ public class DayViewActivity extends AppCompatActivity
         totalCurrencySpinner.setAdapter(spinnerArrayAdapter);
         totalCurrencySpinner.setSelection(Currencies.default_currency);
 
+        final TextView totalAmountTextView = findViewById(R.id.totalAmountTextView);
+        String cost;
+        if (Currencies.integer[totalCurrencySpinner.getSelectedItemPosition()])
+        {
+            cost = String.format("%.00f", 0.0f);
+        }
+        else
+        {
+            cost = String.format("%.02f", 0.0f);
+        }
+        totalAmountTextView.setText(cost);
+
         updateDay();
     }
 
