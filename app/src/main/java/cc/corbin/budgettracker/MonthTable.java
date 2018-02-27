@@ -94,6 +94,8 @@ public class MonthTable extends TableLayout implements View.OnClickListener
 
     private void setup()
     {
+        boolean integer = Currencies.integer[Currencies.default_currency];
+
         setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)); // TODO
         setStretchAllColumns(true);
         setColumnShrinkable(0, true);
@@ -197,24 +199,12 @@ public class MonthTable extends TableLayout implements View.OnClickListener
             monthTotal += categoryTotal;
 
             week0.setText(category);
-            if (Currencies.integer[Currencies.default_currency])
-            {
-                week1.setText(String.format("%.00f", week1V));
-                week2.setText(String.format("%.00f", week2V));
-                week3.setText(String.format("%.00f", week3V));
-                week4.setText(String.format("%.00f", week4V));
-                week5.setText(String.format("%.00f", week5V));
-                week6.setText(String.format("%.00f", categoryTotal));
-            }
-            else
-            {
-                week1.setText(String.format("%.02f", week1V));
-                week2.setText(String.format("%.02f", week2V));
-                week3.setText(String.format("%.02f", week3V));
-                week4.setText(String.format("%.02f", week4V));
-                week5.setText(String.format("%.02f", week5V));
-                week6.setText(String.format("%.02f", categoryTotal));
-            }
+            week1.setText(Currencies.formatCurrency(integer, week1V));
+            week2.setText(Currencies.formatCurrency(integer, week2V));
+            week3.setText(Currencies.formatCurrency(integer, week3V));
+            week4.setText(Currencies.formatCurrency(integer, week4V));
+            week5.setText(Currencies.formatCurrency(integer, week5V));
+            week6.setText(Currencies.formatCurrency(integer, categoryTotal));
 
             categoryRow.addView(week0);
             categoryRow.addView(week1);
@@ -237,24 +227,12 @@ public class MonthTable extends TableLayout implements View.OnClickListener
         week6 = new TableCell(_context, TableCell.GRAND_TOTAL_CELL);
 
         week0.setText(R.string.total);
-        if (Currencies.integer[Currencies.default_currency])
-        {
-            week1.setText(String.format("%.00f", week1Total));
-            week2.setText(String.format("%.00f", week2Total));
-            week3.setText(String.format("%.00f", week3Total));
-            week4.setText(String.format("%.00f", week4Total));
-            week5.setText(String.format("%.00f", week5Total));
-            week6.setText(String.format("%.00f", monthTotal));
-        }
-        else
-        {
-            week1.setText(String.format("%.02f", week1Total));
-            week2.setText(String.format("%.02f", week2Total));
-            week3.setText(String.format("%.02f", week3Total));
-            week4.setText(String.format("%.02f", week4Total));
-            week5.setText(String.format("%.02f", week5Total));
-            week6.setText(String.format("%.02f", monthTotal));
-        }
+        week1.setText(Currencies.formatCurrency(integer, week1Total));
+        week2.setText(Currencies.formatCurrency(integer, week2Total));
+        week3.setText(Currencies.formatCurrency(integer, week3Total));
+        week4.setText(Currencies.formatCurrency(integer, week4Total));
+        week5.setText(Currencies.formatCurrency(integer, week5Total));
+        week6.setText(Currencies.formatCurrency(integer, monthTotal));
 
         totalRow.addView(week0);
         totalRow.addView(week1);

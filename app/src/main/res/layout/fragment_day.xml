@@ -7,29 +7,17 @@
     android:layout_height="match_parent"
     tools:context="cc.corbin.budgettracker.DayViewActivity">
 
-    <LinearLayout
-        android:id="@+id/allItemsContainer"
+
+    <FrameLayout
+        android:id="@+id/progressFrame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:focusableInTouchMode="true">
+        android:layout_height="match_parent">
 
-        <ScrollView
-            android:id="@+id/itemsScroller"
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyle"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:id="@+id/itemsContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-            </LinearLayout>
-
-        </ScrollView>
-
-    </LinearLayout>
+            android:layout_height="match_parent" />
+    </FrameLayout>
 
 </android.support.constraint.ConstraintLayout>

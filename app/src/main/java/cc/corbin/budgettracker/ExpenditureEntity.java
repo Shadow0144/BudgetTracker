@@ -27,6 +27,9 @@ public class ExpenditureEntity
     @Ignore
     private int expenseTypeNumber;
 
+    @ColumnInfo
+    private String note;
+
     // Must have a date set as this is the PRIMARY_KEY
 
     @Ignore
@@ -36,14 +39,16 @@ public class ExpenditureEntity
         this.currency = 0;
         this.amount = 0.0f;
         this.expenseType = "";
+        this.note = "";
     }
 
-    public ExpenditureEntity(long date, int currency, float amount, String expenseType)
+    public ExpenditureEntity(long date, int currency, float amount, String expenseType, String note)
     {
         this.date = date;
         this.currency = currency;
         this.amount = amount;
         this.expenseType = expenseType;
+        this.note = note;
     }
 
     public long getDate()
@@ -84,6 +89,16 @@ public class ExpenditureEntity
     public void setExpenseType(String expenseType)
     {
         this.expenseType = expenseType;
+    }
+
+    public String getNote()
+    {
+        return note;
+    }
+
+    public void setNote(String note)
+    {
+        this.note = note;
     }
 
     @Ignore

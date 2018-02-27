@@ -12,6 +12,7 @@
         android:id="@+id/negativeView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:text="-"
         android:textSize="24sp" />
 
@@ -19,6 +20,7 @@
         android:id="@+id/currencyView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:paddingEnd="5dp"
         android:paddingStart="5dp"
         android:text="$"
@@ -26,39 +28,46 @@
 
     <TextView
         android:id="@+id/costView"
-        android:layout_width="match_parent"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:layout_weight="1"
         android:text=""
         android:textSize="24sp" />
 
-    <ImageView
-        android:id="@+id/verticalDivider"
-        android:layout_width="5dp"
-        android:layout_height="match_parent"
-        android:layout_weight="0"
-        android:foregroundTint="@color/black"
-        android:paddingEnd="5dp"
-        android:paddingStart="5dp"
-        app:srcCompat="?attr/dividerVertical" />
-
     <TextView
         android:id="@+id/categoryView"
-        android:layout_width="75dp"
+        android:layout_width="175dp"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:ellipsize="end"
         android:lines="1"
         android:text=""
         android:textSize="24sp" />
 
-    <TextView
+    <Button
+        android:id="@+id/noteButton"
+        android:layout_width="20dp"
+        android:layout_height="25dp"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:foreground="@android:drawable/stat_notify_chat"
+        android:foregroundTint="@color/translucent" />
+
+    <Space
+        android:id="@+id/removeSpacer"
+        android:layout_width="5dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" />
+
+    <Button
         android:id="@+id/removeButton"
-        android:layout_width="@android:dimen/app_icon_size"
-        android:layout_height="match_parent"
-        android:layout_weight="0"
-        android:text="@string/x"
-        android:textAlignment="textEnd"
-        android:textColor="@android:color/holo_red_dark"
-        android:textSize="24sp" />
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:foreground="@android:drawable/ic_delete" />
 
 </android.widget.LinearLayout>

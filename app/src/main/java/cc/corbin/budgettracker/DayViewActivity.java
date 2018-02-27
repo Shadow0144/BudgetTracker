@@ -89,15 +89,7 @@ public class DayViewActivity extends AppCompatActivity
         totalCurrencySpinner.setSelection(Currencies.default_currency);
 
         final TextView totalAmountTextView = findViewById(R.id.totalAmountTextView);
-        String cost;
-        if (Currencies.integer[totalCurrencySpinner.getSelectedItemPosition()])
-        {
-            cost = String.format("%.00f", 0.0f);
-        }
-        else
-        {
-            cost = String.format("%.02f", 0.0f);
-        }
+        String cost = Currencies.formatCurrency(Currencies.integer[totalCurrencySpinner.getSelectedItemPosition()], 0.0f);
         totalAmountTextView.setText(cost);
 
         updateDay();
@@ -230,15 +222,7 @@ public class DayViewActivity extends AppCompatActivity
             {
                 total += expenditureEntities.get(i).getAmount();
             }
-            String cost;
-            if (Currencies.integer[totalCurrencySpinner.getSelectedItemPosition()])
-            {
-                cost = String.format("%.00f", total);
-            }
-            else
-            {
-                cost = String.format("%.02f", total);
-            }
+            String cost = Currencies.formatCurrency(Currencies.integer[totalCurrencySpinner.getSelectedItemPosition()], total);
             totalAmountTextView.setText(cost);
         }
         else { }

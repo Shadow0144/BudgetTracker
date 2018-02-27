@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
@@ -19,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -27,6 +29,7 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -78,7 +81,14 @@ public class DayFragment extends Fragment
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_day, container, false);
 
-        _itemsContainer = v.findViewById(R.id.itemsContainer);
+        FrameLayout progressFrame = v.findViewById(R.id.progressFrame);
+        ConstraintLayout rootLayout = ((ConstraintLayout)progressFrame.getParent());
+
+        rootLayout.removeView(progressFrame);
+
+        View dayView = inflater.inflate(R.layout.day, rootLayout, true);
+
+        _itemsContainer = dayView.findViewById(R.id.itemsContainer);
 
         _visible = true;
 
@@ -115,7 +125,11 @@ public class DayFragment extends Fragment
 
     public void updateExpenditureDatabase()
     {
-        _db.expenditureDao().update(_expenditureEntities);
+        if (_expenditureEntities != null)
+        {
+            _db.expenditureDao().update(_expenditureEntities);
+        }
+        else { }
     }
 
     // Begin popups to add a new expenditure
@@ -217,15 +231,7 @@ public class DayFragment extends Fragment
         if (editing)
         {
             symbolSpinner.setSelection(_expenditure.getCurrency());
-            String cost;
-            if (Currencies.integer[_expenditure.getCurrency()])
-            {
-                cost = String.format("%.00f", _expenditure.getAmount());
-            }
-            else
-            {
-                cost = String.format("%.02f", _expenditure.getAmount());
-            }
+            String cost = Currencies.formatCurrency(Currencies.integer[_expenditure.getCurrency()], _expenditure.getAmount());
             amountEditText.setText(cost, TextView.BufferType.EDITABLE);
         }
         else { }
@@ -312,7 +318,7 @@ public class DayFragment extends Fragment
     private void cancelAddingExpenditure()
     {
         _popupWindow.dismiss();
-        _addingNewExpenditure = false;
+        _addingNewExpenditure = false; // TODO
     }
 
     private void succeedAddingExpenditure()
@@ -384,18 +390,10 @@ public class DayFragment extends Fragment
             }
         });
 
-        String cost;
-        if (Currencies.integer[exp.getCurrency()])
-        {
-            cost = String.format("%.00f", exp.getAmount());
-        }
-        else
-        {
-            cost = String.format("%.02f", exp.getAmount());
-        }
+        String cost = Currencies.formatCurrency(Currencies.integer[exp.getCurrency()], exp.getAmount());
         costView.setText(cost);
 
-        TextView removeButton = view.findViewById(R.id.removeButton);
+        final Button removeButton = view.findViewById(R.id.removeButton);
         removeButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -419,6 +417,26 @@ public class DayFragment extends Fragment
                 alert.show();
             }
         });
+
+        final Button noteButton = view.findViewById(R.id.noteButton);
+        noteButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                editNote(v);
+            }
+        });
+
+        final String note = exp.getNote();
+        if (note.length() == 0)
+        {
+            noteButton.setForegroundTintList(getContext().getColorStateList(R.color.translucent));
+        }
+        else
+        {
+            noteButton.setForegroundTintList(getContext().getColorStateList(R.color.black));
+        }
 
         _itemsContainer.addView(view);
         _parent.updateTotal();
@@ -453,15 +471,7 @@ public class DayFragment extends Fragment
         categoryView.setText(_expenditure.getExpenseType());
 
         final TextView costView = view.findViewById(R.id.costView);
-        String cost;
-        if (Currencies.integer[_expenditure.getCurrency()])
-        {
-            cost = String.format("%.00f", _expenditure.getAmount());
-        }
-        else
-        {
-            cost = String.format("%.02f", _expenditure.getAmount());
-        }
+        String cost = Currencies.formatCurrency(Currencies.integer[_expenditure.getCurrency()], _expenditure.getAmount());
         costView.setText(cost);
         _parent.updateTotal();
     }
@@ -492,5 +502,67 @@ public class DayFragment extends Fragment
         ViewGroup parent = ((ViewGroup) (v.getParent()));
         _expenditure = _expenditureEntities.get(parent.getId());
         selectExpenditureCategory(true, parent);
+    }
+
+    public void editNote(View v)
+    {
+        final ViewGroup parent = ((ViewGroup) (v.getParent()));
+        _expenditure = _expenditureEntities.get(parent.getId());
+
+        final View noteView = getLayoutInflater().inflate(R.layout.note, null);
+
+        // Setup the categories
+        final EditText noteEditText = noteView.findViewById(R.id.noteEditText);
+
+        noteEditText.setText(_expenditure.getNote());
+
+        // Setup the cancel button
+        final Button cancelButton = noteView.findViewById(R.id.cancelButton);
+        cancelButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                _popupWindow.dismiss();
+            }
+        });
+
+        // Setup the accept button
+        final Button okButton = noteView.findViewById(R.id.okButton);
+        okButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                String note;
+                if (noteEditText.getText() != null)
+                {
+                    note = noteEditText.getText().toString();
+                }
+                else
+                {
+                    note = "";
+                }
+
+                _expenditure.setNote(note);
+
+                if (note.length() == 0)
+                {
+                    parent.findViewById(R.id.noteButton).setForegroundTintList(getContext().getColorStateList(R.color.translucent));
+                }
+                else
+                {
+                    parent.findViewById(R.id.noteButton).setForegroundTintList(getContext().getColorStateList(R.color.black));
+                }
+
+                _popupWindow.dismiss();
+            }
+        });
+
+        _popupWindow = new PopupWindow(noteView,
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        _popupWindow.setFocusable(true);
+        _popupWindow.update();
+        _popupWindow.showAtLocation(_itemsContainer, Gravity.CENTER, 0, 0);
     }
 }
