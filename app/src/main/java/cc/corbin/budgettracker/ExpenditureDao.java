@@ -22,10 +22,10 @@ public interface ExpenditureDao
     List<ExpenditureEntity> getDay(long date);
 
     @Query("SELECT * FROM expenditureentity WHERE date BETWEEN (:sDate) AND (:eDate+86400000-1)")
-    List<ExpenditureEntity> getWeek(long sDate, long eDate);
+    List<ExpenditureEntity> getTimeSpan(long sDate, long eDate);
 
     @Query("SELECT * FROM expenditureentity WHERE date BETWEEN (:sDate) AND (:eDate+86400000-1) AND expenseType = (:category)")
-    List<ExpenditureEntity> getWeek(long sDate, long eDate, String category);
+    List<ExpenditureEntity> getTimeSpan(long sDate, long eDate, String category);
 
     @Query("SELECT * FROM expenditureentity WHERE date IN (:expenditureIds)")
     List<ExpenditureEntity> loadAllByIds(int[] expenditureIds);

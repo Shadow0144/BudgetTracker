@@ -13,6 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_weight="0"
         android:text="-"
         android:textSize="24sp" />
 
@@ -21,6 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_weight="0"
         android:paddingEnd="5dp"
         android:paddingStart="5dp"
         android:text="$"
@@ -37,9 +39,10 @@
 
     <TextView
         android:id="@+id/categoryView"
-        android:layout_width="175dp"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_weight="0"
         android:ellipsize="end"
         android:lines="1"
         android:text=""
@@ -47,24 +50,24 @@
 
     <Button
         android:id="@+id/noteButton"
-        android:layout_width="20dp"
-        android:layout_height="25dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_gravity="center"
         android:layout_weight="1"
         android:background="@android:color/transparent"
-        android:foreground="@android:drawable/stat_notify_chat"
+        android:foreground="@android:drawable/stat_notify_error"
         android:foregroundTint="@color/translucent" />
 
     <Space
         android:id="@+id/removeSpacer"
-        android:layout_width="5dp"
+        android:layout_width="20dp"
         android:layout_height="wrap_content"
         android:layout_weight="1" />
 
     <Button
         android:id="@+id/removeButton"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_gravity="center"
         android:layout_weight="1"
         android:background="@android:color/transparent"

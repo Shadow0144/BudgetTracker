@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * Created by Corbin on 1/28/2018.
@@ -48,6 +49,14 @@ public class MonthViewActivity extends AppCompatActivity
         TextView header = findViewById(R.id.monthView);
         DateFormatSymbols dfs = new DateFormatSymbols();
         header.setText(dfs.getMonths()[_month-1] + " " + _year);
+
+        ExcelExporter.checkPermissions(this);
+    }
+
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults)
+    {
+        ExcelExporter.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     public void previousMonth(View v)
@@ -119,5 +128,25 @@ public class MonthViewActivity extends AppCompatActivity
 
             budgetTable.addView(tableRow);
         }
+    }
+
+    public void exportMonth(View v)
+    {
+        ExpenditureDatabase db = ExpenditureDatabase.getExpenditureDatabase(this);
+
+        Calendar c = Calendar.getInstance();
+        c.set(_year, _month-1, 1);
+        int maxDays = c.getActualMaximum(Calendar.DATE);
+
+        c.set(_year, _month-1, 1, 0, 0, 0);
+        c.set(Calendar.MILLISECOND, 0);
+        long sDate = c.getTimeInMillis();
+
+        c.set(_year, _month-1, maxDays, 0, 0, 0);
+        c.set(Calendar.MILLISECOND, 0);
+        long eDate = c.getTimeInMillis();
+
+        List<ExpenditureEntity> monthExp = db.expenditureDao().getTimeSpan(sDate, eDate);
+        ExcelExporter.exportMonth(this, _month, _year, monthExp);
     }
 }

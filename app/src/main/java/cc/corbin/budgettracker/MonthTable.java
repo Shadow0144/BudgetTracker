@@ -2,21 +2,14 @@ package cc.corbin.budgettracker;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
-import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Created by Corbin on 1/29/2018.
@@ -96,7 +89,7 @@ public class MonthTable extends TableLayout implements View.OnClickListener
     {
         boolean integer = Currencies.integer[Currencies.default_currency];
 
-        setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)); // TODO
+        setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         setStretchAllColumns(true);
         setColumnShrinkable(0, true);
 
@@ -259,11 +252,12 @@ public class MonthTable extends TableLayout implements View.OnClickListener
             c.set(_year, _month-1, (weekNum*7)+1, 0, 0, 0);
             c.set(Calendar.MILLISECOND, 0);
             long sDate = c.getTimeInMillis();
+
             c.set(_year, _month-1, Math.min(((weekNum+1)*7)+1, maxDays), 0, 0, 0);
             c.set(Calendar.MILLISECOND, 0);
-
             long eDate = c.getTimeInMillis();
-            List<ExpenditureEntity> weekExp = db.expenditureDao().getWeek(sDate, eDate, category);
+
+            List<ExpenditureEntity> weekExp = db.expenditureDao().getTimeSpan(sDate, eDate, category);
 
             int count = weekExp.size();
             for (int i = 0; i < count; i++)
