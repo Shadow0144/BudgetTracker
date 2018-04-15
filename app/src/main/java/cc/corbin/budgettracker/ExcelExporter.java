@@ -45,15 +45,26 @@ public class ExcelExporter
 {
     private static final String TAG = "ExcelExporter";
 
-    private static final int WRITE_EXTERNAL_STORAGE_CODE = 1;
+    private static final int CHECK_CODE = 0; // Just check and request and return
+    private static final int EXPORT_MONTH_CODE = 1;
 
     private static boolean _externalStorage = false;
 
+    private static Context _context;
+    private static int _month;
+    private static int _year;
+    private static List<ExpenditureEntity> _expenditures;
+
     public static void checkPermissions(Activity activity)
+    {
+        checkPermissions(activity, CHECK_CODE);
+    }
+
+    private static void checkPermissions(Activity activity, int code)
     {
         if (activity.checkSelfPermission(WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
         {
-            activity.requestPermissions(new String[] {READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE}, WRITE_EXTERNAL_STORAGE_CODE);
+            activity.requestPermissions(new String[] {READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE}, code);
         }
         else
         {
@@ -64,28 +75,39 @@ public class ExcelExporter
     public static void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults)
     {
-        switch (requestCode)
+        // If request is cancelled, the result arrays are empty
+        if (grantResults.length > 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED)
         {
-            case WRITE_EXTERNAL_STORAGE_CODE:
+            _externalStorage = true;
+            switch (requestCode)
             {
-                // If request is cancelled, the result arrays are empty
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                {
-                    _externalStorage = true;
-                }
-                else
-                {
-                    _externalStorage = false;
-                }
-                break;
+                case EXPORT_MONTH_CODE:
+                    exportMonth(_context, _month, _year, _expenditures);
+                    break;
             }
+        }
+        else
+        {
+            _externalStorage = false;
+            Toast.makeText(_context, "Failed to acquire permissions", Toast.LENGTH_SHORT).show();
+            _context = null;
+            _expenditures = null;
         }
     }
 
     public static void exportMonth(Context context, int month, int year, List<ExpenditureEntity> expenditures)
     {
-        if (_externalStorage)
+        _context = context;
+        _month = month;
+        _year = year;
+        _expenditures = expenditures;
+
+        if (!_externalStorage)
+        {
+            checkPermissions(((Activity)context), EXPORT_MONTH_CODE);
+        }
+        else
         {
             File sd = Environment.getExternalStorageDirectory();
 
@@ -104,7 +126,7 @@ public class ExcelExporter
 
             Calendar calendar = Calendar.getInstance();
             calendar.set(Calendar.YEAR, year);
-            calendar.set(Calendar.MONTH, month);
+            calendar.set(Calendar.MONTH, month-1);
             int count = calendar.getActualMaximum(Calendar.DATE);
 
             File directory = new File(sd.getAbsolutePath());
@@ -168,7 +190,7 @@ public class ExcelExporter
                 ArrayList<String> notes = new ArrayList<String>();
                 for (int i = 0; i < count; i++)
                 {
-                    date.set(year, month - 1, i, 0, 0, 0);
+                    date.set(year, month - 1, i+1, 0, 0, 0);
                     date.set(Calendar.MILLISECOND, 0);
 
                     // Print the day, if expenditures are available for that day, print them
@@ -188,10 +210,11 @@ public class ExcelExporter
                         if (currExp < expCount)
                         {
                             ExpenditureEntity exp = expenditures.get(currExp);
-                            expDate.setTimeInMillis(exp.getDate());
+                            expDate.set(exp.getYear(), exp.getMonth(), exp.getDay());
                             expDate.set(Calendar.MILLISECOND, 0);
                             if (date.compareTo(expDate) == 0)
                             {
+                                Log.e(TAG, ""+expDate.getTimeInMillis());
                                 WritableCellFormat format, superFormat;
                                 if (alt)
                                 {
@@ -272,10 +295,9 @@ public class ExcelExporter
                 e.printStackTrace();
                 Toast.makeText(context, "Failed to export", Toast.LENGTH_SHORT).show();
             }
-        }
-        else
-        {
-            Toast.makeText(context, "Requires permission to save externally", Toast.LENGTH_SHORT).show();
+
+            _context = null;
+            _expenditures = null;
         }
     }
 }

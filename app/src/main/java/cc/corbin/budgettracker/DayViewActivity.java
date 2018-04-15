@@ -1,5 +1,6 @@
 package cc.corbin.budgettracker;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Environment;
 import android.support.v4.view.ViewPager;
@@ -65,6 +66,9 @@ public class DayViewActivity extends AppCompatActivity
         _previousDay = findViewById(R.id.yesterdayButton);
         _nextDay = findViewById(R.id.tomorrowButton);
 
+        final ExpenditureViewModel viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
+        viewModel.setDatabase(ExpenditureDatabase.getExpenditureDatabase(this));
+
         loadCategories();
 
         _currentDate = Calendar.getInstance();
@@ -72,7 +76,8 @@ public class DayViewActivity extends AppCompatActivity
         _currentDate.setTimeInMillis(getIntent().getLongExtra(DATE_INTENT, Calendar.getInstance().getTimeInMillis()));
         SimpleDateFormat simpleDate =  new SimpleDateFormat("dd/MM/yyyy");
 
-        _dateView.setText(getString(R.string.expenses) + simpleDate.format(_currentDate.getTime()));
+        //_dateView.setText(getString(R.string.expenses) + simpleDate.format(_currentDate.getTime()));
+        _dateView.setText(simpleDate.format(_currentDate.getTime()));
 
         _year = _currentDate.get(Calendar.YEAR);
         _month = _currentDate.get(Calendar.MONTH)+1;
@@ -80,7 +85,39 @@ public class DayViewActivity extends AppCompatActivity
 
         _adapter = new DayFragmentPagerAdapter(this, getSupportFragmentManager(), _month, _year);
         _pagerView.setAdapter(_adapter);
-        _pagerView.setCurrentItem(_day);
+        _pagerView.setCurrentItem(_day-1);
+
+        _pagerView.addOnPageChangeListener(new ViewPager.OnPageChangeListener()
+        {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+            {
+
+            }
+
+            @Override
+            public void onPageSelected(int position)
+            {
+                if (position < (_day-1))
+                {
+                    previousDay(null);
+                }
+                else if (position > (_day-1))
+                {
+                    nextDay(null);
+                }
+                else
+                {
+                    // Same date
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state)
+            {
+
+            }
+        });
 
         final Spinner totalCurrencySpinner = findViewById(R.id.totalCurrencySpinner);
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
@@ -123,8 +160,6 @@ public class DayViewActivity extends AppCompatActivity
         {
             updateDay();
         }
-
-        updateTotal();
     }
 
     public void nextDay(View v)
@@ -147,35 +182,39 @@ public class DayViewActivity extends AppCompatActivity
         {
             updateDay();
         }
-
-        updateTotal();
     }
 
     private void updateDay()
     {
-        _pagerView.setCurrentItem(_day);
-
-        if (_day == 1)
+        if (_pagerView.getCurrentItem() != (_day-1))
         {
-            _previousDay.setText(getString(R.string.pprevious));
-            _nextDay.setText(getString(R.string.next));
-        }
-        else if (_day == _adapter.lastDay())
-        {
-            _previousDay.setText(getString(R.string.previous));
-            _nextDay.setText(getString(R.string.nnext));
-        }
-        else
-        {
-            _previousDay.setText(getString(R.string.previous));
-            _nextDay.setText(getString(R.string.next));
-        }
+            _pagerView.setCurrentItem(_day-1);
 
-        _currentDate = Calendar.getInstance();
-        _currentDate.set(_year, _month-1, _day);
-        SimpleDateFormat simpleDate =  new SimpleDateFormat("dd/MM/yyyy");
+            if (_day == 1)
+            {
+                _previousDay.setText(getString(R.string.pprevious));
+                _nextDay.setText(getString(R.string.next));
+            }
+            else if (_day == _adapter.lastDay())
+            {
+                _previousDay.setText(getString(R.string.previous));
+                _nextDay.setText(getString(R.string.nnext));
+            }
+            else
+            {
+                _previousDay.setText(getString(R.string.previous));
+                _nextDay.setText(getString(R.string.next));
+            }
 
-        _dateView.setText(simpleDate.format(_currentDate.getTime()));
+            _currentDate = Calendar.getInstance();
+            _currentDate.set(_year, _month - 1, _day);
+            SimpleDateFormat simpleDate = new SimpleDateFormat("dd/MM/yyyy");
+
+            _dateView.setText(simpleDate.format(_currentDate.getTime()));
+
+            updateTotal();
+        }
+        else { }
     }
 
     public void addItem(View v)
@@ -214,7 +253,7 @@ public class DayViewActivity extends AppCompatActivity
         float total = 0.0f;
         final TextView totalAmountTextView = findViewById(R.id.totalAmountTextView);
         final Spinner totalCurrencySpinner = findViewById(R.id.totalCurrencySpinner);
-        List<ExpenditureEntity> expenditureEntities = _adapter.getExpenditures(_day);
+        List<ExpenditureEntity> expenditureEntities = _adapter.getExpenditures(_day-1);
         if (expenditureEntities != null)
         {
             int count = expenditureEntities.size();

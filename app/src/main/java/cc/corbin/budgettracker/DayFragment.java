@@ -1,38 +1,31 @@
 package cc.corbin.budgettracker;
 
 import android.app.AlertDialog;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.text.Editable;
 import android.text.InputFilter;
-import android.text.Layout;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
-
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -48,6 +41,8 @@ public class DayFragment extends Fragment
     private LinearLayout _itemsContainer;
 
     private List<ExpenditureEntity> _expenditureEntities;
+    private LiveData<List<ExpenditureEntity>> _entity;
+    private ExpenditureViewModel _viewModel;
 
     private DayFragmentPagerAdapter _parent;
 
@@ -56,10 +51,6 @@ public class DayFragment extends Fragment
     private int _day;
 
     private boolean _visible;
-
-    private long _date;
-    private long _uid;
-    private ExpenditureDatabase _db;
 
     private boolean _addingNewExpenditure;
 
@@ -81,39 +72,64 @@ public class DayFragment extends Fragment
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_day, container, false);
 
-        FrameLayout progressFrame = v.findViewById(R.id.progressFrame);
-        ConstraintLayout rootLayout = ((ConstraintLayout)progressFrame.getParent());
+        _viewModel = ViewModelProviders.of(getActivity()).get(ExpenditureViewModel.class);
+        _entity = _viewModel.getDay(_year, _month, _day);
 
-        rootLayout.removeView(progressFrame);
-
-        View dayView = inflater.inflate(R.layout.day, rootLayout, true);
-
-        _itemsContainer = dayView.findViewById(R.id.itemsContainer);
-
-        _visible = true;
-
-        Calendar c = Calendar.getInstance();
-        c.set(_year, _month-1, _day, 0, 0, 0);
-        c.set(Calendar.MILLISECOND, 0);
-        _date = c.getTimeInMillis();
-
-        _db = ExpenditureDatabase.getExpenditureDatabase(getContext());
-        _expenditureEntities = _db.expenditureDao().getDay(_date);
-
-        if (_expenditureEntities.size() > 0)
+        final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
         {
-            _uid = _expenditureEntities.get(_expenditureEntities.size() - 1).getDate() + 1;
-        }
-        else
-        {
-            _uid = _date;
-        }
+            @Override
+            public void onChanged(@Nullable List<ExpenditureEntity> expenditureEntities)
+            {
+                onLoadExpenses(expenditureEntities);
+            }
+        };
 
-        _addingNewExpenditure = false;
-
-        setUpExpenditures();
+        _entity.observe(this, entityObserver);
 
         return v;
+    }
+
+    public void onLoadExpenses(@Nullable List<ExpenditureEntity> expenditureEntities)
+    {
+        if (expenditureEntities != null)
+        {
+            _expenditureEntities = expenditureEntities;
+
+            onLoad();
+        }
+        else { }
+    }
+
+    public void onLoad()
+    {
+        FrameLayout progressFrame = getActivity().findViewById(R.id.progressFrame);
+        if (progressFrame != null)
+        {
+            ConstraintLayout rootLayout = ((ConstraintLayout) progressFrame.getParent());
+
+            rootLayout.removeView(progressFrame);
+
+            LayoutInflater inflater = getLayoutInflater();
+            View dayView = inflater.inflate(R.layout.day, rootLayout, true);
+
+            _itemsContainer = dayView.findViewById(R.id.itemsContainer);
+
+            _visible = true;
+
+            /*if (_expenditureEntities.size() > 0)
+            {
+                _uid = _expenditureEntities.get(_expenditureEntities.size() - 1).getDate() + 1;
+            }
+            else
+            {
+                _uid = _date;
+            }*/
+
+            _addingNewExpenditure = false;
+
+            setUpExpenditures();
+        }
+        else { }
     }
 
     @Override
@@ -127,7 +143,7 @@ public class DayFragment extends Fragment
     {
         if (_expenditureEntities != null)
         {
-            _db.expenditureDao().update(_expenditureEntities);
+            _viewModel.updateEntities(_expenditureEntities);
         }
         else { }
     }
@@ -137,7 +153,7 @@ public class DayFragment extends Fragment
     {
         if (!_addingNewExpenditure)
         {
-            _expenditure = new ExpenditureEntity(_uid++);
+            _expenditure = new ExpenditureEntity(_day, _month, _year);
             selectExpenditureAmount(false, null);
         }
         else { } // Ignore
@@ -323,7 +339,7 @@ public class DayFragment extends Fragment
 
     private void succeedAddingExpenditure()
     {
-        _db.expenditureDao().insertAll(_expenditure);
+        _viewModel.insertEntity(_expenditure);
 
         addExpenditure(_expenditure);
 
@@ -452,7 +468,7 @@ public class DayFragment extends Fragment
         ViewGroup parent = ((ViewGroup) (v.getParent()));
         parent.removeView(v);
         ExpenditureEntity exp = _expenditureEntities.remove(v.getId());
-        _db.expenditureDao().delete(exp);
+        _viewModel.removeEntity(exp);
         // Rename all the views
         int count = parent.getChildCount();
         for (int i = 0; i < count; i++)

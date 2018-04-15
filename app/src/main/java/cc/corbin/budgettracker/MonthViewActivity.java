@@ -1,7 +1,11 @@
 package cc.corbin.budgettracker;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -29,28 +33,73 @@ public class MonthViewActivity extends AppCompatActivity
     private int _month;
     private int _year;
 
+    private ExpenditureViewModel _viewModel;
+    private LiveData<List<ExpenditureEntity>> _week1;
+    private LiveData<List<ExpenditureEntity>> _week2;
+    private LiveData<List<ExpenditureEntity>> _week3;
+    private LiveData<List<ExpenditureEntity>> _week4;
+    private LiveData<List<ExpenditureEntity>> _week5;
+    private int _loadedCount;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_month_view);
 
-        FrameLayout monthsContainer = findViewById(R.id.monthHolder);
         _month = getIntent().getIntExtra(MONTH_INTENT, Calendar.getInstance().get(Calendar.MONTH)+1);
         _year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
-        MonthTable table = new MonthTable(this, _month, _year);
-        monthsContainer.addView(table);
+
+        _loadedCount = 0;
+
+        _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
+        _viewModel.setDatabase(ExpenditureDatabase.getExpenditureDatabase(this));
+
+        _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
+        _week1 = _viewModel.getWeek(_year, _month, 1);
+        _week2 = _viewModel.getWeek(_year, _month, 2);
+        _week3 = _viewModel.getWeek(_year, _month, 3);
+        _week4 = _viewModel.getWeek(_year, _month, 4);
+        _week5 = _viewModel.getWeek(_year, _month, 5);
+
+        final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
+        {
+            @Override
+            public void onChanged(@Nullable List<ExpenditureEntity> expenditureEntities)
+            {
+                _loadedCount++;
+                if (_loadedCount == 5)
+                {
+                    monthLoaded();
+                }
+                else { }
+            }
+        };
+
+        _week1.observe(this, entityObserver);
+        _week2.observe(this, entityObserver);
+        _week3.observe(this, entityObserver);
+        _week4.observe(this, entityObserver);
+        _week5.observe(this, entityObserver);
+
+        TextView header = findViewById(R.id.monthView);
+        DateFormatSymbols dfs = new DateFormatSymbols();
+        header.setText(dfs.getMonths()[_month-1] + " " + _year);
 
         FrameLayout budgetContainer = findViewById(R.id.budgetHolder);
         TableLayout budgetTable = new TableLayout(this);
         setupBudgetTable(budgetTable);
         budgetContainer.addView(budgetTable);
 
-        TextView header = findViewById(R.id.monthView);
-        DateFormatSymbols dfs = new DateFormatSymbols();
-        header.setText(dfs.getMonths()[_month-1] + " " + _year);
-
         ExcelExporter.checkPermissions(this);
+    }
+
+    private void monthLoaded()
+    {
+        FrameLayout monthsContainer = findViewById(R.id.monthHolder);
+        MonthTable table = new MonthTable(this, _month, _year);
+        table.setup(_week1.getValue(), _week2.getValue(), _week3.getValue(), _week4.getValue(), _week5.getValue());
+        monthsContainer.addView(table);
     }
 
     public void onRequestPermissionsResult(int requestCode,
@@ -132,21 +181,7 @@ public class MonthViewActivity extends AppCompatActivity
 
     public void exportMonth(View v)
     {
-        ExpenditureDatabase db = ExpenditureDatabase.getExpenditureDatabase(this);
-
-        Calendar c = Calendar.getInstance();
-        c.set(_year, _month-1, 1);
-        int maxDays = c.getActualMaximum(Calendar.DATE);
-
-        c.set(_year, _month-1, 1, 0, 0, 0);
-        c.set(Calendar.MILLISECOND, 0);
-        long sDate = c.getTimeInMillis();
-
-        c.set(_year, _month-1, maxDays, 0, 0, 0);
-        c.set(Calendar.MILLISECOND, 0);
-        long eDate = c.getTimeInMillis();
-
-        List<ExpenditureEntity> monthExp = db.expenditureDao().getTimeSpan(sDate, eDate);
-        ExcelExporter.exportMonth(this, _month, _year, monthExp);
+        //List<ExpenditureEntity> monthExp = db.expenditureDao().getTimeSpan(_year, _month, 1, maxDays);
+        //ExcelExporter.exportMonth(this, _month, _year, monthExp);
     }
 }

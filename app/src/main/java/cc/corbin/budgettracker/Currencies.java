@@ -41,12 +41,12 @@ public final class Currencies
 
         if (integer)
         {
-            DecimalFormat formatter = new DecimalFormat("#,###,###");
+            DecimalFormat formatter = new DecimalFormat("###,###,###,###");
             cost = formatter.format(amount);
         }
         else
         {
-            DecimalFormat formatter = new DecimalFormat("#,###,###.00");
+            DecimalFormat formatter = new DecimalFormat("###,###,###,###.00");
             cost = formatter.format(amount);
         }
 

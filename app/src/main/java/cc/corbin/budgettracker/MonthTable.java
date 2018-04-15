@@ -31,8 +31,6 @@ public class MonthTable extends TableLayout implements View.OnClickListener
 
         _month = 1;
         _year = 2018;
-
-        setup();
     }
 
     public MonthTable(Context context, AttributeSet attrs)
@@ -59,8 +57,6 @@ public class MonthTable extends TableLayout implements View.OnClickListener
         {
             a.recycle();
         }
-
-        setup();
     }
 
     public MonthTable(Context context, int month, int year)
@@ -70,8 +66,6 @@ public class MonthTable extends TableLayout implements View.OnClickListener
 
         _month = month;
         _year = year;
-
-        setup();
     }
 
     public void onClick(View v)
@@ -85,7 +79,9 @@ public class MonthTable extends TableLayout implements View.OnClickListener
         ((MonthViewActivity)_context).finish();
     }
 
-    private void setup()
+    public void setup(List<ExpenditureEntity> expWeek1, List<ExpenditureEntity> expWeek2,
+                       List<ExpenditureEntity> expWeek3, List<ExpenditureEntity> expWeek4,
+                       List<ExpenditureEntity> expWeek5)
     {
         boolean integer = Currencies.integer[Currencies.default_currency];
 
@@ -175,13 +171,12 @@ public class MonthTable extends TableLayout implements View.OnClickListener
 
             // Set the text
             String category = DayViewActivity.getCategories()[i];
-            ExpenditureDatabase db = ExpenditureDatabase.getExpenditureDatabase(getContext());
 
-            float week1V = getWeekTotal(db, 1, category);
-            float week2V = getWeekTotal(db, 2, category);
-            float week3V = getWeekTotal(db, 3, category);
-            float week4V = getWeekTotal(db, 4, category);
-            float week5V = getWeekTotal(db, 5, category);
+            float week1V = getWeekTotal(expWeek1, 1, category);
+            float week2V = getWeekTotal(expWeek2, 2, category);
+            float week3V = getWeekTotal(expWeek3, 3, category);
+            float week4V = getWeekTotal(expWeek4, 4, category);
+            float week5V = getWeekTotal(expWeek5, 5, category);
             float categoryTotal = week1V + week2V + week3V + week4V + week5V;
 
             week1Total += week1V;
@@ -237,7 +232,7 @@ public class MonthTable extends TableLayout implements View.OnClickListener
         addView(totalRow);
     }
 
-    private float getWeekTotal(ExpenditureDatabase db, int weekNum, String category)
+    private float getWeekTotal(List<ExpenditureEntity> weekExp, int weekNum, String category)
     {
         weekNum--; // Saves some subtracting later
 
@@ -249,15 +244,15 @@ public class MonthTable extends TableLayout implements View.OnClickListener
         float total = 0.0f;
         if (maxDays >= ((weekNum*7)+1))
         {
-            c.set(_year, _month-1, (weekNum*7)+1, 0, 0, 0);
+            int sDay = (weekNum*7)+1;
+            /*c.set(_year, _month-1, (weekNum*7)+1, 0, 0, 0);
             c.set(Calendar.MILLISECOND, 0);
-            long sDate = c.getTimeInMillis();
+            long sDate = c.getTimeInMillis();*/
 
-            c.set(_year, _month-1, Math.min(((weekNum+1)*7)+1, maxDays), 0, 0, 0);
+            int eDay = Math.min(((weekNum+1)*7)+1, maxDays);
+            /*c.set(_year, _month-1, Math.min(((weekNum+1)*7)+1, maxDays), 0, 0, 0);
             c.set(Calendar.MILLISECOND, 0);
-            long eDate = c.getTimeInMillis();
-
-            List<ExpenditureEntity> weekExp = db.expenditureDao().getTimeSpan(sDate, eDate, category);
+            long eDate = c.getTimeInMillis();*/
 
             int count = weekExp.size();
             for (int i = 0; i < count; i++)
