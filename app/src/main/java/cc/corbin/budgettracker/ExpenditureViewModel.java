@@ -166,6 +166,11 @@ public class ExpenditureViewModel extends ViewModel
         return _db.expenditureDao().getTimeSpan(year, month, (((week-1)*7)+1), (((week)*7)));
     }
 
+    public LiveData<List<ExpenditureEntity>> getMonth(int year, int month)
+    {
+        return _db.expenditureDao().getTimeSpan(year, month, 0, 32);
+    }
+
     public void insertEntity(ExpenditureEntity entity)
     {
         DatabaseEvent event = new DatabaseEvent(DatabaseEvent.EventType.insert, entity);

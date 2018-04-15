@@ -34,11 +34,12 @@ public class MonthViewActivity extends AppCompatActivity
     private int _year;
 
     private ExpenditureViewModel _viewModel;
-    private LiveData<List<ExpenditureEntity>> _week1;
+    /*private LiveData<List<ExpenditureEntity>> _week1;
     private LiveData<List<ExpenditureEntity>> _week2;
     private LiveData<List<ExpenditureEntity>> _week3;
     private LiveData<List<ExpenditureEntity>> _week4;
-    private LiveData<List<ExpenditureEntity>> _week5;
+    private LiveData<List<ExpenditureEntity>> _week5;*/
+    private LiveData<List<ExpenditureEntity>> _monthExps;
     private int _loadedCount;
 
     @Override
@@ -56,31 +57,21 @@ public class MonthViewActivity extends AppCompatActivity
         _viewModel.setDatabase(ExpenditureDatabase.getExpenditureDatabase(this));
 
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
-        _week1 = _viewModel.getWeek(_year, _month, 1);
-        _week2 = _viewModel.getWeek(_year, _month, 2);
-        _week3 = _viewModel.getWeek(_year, _month, 3);
-        _week4 = _viewModel.getWeek(_year, _month, 4);
-        _week5 = _viewModel.getWeek(_year, _month, 5);
 
         final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
         {
             @Override
             public void onChanged(@Nullable List<ExpenditureEntity> expenditureEntities)
             {
-                _loadedCount++;
-                if (_loadedCount == 5)
+                if (expenditureEntities != null)
                 {
-                    monthLoaded();
+                    monthLoaded(expenditureEntities);
                 }
-                else { }
             }
         };
 
-        _week1.observe(this, entityObserver);
-        _week2.observe(this, entityObserver);
-        _week3.observe(this, entityObserver);
-        _week4.observe(this, entityObserver);
-        _week5.observe(this, entityObserver);
+        _monthExps = _viewModel.getMonth(_year, _month);
+        _monthExps.observe(this, entityObserver);
 
         TextView header = findViewById(R.id.monthView);
         DateFormatSymbols dfs = new DateFormatSymbols();
@@ -94,12 +85,17 @@ public class MonthViewActivity extends AppCompatActivity
         ExcelExporter.checkPermissions(this);
     }
 
-    private void monthLoaded()
+    private void monthLoaded(List<ExpenditureEntity> expenditureEntities)
     {
-        FrameLayout monthsContainer = findViewById(R.id.monthHolder);
-        MonthTable table = new MonthTable(this, _month, _year);
-        table.setup(_week1.getValue(), _week2.getValue(), _week3.getValue(), _week4.getValue(), _week5.getValue());
-        monthsContainer.addView(table);
+        FrameLayout monthsWeeklyContainer = findViewById(R.id.monthWeeklyHolder);
+        MonthWeeklySummaryTable weeklyTable = new MonthWeeklySummaryTable(this, _month, _year);
+        weeklyTable.setup(expenditureEntities);
+        monthsWeeklyContainer.addView(weeklyTable);
+
+        FrameLayout monthsCategoryContainer = findViewById(R.id.monthCategoryHolder);
+        MonthCategorySummaryTable categoryTable = new MonthCategorySummaryTable(this, _month, _year);
+        categoryTable.setup(expenditureEntities);
+        monthsCategoryContainer.addView(categoryTable);
     }
 
     public void onRequestPermissionsResult(int requestCode,

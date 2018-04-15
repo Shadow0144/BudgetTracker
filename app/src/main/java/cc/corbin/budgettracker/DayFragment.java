@@ -102,34 +102,31 @@ public class DayFragment extends Fragment
 
     public void onLoad()
     {
+        ConstraintLayout rootLayout;
+
         FrameLayout progressFrame = getActivity().findViewById(R.id.progressFrame);
         if (progressFrame != null)
         {
-            ConstraintLayout rootLayout = ((ConstraintLayout) progressFrame.getParent());
-
-            rootLayout.removeView(progressFrame);
-
-            LayoutInflater inflater = getLayoutInflater();
-            View dayView = inflater.inflate(R.layout.day, rootLayout, true);
-
-            _itemsContainer = dayView.findViewById(R.id.itemsContainer);
-
-            _visible = true;
-
-            /*if (_expenditureEntities.size() > 0)
-            {
-                _uid = _expenditureEntities.get(_expenditureEntities.size() - 1).getDate() + 1;
-            }
-            else
-            {
-                _uid = _date;
-            }*/
-
-            _addingNewExpenditure = false;
-
-            setUpExpenditures();
+            rootLayout = ((ConstraintLayout) progressFrame.getParent());
         }
-        else { }
+        else
+        {
+            progressFrame = getActivity().findViewById(R.id.dayFrame);
+            rootLayout = ((ConstraintLayout) progressFrame.getParent());
+        }
+
+        rootLayout.removeView(progressFrame);
+
+        LayoutInflater inflater = getLayoutInflater();
+        View dayView = inflater.inflate(R.layout.day, rootLayout, true);
+
+        _itemsContainer = dayView.findViewById(R.id.itemsContainer);
+
+        _visible = true;
+
+        _addingNewExpenditure = false;
+
+        setUpExpenditures();
     }
 
     @Override
