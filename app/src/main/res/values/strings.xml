@@ -7,7 +7,12 @@
     <string name="nnext">&gt;&gt;</string>
     <string name="total">Total</string>
     <string name="x">X</string>
+    <string name="negative">-</string>
     <string name="expenses">Expenses for:&#160;</string>
+    <string name="failure_expense">Failed to create/update/delete expenditure</string>
+    <string name="failure_create_expense">Failed to create expenditure</string>
+    <string name="failure_edit_expense">Failed to edit expenditure</string>
+    <string name="failure_delete_expense">Failed to delete expenditure</string>
     <string-array name="default_categories">
         <item>Food</item>
         <item>Essentials</item>
@@ -24,4 +29,7 @@
     <string name="month_weekly_title">Expenditures by Week</string>
     <string name="month_category_title">Expenditures by Category</string>
     <string name="budget_title">Monthly Budget Limits</string>
+    <string name="year_monthly_title">Expenditures by Year</string>
+    <string name="year_category_title">Expenditures by Category</string>
+    <string name="year_budget_title">Yearly Budget Limits</string>
 </resources>

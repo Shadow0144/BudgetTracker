@@ -21,36 +21,33 @@ import java.util.Calendar;
 import java.util.List;
 
 /**
- * Created by Corbin on 1/28/2018.
+ * Created by Corbin on 4/15/2018.
  */
 
-public class MonthViewActivity extends AppCompatActivity
+public class YearViewActivity extends AppCompatActivity
 {
-    private final String TAG = "MonthViewActivity";
+    private final String TAG = "YearViewActivity";
 
-    public final static String MONTH_INTENT = "Month";
     public final static String YEAR_INTENT = "Year";
 
-    private int _month;
     private int _year;
 
     private ExpenditureViewModel _viewModel;
-    private MutableLiveData<List<ExpenditureEntity>> _monthExps;
+    private MutableLiveData<List<ExpenditureEntity>> _yearExps;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_month_view);
+        setContentView(R.layout.activity_year_view);
 
-        _month = getIntent().getIntExtra(MONTH_INTENT, Calendar.getInstance().get(Calendar.MONTH)+1);
         _year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
 
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
         _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
 
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
-        _viewModel.setDate(_year, _month, 0);
+        _viewModel.setDate(_year, 0, 0);
 
         final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
         {
@@ -59,29 +56,19 @@ public class MonthViewActivity extends AppCompatActivity
             {
                 if (expenditureEntities != null)
                 {
-                    monthLoaded(expenditureEntities);
+                    yearLoaded(expenditureEntities);
                 }
                 else { }
             }
         };
 
-        _monthExps = new MutableLiveData<List<ExpenditureEntity>>();
-        _viewModel.getMonth(_monthExps);
-        _monthExps.observe(this, entityObserver);
+        _yearExps = new MutableLiveData<List<ExpenditureEntity>>();
+        _viewModel.getYear(_yearExps);
+        _yearExps.observe(this, entityObserver);
 
-        TextView header = findViewById(R.id.monthView);
+        TextView header = findViewById(R.id.yearView);
         DateFormatSymbols dfs = new DateFormatSymbols();
-        header.setText(dfs.getMonths()[_month-1] + " " + _year);
-        header.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent(getApplicationContext(), YearViewActivity.class);
-                intent.putExtra(YearViewActivity.YEAR_INTENT, _year);
-                startActivity(intent);
-            }
-        });
+        header.setText("" + _year);
 
         FrameLayout budgetContainer = findViewById(R.id.budgetHolder);
         TableLayout budgetTable = new TableLayout(this);
@@ -91,17 +78,17 @@ public class MonthViewActivity extends AppCompatActivity
         ExcelExporter.checkPermissions(this);
     }
 
-    private void monthLoaded(List<ExpenditureEntity> expenditureEntities)
+    private void yearLoaded(List<ExpenditureEntity> expenditureEntities)
     {
-        FrameLayout monthsWeeklyContainer = findViewById(R.id.monthWeeklyHolder);
-        MonthWeeklySummaryTable weeklyTable = new MonthWeeklySummaryTable(this, _month, _year);
-        weeklyTable.setup(expenditureEntities);
-        monthsWeeklyContainer.addView(weeklyTable);
+        FrameLayout monthsWeeklyContainer = findViewById(R.id.yearMonthlyHolder);
+        YearMonthlySummaryTable monthlyTable = new YearMonthlySummaryTable(this, _year);
+        monthlyTable.setup(expenditureEntities);
+        monthsWeeklyContainer.addView(monthlyTable);
 
-        FrameLayout monthsCategoryContainer = findViewById(R.id.monthCategoryHolder);
-        MonthCategorySummaryTable categoryTable = new MonthCategorySummaryTable(this, _month, _year);
+        FrameLayout yearsCategoryContainer = findViewById(R.id.yearCategoryHolder);
+        YearCategorySummaryTable categoryTable = new YearCategorySummaryTable(this, _year);
         categoryTable.setup(expenditureEntities);
-        monthsCategoryContainer.addView(categoryTable);
+        yearsCategoryContainer.addView(categoryTable);
     }
 
     public void onRequestPermissionsResult(int requestCode,
@@ -110,36 +97,18 @@ public class MonthViewActivity extends AppCompatActivity
         ExcelExporter.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    public void previousMonth(View v)
+    public void previousYear(View v)
     {
         Intent intent = new Intent(getApplicationContext(), MonthViewActivity.class);
-        if (_month > 1)
-        {
-            intent.putExtra(MonthViewActivity.MONTH_INTENT, _month - 1);
-            intent.putExtra(MonthViewActivity.YEAR_INTENT, _year);
-        }
-        else
-        {
-            intent.putExtra(MonthViewActivity.MONTH_INTENT, 12);
-            intent.putExtra(MonthViewActivity.YEAR_INTENT, _year - 1);
-        }
+        intent.putExtra(MonthViewActivity.YEAR_INTENT, _year-1);
         startActivity(intent);
         finish();
     }
 
-    public void nextMonth(View v)
+    public void nextYear(View v)
     {
-        Intent intent = new Intent(getApplicationContext(), MonthViewActivity.class);
-        if (_month < 12)
-        {
-            intent.putExtra(MonthViewActivity.MONTH_INTENT, _month + 1);
-            intent.putExtra(MonthViewActivity.YEAR_INTENT, _year);
-        }
-        else
-        {
-            intent.putExtra(MonthViewActivity.MONTH_INTENT, 1);
-            intent.putExtra(MonthViewActivity.YEAR_INTENT, _year + 1);
-        }
+        Intent intent = new Intent(getApplicationContext(), YearViewActivity.class);
+        intent.putExtra(MonthViewActivity.YEAR_INTENT, _year + 1);
         startActivity(intent);
         finish();
     }
@@ -151,7 +120,7 @@ public class MonthViewActivity extends AppCompatActivity
 
         TableRow titleRow = new TableRow(this);
         TableCell titleCell = new TableCell(this, TableCell.TITLE_CELL);
-        titleCell.setText(R.string.budget_title);
+        titleCell.setText(R.string.year_budget_title);
 
         TableRow.LayoutParams params = new TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
@@ -181,7 +150,7 @@ public class MonthViewActivity extends AppCompatActivity
         }
     }
 
-    public void exportMonth(View v)
+    public void exportYear(View v)
     {
         //List<ExpenditureEntity> monthExp = db.expenditureDao().getTimeSpan(_year, _month, 1, maxDays);
         //ExcelExporter.exportMonth(this, _month, _year, monthExp);

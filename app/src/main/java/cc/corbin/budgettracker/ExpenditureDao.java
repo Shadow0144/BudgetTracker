@@ -21,13 +21,19 @@ public interface ExpenditureDao
     List<ExpenditureEntity> getAll();
 
     @Query("SELECT * FROM expenditureentity WHERE year = (:year) AND month = (:month) AND day = (:day)")
-    LiveData<List<ExpenditureEntity>> getDay(int year, int month, int day);
+    List<ExpenditureEntity> getDay(int year, int month, int day);
+
+    @Query("SELECT * FROM expenditureentity WHERE year = (:year) AND month = (:month)")
+    List<ExpenditureEntity> getMonth(int year, int month);
+
+    @Query("SELECT * FROM expenditureentity WHERE year = (:year)")
+    List<ExpenditureEntity> getYear(int year);
 
     @Query("SELECT * FROM expenditureentity WHERE (" +
             "year = (:year) AND " +
             "month = (:month) AND " +
             "day BETWEEN (:sDay) AND (:eDay))")
-    LiveData<List<ExpenditureEntity>> getTimeSpan(int year, int month, int sDay, int eDay);
+    List<ExpenditureEntity> getTimeSpan(int year, int month, int sDay, int eDay);
 
     @Query("SELECT * FROM expenditureentity WHERE (" +
             "(year > (:sYear) AND year < (:eYear)) OR " +
@@ -40,14 +46,14 @@ public interface ExpenditureDao
             "(year = (:sYear) AND year = (:eYear) AND month > (:sMonth) AND month = (:eMonth) AND day <= (:eDay)) OR " +
             "(year = (:sYear) AND year = (:eYear) AND month = (:sMonth) AND month = (:eMonth) AND day >= (:sDay) AND day <= (:eDay)))" +
             ")")
-    LiveData<List<ExpenditureEntity>> getTimeSpan(int sYear, int sMonth, int sDay, int eYear, int eMonth, int eDay);
+    List<ExpenditureEntity> getTimeSpan(int sYear, int sMonth, int sDay, int eYear, int eMonth, int eDay);
 
     @Query("SELECT * FROM expenditureentity WHERE (" +
             "year = (:year) AND " +
             "month = (:month) AND " +
             "day BETWEEN (:sDay) AND (:eDay)) AND " +
             "expenseType = (:category)")
-    LiveData<List<ExpenditureEntity>> getTimeSpan(int year, int month, int sDay, int eDay, String category);
+    List<ExpenditureEntity> getTimeSpan(int year, int month, int sDay, int eDay, String category);
 
     @Query("SELECT * FROM expenditureentity WHERE (" +
             "(" +
@@ -63,16 +69,19 @@ public interface ExpenditureDao
             ") AND " +
             " expenseType = (:category) " +
             ")")
-    LiveData<List<ExpenditureEntity>> getTimeSpan(int sYear, int sMonth, int sDay, int eYear, int eMonth, int eDay, String category);
+    List<ExpenditureEntity> getTimeSpan(int sYear, int sMonth, int sDay, int eYear, int eMonth, int eDay, String category);
 
     @Query("SELECT * FROM expenditureentity WHERE id IN (:expenditureIds)")
-    LiveData<List<ExpenditureEntity>> loadAllByIds(int[] expenditureIds);
+    List<ExpenditureEntity> loadAllByIds(long[] expenditureIds);
 
     @Insert
-    void insertAll(ExpenditureEntity... expenditures);
+    long insert(ExpenditureEntity expenditures);
 
     @Insert
-    void insertAll(List<ExpenditureEntity> expenditures);
+    long[] insertAll(ExpenditureEntity... expenditures);
+
+    @Insert
+    long[] insertAll(List<ExpenditureEntity> expenditures);
 
     @Delete
     void delete(ExpenditureEntity expenditure);

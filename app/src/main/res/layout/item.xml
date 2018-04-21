@@ -8,6 +8,11 @@
     android:padding="10dp"
     android:paddingStart="15dp">
 
+    <Space
+        android:layout_width="5dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0" />
+
     <TextView
         android:id="@+id/negativeView"
         android:layout_width="wrap_content"
@@ -25,12 +30,11 @@
         android:layout_weight="0"
         android:paddingEnd="5dp"
         android:paddingStart="5dp"
-        android:text="$"
         android:textSize="24sp" />
 
     <TextView
         android:id="@+id/costView"
-        android:layout_width="100dp"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_weight="1"
@@ -57,20 +61,5 @@
         android:background="@android:color/transparent"
         android:foreground="@android:drawable/stat_notify_error"
         android:foregroundTint="@color/translucent" />
-
-    <Space
-        android:id="@+id/removeSpacer"
-        android:layout_width="20dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1" />
-
-    <Button
-        android:id="@+id/removeButton"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_gravity="center"
-        android:layout_weight="1"
-        android:background="@android:color/transparent"
-        android:foreground="@android:drawable/ic_delete" />
 
 </android.widget.LinearLayout>

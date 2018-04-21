@@ -20,6 +20,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".MonthViewActivity"></activity>
+        <activity android:name=".YearViewActivity"></activity>
+        <activity android:name=".ExpenditureEditActivity"></activity>
     </application>
 
 </manifest>

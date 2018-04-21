@@ -15,6 +15,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -38,6 +39,14 @@ public class DayViewActivity extends AppCompatActivity
     private final String TAG = "DayViewActivity";
 
     public final static String DATE_INTENT = "Date";
+
+    public final static int CREATE_EXPENDITURE = 0;
+    public final static int EDIT_EXPENDITURE = 1;
+
+    public final static int SUCCEED = 0;
+    public final static int CANCEL = 1;
+    public final static int DELETE = 2;
+    public final static int FAILURE = -1;
 
     private TextView _dateView;
     private ViewPager _pagerView;
@@ -67,7 +76,7 @@ public class DayViewActivity extends AppCompatActivity
         _nextDay = findViewById(R.id.tomorrowButton);
 
         final ExpenditureViewModel viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
-        viewModel.setDatabase(ExpenditureDatabase.getExpenditureDatabase(this));
+        viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
 
         loadCategories();
 
@@ -118,6 +127,23 @@ public class DayViewActivity extends AppCompatActivity
 
             }
         });
+
+        // Set the arrows
+        if (_day == 1)
+        {
+            _previousDay.setText(getString(R.string.pprevious));
+            _nextDay.setText(getString(R.string.next));
+        }
+        else if (_day == _adapter.lastDay())
+        {
+            _previousDay.setText(getString(R.string.previous));
+            _nextDay.setText(getString(R.string.nnext));
+        }
+        else
+        {
+            _previousDay.setText(getString(R.string.previous));
+            _nextDay.setText(getString(R.string.next));
+        }
 
         final Spinner totalCurrencySpinner = findViewById(R.id.totalCurrencySpinner);
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
@@ -212,20 +238,95 @@ public class DayViewActivity extends AppCompatActivity
 
             _dateView.setText(simpleDate.format(_currentDate.getTime()));
 
-            updateTotal();
+            getUpdatedTotal(_day);
         }
         else { }
     }
 
     public void addItem(View v)
     {
-        try
+        Intent intent = new Intent(getApplicationContext(), ExpenditureEditActivity.class);
+        intent.putExtra(ExpenditureEditActivity.YEAR_INTENT, _year);
+        intent.putExtra(ExpenditureEditActivity.MONTH_INTENT, _month);
+        intent.putExtra(ExpenditureEditActivity.DAY_INTENT, _day);
+        intent.putExtra(ExpenditureEditActivity.TYPE_INTENT, CREATE_EXPENDITURE);
+        startActivityForResult(intent, CREATE_EXPENDITURE);
+    }
+
+    public void editItem(int index, ExpenditureEntity exp)
+    {
+        Intent intent = new Intent(getApplicationContext(), ExpenditureEditActivity.class);
+        intent.putExtra(ExpenditureEditActivity.INDEX_INTENT, index);
+        intent.putExtra(ExpenditureEditActivity.EXPENDITURE_INTENT, exp);
+        intent.putExtra(ExpenditureEditActivity.TYPE_INTENT, EDIT_EXPENDITURE);
+        startActivityForResult(intent, EDIT_EXPENDITURE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (resultCode == FAILURE)
         {
-            _adapter.addExpenditure(_pagerView.getCurrentItem());
+            Toast toast = Toast.makeText(this, getString(R.string.failure_expense), Toast.LENGTH_LONG);
+            toast.show();
         }
-        catch (IllegalStateException e)
+        else
         {
-            Log.e(TAG, "Key was not unique");
+            if (requestCode == CREATE_EXPENDITURE)
+            {
+                if (resultCode == SUCCEED)
+                {
+                    ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
+                    if (expenditureEntity.getDay() == _day && expenditureEntity.getMonth() == _month && expenditureEntity.getYear() == _year)
+                    {
+                        _adapter.addExpenditure(_pagerView.getCurrentItem(), expenditureEntity);
+                        getUpdatedTotal(_day);
+                    }
+                    else
+                    {
+                        Toast toast = Toast.makeText(this, getString(R.string.failure_create_expense), Toast.LENGTH_LONG);
+                        toast.show();
+                    }
+                }
+                else { }
+            }
+            else if (requestCode == EDIT_EXPENDITURE)
+            {
+                if (resultCode == SUCCEED)
+                {
+                    ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
+                    int index = data.getIntExtra(ExpenditureEditActivity.INDEX_INTENT, -1);
+                    if (expenditureEntity != null && index != -1
+                            && expenditureEntity.getDay() == _day && expenditureEntity.getMonth() == _month && expenditureEntity.getYear() == _year)
+                    {
+                        _adapter.updateExpenditure(_pagerView.getCurrentItem(), index, expenditureEntity);
+                        getUpdatedTotal(_day);
+                    }
+                    else
+                    {
+                        Toast toast = Toast.makeText(this, getString(R.string.failure_edit_expense), Toast.LENGTH_LONG);
+                        toast.show();
+                    }
+                }
+                else if (resultCode == DELETE) // Delete can only occur from an edit
+                {
+                    ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
+                    int index = data.getIntExtra(ExpenditureEditActivity.INDEX_INTENT, -1);
+                    if (expenditureEntity != null && index != -1
+                            && expenditureEntity.getDay() == _day && expenditureEntity.getMonth() == _month && expenditureEntity.getYear() == _year)
+                    {
+                        _adapter.removeExpenditure(_pagerView.getCurrentItem(), index, expenditureEntity);
+                        getUpdatedTotal(_day);
+                    }
+                    else
+                    {
+                        Toast toast = Toast.makeText(this, getString(R.string.failure_delete_expense), Toast.LENGTH_LONG);
+                        toast.show();
+                    }
+                }
+                else { }
+            }
+            else { }
         }
     }
 
@@ -248,20 +349,26 @@ public class DayViewActivity extends AppCompatActivity
         return _categories;
     }
 
-    public void updateTotal()
+    public void updateTotal(int day, float amount)
     {
-        float total = 0.0f;
-        final TextView totalAmountTextView = findViewById(R.id.totalAmountTextView);
-        final Spinner totalCurrencySpinner = findViewById(R.id.totalCurrencySpinner);
-        List<ExpenditureEntity> expenditureEntities = _adapter.getExpenditures(_day-1);
-        if (expenditureEntities != null)
+        if (day == _day)
         {
-            int count = expenditureEntities.size();
-            for (int i = 0; i < count; i++)
-            {
-                total += expenditureEntities.get(i).getAmount();
-            }
-            String cost = Currencies.formatCurrency(Currencies.integer[totalCurrencySpinner.getSelectedItemPosition()], total);
+            final TextView totalAmountTextView = findViewById(R.id.totalAmountTextView);
+            final Spinner totalCurrencySpinner = findViewById(R.id.totalCurrencySpinner);
+            String cost = Currencies.formatCurrency(Currencies.integer[totalCurrencySpinner.getSelectedItemPosition()], amount);
+            totalAmountTextView.setText(cost);
+        }
+        else { }
+    }
+
+    private void getUpdatedTotal(int day)
+    {
+        if (day == _day)
+        {
+            final TextView totalAmountTextView = findViewById(R.id.totalAmountTextView);
+            final Spinner totalCurrencySpinner = findViewById(R.id.totalCurrencySpinner);
+            float amount = _adapter.getItem(day-1).calculateTotal();
+            String cost = Currencies.formatCurrency(Currencies.integer[totalCurrencySpinner.getSelectedItemPosition()], amount);
             totalAmountTextView.setText(cost);
         }
         else { }

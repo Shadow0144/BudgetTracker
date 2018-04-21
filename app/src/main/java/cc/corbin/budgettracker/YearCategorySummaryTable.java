@@ -15,25 +15,23 @@ import java.util.List;
  * Created by Corbin on 1/29/2018.
  */
 
-public class MonthCategorySummaryTable extends TableLayout
+public class YearCategorySummaryTable extends TableLayout
 {
-    private final String TAG = "MonthCategorySummaryTable";
+    private final String TAG = "YearCategorySummaryTable";
 
     private Context _context;
 
-    private int _month;
     private int _year;
 
-    public MonthCategorySummaryTable(Context context)
+    public YearCategorySummaryTable(Context context)
     {
         super(context);
         _context = context;
 
-        _month = 1;
         _year = 2018;
     }
 
-    public MonthCategorySummaryTable(Context context, AttributeSet attrs)
+    public YearCategorySummaryTable(Context context, AttributeSet attrs)
     {
         super(context, attrs);
         _context = context;
@@ -45,12 +43,10 @@ public class MonthCategorySummaryTable extends TableLayout
 
         try
         {
-            _month = a.getInteger(R.styleable.MonthTable_month, 1);
             _year = a.getInteger(R.styleable.MonthTable_year, 2018);
         }
         catch (Exception e)
         {
-            _month = 1;
             _year = 2018;
         }
         finally
@@ -59,16 +55,15 @@ public class MonthCategorySummaryTable extends TableLayout
         }
     }
 
-    public MonthCategorySummaryTable(Context context, int month, int year)
+    public YearCategorySummaryTable(Context context, int year)
     {
         super(context);
         _context = context;
 
-        _month = month;
         _year = year;
     }
 
-    public void setup(List<ExpenditureEntity> monthExpenditures)
+    public void setup(List<ExpenditureEntity> yearExpenditures)
     {
         boolean integer = Currencies.integer[Currencies.default_currency];
 
@@ -83,7 +78,7 @@ public class MonthCategorySummaryTable extends TableLayout
         // Setup the title
         TableRow titleRow = new TableRow(_context);
         TableCell titleCell = new TableCell(_context, TableCell.TITLE_CELL);
-        titleCell.setText(R.string.month_category_title);
+        titleCell.setText(R.string.year_category_title);
         TableRow.LayoutParams params = new TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.WRAP_CONTENT
@@ -114,14 +109,14 @@ public class MonthCategorySummaryTable extends TableLayout
         addView(headerRow);
 
         float[] budget = new float[categories.length];
-        float monthBudget = 0.0f;
+        float yearBudget = 0.0f;
         for (int i = 0; i < budget.length; i++)
         {
             budget[i] = 0.0f;
-            monthBudget += budget[i];
+            yearBudget += budget[i];
         }
 
-        float monthTotal = 0.0f;
+        float yearTotal = 0.0f;
         for (int i = 0; i < rows; i++) // Add a row for each category
         {
             TableRow categoryRow = new TableRow(_context);
@@ -130,8 +125,8 @@ public class MonthCategorySummaryTable extends TableLayout
             budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
             remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
 
-            float total = getCategoryTotal(monthExpenditures, categories[i]);
-            monthTotal += total;
+            float total = getCategoryTotal(yearExpenditures, categories[i]);
+            yearTotal += total;
 
             categoryCell.setText(categories[i]);
             expenseCell.setText(Currencies.formatCurrency(integer, total));
@@ -153,9 +148,9 @@ public class MonthCategorySummaryTable extends TableLayout
         remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
 
         categoryCell.setText(R.string.total);
-        expenseCell.setText(Currencies.formatCurrency(integer, monthTotal));
-        budgetCell.setText(Currencies.formatCurrency(integer, monthBudget));
-        remainingCell.setText(Currencies.formatCurrency(integer, (monthBudget - monthTotal)));
+        expenseCell.setText(Currencies.formatCurrency(integer, yearTotal));
+        budgetCell.setText(Currencies.formatCurrency(integer, yearBudget));
+        remainingCell.setText(Currencies.formatCurrency(integer, (yearBudget - yearTotal)));
 
         totalRow.addView(categoryCell);
         totalRow.addView(expenseCell);

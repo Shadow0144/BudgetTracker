@@ -4,6 +4,8 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -13,10 +15,10 @@ import java.util.Calendar;
  */
 
 @Entity
-public class ExpenditureEntity
+public class ExpenditureEntity implements Parcelable
 {
     @PrimaryKey(autoGenerate = true)
-    private int id;
+    private long id;
 
     @ColumnInfo
     private int day;
@@ -95,7 +97,7 @@ public class ExpenditureEntity
         checkNullStrings();
     }
 
-    public ExpenditureEntity(int id, int day, int month, int year, int currency, float amount, String expenseType, String note)
+    public ExpenditureEntity(long id, int day, int month, int year, int currency, float amount, String expenseType, String note)
     {
         this.id = id;
         this.day = day;
@@ -108,12 +110,12 @@ public class ExpenditureEntity
         checkNullStrings();
     }
 
-    public int getId()
+    public long getId()
     {
         return id;
     }
 
-    public void setId(int id)
+    public void setId(long id)
     {
         this.id = id;
     }
@@ -217,5 +219,59 @@ public class ExpenditureEntity
         day = currentDate.get(Calendar.DATE);
         month = currentDate.get(Calendar.MONTH)+1;
         year = currentDate.get(Calendar.YEAR);
+    }
+
+    @Ignore
+    public void update(ExpenditureEntity expenditureEntity)
+    {
+        currency = expenditureEntity.currency;
+        amount = expenditureEntity.amount;
+        expenseType = expenditureEntity.expenseType;
+        note = expenditureEntity.note;
+    }
+
+    public static final Parcelable.Creator<ExpenditureEntity> CREATOR = new Parcelable.Creator<ExpenditureEntity>()
+    {
+        public ExpenditureEntity createFromParcel(Parcel in)
+        {
+            return new ExpenditureEntity(in);
+        }
+
+        public ExpenditureEntity[] newArray(int size)
+        {
+            return new ExpenditureEntity[size];
+        }
+    };
+
+    @Override
+    public void writeToParcel(Parcel out, int flags)
+    {
+        out.writeLong(id);
+        out.writeInt(day);
+        out.writeInt(month);
+        out.writeInt(year);
+        out.writeInt(currency);
+        out.writeFloat(amount);
+        out.writeString(expenseType);
+        out.writeString(note);
+    }
+
+    // example constructor that takes a Parcel and gives you an object populated with it's values
+    private ExpenditureEntity(Parcel in)
+    {
+        id = in.readLong();
+        day = in.readInt();
+        month = in.readInt();
+        year = in.readInt();
+        currency = in.readInt();
+        amount = in.readFloat();
+        expenseType = in.readString();
+        note = in.readString();
+    }
+
+    @Override
+    public int describeContents()
+    {
+        return 0;
     }
 }

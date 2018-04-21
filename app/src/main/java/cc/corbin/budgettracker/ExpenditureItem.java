@@ -1,13 +1,21 @@
 package cc.corbin.budgettracker;
 
+import android.app.AlertDialog;
 import android.content.Context;
-import android.content.res.TypedArray;
+import android.content.DialogInterface;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 public class ExpenditureItem extends LinearLayout
 {
-    private ExpenditureEntity _entity;
+    private final String TAG = "ExpenditureItem";
+
+    private ExpenditureEntity _expenditure;
 
     public ExpenditureItem(Context context)
     {
@@ -37,8 +45,50 @@ public class ExpenditureItem extends LinearLayout
         setup(context, entity);
     }
 
-    private void setup(Context context, ExpenditureEntity entity)
+    private void setup(Context context, ExpenditureEntity expenditure)
     {
-        _entity = entity;
+        _expenditure = expenditure;
+
+        LayoutInflater inflater = LayoutInflater.from(context);
+        final View view = inflater.inflate(R.layout.item, null);
+
+        refresh(view);
+
+        addView(view);
+    }
+
+    private void refresh(View view)
+    {
+        final TextView currencyView = view.findViewById(R.id.currencyView);
+        currencyView.setText(Currencies.symbols[_expenditure.getCurrency()]);
+
+        final TextView categoryView = view.findViewById(R.id.categoryView);
+        categoryView.setText(_expenditure.getExpenseType());
+
+        final TextView costView = view.findViewById(R.id.costView);
+        String cost = Currencies.formatCurrency(Currencies.integer[_expenditure.getCurrency()], _expenditure.getAmount());
+        costView.setText(cost);
+
+        final Button noteButton = view.findViewById(R.id.noteButton);
+        final String note = _expenditure.getNote();
+        if (note.length() == 0)
+        {
+            noteButton.setForegroundTintList(getContext().getColorStateList(R.color.translucent));
+        }
+        else
+        {
+            noteButton.setForegroundTintList(getContext().getColorStateList(R.color.black));
+        }
+    }
+
+    public ExpenditureEntity getExpenditure()
+    {
+        return _expenditure;
+    }
+
+    public void updateExpenditure(ExpenditureEntity expenditure)
+    {
+        _expenditure.update(expenditure);
+        refresh(this);
     }
 }
