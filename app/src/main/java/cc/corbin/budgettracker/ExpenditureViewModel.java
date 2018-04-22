@@ -43,10 +43,8 @@ class ExpDatabaseEvent
     private QueryType _queryType;
     private List<ExpenditureEntity> _entities;
 
-    public ExpDatabaseEvent(MutableLiveData<List<ExpenditureEntity>> mutableLiveData,
-                            EventType eventType, int year, int month, int day, ExpenditureEntity entity)
+    public ExpDatabaseEvent(EventType eventType, int year, int month, int day, ExpenditureEntity entity)
     {
-        _mutableLiveData = mutableLiveData;
         _eventType = eventType;
         _year = year;
         _month = month;
@@ -126,26 +124,63 @@ class BudDatabaseEvent
 
     public enum EventType
     {
+        query,
         insert,
         update,
         remove
     };
 
+    public enum QueryType
+    {
+        month,
+        year
+    };
+
+    private MutableLiveData<List<BudgetEntity>> _mutableLiveData;
+
     private int _id;
     private int _year;
     private int _month;
-    private int _day;
     private EventType _eventType;
+    private QueryType _queryType;
     private BudgetEntity _entity;
+    private List<BudgetEntity> _entities;
 
-    public BudDatabaseEvent(EventType eventType, int year, int month, int day, BudgetEntity entity)
+    public BudDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
+                            int year, int month, BudgetEntity entity)
     {
+        _mutableLiveData = mutableLiveData;
         _eventType = eventType;
         _year = year;
         _month = month;
-        _day = day;
         _entity = entity;
         _id = id++;
+    }
+
+    public BudDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
+                            int year, int month, QueryType queryType)
+    {
+        _mutableLiveData = mutableLiveData;
+        _queryType = queryType;
+        _eventType = eventType;
+        _year = year;
+        _month = month;
+        _id = id++;
+    }
+
+    public MutableLiveData<List<BudgetEntity>> getMutableLiveData()
+    {
+        return _mutableLiveData;
+    }
+
+    public void setEntities(List<BudgetEntity> entities)
+    {
+        _entities = entities;
+    }
+
+    public List<BudgetEntity> getEntities()
+    {
+        return _entities;
     }
 
     public BudgetEntity getEntity()
@@ -156,6 +191,11 @@ class BudDatabaseEvent
     public EventType getEventType()
     {
         return _eventType;
+    }
+
+    public QueryType getQueryType()
+    {
+        return _queryType;
     }
 
     public int getId()
@@ -171,11 +211,6 @@ class BudDatabaseEvent
     public int getMonth()
     {
         return _month;
-    }
-
-    public int getDay()
-    {
-        return _day;
     }
 }
 
@@ -285,16 +320,35 @@ class DatabaseThread extends Thread
     {
         switch (event.getEventType())
         {
+            case query:
+                List<BudgetEntity> entities = null;
+                switch (event.getQueryType())
+                {
+                    case month:
+                        entities = _dbB.budgetDao().getMonth(event.getYear(), event.getMonth());
+                        break;
+                    case year:
+                        entities = _dbB.budgetDao().getYear(event.getYear());
+                        break;
+                }
+                event.setEntities(entities);
+                _completedBudEvents.add(event);
+                _handler.post(new ExpenditureRunnable());
+                break;
             case insert:
-                _dbB.budgetDao().insertAll(event.getEntity());
+                long id = _dbB.budgetDao().insert(event.getEntity());
+                event.getEntity().setId(id);
+                _completedBudEvents.add(event);
                 _handler.post(new ExpenditureRunnable());
                 break;
             case update:
                 _dbB.budgetDao().update(event.getEntity());
+                _completedBudEvents.add(event);
                 _handler.post(new ExpenditureRunnable());
                 break;
             case remove:
                 _dbB.budgetDao().delete(event.getEntity());
+                _completedBudEvents.add(event);
                 _handler.post(new ExpenditureRunnable());
                 break;
         }
@@ -388,7 +442,17 @@ public class ExpenditureViewModel extends ViewModel
         while (!_completedExpEvents.isEmpty())
         {
             ExpDatabaseEvent expDatabaseEvent = _completedExpEvents.poll();
-            expDatabaseEvent.getMutableLiveData().postValue(expDatabaseEvent.getEntities());
+            if (expDatabaseEvent.getMutableLiveData() != null)
+            {
+                expDatabaseEvent.getMutableLiveData().postValue(expDatabaseEvent.getEntities());
+            }
+            else { }
+        }
+
+        while (!_completedBudEvents.isEmpty())
+        {
+            BudDatabaseEvent budDatabaseEvent = _completedBudEvents.poll();
+            budDatabaseEvent.getMutableLiveData().postValue(budDatabaseEvent.getEntities());
         }
     }
 
@@ -410,57 +474,45 @@ public class ExpenditureViewModel extends ViewModel
         _expEvents.add(event);
     }
 
-    public void insertExpEntity(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, ExpenditureEntity entity)
+    public void insertExpEntity(ExpenditureEntity entity)
     {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.insert, _year, _month, _day, entity);
+        ExpDatabaseEvent event = new ExpDatabaseEvent(ExpDatabaseEvent.EventType.insert, _year, _month, _day, entity);
         _expEvents.add(event);
     }
 
-    public void insertExpEntities(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, List<ExpenditureEntity> entities)
+    public void updateExpEntity(ExpenditureEntity entity)
     {
-        int size = entities.size();
-        for (int i = 0; i < size; i++)
-        {
-            ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.insert, _year, _month, _day, entities.get(i));
-            _expEvents.add(event);
-        }
-    }
-
-    public void updateExpEntity(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, ExpenditureEntity entity)
-    {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.update, _year, _month, _day, entity);
+        ExpDatabaseEvent event = new ExpDatabaseEvent(ExpDatabaseEvent.EventType.update, _year, _month, _day, entity);
         _expEvents.add(event);
     }
 
-    public void updateExpEntities(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, List<ExpenditureEntity> entities)
+    public void removeExpEntity(ExpenditureEntity entity)
     {
-        int size = entities.size();
-        for (int i = 0; i < size; i++)
-        {
-            ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.update, _year, _month, _day, entities.get(i));
-            _expEvents.add(event);
-        }
-    }
-
-    public void removeExpEntity(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, ExpenditureEntity entity)
-    {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.remove, _year, _month, _day, entity);
+        ExpDatabaseEvent event = new ExpDatabaseEvent(ExpDatabaseEvent.EventType.remove, _year, _month, _day, entity);
         _expEvents.add(event);
     }
 
-    public void insertBudgetEntity(BudgetEntity budgetEntity)
+    public void getMonthBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData)
     {
-        BudDatabaseEvent event = new BudDatabaseEvent(BudDatabaseEvent.EventType.insert, _year, _month, _day, budgetEntity);
+        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.query, _year, _month, BudDatabaseEvent.QueryType.month);
         _budEvents.add(event);
     }
 
-    public void insertBudgetEntities(List<BudgetEntity> budgetEntities)
+    public void insertBudgetEntity(MutableLiveData<List<BudgetEntity>> mutableLiveData, BudgetEntity budgetEntity)
     {
-        int size = budgetEntities.size();
-        for (int i = 0; i < size; i++)
-        {
-            BudDatabaseEvent event = new BudDatabaseEvent(BudDatabaseEvent.EventType.insert, _year, _month, _day, budgetEntities.get(i));
-            _budEvents.add(event);
-        }
+        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.insert, _year, _month, budgetEntity);
+        _budEvents.add(event);
+    }
+
+    public void updateBudgetEntity(MutableLiveData<List<BudgetEntity>> mutableLiveData, BudgetEntity budgetEntity)
+    {
+        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.update, _year, _month, budgetEntity);
+        _budEvents.add(event);
+    }
+
+    public void removeBudgetEntity(MutableLiveData<List<BudgetEntity>> mutableLiveData, BudgetEntity budgetEntity)
+    {
+        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.remove, _year, _month, budgetEntity);
+        _budEvents.add(event);
     }
 }

@@ -32,7 +32,7 @@
 
     <TextView
         android:id="@+id/costView"
-        android:layout_width="125dp"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_weight="1"
@@ -45,7 +45,7 @@
 
     <TextView
         android:id="@+id/categoryView"
-        android:layout_width="150dp"
+        android:layout_width="170dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_weight="1"

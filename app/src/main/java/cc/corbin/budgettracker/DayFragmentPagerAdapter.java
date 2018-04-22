@@ -54,7 +54,7 @@ public class DayFragmentPagerAdapter extends FragmentPagerAdapter
         return _count;
     }
 
-    public void addExpenditure(int index, ExpenditureEntity expenditureEntity)
+    /*public void addExpenditure(int index, ExpenditureEntity expenditureEntity)
     {
         _fragments.get(index).addExpenditure(expenditureEntity);
     }
@@ -68,12 +68,12 @@ public class DayFragmentPagerAdapter extends FragmentPagerAdapter
     public void removeExpenditure(int index, int id, ExpenditureEntity expenditureEntity)
     {
         _fragments.get(index).deleteExpenditure(id, expenditureEntity);
-    }
+    }*/
 
-    public void updateExpenditureDatabase(int index)
+    /*public void updateExpenditureDatabase(int index)
     {
         _fragments.get(index).updateExpenditureDatabase();
-    }
+    }*/
 
     @Override
     public DayFragment getItem(int position)

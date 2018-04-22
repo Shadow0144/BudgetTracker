@@ -37,6 +37,8 @@ public class MonthViewActivity extends AppCompatActivity
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _monthExps;
 
+    private MutableLiveData<List<BudgetEntity>> _budgets;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -65,9 +67,26 @@ public class MonthViewActivity extends AppCompatActivity
             }
         };
 
+        final Observer<List<BudgetEntity>> budgetObserver = new Observer<List<BudgetEntity>>()
+        {
+            @Override
+            public void onChanged(@Nullable List<BudgetEntity> budgetEntities)
+            {
+                if (budgetEntities != null)
+                {
+                    budgetLoaded(budgetEntities);
+                }
+                else { }
+            }
+        };
+
         _monthExps = new MutableLiveData<List<ExpenditureEntity>>();
         _viewModel.getMonth(_monthExps);
         _monthExps.observe(this, entityObserver);
+
+        _budgets = new MutableLiveData<List<BudgetEntity>>();
+        _viewModel.getMonthBudget(_budgets);
+        _budgets.observe(this, budgetObserver);
 
         TextView header = findViewById(R.id.monthView);
         DateFormatSymbols dfs = new DateFormatSymbols();
@@ -102,6 +121,36 @@ public class MonthViewActivity extends AppCompatActivity
         MonthCategorySummaryTable categoryTable = new MonthCategorySummaryTable(this, _month, _year);
         categoryTable.setup(expenditureEntities);
         monthsCategoryContainer.addView(categoryTable);
+    }
+
+    private void budgetLoaded(List<BudgetEntity> budgetEntities)
+    {
+        FrameLayout budgetContainer = findViewById(R.id.budgetHolder);
+        String[] categories = DayViewActivity.getCategories();
+        int sizeCat = categories.length;
+        int size = budgetEntities.size();
+        for (int i = 0; i < size; i++)
+        {
+            BudgetEntity entity = budgetEntities.get(i);
+            String category = entity.getExpenseType();
+            Log.e(TAG, "Item #:" + i + " Category: " + category);
+            for (int j = 0; j < sizeCat; j++)
+            {
+                if (category.equals(categories[j]))
+                {
+                    TextView view = budgetContainer.findViewById(j);
+                    view.setText("" + entity.getAmount());
+                    break;
+                }
+                else { }
+            }
+        }
+    }
+
+    private void addBudget()
+    {
+        BudgetEntity entity = new BudgetEntity(_month, _year, Currencies.default_currency, 30, DayViewActivity.getCategories()[0]);
+        _viewModel.insertBudgetEntity(_budgets, entity);
     }
 
     public void onRequestPermissionsResult(int requestCode,
@@ -173,6 +222,15 @@ public class MonthViewActivity extends AppCompatActivity
 
             headerCell.setText(categories[i]);
             contentCell.setText("0");
+            contentCell.setId(i);
+            contentCell.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    addBudget();
+                }
+            });
 
             tableRow.addView(headerCell);
             tableRow.addView(contentCell);

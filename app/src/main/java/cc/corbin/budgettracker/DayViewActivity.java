@@ -61,6 +61,8 @@ public class DayViewActivity extends AppCompatActivity
     private int _month;
     private int _day;
 
+    private ExpenditureViewModel _viewModel;
+
     private static String[] _categories;
 
     @Override
@@ -75,8 +77,8 @@ public class DayViewActivity extends AppCompatActivity
         _previousDay = findViewById(R.id.yesterdayButton);
         _nextDay = findViewById(R.id.tomorrowButton);
 
-        final ExpenditureViewModel viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
-        viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
+        _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
+        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
 
         loadCategories();
 
@@ -163,12 +165,12 @@ public class DayViewActivity extends AppCompatActivity
     {
         super.onPause();
 
-        _adapter.updateExpenditureDatabase(_pagerView.getCurrentItem());
+        //_adapter.updateExpenditureDatabase(_pagerView.getCurrentItem());
     }
 
     public void previousDay(View v)
     {
-        _adapter.updateExpenditureDatabase(_pagerView.getCurrentItem());
+        //_adapter.updateExpenditureDatabase(_pagerView.getCurrentItem());
         _day--;
 
         if (_day == 0)
@@ -190,7 +192,7 @@ public class DayViewActivity extends AppCompatActivity
 
     public void nextDay(View v)
     {
-        _adapter.updateExpenditureDatabase(_pagerView.getCurrentItem());
+        //_adapter.updateExpenditureDatabase(_pagerView.getCurrentItem());
         _day++;
 
         if (_day == (_adapter.lastDay()+1))
@@ -277,16 +279,8 @@ public class DayViewActivity extends AppCompatActivity
                 if (resultCode == SUCCEED)
                 {
                     ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
-                    if (expenditureEntity.getDay() == _day && expenditureEntity.getMonth() == _month && expenditureEntity.getYear() == _year)
-                    {
-                        _adapter.addExpenditure(_pagerView.getCurrentItem(), expenditureEntity);
-                        getUpdatedTotal(_day);
-                    }
-                    else
-                    {
-                        Toast toast = Toast.makeText(this, getString(R.string.failure_create_expense), Toast.LENGTH_LONG);
-                        toast.show();
-                    }
+                    _viewModel.insertExpEntity(expenditureEntity);
+                    _adapter.getItem(_pagerView.getCurrentItem()).refreshView();
                 }
                 else { }
             }
@@ -295,34 +289,14 @@ public class DayViewActivity extends AppCompatActivity
                 if (resultCode == SUCCEED)
                 {
                     ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
-                    int index = data.getIntExtra(ExpenditureEditActivity.INDEX_INTENT, -1);
-                    if (expenditureEntity != null && index != -1
-                            && expenditureEntity.getDay() == _day && expenditureEntity.getMonth() == _month && expenditureEntity.getYear() == _year)
-                    {
-                        _adapter.updateExpenditure(_pagerView.getCurrentItem(), index, expenditureEntity);
-                        getUpdatedTotal(_day);
-                    }
-                    else
-                    {
-                        Toast toast = Toast.makeText(this, getString(R.string.failure_edit_expense), Toast.LENGTH_LONG);
-                        toast.show();
-                    }
+                    _viewModel.updateExpEntity(expenditureEntity);
+                    _adapter.getItem(_pagerView.getCurrentItem()).refreshView();
                 }
                 else if (resultCode == DELETE) // Delete can only occur from an edit
                 {
                     ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
-                    int index = data.getIntExtra(ExpenditureEditActivity.INDEX_INTENT, -1);
-                    if (expenditureEntity != null && index != -1
-                            && expenditureEntity.getDay() == _day && expenditureEntity.getMonth() == _month && expenditureEntity.getYear() == _year)
-                    {
-                        _adapter.removeExpenditure(_pagerView.getCurrentItem(), index, expenditureEntity);
-                        getUpdatedTotal(_day);
-                    }
-                    else
-                    {
-                        Toast toast = Toast.makeText(this, getString(R.string.failure_delete_expense), Toast.LENGTH_LONG);
-                        toast.show();
-                    }
+                    _viewModel.removeExpEntity(expenditureEntity);
+                    _adapter.getItem(_pagerView.getCurrentItem()).refreshView();
                 }
                 else { }
             }

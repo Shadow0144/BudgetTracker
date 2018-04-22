@@ -210,8 +210,6 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
         int sDay = ((weekNum-1)*7)+1; // 1, 8, 15, 22, 29
         int eDay = Math.min((weekNum*7), maxDays); // 7, 14, 21, 28, 28/29/30/31
 
-        Log.e(TAG, sDay + " " + eDay);
-
         float total = 0.0f;
         if (eDay >= sDay)
         {

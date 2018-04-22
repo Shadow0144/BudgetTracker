@@ -16,7 +16,7 @@ import java.util.Calendar;
 public class BudgetEntity
 {
     @PrimaryKey(autoGenerate = true)
-    private int id;
+    private long id;
 
     @ColumnInfo
     private int month;
@@ -55,7 +55,7 @@ public class BudgetEntity
         this.expenseType = expenseType;
     }
 
-    public BudgetEntity(int id, int month, int year, int currency, float amount, String expenseType)
+    public BudgetEntity(long id, int month, int year, int currency, float amount, String expenseType)
     {
         this.id = id;
         this.month = month;
@@ -65,12 +65,12 @@ public class BudgetEntity
         this.expenseType = expenseType;
     }
 
-    public int getId()
+    public long getId()
     {
         return id;
     }
 
-    public void setId(int id)
+    public void setId(long id)
     {
         this.id = id;
     }

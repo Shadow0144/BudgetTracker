@@ -20,38 +20,60 @@ public interface BudgetDao
     @Query("SELECT * FROM budgetentity")
     List<BudgetEntity> getAll();
 
+    @Query("SELECT * FROM budgetentity " +
+            "WHERE year = (:year) AND month = (:month)") /// TODO Fix
+    List<BudgetEntity> getMonth(int year, int month);
+
     @Query("SELECT * FROM budgetentity WHERE year = (:year) AND month = (:month)")
-    LiveData<List<BudgetEntity>> getMonth(int year, int month);
+    List<BudgetEntity> getOnlyMonth(int year, int month);
 
     @Query("SELECT * FROM budgetentity WHERE year = (:year) AND month = (:month) AND expenseType = (:category)")
-    LiveData<List<BudgetEntity>> getMonth(int year, int month, String category);
+    List<BudgetEntity> getMonth(int year, int month, String category);  /// TODO Fix
+
+    @Query("SELECT * FROM budgetentity WHERE year = (:year) AND month = (:month) AND expenseType = (:category)")
+    List<BudgetEntity> getOnlyMonth(int year, int month, String category);
+
+    @Query("SELECT * FROM budgetentity WHERE year = (:year)")  /// TODO Fix
+    List<BudgetEntity> getYear(int year);
+
+    @Query("SELECT * FROM budgetentity WHERE year = (:year)")
+    List<BudgetEntity> getOnlyYear(int year);
+
+    @Query("SELECT * FROM budgetentity WHERE year = (:year) AND expenseType = (:category)")  /// TODO Fix
+    List<BudgetEntity> getYear(int year, String category);
+
+    @Query("SELECT * FROM budgetentity WHERE year = (:year) AND expenseType = (:category)")
+    List<BudgetEntity> getOnlyYear(int year, String category);
 
     @Query("SELECT * FROM budgetentity WHERE ( " +
             "year = (:year) AND " +
             "month BETWEEN (:sMonth) AND (:eMonth)" +
             " )")
-    LiveData<List<BudgetEntity>> getTimeSpan(int year, int sMonth, int eMonth);
+    List<BudgetEntity> getTimeSpan(int year, int sMonth, int eMonth);
 
     @Query("SELECT * FROM budgetentity WHERE ( " +
             "year = (:year) AND " +
             "month BETWEEN (:sMonth) AND (:eMonth) AND " +
             "expenseType = (:category)" +
             " )")
-    LiveData<List<BudgetEntity>> getTimeSpan(int year, int sMonth, int eMonth, String category);
+    List<BudgetEntity> getTimeSpan(int year, int sMonth, int eMonth, String category);
 
     @Query("SELECT * FROM budgetentity WHERE ( " +
             "expenseType = (:category)" +
             " )")
-    LiveData<List<BudgetEntity>> getCategory(String category);
+    List<BudgetEntity> getCategory(String category);
 
     @Query("SELECT * FROM budgetentity WHERE id IN (:budgetsIds)")
-    LiveData<List<BudgetEntity>> loadAllByIds(int[] budgetsIds);
+    List<BudgetEntity> loadAllByIds(int[] budgetsIds);
 
     @Insert
-    void insertAll(BudgetEntity... budgets);
+    long insert(BudgetEntity budget);
 
     @Insert
-    void insertAll(List<BudgetEntity> budgets);
+    long[] insertAll(BudgetEntity... budgets);
+
+    @Insert
+    long[] insertAll(List<BudgetEntity> budgets);
 
     @Delete
     void delete(BudgetEntity budget);

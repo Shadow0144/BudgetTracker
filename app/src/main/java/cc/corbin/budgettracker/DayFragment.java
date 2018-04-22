@@ -84,6 +84,24 @@ public class DayFragment extends Fragment
         return v;
     }
 
+    public void refreshView()
+    {
+        FrameLayout containerFrame = getActivity().findViewById(R.id.dayFrame);
+        if (containerFrame != null) // While refreshing, remove everything and replace it with a loading bar
+        {
+            ConstraintLayout rootLayout = ((ConstraintLayout) containerFrame.getParent());
+            rootLayout.removeView(containerFrame);
+
+            LayoutInflater inflater = getLayoutInflater();
+            View progressFrame = inflater.inflate(R.layout.progress_frame, rootLayout, false);
+            rootLayout.addView(progressFrame);
+        }
+        else { }
+
+        _viewModel.setDate(_year, _month, _day);
+        _viewModel.getDay(_entities);
+    }
+
     public void onLoadExpenses(@Nullable List<ExpenditureEntity> expenditureEntities)
     {
         if (expenditureEntities != null)
@@ -124,16 +142,16 @@ public class DayFragment extends Fragment
         super.onPause();
     }
 
-    public void updateExpenditureDatabase()
+    /*public void updateExpenditureDatabase()
     {
         if (_expenditureEntities != null)
         {
-            _viewModel.updateExpEntities(_entities, _expenditureEntities);
+            _viewModel.updateExpEntities(_expenditureEntities);
         }
         else { }
-    }
+    }*/
 
-    public void addExpenditure(ExpenditureEntity exp)
+    /*public void addExpenditure(ExpenditureEntity exp)
     {
         _viewModel.insertExpEntity(_entities, exp);
         _expenditureEntities.add(exp);
@@ -157,7 +175,7 @@ public class DayFragment extends Fragment
         _expenditureEntities.remove(index);
         _viewModel.removeExpEntity(_entities, exp);
         resetIndices();
-    }
+    }*/
 
     private void setUpExpenditures()
     {
