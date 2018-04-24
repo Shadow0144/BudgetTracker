@@ -28,6 +28,7 @@ public class TableCell extends AppCompatTextView
     public final static int TITLE_CELL = 2;
     public final static int TOTAL_CELL = 3;
     public final static int GRAND_TOTAL_CELL = 4;
+    public final static int SPECIAL_CELL = 5;
 
     private final int BUFFER = 20;
 
@@ -91,7 +92,7 @@ public class TableCell extends AppCompatTextView
         setup(context, cellType);
     }
 
-    private void setup(Context context, int cellType)
+    public void setup(Context context, int cellType)
     {
         setGravity(Gravity.CENTER);
         setPadding(BUFFER, BUFFER, BUFFER, BUFFER);
@@ -122,10 +123,16 @@ public class TableCell extends AppCompatTextView
                 setTypeface(null, Typeface.BOLD);
                 setTextColor(context.getColor(R.color.blue));
                 break;
+            case SPECIAL_CELL: // Special
+                setBackground(context.getDrawable(R.drawable.special_cell_shape));
+                setTypeface(null, Typeface.BOLD);
+                setTextColor(context.getColor(R.color.black));
+                break;
             default:
                 setBackground(context.getDrawable(R.drawable.cell_shape));
                 setTextColor(context.getColor(R.color.black));
                 break;
         }
+        invalidate();
     }
 }

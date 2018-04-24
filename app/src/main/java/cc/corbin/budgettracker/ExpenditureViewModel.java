@@ -4,6 +4,8 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.os.Handler;
 import android.util.Log;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -325,7 +327,61 @@ class DatabaseThread extends Thread
                 switch (event.getQueryType())
                 {
                     case month:
-                        entities = _dbB.budgetDao().getMonth(event.getYear(), event.getMonth());
+                        entities = new ArrayList<BudgetEntity>();
+                        String[] categories = DayViewActivity.getCategories();
+                        for (int i = 0; i < categories.length; i++)
+                        {
+                            List<BudgetEntity> catEntities = _dbB.budgetDao().getCategoryBeforeMonth(event.getYear(), event.getMonth(), categories[i]);
+                            if (catEntities.size() == 0)
+                            {
+                                BudgetEntity newEntity = new BudgetEntity();
+                                newEntity.setExpenseType(categories[i]);
+                                newEntity.setCurrency(Currencies.default_currency);
+                                entities.add(newEntity);
+                            }
+                            else
+                            {
+                                BudgetEntity maxEntity = catEntities.get(0);
+                                int maxYear = maxEntity.getYear();
+                                int maxMonth = maxEntity.getMonth();
+                                int size = catEntities.size();
+                                for (int j = 1; j < size; j++)
+                                {
+                                    BudgetEntity catEntity = catEntities.get(i);
+                                    if (catEntity.getYear() > maxYear)
+                                    {
+                                        maxMonth = catEntity.getMonth();
+                                        maxYear = catEntity.getYear();
+                                        maxEntity = catEntity;
+                                    }
+                                    else if (catEntity.getYear() == maxYear)
+                                    {
+                                        if (catEntity.getMonth() > maxMonth)
+                                        {
+                                            maxMonth = catEntity.getMonth();
+                                            maxEntity = catEntity;
+                                        }
+                                        else { }
+                                    }
+                                    else { }
+                                }
+                                entities.add(maxEntity);
+                            }
+                            /*List<BudgetEntity> entity = _dbB.budgetDao().getMonth(event.getYear(), event.getMonth(), categories[i]);
+                            Log.e(TAG, entity.get(0).getExpenseType());
+                            if (entity.size() == 1)
+                            {
+                                entities.add(entity.get(0));
+                            }
+                            else
+                            {
+                                BudgetEntity newEntity = new BudgetEntity();
+                                newEntity.setExpenseType(categories[i]);
+                                newEntity.setCurrency(Currencies.default_currency);
+                                entities.add(newEntity);
+                            }*/
+                        }
+                        event.setEntities(entities);
                         break;
                     case year:
                         entities = _dbB.budgetDao().getYear(event.getYear());
@@ -452,7 +508,11 @@ public class ExpenditureViewModel extends ViewModel
         while (!_completedBudEvents.isEmpty())
         {
             BudDatabaseEvent budDatabaseEvent = _completedBudEvents.poll();
-            budDatabaseEvent.getMutableLiveData().postValue(budDatabaseEvent.getEntities());
+            if (budDatabaseEvent.getMutableLiveData() != null)
+            {
+                budDatabaseEvent.getMutableLiveData().postValue(budDatabaseEvent.getEntities());
+            }
+            else { }
         }
     }
 

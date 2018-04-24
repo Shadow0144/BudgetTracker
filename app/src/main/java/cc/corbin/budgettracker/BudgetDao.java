@@ -21,14 +21,20 @@ public interface BudgetDao
     List<BudgetEntity> getAll();
 
     @Query("SELECT * FROM budgetentity " +
-            "WHERE year = (:year) AND month = (:month)") /// TODO Fix
+            "WHERE year < (:year) OR (year = (:year) AND month <= (:month))") /// TODO Fix
     List<BudgetEntity> getMonth(int year, int month);
 
     @Query("SELECT * FROM budgetentity WHERE year = (:year) AND month = (:month)")
     List<BudgetEntity> getOnlyMonth(int year, int month);
 
-    @Query("SELECT * FROM budgetentity WHERE year = (:year) AND month = (:month) AND expenseType = (:category)")
-    List<BudgetEntity> getMonth(int year, int month, String category);  /// TODO Fix
+    @Query("SELECT * FROM budgetentity WHERE " +
+            "year = (SELECT MAX(year) FROM " +
+            "(SELECT * FROM budgetentity WHERE " +
+            "(((year < (:year)) OR (year = (:year) AND month <= (:month))) AND expenseType = (:category))" +
+            ")) " +
+            "ORDER BY month DESC " +
+            "LIMIT 1")
+    List<BudgetEntity> getMonth(int year, int month, String category); // TODO BROKEN!
 
     @Query("SELECT * FROM budgetentity WHERE year = (:year) AND month = (:month) AND expenseType = (:category)")
     List<BudgetEntity> getOnlyMonth(int year, int month, String category);
@@ -57,6 +63,12 @@ public interface BudgetDao
             "expenseType = (:category)" +
             " )")
     List<BudgetEntity> getTimeSpan(int year, int sMonth, int eMonth, String category);
+
+    @Query("SELECT * FROM budgetentity WHERE ( " +
+            "expenseType = (:category) " +
+            "AND (year < (:year) OR (year = (:year) AND month <= (:month))) AND month != 0" +
+            " )")
+    List<BudgetEntity> getCategoryBeforeMonth(int year, int month, String category);
 
     @Query("SELECT * FROM budgetentity WHERE ( " +
             "expenseType = (:category)" +

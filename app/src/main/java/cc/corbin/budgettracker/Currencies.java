@@ -46,8 +46,28 @@ public final class Currencies
         }
         else
         {
-            DecimalFormat formatter = new DecimalFormat("###,###,###,###.00");
+            DecimalFormat formatter = new DecimalFormat("###,###,###,##0.00");
             cost = formatter.format(amount);
+        }
+
+        return cost;
+    }
+
+    public static String formatCurrency(int currency, float amount)
+    {
+        String cost;
+
+        boolean decimal = !integer[currency];
+
+        if (!decimal)
+        {
+            DecimalFormat formatter = new DecimalFormat("###,###,###,###");
+            cost = symbols[currency] + formatter.format(amount);
+        }
+        else
+        {
+            DecimalFormat formatter = new DecimalFormat("###,###,###,##0.00");
+            cost = symbols[currency] + formatter.format(amount);
         }
 
         return cost;

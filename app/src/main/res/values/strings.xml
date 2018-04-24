@@ -32,4 +32,6 @@
     <string name="year_monthly_title">Expenditures by Year</string>
     <string name="year_category_title">Expenditures by Category</string>
     <string name="year_budget_title">Yearly Budget Limits</string>
+    <string name="budget_as_of">As of&#160;</string>
+    <string name="budget_unset">No budget set</string>
 </resources>
