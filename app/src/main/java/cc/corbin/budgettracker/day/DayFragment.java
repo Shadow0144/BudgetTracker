@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +35,7 @@ public class DayFragment extends Fragment
     private ExpenditureViewModel _viewModel;
 
     private DayFragmentPagerAdapter _parent;
+    private View _view;
 
     private int _year;
     private int _month;
@@ -52,12 +54,11 @@ public class DayFragment extends Fragment
                              Bundle savedInstanceState)
     {
         // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_day, container, false);
+         _view = inflater.inflate(R.layout.fragment_day, container, false);
 
         _viewModel = ViewModelProviders.of(getActivity()).get(ExpenditureViewModel.class);
         _viewModel.setDate(_year, _month, _day);
         _entities = new MutableLiveData<List<ExpenditureEntity>>();
-        _viewModel.getDay(_entities);
 
         final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
         {
@@ -71,12 +72,14 @@ public class DayFragment extends Fragment
 
         _entities.observe(this, entityObserver);
 
-        return v;
+        _viewModel.getDay(_entities);
+
+        return _view;
     }
 
     public void refreshView()
     {
-        FrameLayout containerFrame = getActivity().findViewById(R.id.dayFrame);
+        FrameLayout containerFrame = _view.findViewById(R.id.dayFrame);
         if (containerFrame != null) // While refreshing, remove everything and replace it with a loading bar
         {
             ConstraintLayout rootLayout = ((ConstraintLayout) containerFrame.getParent());
@@ -100,10 +103,10 @@ public class DayFragment extends Fragment
 
             ConstraintLayout rootLayout;
 
-            FrameLayout containerFrame = getActivity().findViewById(R.id.progressFrame);
+            FrameLayout containerFrame = _view.findViewById(R.id.progressFrame);
             if (containerFrame == null)
             {
-                containerFrame = getActivity().findViewById(R.id.dayFrame);
+                containerFrame = _view.findViewById(R.id.dayFrame);
             }
             else { }
             rootLayout = ((ConstraintLayout) containerFrame.getParent());
@@ -116,6 +119,8 @@ public class DayFragment extends Fragment
             _itemsContainer = dayView.findViewById(R.id.itemsContainer);
 
             setUpExpenditures();
+
+            unlock();
         }
         else { }
     }
@@ -175,10 +180,12 @@ public class DayFragment extends Fragment
     public void lock()
     {
         _itemsContainer.setEnabled(false);
+        _view.findViewById(R.id.newProgressFrame).setVisibility(View.VISIBLE);
     }
 
     public void unlock()
     {
         _itemsContainer.setEnabled(true);
+        _view.findViewById(R.id.newProgressFrame).setVisibility(View.GONE);
     }
 }

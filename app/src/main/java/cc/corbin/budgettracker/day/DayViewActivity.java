@@ -239,8 +239,9 @@ public class DayViewActivity extends AppCompatActivity
         _currentDate = Calendar.getInstance();
         _currentDate.set(_year, _month - 1, _day);
         SimpleDateFormat simpleDate = new SimpleDateFormat("dd/MM/yyyy");
-
         _dateView.setText(simpleDate.format(_currentDate.getTime()));
+
+        _viewModel.setDate(_year, _month, _day);
 
         getUpdatedTotal(_day);
     }
@@ -299,6 +300,12 @@ public class DayViewActivity extends AppCompatActivity
                 else { }
             }
             else { }
+
+            if (resultCode == CANCEL)
+            {
+                unlockAll();
+            }
+            else { }
         }
     }
 
@@ -310,6 +317,12 @@ public class DayViewActivity extends AppCompatActivity
     }
 
     private void unlock()
+    {
+        _previousDay.setEnabled(true);
+        _nextDay.setEnabled(true);
+    }
+
+    private void unlockAll()
     {
         _previousDay.setEnabled(true);
         _nextDay.setEnabled(true);
