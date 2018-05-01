@@ -89,6 +89,9 @@ public class DatabaseThread extends Thread
                     case year:
                         entities = _dbE.expenditureDao().getYear(event.getYear());
                         break;
+                    case total:
+                        entities = _dbE.expenditureDao().getAll();
+                        break;
                 }
                 event.setEntities(entities);
                 _completedExpEvents.add(event);

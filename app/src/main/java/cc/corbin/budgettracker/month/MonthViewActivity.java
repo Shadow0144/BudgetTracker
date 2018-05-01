@@ -21,6 +21,7 @@ import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.List;
 
+import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.R;
@@ -196,6 +197,19 @@ public class MonthViewActivity extends AppCompatActivity
         final TextView categoryTextView = budgetEditView.findViewById(R.id.categoryTextView);
         categoryTextView.setText(entity.getExpenseType() + ": ");
 
+        final TextView currencyTextView = budgetEditView.findViewById(R.id.currencyTextView);
+        currencyTextView.setText(Currencies.symbols[Currencies.default_currency]);
+
+        final EditText budgetEditText = budgetEditView.findViewById(R.id.amountEditText);
+        if (Currencies.integer[Currencies.default_currency])
+        {
+            budgetEditText.setHint("0");
+        }
+        else
+        {
+            budgetEditText.setHint("0.00");
+        }
+
         if (entity.getMonth() == _month && entity.getYear() == _year) // If the ID is not 0
         {
             final Button removeButton = budgetEditView.findViewById(R.id.removeButton);
@@ -213,8 +227,16 @@ public class MonthViewActivity extends AppCompatActivity
     {
         BudgetEntity entity = _budgets.getValue().get(_budgetId);
 
-        final EditText amountTextEdit = _popupWindow.getContentView().findViewById(R.id.amountText);
-        float amount = Float.parseFloat(amountTextEdit.getText().toString());
+        final EditText amountTextEdit = _popupWindow.getContentView().findViewById(R.id.amountEditText);
+        float amount = 0.0f;
+        try
+        {
+            amount = Float.parseFloat(amountTextEdit.getText().toString());
+        }
+        catch (Exception e)
+        {
+            Log.e(TAG, "Empty amount");
+        }
         entity.setAmount(amount);
 
         if (entity.getMonth() == _month && entity.getYear() == _year) // Edit

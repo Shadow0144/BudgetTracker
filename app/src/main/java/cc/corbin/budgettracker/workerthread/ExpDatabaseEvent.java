@@ -24,7 +24,8 @@ public class ExpDatabaseEvent
     {
         day,
         month,
-        year
+        year,
+        total
     }
 
     private MutableLiveData<List<ExpenditureEntity>> _mutableLiveData;

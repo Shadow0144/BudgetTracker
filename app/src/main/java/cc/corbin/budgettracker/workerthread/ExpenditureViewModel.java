@@ -126,6 +126,13 @@ public class ExpenditureViewModel extends ViewModel
         _expEvents.add(event);
     }
 
+    public void getTotal(MutableLiveData<List<ExpenditureEntity>> mutableLiveData)
+    {
+        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.query, _year, _month, _day, ExpDatabaseEvent.QueryType.total);
+        _expEvents.add(event);
+
+    }
+
     public void insertExpEntity(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, ExpenditureEntity entity)
     {
         ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.insert, _year, _month, _day, entity);
