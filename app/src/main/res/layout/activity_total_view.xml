@@ -16,34 +16,18 @@
             android:background="@color/colorPrimaryDark"
             android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/previousYearButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="previousYear"
-                android:text="@string/previous" />
-
             <TextView
-                android:id="@+id/yearView"
+                android:id="@+id/totalView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
                 android:layout_weight="2"
                 android:gravity="center"
-                android:text="TextView"
+                android:text="Total"
                 android:textAlignment="center"
                 android:textColor="@android:color/background_light"
                 android:textSize="24sp"
                 android:textStyle="normal|bold" />
-
-            <Button
-                android:id="@+id/nextYearButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="nextYear"
-                android:text="@string/next" />
 
         </LinearLayout>
 
@@ -52,7 +36,7 @@
             android:layout_height="match_parent">
 
             <LinearLayout
-                android:id="@+id/yearsLayout"
+                android:id="@+id/totalsLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
@@ -63,7 +47,7 @@
                     android:layout_weight="0" />
 
                 <FrameLayout
-                    android:id="@+id/yearMonthlyHolder"
+                    android:id="@+id/totalYearlyHolder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0">
@@ -76,7 +60,7 @@
                     android:layout_weight="0" />
 
                 <FrameLayout
-                    android:id="@+id/yearCategoryHolder"
+                    android:id="@+id/totalCategoryHolder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0">
@@ -89,7 +73,7 @@
                     android:layout_weight="0" />
 
                 <FrameLayout
-                    android:id="@+id/yearBudgetHolder"
+                    android:id="@+id/totalBudgetHolder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0">
@@ -102,15 +86,16 @@
                     android:layout_weight="0" />
 
                 <Button
-                    android:id="@+id/exportYearButton"
+                    android:id="@+id/exportTotalButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
                     android:onClick="exportYear"
-                    android:text="Export Year" />
+                    android:text="Export Total" />
 
             </LinearLayout>
         </ScrollView>
+
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

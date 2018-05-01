@@ -4,108 +4,114 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/monthLayout"
+            android:id="@+id/dateLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:id="@+id/dateLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:background="@color/colorPrimaryDark"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/previousMonthButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="previousMonth"
-                    android:text="@string/previous" />
-
-                <TextView
-                    android:id="@+id/monthView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:layout_weight="2"
-                    android:gravity="center"
-                    android:text="TextView"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/background_light"
-                    android:textSize="24sp"
-                    android:textStyle="normal|bold" />
-
-                <Button
-                    android:id="@+id/nextMonthButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="nextMonth"
-                    android:text="@string/next" />
-
-            </LinearLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="15dp"
-                android:layout_weight="0" />
-
-            <FrameLayout
-                android:id="@+id/monthWeeklyHolder"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0">
-
-            </FrameLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="15dp"
-                android:layout_weight="0" />
-
-            <FrameLayout
-                android:id="@+id/monthCategoryHolder"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0">
-
-            </FrameLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="15dp"
-                android:layout_weight="0" />
-
-            <FrameLayout
-                android:id="@+id/budgetHolder"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0">
-
-            </FrameLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="15dp"
-                android:layout_weight="0" />
+            android:layout_weight="0"
+            android:background="@color/colorPrimaryDark"
+            android:orientation="horizontal">
 
             <Button
-                android:id="@+id/exportMonthButton"
+                android:id="@+id/previousMonthButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="previousMonth"
+                android:text="@string/previous" />
+
+            <TextView
+                android:id="@+id/monthView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:onClick="exportMonth"
-                android:text="Export Month" />
+                android:layout_marginTop="3dp"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:text="TextView"
+                android:textAlignment="center"
+                android:textColor="@android:color/background_light"
+                android:textSize="24sp"
+                android:textStyle="normal|bold" />
+
+            <Button
+                android:id="@+id/nextMonthButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="nextMonth"
+                android:text="@string/next" />
 
         </LinearLayout>
-    </ScrollView>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/monthLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="15dp"
+                    android:layout_weight="0" />
+
+                <FrameLayout
+                    android:id="@+id/monthWeeklyHolder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0">
+
+                </FrameLayout>
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="15dp"
+                    android:layout_weight="0" />
+
+                <FrameLayout
+                    android:id="@+id/monthCategoryHolder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0">
+
+                </FrameLayout>
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="15dp"
+                    android:layout_weight="0" />
+
+                <FrameLayout
+                    android:id="@+id/monthBudgetHolder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0">
+
+                </FrameLayout>
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="15dp"
+                    android:layout_weight="0" />
+
+                <Button
+                    android:id="@+id/exportMonthButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:onClick="exportMonth"
+                    android:text="Export Month" />
+
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
