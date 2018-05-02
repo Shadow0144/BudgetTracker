@@ -87,6 +87,7 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
         int week = v.getId();
         date.set(_year, _month-1, ((week-1)*7) + 1);
         intent.putExtra(DayViewActivity.DATE_INTENT, date.getTimeInMillis());
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         _context.startActivity(intent);
         ((MonthViewActivity)_context).finish();
     }

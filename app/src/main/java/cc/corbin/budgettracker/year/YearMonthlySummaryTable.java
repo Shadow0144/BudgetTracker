@@ -1,24 +1,29 @@
 package cc.corbin.budgettracker.year;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
 import java.text.DateFormatSymbols;
+import java.util.Calendar;
 import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.TableCell;
+import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
+import cc.corbin.budgettracker.month.MonthViewActivity;
 
 /**
  * Created by Corbin on 1/29/2018.
  */
 
-public class YearMonthlySummaryTable extends TableLayout
+public class YearMonthlySummaryTable extends TableLayout implements View.OnClickListener
 {
     private final String TAG = "YearMonthlySummaryTable";
 
@@ -64,6 +69,18 @@ public class YearMonthlySummaryTable extends TableLayout
         _context = context;
 
         _year = year;
+    }
+
+    public void onClick(View v)
+    {
+        Intent intent = new Intent(_context, MonthViewActivity.class);
+        Calendar date = Calendar.getInstance();
+        int month = v.getId();
+        intent.putExtra(MonthViewActivity.MONTH_INTENT, month);
+        intent.putExtra(MonthViewActivity.YEAR_INTENT, _year);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        _context.startActivity(intent);
+        ((YearViewActivity)_context).finish();
     }
 
     public void setup(List<ExpenditureEntity> yearExpenditures)
@@ -130,6 +147,9 @@ public class YearMonthlySummaryTable extends TableLayout
             expenseCell.setText(Currencies.formatCurrency(integer, total));
             budgetCell.setText(Currencies.formatCurrency(integer, budget));
             remainingCell.setText(Currencies.formatCurrency(integer, (budget - total)));
+
+            monthCell.setId(i + 1);
+            monthCell.setOnClickListener(this);
 
             weekRow.addView(monthCell);
             weekRow.addView(expenseCell);
