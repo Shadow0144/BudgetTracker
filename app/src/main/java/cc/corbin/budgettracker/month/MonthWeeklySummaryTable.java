@@ -32,8 +32,15 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
     private int _month;
     private int _year;
 
+    private List<Float> _expenses;
+    private float _totalExpenses;
+
     private List<TableCell> _budgetCells;
     private TableCell _totalBudgetCell;
+
+    private List<TableCell> _remainingCells;
+    private TableCell _totalRemainingCell;
+
     private int _weeks;
 
     public MonthWeeklySummaryTable(Context context)
@@ -94,9 +101,9 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
 
     public void setup(List<ExpenditureEntity> monthExpenditures)
     {
-        boolean integer = Currencies.integer[Currencies.default_currency];
-
+        _expenses = new ArrayList<Float>();
         _budgetCells = new ArrayList<TableCell>();
+        _remainingCells = new ArrayList<TableCell>();
 
         // Setup the table
         setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
@@ -157,15 +164,17 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
             remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
             weekCell.setId(++id);
 
-            _budgetCells.add(budgetCell);
-
             float total = getWeekTotal(monthExpenditures, i+1);
             monthTotal += total;
 
             weekCell.setText("Week " + (i+1)); // TODO Internationalize
-            expenseCell.setText(Currencies.formatCurrency(integer, total));
-            budgetCell.setText(Currencies.formatCurrency(integer, budget));
-            remainingCell.setText(Currencies.formatCurrency(integer, (budget - total)));
+            expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+            budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, budget));
+            remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, (budget - total)));
+
+            _expenses.add(total);
+            _budgetCells.add(budgetCell);
+            _remainingCells.add(remainingCell);
 
             weekCell.setOnClickListener(this);
 
@@ -204,12 +213,14 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
         budgetCell = new TableCell(_context, TableCell.BOLD_CELL);
         remainingCell = new TableCell(_context, TableCell.BOLD_CELL);
 
-        _totalBudgetCell = budgetCell;
-
         weekCell.setText(R.string.total);
-        expenseCell.setText(Currencies.formatCurrency(integer, monthTotal));
-        budgetCell.setText(Currencies.formatCurrency(integer, monthBudget));
-        remainingCell.setText(Currencies.formatCurrency(integer, (monthBudget - monthTotal)));
+        expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, monthTotal));
+        budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, monthBudget));
+        remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, (monthBudget - monthTotal)));
+
+        _totalExpenses = monthTotal;
+        _totalBudgetCell = budgetCell;
+        _totalRemainingCell = remainingCell;
 
         totalRow.addView(weekCell);
         totalRow.addView(expenseCell);
@@ -263,8 +274,12 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
             for (int i = 0; i < _weeks; i++)
             {
                 _budgetCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, budget));
+                float remaining = budget - _expenses.get(i);
+                _remainingCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
             }
             _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+            float totalRemaining = total - _totalExpenses;
+            _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
         }
         else { }
     }

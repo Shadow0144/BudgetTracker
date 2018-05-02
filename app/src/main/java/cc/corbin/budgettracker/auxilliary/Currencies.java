@@ -59,15 +59,23 @@ public final class Currencies
 
         boolean decimal = !integer[currency];
 
+        DecimalFormat formatter;
         if (!decimal)
         {
-            DecimalFormat formatter = new DecimalFormat("###,###,###,###");
+            formatter = new DecimalFormat("###,###,###,###");
+        }
+        else
+        {
+            formatter = new DecimalFormat("###,###,###,##0.00");
+        }
+
+        if (amount >= 0)
+        {
             cost = symbols[currency] + formatter.format(amount);
         }
         else
         {
-            DecimalFormat formatter = new DecimalFormat("###,###,###,##0.00");
-            cost = symbols[currency] + formatter.format(amount);
+            cost = "-" + symbols[currency] + formatter.format((-1)*amount);
         }
 
         return cost;
