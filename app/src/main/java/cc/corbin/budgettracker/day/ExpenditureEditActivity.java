@@ -16,6 +16,7 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.MoneyValueFilter;
 import cc.corbin.budgettracker.R;
@@ -207,7 +208,7 @@ public class ExpenditureEditActivity extends AppCompatActivity
         final RadioGroup categoriesHolder = findViewById(R.id.categoriesHolder);
         categoriesHolder.removeAllViews();
         categoriesHolder.clearCheck();
-        final String[] categories = DayViewActivity.getCategories();
+        final String[] categories = Categories.getCategories();
         int count = categories.length;
         for (int i = 0; i < count; i++)
         {

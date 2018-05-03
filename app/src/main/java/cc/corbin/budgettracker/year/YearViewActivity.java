@@ -17,6 +17,7 @@ import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.List;
 
+import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
 import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
@@ -132,7 +133,7 @@ public class YearViewActivity extends AppCompatActivity
 
     private void setupBudgetTable(TableLayout budgetTable)
     {
-        String[] categories = DayViewActivity.getCategories();
+        String[] categories = Categories.getCategories();
         int count = categories.length;
 
         TableRow titleRow = new TableRow(this);

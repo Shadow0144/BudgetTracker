@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Budget Tracker</string>
+    <string name="budget_tracker_preferences_key">BudgetTrackerPreferencesKey</string>
+    <string name="categories_list_key">CategoriesListKey</string>
     <string name="add_item">Add Item</string>
     <string name="previous">&lt;</string>
     <string name="next">&gt;</string>

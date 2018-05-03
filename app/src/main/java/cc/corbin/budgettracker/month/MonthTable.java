@@ -11,6 +11,7 @@ import android.widget.TableRow;
 import java.util.Calendar;
 import java.util.List;
 
+import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.TableCell;
@@ -95,7 +96,7 @@ public class MonthTable extends TableLayout implements View.OnClickListener
         setStretchAllColumns(true);
         setColumnShrinkable(0, true);
 
-        String[] categories = DayViewActivity.getCategories();
+        String[] categories = Categories.getCategories();
         int rows = categories.length;
 
         Calendar c = Calendar.getInstance();
@@ -176,7 +177,7 @@ public class MonthTable extends TableLayout implements View.OnClickListener
             week6 = new TableCell(_context, TableCell.TOTAL_CELL);
 
             // Set the text
-            String category = DayViewActivity.getCategories()[i];
+            String category = Categories.getCategories()[i];
 
             float week1V = getWeekTotal(expWeek1, 1, category);
             float week2V = getWeekTotal(expWeek2, 2, category);

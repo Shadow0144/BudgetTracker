@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
@@ -130,7 +131,7 @@ public class DatabaseThread extends Thread
                 {
                     case month:
                         entities = new ArrayList<BudgetEntity>();
-                        String[] categories = DayViewActivity.getCategories();
+                        String[] categories = Categories.getCategories();
                         for (int i = 0; i < categories.length; i++)
                         {
                             List<BudgetEntity> catEntities = _dbB.budgetDao().getCategoryBeforeMonth(event.getYear(), event.getMonth(), categories[i]);

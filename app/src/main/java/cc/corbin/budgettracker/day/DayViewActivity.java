@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
+import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
@@ -76,7 +77,11 @@ public class DayViewActivity extends AppCompatActivity
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
         _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
 
-        loadCategories();
+        if (!Categories.areCategoriesLoaded())
+        {
+            Categories.loadCategories(this);
+        }
+        else { }
 
         _currentDate = Calendar.getInstance();
 
@@ -336,16 +341,6 @@ public class DayViewActivity extends AppCompatActivity
         intent.putExtra(MonthViewActivity.YEAR_INTENT, _year);
         startActivity(intent);
         //finish();
-    }
-
-    private void loadCategories()
-    {
-        _categories = getResources().getStringArray(R.array.default_categories);
-    }
-
-    public static String[] getCategories()
-    {
-        return _categories;
     }
 
     public void updateTotal(int day, float amount)

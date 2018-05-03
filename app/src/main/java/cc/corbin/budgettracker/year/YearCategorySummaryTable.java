@@ -8,6 +8,7 @@ import android.widget.TableRow;
 
 import java.util.List;
 
+import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.TableCell;
@@ -70,7 +71,7 @@ public class YearCategorySummaryTable extends TableLayout
     {
         boolean integer = Currencies.integer[Currencies.default_currency];
 
-        String[] categories = DayViewActivity.getCategories();
+        String[] categories = Categories.getCategories();
         int rows = categories.length;
 
         // Setup the table
