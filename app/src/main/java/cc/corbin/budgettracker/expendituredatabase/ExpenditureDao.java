@@ -72,6 +72,9 @@ public interface ExpenditureDao
     @Query("SELECT * FROM expenditureentity WHERE id IN (:expenditureIds)")
     List<ExpenditureEntity> loadAllByIds(long[] expenditureIds);
 
+    @Query("UPDATE expenditureentity SET expenseType = (:newCategory) WHERE expenseType = (:currentCategory)")
+    void recategorize(String currentCategory, String newCategory);
+
     @Insert
     long insert(ExpenditureEntity expenditures);
 

@@ -51,7 +51,6 @@ public class MonthViewActivity extends AppCompatActivity
 
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _monthExps;
-
     private MutableLiveData<List<BudgetEntity>> _budgets;
 
     private int _budgetId; // ID of the budget entity being edited
@@ -68,8 +67,6 @@ public class MonthViewActivity extends AppCompatActivity
 
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
         _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
-
-        _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
         _viewModel.setDate(_year, _month, 0);
 
         final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()

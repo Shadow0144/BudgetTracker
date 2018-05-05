@@ -117,6 +117,12 @@ public class DatabaseThread extends Thread
                 _completedExpEvents.add(event);
                 _handler.post(new ExpenditureRunnable());
                 break;
+
+            case recategorize:
+                _dbE.expenditureDao().recategorize(event.getOldCategory(), event.getNewCategory());
+                _completedExpEvents.add(event);
+                _handler.post(new ExpenditureRunnable());
+                break;
         }
     }
 
@@ -180,19 +186,28 @@ public class DatabaseThread extends Thread
                 _completedBudEvents.add(event);
                 _handler.post(new ExpenditureRunnable());
                 break;
+
             case insert:
                 long id = _dbB.budgetDao().insert(event.getEntity());
                 event.getEntity().setId(id);
                 _completedBudEvents.add(event);
                 _handler.post(new ExpenditureRunnable());
                 break;
+
             case update:
                 _dbB.budgetDao().update(event.getEntity());
                 _completedBudEvents.add(event);
                 _handler.post(new ExpenditureRunnable());
                 break;
+
             case remove:
                 _dbB.budgetDao().delete(event.getEntity());
+                _completedBudEvents.add(event);
+                _handler.post(new ExpenditureRunnable());
+                break;
+
+            case recategorize:
+                _dbB.budgetDao().recategorize(event.getOldCategory(), event.getNewCategory());
                 _completedBudEvents.add(event);
                 _handler.post(new ExpenditureRunnable());
                 break;

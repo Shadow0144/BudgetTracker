@@ -76,6 +76,9 @@ public interface BudgetDao
     @Query("SELECT * FROM budgetentity WHERE id IN (:budgetsIds)")
     List<BudgetEntity> loadAllByIds(int[] budgetsIds);
 
+    @Query("UPDATE budgetentity SET expenseType = (:newCategory) WHERE expenseType = (:currentCategory)")
+    void recategorize(String currentCategory, String newCategory);
+
     @Insert
     long insert(BudgetEntity budget);
 

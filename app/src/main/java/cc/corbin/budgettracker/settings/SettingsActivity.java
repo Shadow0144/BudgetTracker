@@ -1,7 +1,13 @@
 package cc.corbin.budgettracker.settings;
 
 import android.app.ActionBar;
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -22,10 +28,21 @@ import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.TableCell;
+import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
+import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
+import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
+import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
+import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 
 public class SettingsActivity extends AppCompatActivity
 {
@@ -37,8 +54,11 @@ public class SettingsActivity extends AppCompatActivity
     private TableCell _otherCategoryCell;
 
     private int _categoryEditIndex;
-    private int _newCategoryIndex;
     private PopupWindow _popupWindow;
+
+    private ExpenditureViewModel _viewModel;
+    private MutableLiveData<List<ExpenditureEntity>> _exps;
+    private MutableLiveData<List<BudgetEntity>> _budgets;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -47,6 +67,34 @@ public class SettingsActivity extends AppCompatActivity
         setContentView(R.layout.activity_settings);
 
         _categories = Categories.getCategories();
+
+        _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
+        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
+        _viewModel.setDate(0, 0, 0);
+
+        _exps = new MutableLiveData<List<ExpenditureEntity>>();
+        _budgets = new MutableLiveData<List<BudgetEntity>>();
+
+        final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
+        {
+            @Override
+            public void onChanged(@Nullable List<ExpenditureEntity> expenditureEntities)
+            {
+                expendituresUpdated();
+            }
+        };
+
+        final Observer<List<BudgetEntity>> budgetObserver = new Observer<List<BudgetEntity>>()
+        {
+            @Override
+            public void onChanged(@Nullable List<BudgetEntity> budgetEntities)
+            {
+                budgetsUpdated();
+            }
+        };
+
+        _exps.observe(this, entityObserver);
+        _budgets.observe(this, budgetObserver);
 
         final LinearLayout categoriesLayout = findViewById(R.id.categoriesLayout);
 
@@ -104,6 +152,43 @@ public class SettingsActivity extends AppCompatActivity
         _categoriesTable.addView(categoryRow);
 
         categoriesLayout.addView(_categoriesTable);
+
+        final TableLayout defaultCurrencyTable = findViewById(R.id.defaultCurrencyTable);
+        defaultCurrencyTable.setColumnStretchable(0, true);
+        defaultCurrencyTable.setColumnStretchable(1, true);
+
+        final TableRow defaultCurrencyTitleRow = new TableRow(this);
+        final TableCell defaultCurrencyTitle = new TableCell(this, TableCell.TITLE_CELL);
+        defaultCurrencyTitle.setText("Default Currency");
+        TableRow.LayoutParams params = new TableRow.LayoutParams(
+            TableRow.LayoutParams.MATCH_PARENT,
+            TableRow.LayoutParams.WRAP_CONTENT
+        );
+        params.span = 2;
+        defaultCurrencyTitle.setLayoutParams(params);
+        defaultCurrencyTitleRow.addView(defaultCurrencyTitle);
+        defaultCurrencyTable.addView(defaultCurrencyTitleRow);
+
+        final TableRow defaultCurrencyContentRow = new TableRow(this);
+        final TableCell defaultCurrencySymbolCell = new TableCell(this, TableCell.DEFAULT_CELL);
+        final TableCell defaultCurrencyNameCell = new TableCell(this, TableCell.DEFAULT_CELL);
+
+        defaultCurrencySymbolCell.setText(Currencies.symbols[Currencies.default_currency]);
+        defaultCurrencyNameCell.setText(Currencies.currencies.values()[Currencies.default_currency].name());
+
+        defaultCurrencyContentRow.addView(defaultCurrencySymbolCell);
+        defaultCurrencyContentRow.addView(defaultCurrencyNameCell);
+        defaultCurrencyTable.addView(defaultCurrencyContentRow);
+    }
+
+    private void expendituresUpdated()
+    {
+
+    }
+
+    private void budgetsUpdated()
+    {
+
     }
 
     public void cancel(View v)
@@ -118,7 +203,7 @@ public class SettingsActivity extends AppCompatActivity
         final View categoryEditView = getLayoutInflater().inflate(R.layout.popup_edit_category, null);
 
         final EditText categoryEditText = categoryEditView.findViewById(R.id.categoryEditText);
-        categoryEditText.setHint(((TextView)v).getText());
+        categoryEditText.setText(((TextView)v).getText());
 
         final Button confirmButton = categoryEditView.findViewById(R.id.confirmButton);
         categoryEditText.addTextChangedListener(new TextWatcher()
@@ -138,8 +223,18 @@ public class SettingsActivity extends AppCompatActivity
             @Override
             public void afterTextChanged(Editable s)
             {
-                // TODO - Check if it matches any other category
-                confirmButton.setEnabled(categoryEditText.getText().length() > 0);
+                String text = s.toString();
+                boolean unmatched = true;
+                for (int i = 0; i < _categories.length; i++)
+                {
+                    if (text.equals(_categories[i]))
+                    {
+                        unmatched = false;
+                        break;
+                    }
+                    else { }
+                }
+                confirmButton.setEnabled(unmatched && (text.length() > 0));
             }
         });
 
@@ -151,6 +246,30 @@ public class SettingsActivity extends AppCompatActivity
 
     public void confirmCategoryEdit(View v)
     {
+        final EditText categoryEditText = _popupWindow.getContentView().findViewById(R.id.categoryEditText);
+
+        String oldCategory = _categories[_categoryEditIndex];
+        String newCategory = categoryEditText.getText().toString();
+
+        _viewModel.recategorizeExpenditureEntities(_exps, oldCategory, newCategory);
+        _viewModel.recategorizeBudgetEntities(_budgets, oldCategory, newCategory);
+
+        _categories[_categoryEditIndex] = newCategory;
+
+        final TextView editedCategory = _categoriesTable.findViewById(_categoryEditIndex);
+        editedCategory.setText(_categories[_categoryEditIndex]);
+
+        // Save the updated categories
+        TreeSet<String> categoriesNewSet = new TreeSet<String>();
+        for (int i = 0; i < _categories.length; i++)
+        {
+            categoriesNewSet.add(_categories[i]);
+        }
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.budget_tracker_preferences_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putStringSet(getString(R.string.categories_list_key), categoriesNewSet);
+        Categories.setCategories(_categories);
+        editor.commit();
 
         _popupWindow.dismiss();
     }
@@ -165,12 +284,23 @@ public class SettingsActivity extends AppCompatActivity
         final TextView currentCategoryTextView = recategorizeView.findViewById(R.id.originalCategoryTextView);
         currentCategoryTextView.setText(_categories[_categoryEditIndex]);
 
+        String[] updatedCategories = new String[_categories.length-1];
+        int j = 0;
+        for (int i = 0; i < _categories.length; i++)
+        {
+            if (!_categories[i].equals(_categories[_categoryEditIndex]))
+            {
+                updatedCategories[j] = _categories[i];
+                j++;
+            }
+            else { }
+        }
+
         final Spinner newCategorySpinner = recategorizeView.findViewById(R.id.newCategorySpinner);
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
-                this, android.R.layout.simple_spinner_item, _categories);
+                this, android.R.layout.simple_spinner_item, updatedCategories);
         newCategorySpinner.setAdapter(spinnerArrayAdapter);
-        newCategorySpinner.setSelection(_categories.length-1);
-        // TODO - Remove original category from list and make spinner set new category index
+        newCategorySpinner.setSelection(updatedCategories.length-1); // Set to Other
 
         _popupWindow = new PopupWindow(recategorizeView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         _popupWindow.setFocusable(true);
@@ -181,9 +311,17 @@ public class SettingsActivity extends AppCompatActivity
     // Called from the Confirm button of the recategorization popup
     public void confirmRecategorize(View v)
     {
+        final Spinner newCategorySpinner = _popupWindow.getContentView().findViewById(R.id.newCategorySpinner);
+        String newCategory = newCategorySpinner.getSelectedItem().toString();
         _popupWindow.dismiss();
 
         final View confirmRemoveCategoryLayout = getLayoutInflater().inflate(R.layout.popup_confirm_remove_category, null);
+
+        final TextView originalCategoryTextView = confirmRemoveCategoryLayout.findViewById(R.id.originalCategoryTextView);
+        final TextView newCategoryTextView = confirmRemoveCategoryLayout.findViewById(R.id.newCategoryTextView);
+
+        originalCategoryTextView.setText(_categories[_categoryEditIndex]);
+        newCategoryTextView.setText(newCategory);
 
         _popupWindow = new PopupWindow(confirmRemoveCategoryLayout, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         _popupWindow.setFocusable(true);
@@ -194,6 +332,45 @@ public class SettingsActivity extends AppCompatActivity
     // Called from the final warning screen
     public void confirmRemoveAndRecategorize(View v)
     {
+        final TextView originalCategoryTextView = _popupWindow.getContentView().findViewById(R.id.originalCategoryTextView);
+        final TextView newCategoryTextView = _popupWindow.getContentView().findViewById(R.id.newCategoryTextView);
+
+        String originalCategory = originalCategoryTextView.getText().toString();
+        String newCategory = newCategoryTextView.getText().toString();
+
+        _viewModel.recategorizeExpenditureEntities(_exps, originalCategory, newCategory);
+        _viewModel.recategorizeBudgetEntities(_budgets, originalCategory, newCategory);
+
+        // Remove from the list and commit the change
+        String[] newCategories = new String[_categories.length-1];
+        int j = 0;
+        for (int i = 0; i < _categories.length; i++)
+        {
+            if (i != _categoryEditIndex)
+            {
+                newCategories[j] = _categories[i];
+                j++;
+            }
+            else { }
+        }
+        _categories = newCategories;
+
+        // Remove the view
+        _categoriesTable.removeViewAt(_categoryEditIndex+1); // +1 for the column header
+
+        // Save the updated categories
+        TreeSet<String> categoriesNewSet = new TreeSet<String>();
+        for (int i = 0; i < _categories.length; i++)
+        {
+            categoriesNewSet.add(_categories[i]);
+        }
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.budget_tracker_preferences_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putStringSet(getString(R.string.categories_list_key), categoriesNewSet);
+        Categories.setCategories(_categories);
+        editor.commit();
+
+
         _popupWindow.dismiss();
     }
 
@@ -229,8 +406,18 @@ public class SettingsActivity extends AppCompatActivity
             @Override
             public void afterTextChanged(Editable s)
             {
-                // TODO - Check if it matches any other category
-                confirmButton.setEnabled(categoryEditText.getText().length() > 0);
+                String text = s.toString();
+                boolean unmatched = true;
+                for (int i = 0; i < _categories.length; i++)
+                {
+                    if (text.equals(_categories[i]))
+                    {
+                        unmatched = false;
+                        break;
+                    }
+                    else { }
+                }
+                confirmButton.setEnabled(unmatched && (text.length() > 0));
             }
         });
 
@@ -264,6 +451,20 @@ public class SettingsActivity extends AppCompatActivity
 
         categoryRow.addView(categoryCell);
         _categoriesTable.addView(categoryRow, end+1);
+
+        _categories = categoriesNew;
+
+        // Save the updated categories
+        TreeSet<String> categoriesNewSet = new TreeSet<String>();
+        for (i = 0; i < _categories.length; i++)
+        {
+            categoriesNewSet.add(_categories[i]);
+        }
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.budget_tracker_preferences_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putStringSet(getString(R.string.categories_list_key), categoriesNewSet);
+        Categories.setCategories(_categories);
+        editor.commit();
 
         _popupWindow.dismiss();
     }

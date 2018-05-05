@@ -28,7 +28,8 @@ public class Categories
         }
         else
         {
-            _categories = ((String[])categoriesSet.toArray());
+            _categories = new String[categoriesSet.size()];
+            categoriesSet.toArray(_categories);
         }
 
         _categoriesSet = true;

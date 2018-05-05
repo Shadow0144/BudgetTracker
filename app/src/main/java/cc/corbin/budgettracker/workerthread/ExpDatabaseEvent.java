@@ -17,7 +17,8 @@ public class ExpDatabaseEvent
         query,
         insert,
         update,
-        remove
+        remove,
+        recategorize
     };
 
     public enum QueryType
@@ -34,6 +35,8 @@ public class ExpDatabaseEvent
     private int _year;
     private int _month;
     private int _day;
+    private String _oldCategory;
+    private String _newCategory;
     private EventType _eventType;
     private ExpenditureEntity _entity;
     private QueryType _queryType;
@@ -60,6 +63,16 @@ public class ExpDatabaseEvent
         _month = month;
         _day = day;
         _queryType = queryType;
+        _id = id++;
+    }
+
+    public ExpDatabaseEvent(MutableLiveData<List<ExpenditureEntity>> mutableLiveData,
+                            EventType eventType, String oldCategory, String newCategory)
+    {
+        _mutableLiveData = mutableLiveData;
+        _eventType = eventType;
+        _oldCategory = oldCategory;
+        _newCategory = newCategory;
         _id = id++;
     }
 
@@ -111,5 +124,15 @@ public class ExpDatabaseEvent
     public int getDay()
     {
         return _day;
+    }
+
+    public String getOldCategory()
+    {
+        return _oldCategory;
+    }
+
+    public String getNewCategory()
+    {
+        return _newCategory;
     }
 }

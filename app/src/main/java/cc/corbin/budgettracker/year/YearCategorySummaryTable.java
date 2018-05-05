@@ -69,8 +69,6 @@ public class YearCategorySummaryTable extends TableLayout
 
     public void setup(List<ExpenditureEntity> yearExpenditures)
     {
-        boolean integer = Currencies.integer[Currencies.default_currency];
-
         String[] categories = Categories.getCategories();
         int rows = categories.length;
 
@@ -133,9 +131,9 @@ public class YearCategorySummaryTable extends TableLayout
             yearTotal += total;
 
             categoryCell.setText(categories[i]);
-            expenseCell.setText(Currencies.formatCurrency(integer, total));
-            budgetCell.setText(Currencies.formatCurrency(integer, budget[i]));
-            remainingCell.setText(Currencies.formatCurrency(integer, (budget[i] - total)));
+            expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+            budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, budget[i]));
+            remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, (budget[i] - total)));
 
             categoryRow.addView(categoryCell);
             categoryRow.addView(expenseCell);
@@ -152,9 +150,9 @@ public class YearCategorySummaryTable extends TableLayout
         remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
 
         categoryCell.setText(R.string.total);
-        expenseCell.setText(Currencies.formatCurrency(integer, yearTotal));
-        budgetCell.setText(Currencies.formatCurrency(integer, yearBudget));
-        remainingCell.setText(Currencies.formatCurrency(integer, (yearBudget - yearTotal)));
+        expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, yearTotal));
+        budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, yearBudget));
+        remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, (yearBudget - yearTotal)));
 
         totalRow.addView(categoryCell);
         totalRow.addView(expenseCell);

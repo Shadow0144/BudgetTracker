@@ -85,8 +85,6 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
 
     public void setup(List<ExpenditureEntity> yearExpenditures)
     {
-        boolean integer = Currencies.integer[Currencies.default_currency];
-
         // Setup the table
         setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         setStretchAllColumns(true);
@@ -144,9 +142,9 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
             yearTotal += total;
 
             monthCell.setText(months[i]);
-            expenseCell.setText(Currencies.formatCurrency(integer, total));
-            budgetCell.setText(Currencies.formatCurrency(integer, budget));
-            remainingCell.setText(Currencies.formatCurrency(integer, (budget - total)));
+            expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+            budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, budget));
+            remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, (budget - total)));
 
             monthCell.setId(i + 1);
             monthCell.setOnClickListener(this);
@@ -166,9 +164,9 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
         remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
 
         monthCell.setText(R.string.total);
-        expenseCell.setText(Currencies.formatCurrency(integer, yearTotal));
-        budgetCell.setText(Currencies.formatCurrency(integer, yearBudget));
-        remainingCell.setText(Currencies.formatCurrency(integer, (yearBudget - yearTotal)));
+        expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, yearTotal));
+        budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, yearBudget));
+        remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, (yearBudget - yearTotal)));
 
         totalRow.addView(monthCell);
         totalRow.addView(expenseCell);

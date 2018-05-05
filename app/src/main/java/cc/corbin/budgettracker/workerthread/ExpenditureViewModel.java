@@ -151,6 +151,12 @@ public class ExpenditureViewModel extends ViewModel
         _expEvents.add(event);
     }
 
+    public void recategorizeExpenditureEntities(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, String oldCategory, String newCategory)
+    {
+        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.recategorize, oldCategory, newCategory);
+        _expEvents.add(event);
+    }
+
     public void getMonthBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData)
     {
         BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.query, _year, _month, BudgetDatabaseEvent.QueryType.month);
@@ -172,6 +178,12 @@ public class ExpenditureViewModel extends ViewModel
     public void removeBudgetEntity(MutableLiveData<List<BudgetEntity>> mutableLiveData, BudgetEntity budgetEntity)
     {
         BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.remove, _year, _month, budgetEntity);
+        _budEvents.add(event);
+    }
+
+    public void recategorizeBudgetEntities(MutableLiveData<List<BudgetEntity>> mutableLiveData, String oldCategory, String newCategory)
+    {
+        BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.recategorize, oldCategory, newCategory);
         _budEvents.add(event);
     }
 }

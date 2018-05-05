@@ -59,8 +59,8 @@ public class TotalViewActivity extends AppCompatActivity
         };
 
         _totalExps = new MutableLiveData<List<ExpenditureEntity>>();
-        _viewModel.getYear(_totalExps);
         _totalExps.observe(this, entityObserver);
+        _viewModel.getTotal(_totalExps);
 
         TextView header = findViewById(R.id.totalView);
         DateFormatSymbols dfs = new DateFormatSymbols();

@@ -47,16 +47,28 @@
                     android:layout_width="match_parent"
                     android:layout_height="15dp" />
 
-                <ScrollView
+                <LinearLayout
+                    android:id="@+id/categoriesLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="15dp"
+                    android:layout_weight="0" />
+
+                <TableLayout
+                    android:id="@+id/defaultCurrencyTable"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <LinearLayout
-                        android:id="@+id/categoriesLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical" />
-                </ScrollView>
+                </TableLayout>
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="15dp"
+                    android:layout_weight="1" />
             </LinearLayout>
         </ScrollView>
 

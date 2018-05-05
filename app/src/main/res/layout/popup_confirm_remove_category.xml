@@ -42,6 +42,11 @@
                 android:textColor="@color/black"
                 android:textSize="18sp" />
 
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="15dp"
+                android:layout_weight="1" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -49,23 +54,33 @@
 
                 <TextView
                     android:id="@+id/originalCategoryTextView"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:gravity="center" />
 
                 <TextView
                     android:id="@+id/arrowTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="2"
+                    android:layout_weight="0"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp"
                     android:text="->" />
 
                 <TextView
                     android:id="@+id/newCategoryTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:gravity="center" />
+
             </LinearLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="15dp"
+                android:layout_weight="1" />
 
             <LinearLayout
                 android:layout_width="match_parent"
