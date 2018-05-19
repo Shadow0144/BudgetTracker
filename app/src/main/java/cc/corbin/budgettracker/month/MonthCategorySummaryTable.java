@@ -33,11 +33,18 @@ public class MonthCategorySummaryTable extends TableLayout
     private List<Float> _expenses;
     private float _totalExpenses;
 
+    private List<TableCell> _expenseCells;
+    private TableCell _totalExpenseCell;
+
     private List<TableCell> _budgetCells;
     private TableCell _totalBudgetCell;
 
     private List<TableCell> _remainingCells;
     private TableCell _totalRemainingCell;
+
+    private List<BudgetEntity> _budgetEntities;
+
+    private String[] _categories;
 
     public MonthCategorySummaryTable(Context context)
     {
@@ -86,11 +93,12 @@ public class MonthCategorySummaryTable extends TableLayout
     public void setup(List<ExpenditureEntity> monthExpenditures)
     {
         _expenses = new ArrayList<Float>();
+        _expenseCells = new ArrayList<TableCell>();
         _budgetCells = new ArrayList<TableCell>();
         _remainingCells = new ArrayList<TableCell>();
 
-        String[] categories = Categories.getCategories();
-        int rows = categories.length;
+        _categories = Categories.getCategories();
+        int rows = _categories.length;
 
         // Setup the table
         setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
@@ -130,7 +138,7 @@ public class MonthCategorySummaryTable extends TableLayout
         headerRow.addView(remainingCell);
         addView(headerRow);
 
-        float[] budget = new float[categories.length];
+        float[] budget = new float[_categories.length];
         float monthBudget = 0.0f;
         for (int i = 0; i < budget.length; i++)
         {
@@ -147,14 +155,15 @@ public class MonthCategorySummaryTable extends TableLayout
             budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
             remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
 
-            float total = getCategoryTotal(monthExpenditures, categories[i]);
+            float total = getCategoryTotal(monthExpenditures, _categories[i]);
             monthTotal += total;
 
             _expenses.add(total);
+            _expenseCells.add(expenseCell);
             _budgetCells.add(budgetCell);
             _remainingCells.add(remainingCell);
 
-            categoryCell.setText(categories[i]);
+            categoryCell.setText(_categories[i]);
             expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
             budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, budget[i]));
             remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, (budget[i] - total)));
@@ -179,6 +188,7 @@ public class MonthCategorySummaryTable extends TableLayout
         remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, (monthBudget - monthTotal)));
 
         _totalExpenses = monthTotal;
+        _totalExpenseCell = expenseCell;
         _totalBudgetCell = budgetCell;
         _totalRemainingCell = remainingCell;
 
@@ -208,6 +218,7 @@ public class MonthCategorySummaryTable extends TableLayout
 
     public void updateBudgets(List<BudgetEntity> budgetEntities)
     {
+        _budgetEntities = budgetEntities;
         if (_budgetCells != null)
         {
             int size = _budgetCells.size();
@@ -217,13 +228,26 @@ public class MonthCategorySummaryTable extends TableLayout
                 BudgetEntity entity = budgetEntities.get(i);
                 _budgetCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, entity.getAmount()));
                 total += entity.getAmount();
-                float remaining = _expenses.get(i) - entity.getAmount();
+                float remaining = entity.getAmount() - _expenses.get(i);
                 _remainingCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
             }
             _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
-            float totalRemaining = _totalExpenses - total;
+            float totalRemaining = total - _totalExpenses;
             _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
         }
         else { }
+    }
+
+    public void updateExpenditures(List<ExpenditureEntity> expenditureEntities)
+    {
+        float total = 0.0f;
+        int size = _expenseCells.size();
+        for (int i = 0; i < size; i++)
+        {
+            float categoryTotal = getCategoryTotal(expenditureEntities, _categories[i]);
+            _expenseCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, categoryTotal));
+            total += categoryTotal;
+        }
+        _totalExpenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
     }
 }

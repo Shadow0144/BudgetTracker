@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -8,6 +10,7 @@
         android:id="@+id/editorLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_margin="5dp"
         android:orientation="vertical">
 
         <LinearLayout
@@ -28,7 +31,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
-                android:text="-"
+                android:text="@string/negative"
                 android:textSize="24sp" />
 
             <EditText
@@ -36,9 +39,121 @@
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="0.00"
                 android:inputType="numberDecimal"
                 android:maxLines="1" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/conversionLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <LinearLayout
+                android:id="@+id/converterLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/baseCurrencyTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0" />
+
+                <TextView
+                    android:id="@+id/baseAmountTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/one_with_two_digits" />
+
+                <TextView
+                    android:id="@+id/arrowView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="0"
+                    android:text="@string/rightarrow" />
+
+                <TextView
+                    android:id="@+id/convertedCurrencyTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0" />
+
+                <EditText
+                    android:id="@+id/convertedAmountEditText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:hint="@string/one_with_two_digits"
+                    android:inputType="numberDecimal" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/convertedAmountLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_weight="0"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/negativeConvertedView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:paddingRight="3dp"
+                    android:text="@string/negative"
+                    android:textSize="24sp" />
+
+                <TextView
+                    android:id="@+id/totalConvertedAmountTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/conversionRateButtonHolder"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+                    <ProgressBar
+                        android:id="@+id/conversionRateProgressBar"
+                        style="?android:attr/progressBarStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="invisible"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.5"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <Button
+                        android:id="@+id/conversionRateButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0"
+                        android:text="@string/get_conversion_rate"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.5"
+                        app:layout_constraintStart_toEndOf="@+id/conversionRateProgressBar"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </android.support.constraint.ConstraintLayout>
+
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -46,7 +161,9 @@
             android:id="@+id/categoryScrollView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:fadeScrollbars="false"
+            android:scrollbarAlwaysDrawVerticalTrack="true">
 
             <LinearLayout
                 android:id="@+id/categoryLayout"
@@ -60,6 +177,14 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
         </ScrollView>
+
+        <EditText
+            android:id="@+id/generatedNoteEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:editable="false"
+            android:ems="10"
+            android:inputType="textMultiLine" />
 
         <EditText
             android:id="@+id/noteEditText"

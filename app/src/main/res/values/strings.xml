@@ -7,6 +7,8 @@
     <string name="next">&gt;</string>
     <string name="pprevious">&lt;&lt;</string>
     <string name="nnext">&gt;&gt;</string>
+    <string name="leftarrow">&lt;-</string>
+    <string name="rightarrow">-&gt;</string>
     <string name="total">Total</string>
     <string name="x">X</string>
     <string name="negative">-</string>
@@ -36,4 +38,9 @@
     <string name="year_budget_title">Yearly Budget Limits</string>
     <string name="budget_as_of">As of&#160;</string>
     <string name="budget_unset">No budget set</string>
+    <string name="get_conversion_rate">Get Conversion Rate</string>
+    <string name="one_with_zero_digits">1</string>
+    <string name="one_with_two_digits">1.00</string>
+    <string name="zero_with_zero_digits">0</string>
+    <string name="zero_with_two_digits">0.00</string>
 </resources>

@@ -35,11 +35,16 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
     private List<Float> _expenses;
     private float _totalExpenses;
 
+    private List<TableCell> _expenseCells;
+    private TableCell _totalExpenseCell;
+
     private List<TableCell> _budgetCells;
     private TableCell _totalBudgetCell;
 
     private List<TableCell> _remainingCells;
     private TableCell _totalRemainingCell;
+
+    private List<BudgetEntity> _budgetEntities;
 
     private int _weeks;
 
@@ -102,6 +107,7 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
     public void setup(List<ExpenditureEntity> monthExpenditures)
     {
         _expenses = new ArrayList<Float>();
+        _expenseCells = new ArrayList<TableCell>();
         _budgetCells = new ArrayList<TableCell>();
         _remainingCells = new ArrayList<TableCell>();
 
@@ -153,18 +159,45 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
 
         float monthBudget = 0.0f;
         float budget = monthBudget / _weeks;
-
         float monthTotal = 0.0f;
+        float total;
+
+        // Add the extras row
+        TableRow weekRow = new TableRow(_context);
+        weekCell = new TableCell(_context, TableCell.HEADER_CELL);
+        expenseCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+        budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+        remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+
+        total = getWeekTotal(monthExpenditures, 0);
+        monthTotal += total;
+
+        weekCell.setText("Week 0"); // TODO Internationalize
+        expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+        budgetCell.setText("---");
+        remainingCell.setText("---");
+
+        _expenses.add(total);
+        _expenseCells.add(expenseCell);
+        _budgetCells.add(budgetCell);
+        _remainingCells.add(remainingCell);
+
+        weekRow.addView(weekCell);
+        weekRow.addView(expenseCell);
+        weekRow.addView(budgetCell);
+        weekRow.addView(remainingCell);
+        addView(weekRow);
+
         for (int i = 0; i < _weeks; i++) // Add a row for each week
         {
-            TableRow weekRow = new TableRow(_context);
+            weekRow = new TableRow(_context);
             weekCell = new TableCell(_context, TableCell.HEADER_CELL);
             expenseCell = new TableCell(_context, TableCell.DEFAULT_CELL);
             budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
             remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
             weekCell.setId(++id);
 
-            float total = getWeekTotal(monthExpenditures, i+1);
+            total = getWeekTotal(monthExpenditures, i+1);
             monthTotal += total;
 
             weekCell.setText("Week " + (i+1)); // TODO Internationalize
@@ -173,6 +206,7 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
             remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, (budget - total)));
 
             _expenses.add(total);
+            _expenseCells.add(expenseCell);
             _budgetCells.add(budgetCell);
             _remainingCells.add(remainingCell);
 
@@ -187,7 +221,7 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
 
         if (_weeks == 4)
         {
-            TableRow weekRow = new TableRow(_context);
+            weekRow = new TableRow(_context);
             weekCell = new TableCell(_context, TableCell.HEADER_CELL);
             expenseCell = new TableCell(_context, TableCell.DEFAULT_CELL);
             budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
@@ -205,6 +239,24 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
             addView(weekRow);
         }
         else { }
+
+        // Add the adjustments row
+        weekRow = new TableRow(_context);
+        weekCell = new TableCell(_context, TableCell.HEADER_CELL);
+        expenseCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+        budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+        remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+
+        weekCell.setText("Adjust"); // TODO Internationalize
+        expenseCell.setText("---");
+        budgetCell.setText("---");
+        remainingCell.setText("---");
+
+        weekRow.addView(weekCell);
+        weekRow.addView(expenseCell);
+        weekRow.addView(budgetCell);
+        weekRow.addView(remainingCell);
+        addView(weekRow);
 
         // Add the final totals row
         TableRow totalRow = new TableRow(_context);
@@ -239,6 +291,19 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
         int sDay = ((weekNum-1)*7)+1; // 1, 8, 15, 22, 29
         int eDay = Math.min((weekNum*7), maxDays); // 7, 14, 21, 28, 28/29/30/31
 
+        // Special cases
+        if (weekNum == 0)
+        {
+            sDay = 0;
+            eDay = 0;
+        }
+        else if (weekNum == 6)
+        {
+            sDay = 32;
+            eDay = 32;
+        }
+        else { }
+
         float total = 0.0f;
         if (eDay >= sDay)
         {
@@ -261,9 +326,10 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
 
     public void updateBudgets(List<BudgetEntity> budgetEntities)
     {
+        _budgetEntities = budgetEntities;
         if (_budgetCells != null)
         {
-            int size = _budgetCells.size();
+            int size = budgetEntities.size();
             float total = 0.0f;
             for (int i = 0; i < size; i++)
             {
@@ -271,7 +337,7 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
                 total += entity.getAmount();
             }
             float budget = total / _weeks;
-            for (int i = 0; i < _weeks; i++)
+            for (int i = 1; i < _weeks+1; i++) // TODO
             {
                 _budgetCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, budget));
                 float remaining = budget - _expenses.get(i);
@@ -282,5 +348,16 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
             _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
         }
         else { }
+    }
+
+    public void updateExpenditures(List<ExpenditureEntity> expenditureEntities)
+    {
+        int size = _expenseCells.size();
+        for (int i = 0; i < size; i++)
+        {
+            float total = getWeekTotal(expenditureEntities, 0);
+            _expenseCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, total));
+        }
+        updateBudgets(_budgetEntities);
     }
 }
