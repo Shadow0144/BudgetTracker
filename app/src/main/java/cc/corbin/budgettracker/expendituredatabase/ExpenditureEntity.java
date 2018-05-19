@@ -9,6 +9,8 @@ import android.os.Parcelable;
 
 import java.util.Calendar;
 
+import cc.corbin.budgettracker.auxilliary.Currencies;
+
 /**
  * Created by Corbin on 2/14/2018.
  */
@@ -29,16 +31,19 @@ public class ExpenditureEntity implements Parcelable
     private int year;
 
     @ColumnInfo
-    private int currency;
-
-    @ColumnInfo
     private float amount;
 
     @ColumnInfo
     private String expenseType;
 
-    @Ignore
-    private int expenseTypeNumber;
+    @ColumnInfo
+    private int baseCurrency;
+
+    @ColumnInfo
+    private float baseAmount;
+
+    @ColumnInfo
+    private float conversionRate;
 
     @ColumnInfo
     private String note;
@@ -50,19 +55,24 @@ public class ExpenditureEntity implements Parcelable
         this.day = 0;
         this.month = 0;
         this.year = 0;
-        this.currency = 0;
         this.amount = 0.0f;
         this.expenseType = "";
+        this.baseCurrency = 0;
+        this.baseAmount = 0.0f;
+        this.conversionRate = 0.0f;
         this.note = "";
     }
 
+    // Previous constructor
     @Ignore
     public ExpenditureEntity(long date, int currency, float amount, String expenseType, String note)
     {
         this.id = 0;
-        this.currency = currency;
         this.amount = amount;
         this.expenseType = expenseType;
+        this.baseCurrency = Currencies.default_currency;
+        this.baseAmount = amount;
+        this.conversionRate = 1.0f;
         this.note = note;
         checkNullStrings();
         convertDateToDMY(date);
@@ -75,36 +85,58 @@ public class ExpenditureEntity implements Parcelable
         this.day = day;
         this.month = month;
         this.year = year;
-        this.currency = 0;
         this.amount = 0.0f;
         this.expenseType = "";
+        this.baseCurrency = Currencies.default_currency;
+        this.baseAmount = amount;
+        this.conversionRate = 1.0f;
         this.note = "";
         checkNullStrings();
     }
 
     @Ignore
-    public ExpenditureEntity(int day, int month, int year, int currency, float amount, String expenseType, String note)
+    public ExpenditureEntity(int day, int month, int year, float amount, String expenseType, String note)
     {
         this.id = 0;
         this.day = day;
         this.month = month;
         this.year = year;
-        this.currency = currency;
         this.amount = amount;
         this.expenseType = expenseType;
+        this.baseCurrency = Currencies.default_currency;
+        this.baseAmount = amount;
+        this.conversionRate = 1.0f;
         this.note = note;
         checkNullStrings();
     }
 
-    public ExpenditureEntity(long id, int day, int month, int year, int currency, float amount, String expenseType, String note)
+    @Ignore
+    public ExpenditureEntity(long id, int day, int month, int year, float amount, String expenseType, String note)
     {
         this.id = id;
         this.day = day;
         this.month = month;
         this.year = year;
-        this.currency = currency;
         this.amount = amount;
         this.expenseType = expenseType;
+        this.baseCurrency = Currencies.default_currency;
+        this.baseAmount = amount;
+        this.conversionRate = 1.0f;
+        this.note = note;
+        checkNullStrings();
+    }
+
+    public ExpenditureEntity(long id, int day, int month, int year, float amount, String expenseType, int baseCurrency, float baseAmount, float conversionRate, String note)
+    {
+        this.id = id;
+        this.day = day;
+        this.month = month;
+        this.year = year;
+        this.amount = amount;
+        this.expenseType = expenseType;
+        this.baseCurrency = baseCurrency;
+        this.baseAmount = baseAmount;
+        this.conversionRate = conversionRate;
         this.note = note;
         checkNullStrings();
     }
@@ -149,16 +181,6 @@ public class ExpenditureEntity implements Parcelable
         this.year = year;
     }
 
-    public int getCurrency()
-    {
-        return currency;
-    }
-
-    public void setCurrency(int currency)
-    {
-        this.currency = currency;
-    }
-
     public float getAmount()
     {
         return amount;
@@ -179,6 +201,36 @@ public class ExpenditureEntity implements Parcelable
         this.expenseType = expenseType;
     }
 
+    public int getBaseCurrency()
+    {
+        return baseCurrency;
+    }
+
+    public void setBaseCurrency(int baseCurrency)
+    {
+        this.baseCurrency = baseCurrency;
+    }
+
+    public float getBaseAmount()
+    {
+        return  baseAmount;
+    }
+
+    public void setBaseAmount(float baseAmount)
+    {
+        this.baseAmount = baseAmount;
+    }
+
+    public float getConversionRate()
+    {
+        return conversionRate;
+    }
+
+    public void setConversionRate(float conversionRate)
+    {
+        this.conversionRate = conversionRate;
+    }
+
     public String getNote()
     {
         return note;
@@ -187,18 +239,6 @@ public class ExpenditureEntity implements Parcelable
     public void setNote(String note)
     {
         this.note = note;
-    }
-
-    @Ignore
-    public int getExpenseTypeNumber()
-    {
-        return expenseTypeNumber;
-    }
-
-    @Ignore
-    public void setExpenseTypeNumber(int expenseTypeNumber)
-    {
-        this.expenseTypeNumber = expenseTypeNumber;
     }
 
     @Ignore
@@ -223,9 +263,11 @@ public class ExpenditureEntity implements Parcelable
     @Ignore
     public void update(ExpenditureEntity expenditureEntity)
     {
-        currency = expenditureEntity.currency;
         amount = expenditureEntity.amount;
         expenseType = expenditureEntity.expenseType;
+        baseCurrency = expenditureEntity.baseCurrency;
+        baseAmount = expenditureEntity.baseAmount;
+        conversionRate = expenditureEntity.conversionRate;
         note = expenditureEntity.note;
     }
 
@@ -249,22 +291,25 @@ public class ExpenditureEntity implements Parcelable
         out.writeInt(day);
         out.writeInt(month);
         out.writeInt(year);
-        out.writeInt(currency);
         out.writeFloat(amount);
         out.writeString(expenseType);
+        out.writeInt(baseCurrency);
+        out.writeFloat(baseAmount);
+        out.writeFloat(conversionRate);
         out.writeString(note);
     }
 
-    // example constructor that takes a Parcel and gives you an object populated with it's values
     private ExpenditureEntity(Parcel in)
     {
         id = in.readLong();
         day = in.readInt();
         month = in.readInt();
         year = in.readInt();
-        currency = in.readInt();
         amount = in.readFloat();
         expenseType = in.readString();
+        baseCurrency = in.readInt();
+        baseAmount = in.readFloat();
+        conversionRate = in.readFloat();
         note = in.readString();
     }
 

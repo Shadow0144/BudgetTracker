@@ -60,6 +60,14 @@
                 android:orientation="horizontal">
 
                 <TextView
+                    android:id="@+id/atTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:paddingRight="5dp"
+                    android:text="@" />
+
+                <TextView
                     android:id="@+id/baseCurrencyTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -115,6 +123,12 @@
                     android:paddingRight="3dp"
                     android:text="@string/negative"
                     android:textSize="24sp" />
+
+                <TextView
+                    android:id="@+id/totalCurrencyTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0" />
 
                 <TextView
                     android:id="@+id/totalConvertedAmountTextView"
@@ -177,14 +191,6 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
         </ScrollView>
-
-        <EditText
-            android:id="@+id/generatedNoteEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:editable="false"
-            android:ems="10"
-            android:inputType="textMultiLine" />
 
         <EditText
             android:id="@+id/noteEditText"

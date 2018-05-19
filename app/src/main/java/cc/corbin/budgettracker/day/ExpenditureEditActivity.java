@@ -19,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
@@ -33,7 +34,9 @@ import java.math.RoundingMode;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.NumberFormat;
+import java.util.Calendar;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.ConversionRateAsyncTask;
@@ -74,10 +77,9 @@ public class ExpenditureEditActivity extends AppCompatActivity
 
     private Spinner _symbolSpinner;
 
+    private LinearLayout _conversionLayout;
     private EditText _convertedAmountEditText;
     private TextView _totalConvertedAmountTextView;
-
-    private EditText _generatedNoteEditText;
 
     private float _amount;
     private float _rateNumber;
@@ -153,23 +155,69 @@ public class ExpenditureEditActivity extends AppCompatActivity
 
     public void onAccept(View v)
     {
-        final EditText amountEditText = findViewById(R.id.valueEditText);
+        final TextView totalConvertedAmountTextView = findViewById(R.id.totalConvertedAmountTextView);
+        final EditText valueEditText = findViewById(R.id.valueEditText);
+        final EditText conversionRateEditText = findViewById(R.id.convertedAmountEditText);
         final RadioGroup categoriesHolder = findViewById(R.id.categoriesHolder);
         final RadioButton button = categoriesHolder.findViewById(categoriesHolder.getCheckedRadioButtonId());
         final EditText noteEditText = findViewById(R.id.noteEditText);
 
+        NumberFormat formatter = NumberFormat.getInstance(Locale.getDefault());
+
         // Setup the expenditure
-        _expenditure.setCurrency(_symbolSpinner.getSelectedItemPosition());
-        try
+        String amount = totalConvertedAmountTextView.getText().toString();
+        if (amount.length() > 0)
         {
-            _expenditure.setAmount(Float.parseFloat(amountEditText.getText().toString()));
+            try
+            {
+                _expenditure.setAmount(formatter.parse(amount).floatValue());
+            }
+            catch (Exception e)
+            {
+                Log.e(TAG, "Failure to parse final amount float");
+                _expenditure.setAmount(0.0f);
+            }
         }
-        catch (Exception e)
+        else
         {
-            Log.e(TAG, "Failure to parse float");
             _expenditure.setAmount(0.0f);
         }
         _expenditure.setExpenseType(button.getText().toString());
+        _expenditure.setBaseCurrency(_symbolSpinner.getSelectedItemPosition());
+        String baseAmount = valueEditText.getText().toString();
+        if (baseAmount.length() > 0)
+        {
+            try
+            {
+                _expenditure.setBaseAmount(formatter.parse(baseAmount).floatValue());
+            }
+            catch (Exception e)
+            {
+                Log.e(TAG, "Failure to parse base amount float");
+                _expenditure.setBaseAmount(0.0f);
+            }
+        }
+        else
+        {
+            _expenditure.setBaseAmount(0.0f);
+        }
+        String conversionRate = conversionRateEditText.getText().toString();
+        if (conversionRate.length() > 0)
+        {
+            try
+            {
+                _expenditure.setConversionRate(formatter.parse(conversionRate).floatValue());
+            }
+            catch (Exception e)
+            {
+                Log.e(TAG, "Failure to parse conversion rate float");
+                _expenditure.setConversionRate(1.0f);
+            }
+        }
+        else
+        {
+            _expenditure.setConversionRate(1.0f);
+        }
         _expenditure.setNote(noteEditText.getText().toString());
 
         Intent intent = new Intent();
@@ -221,16 +269,26 @@ public class ExpenditureEditActivity extends AppCompatActivity
         _rateNumber = 1.00f;
         _totalConvertedAmount = _amount * _rateNumber;
 
+        _conversionLayout = findViewById(R.id.conversionLayout);
         _totalConvertedAmountTextView = findViewById(R.id.totalConvertedAmountTextView);
-        _generatedNoteEditText = findViewById(R.id.generatedNoteEditText);
+        final TextView totalCurrencyTextView = findViewById(R.id.totalCurrencyTextView);
+        totalCurrencyTextView.setText(Currencies.symbols[Currencies.default_currency]);
+
+        if (_expenditure != null)
+        {
+            _amount = _expenditure.getBaseAmount();
+            _rateNumber = _expenditure.getConversionRate();
+            _totalConvertedAmountTextView.setText(Currencies.formatCurrency(Currencies.integer[Currencies.default_currency], _expenditure.getAmount()));
+        }
+        else { }
 
         // Setup the amount edit
         final EditText amountEditText = findViewById(R.id.valueEditText);
         final MoneyValueFilter moneyValueFilter = new MoneyValueFilter();
         if (_expenditure != null)
         {
-            moneyValueFilter.setDigits(Currencies.integer[_expenditure.getCurrency()] ? 0 : 2);
-            if (Currencies.integer[_expenditure.getCurrency()])
+            moneyValueFilter.setDigits(Currencies.integer[_expenditure.getBaseCurrency()] ? 0 : 2);
+            if (Currencies.integer[_expenditure.getBaseCurrency()])
             {
                 amountEditText.setHint("0");
             }
@@ -238,6 +296,7 @@ public class ExpenditureEditActivity extends AppCompatActivity
             {
                 amountEditText.setHint("0.00");
             }
+            amountEditText.setText(Currencies.formatCurrency(Currencies.integer[_expenditure.getBaseCurrency()], _expenditure.getBaseAmount()));
         }
         else
         {
@@ -278,8 +337,6 @@ public class ExpenditureEditActivity extends AppCompatActivity
                 {
                     _amount = 0.0f;
                 }
-                _totalConvertedAmount = _amount * _rateNumber;
-                _totalConvertedAmountTextView.setText(Currencies.formatCurrency(Currencies.default_currency, _totalConvertedAmount));
 
                 updateConversionViews();
             }
@@ -297,6 +354,12 @@ public class ExpenditureEditActivity extends AppCompatActivity
         final MoneyValueFilter convertedMoneyValueFilter = new MoneyValueFilter();
         convertedMoneyValueFilter.setDigits(2);
         _convertedAmountEditText.setFilters(new InputFilter[]{convertedMoneyValueFilter});
+
+        if (_expenditure != null)
+        {
+            _convertedAmountEditText.setText("" + _expenditure.getConversionRate());
+        }
+        else { } // Else keep the hint
 
         _convertedAmountEditText.addTextChangedListener(new TextWatcher()
         {
@@ -323,8 +386,6 @@ public class ExpenditureEditActivity extends AppCompatActivity
                 {
                     _rateNumber = 1.00f;
                 }
-                _totalConvertedAmount = _amount * _rateNumber;
-                _totalConvertedAmountTextView.setText(Currencies.formatCurrency(Currencies.default_currency, _totalConvertedAmount));
 
                 updateConversionViews();
             }
@@ -335,7 +396,14 @@ public class ExpenditureEditActivity extends AppCompatActivity
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
                 this, android.R.layout.simple_spinner_item, Currencies.symbols);
         _symbolSpinner.setAdapter(spinnerArrayAdapter);
-        _symbolSpinner.setSelection(Currencies.default_currency);
+        if (_expenditure != null)
+        {
+            _symbolSpinner.setSelection(_expenditure.getBaseCurrency());
+        }
+        else
+        {
+            _symbolSpinner.setSelection(Currencies.default_currency);
+        }
         _symbolSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
             @Override
@@ -351,6 +419,16 @@ public class ExpenditureEditActivity extends AppCompatActivity
                     amountEditText.setHint("0.00");
                 }
                 baseCurrencyTextView.setText(Currencies.symbols[position]);
+                if (position == Currencies.default_currency)
+                {
+                    _conversionLayout.setVisibility(View.GONE);
+                }
+                else
+                {
+                    _conversionLayout.setVisibility(View.VISIBLE);
+                }
+
+                updateConversionViews();
             }
 
             @Override
@@ -372,15 +450,6 @@ public class ExpenditureEditActivity extends AppCompatActivity
             }
         });
         _conversionRateProgressBar = findViewById(R.id.conversionRateProgressBar);
-
-        // Setup the values if they exist already
-        if (_expenditure != null)
-        {
-            _symbolSpinner.setSelection(_expenditure.getCurrency());
-            String cost = Currencies.formatCurrency(Currencies.integer[_expenditure.getCurrency()], _expenditure.getAmount());
-            amountEditText.setText(cost, TextView.BufferType.EDITABLE);
-        }
-        else { }
     }
 
     private void setupCategories()
@@ -424,6 +493,7 @@ public class ExpenditureEditActivity extends AppCompatActivity
         {
             // Setup the note
             final EditText noteEditText = findViewById(R.id.noteEditText);
+
             noteEditText.setText(_expenditure.getNote());
         }
         else { }
@@ -431,15 +501,38 @@ public class ExpenditureEditActivity extends AppCompatActivity
 
     private void getConversionRate()
     {
-        _conversionRateButton.setVisibility(View.INVISIBLE);
-        _conversionRateProgressBar.setVisibility(View.VISIBLE);
-        if (!_connectToInternet)
+        Calendar currentDate = Calendar.getInstance();
+        Calendar editDate = Calendar.getInstance();
+        editDate.set(_year, _month-1, _day);
+
+        long end = currentDate.getTimeInMillis();
+        long start = editDate.getTimeInMillis();
+
+        if (end >= start)
         {
-            checkPermissions();
+            long time = TimeUnit.MILLISECONDS.toDays(Math.abs(end - start));
+
+            if (time <= 365)
+            {
+                _conversionRateButton.setVisibility(View.INVISIBLE);
+                _conversionRateProgressBar.setVisibility(View.VISIBLE);
+                if (!_connectToInternet)
+                {
+                    checkPermissions();
+                }
+                else
+                {
+                    connectForConversionRate();
+                }
+            }
+            else
+            {
+                Toast.makeText(this, "Dates more than a year old will need to have the conversion rate manually specified", Toast.LENGTH_LONG);
+            }
         }
         else
         {
-            connectForConversionRate();
+            Toast.makeText(this, "Future dates will need to have the conversion rate manually specified", Toast.LENGTH_LONG);
         }
     }
 
@@ -529,12 +622,6 @@ public class ExpenditureEditActivity extends AppCompatActivity
     private void updateConversionViews()
     {
         _totalConvertedAmount = _amount * _rateNumber;
-        _totalConvertedAmountTextView.setText(Currencies.formatCurrency(Currencies.default_currency, _totalConvertedAmount));
-
-        String generatedNote = Currencies.formatCurrency(_symbolSpinner.getSelectedItemPosition(), _amount) + " -> " +
-                Currencies.formatCurrency(Currencies.default_currency, _totalConvertedAmount) + "\n@ " +
-                Currencies.formatCurrency(_symbolSpinner.getSelectedItemPosition(), 1.00f) + " -> " +
-                Currencies.formatCurrency(Currencies.default_currency, _rateNumber);
-        _generatedNoteEditText.setText(generatedNote);
+        _totalConvertedAmountTextView.setText(Currencies.formatCurrency(Currencies.integer[Currencies.default_currency], _totalConvertedAmount));
     }
 }

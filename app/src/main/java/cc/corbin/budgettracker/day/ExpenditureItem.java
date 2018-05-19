@@ -2,9 +2,11 @@ package cc.corbin.budgettracker.day;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -61,25 +63,27 @@ public class ExpenditureItem extends LinearLayout
     private void refresh(View view)
     {
         final TextView currencyView = view.findViewById(R.id.currencyView);
-        currencyView.setText(Currencies.symbols[_expenditure.getCurrency()]);
+        currencyView.setText(Currencies.symbols[Currencies.default_currency]);
+
+        if (_expenditure.getBaseCurrency() != Currencies.default_currency)
+        {
+            final TextView conversionTextView = view.findViewById(R.id.conversionTextView);
+            conversionTextView.setText("(" + Currencies.formatCurrency(_expenditure.getBaseCurrency(), _expenditure.getBaseAmount())
+                    + " @ " + _expenditure.getConversionRate() + ")");
+        }
+        else { }
 
         final TextView categoryView = view.findViewById(R.id.categoryView);
         categoryView.setText(_expenditure.getExpenseType());
 
         final TextView costView = view.findViewById(R.id.costView);
-        String cost = Currencies.formatCurrency(Currencies.integer[_expenditure.getCurrency()], _expenditure.getAmount());
+        String cost = Currencies.formatCurrency(Currencies.integer[Currencies.default_currency], _expenditure.getAmount()); // TODO - Format better
         costView.setText(cost);
 
-        final Button noteButton = view.findViewById(R.id.noteButton);
+        final TextView noteTextView = view.findViewById(R.id.noteTextView);
         final String note = _expenditure.getNote();
-        if (note.length() == 0)
-        {
-            noteButton.setForegroundTintList(getContext().getColorStateList(R.color.translucent));
-        }
-        else
-        {
-            noteButton.setForegroundTintList(getContext().getColorStateList(R.color.black));
-        }
+        noteTextView.setVisibility((note.length() == 0) ? GONE : VISIBLE);
+        noteTextView.setText(note);
     }
 
     public ExpenditureEntity getExpenditure()
