@@ -44,8 +44,6 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
     private List<TableCell> _remainingCells;
     private TableCell _totalRemainingCell;
 
-    private List<BudgetEntity> _budgetEntities;
-
     private int _weeks;
 
     public MonthWeeklySummaryTable(Context context)
@@ -55,6 +53,8 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
 
         _month = 1;
         _year = 2018;
+
+        createTable();
     }
 
     public MonthWeeklySummaryTable(Context context, AttributeSet attrs)
@@ -81,6 +81,8 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
         {
             a.recycle();
         }
+
+        createTable();
     }
 
     public MonthWeeklySummaryTable(Context context, int month, int year)
@@ -90,6 +92,8 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
 
         _month = month;
         _year = year;
+
+        createTable();
     }
 
     public void onClick(View v)
@@ -104,7 +108,7 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
         ((MonthViewActivity)_context).finish();
     }
 
-    public void setup(List<ExpenditureEntity> monthExpenditures)
+    private void createTable()
     {
         _expenses = new ArrayList<Float>();
         _expenseCells = new ArrayList<TableCell>();
@@ -169,13 +173,15 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
         budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
         remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
 
-        total = getWeekTotal(monthExpenditures, 0);
+        total = 0.0f; //getWeekTotal(monthExpenditures, 0);
         monthTotal += total;
 
         weekCell.setText("Week 0"); // TODO Internationalize
         expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
         budgetCell.setText("---");
         remainingCell.setText("---");
+
+        expenseCell.setLoading(true);
 
         _expenses.add(total);
         _expenseCells.add(expenseCell);
@@ -197,13 +203,17 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
             remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
             weekCell.setId(++id);
 
-            total = getWeekTotal(monthExpenditures, i+1);
+            total = 0.0f; //getWeekTotal(monthExpenditures, i+1);
             monthTotal += total;
 
             weekCell.setText("Week " + (i+1)); // TODO Internationalize
             expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
             budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, budget));
             remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, (budget - total)));
+
+            expenseCell.setLoading(true);
+            budgetCell.setLoading(true);
+            remainingCell.setLoading(true);
 
             _expenses.add(total);
             _expenseCells.add(expenseCell);
@@ -270,7 +280,12 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
         budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, monthBudget));
         remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, (monthBudget - monthTotal)));
 
+        expenseCell.setLoading(true);
+        budgetCell.setLoading(true);
+        remainingCell.setLoading(true);
+
         _totalExpenses = monthTotal;
+        _totalExpenseCell = expenseCell;
         _totalBudgetCell = budgetCell;
         _totalRemainingCell = remainingCell;
 
@@ -324,9 +339,25 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
         return total;
     }
 
+    public void updateExpenditures(List<ExpenditureEntity> expenditureEntities)
+    {
+        int size = _expenseCells.size();
+        float total = 0.0f;
+        for (int i = 0; i < size; i++)
+        {
+            float weekTotal = getWeekTotal(expenditureEntities, i);
+            total += weekTotal;
+            _expenses.set(i, weekTotal);
+            _expenseCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, weekTotal));
+            _expenseCells.get(i).setLoading(false);
+        }
+        _totalExpenses = total;
+        _totalExpenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+        _totalExpenseCell.setLoading(false);
+    }
+
     public void updateBudgets(List<BudgetEntity> budgetEntities)
     {
-        _budgetEntities = budgetEntities;
         if (_budgetCells != null)
         {
             int size = budgetEntities.size();
@@ -340,24 +371,17 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
             for (int i = 1; i < _weeks+1; i++) // TODO
             {
                 _budgetCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, budget));
+                _budgetCells.get(i).setLoading(false);
                 float remaining = budget - _expenses.get(i);
                 _remainingCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
+                _remainingCells.get(i).setLoading(false);
             }
             _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+            _totalBudgetCell.setLoading(false);
             float totalRemaining = total - _totalExpenses;
             _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
+            _totalRemainingCell.setLoading(false);
         }
         else { }
-    }
-
-    public void updateExpenditures(List<ExpenditureEntity> expenditureEntities)
-    {
-        int size = _expenseCells.size();
-        for (int i = 0; i < size; i++)
-        {
-            float total = getWeekTotal(expenditureEntities, 0);
-            _expenseCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, total));
-        }
-        updateBudgets(_budgetEntities);
     }
 }

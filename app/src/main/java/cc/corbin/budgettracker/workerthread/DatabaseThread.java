@@ -126,60 +126,80 @@ public class DatabaseThread extends Thread
         }
     }
 
+    private BudgetEntity getMonthCategoryBudget(int month, int year, String category)
+    {
+        BudgetEntity entity;
+
+        List<BudgetEntity> catEntities = _dbB.budgetDao().getCategoryBeforeMonth(year, month, category);
+        if (catEntities.size() == 0)
+        {
+            BudgetEntity newEntity = new BudgetEntity();
+            newEntity.setExpenseType(category);
+            newEntity.setCurrency(Currencies.default_currency);
+            entity = newEntity;
+        }
+        else
+        {
+            BudgetEntity maxEntity = catEntities.get(0);
+            int maxYear = maxEntity.getYear();
+            int maxMonth = maxEntity.getMonth();
+            int size = catEntities.size();
+            for (int i = 0; i < size; i++)
+            {
+                BudgetEntity catEntity = catEntities.get(i);
+                if (catEntity.getYear() > maxYear)
+                {
+                    maxMonth = catEntity.getMonth();
+                    maxYear = catEntity.getYear();
+                    maxEntity = catEntity;
+                }
+                else if (catEntity.getYear() == maxYear)
+                {
+                    if (catEntity.getMonth() > maxMonth)
+                    {
+                        maxMonth = catEntity.getMonth();
+                        maxEntity = catEntity;
+                    }
+                    else { }
+                }
+                else { }
+            }
+            entity = maxEntity;
+        }
+
+        return entity;
+    }
+
     private void processBudEvent(BudgetDatabaseEvent event)
     {
-        Log.e(TAG, ""+event.getEventType().name());
         switch (event.getEventType())
         {
             case query:
                 List<BudgetEntity> entities = null;
+                String[] categories = Categories.getCategories();
+                int month;
+                int year;
                 switch (event.getQueryType())
                 {
                     case month:
                         entities = new ArrayList<BudgetEntity>();
-                        String[] categories = Categories.getCategories();
+                        month = event.getMonth();
+                        year = event.getYear();
                         for (int i = 0; i < categories.length; i++)
                         {
-                            List<BudgetEntity> catEntities = _dbB.budgetDao().getCategoryBeforeMonth(event.getYear(), event.getMonth(), categories[i]);
-                            if (catEntities.size() == 0)
-                            {
-                                BudgetEntity newEntity = new BudgetEntity();
-                                newEntity.setExpenseType(categories[i]);
-                                newEntity.setCurrency(Currencies.default_currency);
-                                entities.add(newEntity);
-                            }
-                            else
-                            {
-                                BudgetEntity maxEntity = catEntities.get(0);
-                                int maxYear = maxEntity.getYear();
-                                int maxMonth = maxEntity.getMonth();
-                                int size = catEntities.size();
-                                for (int j = 1; j < size; j++)
-                                {
-                                    BudgetEntity catEntity = catEntities.get(i);
-                                    if (catEntity.getYear() > maxYear)
-                                    {
-                                        maxMonth = catEntity.getMonth();
-                                        maxYear = catEntity.getYear();
-                                        maxEntity = catEntity;
-                                    }
-                                    else if (catEntity.getYear() == maxYear)
-                                    {
-                                        if (catEntity.getMonth() > maxMonth)
-                                        {
-                                            maxMonth = catEntity.getMonth();
-                                            maxEntity = catEntity;
-                                        }
-                                        else { }
-                                    }
-                                    else { }
-                                }
-                                entities.add(maxEntity);
-                            }
+                            entities.add(getMonthCategoryBudget(month, year, categories[i]));
                         }
                         break;
                     case year:
-                        entities = _dbB.budgetDao().getYear(event.getYear());
+                        entities = new ArrayList<BudgetEntity>();
+                        year = event.getYear();
+                        for (int i = 1; i < 12+1; i++)
+                        {
+                            for (int j = 0; j < categories.length; j++)
+                            {
+                                entities.add(getMonthCategoryBudget(i, year, categories[j]));
+                            }
+                        }
                         break;
                 }
                 event.setEntities(entities);

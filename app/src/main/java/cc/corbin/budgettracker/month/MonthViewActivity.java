@@ -123,10 +123,9 @@ public class MonthViewActivity extends AppCompatActivity
 
         _monthExps = new MutableLiveData<List<ExpenditureEntity>>();
         _monthExps.observe(this, entityObserver);
-        _viewModel.getMonth(_monthExps);
-
         _budgets = new MutableLiveData<List<BudgetEntity>>();
         _budgets.observe(this, budgetObserver);
+        _viewModel.getMonth(_monthExps);
 
         TextView header = findViewById(R.id.monthView);
         DateFormatSymbols dfs = new DateFormatSymbols();
@@ -142,6 +141,14 @@ public class MonthViewActivity extends AppCompatActivity
             }
         });
 
+        FrameLayout monthsWeeklyContainer = findViewById(R.id.monthWeeklyHolder);
+        _weeklyTable = new MonthWeeklySummaryTable(this, _month, _year);
+        monthsWeeklyContainer.addView(_weeklyTable);
+
+        FrameLayout monthsCategoryContainer = findViewById(R.id.monthCategoryHolder);
+        _categoryTable = new MonthCategorySummaryTable(this, _month, _year);
+        monthsCategoryContainer.addView(_categoryTable);
+
         FrameLayout budgetContainer = findViewById(R.id.monthBudgetHolder);
         _budgetTable = new MonthBudgetTable(this, _month, _year);
         budgetContainer.addView(_budgetTable);
@@ -151,28 +158,23 @@ public class MonthViewActivity extends AppCompatActivity
 
     private void monthLoaded(List<ExpenditureEntity> expenditureEntities)
     {
+        _weeklyTable.updateExpenditures(expenditureEntities);
+        _categoryTable.updateExpenditures(expenditureEntities);
         if (!_loaded)
         {
-            FrameLayout monthsWeeklyContainer = findViewById(R.id.monthWeeklyHolder);
-            _weeklyTable = new MonthWeeklySummaryTable(this, _month, _year);
-            _weeklyTable.setup(expenditureEntities);
-            monthsWeeklyContainer.addView(_weeklyTable);
-
-            FrameLayout monthsCategoryContainer = findViewById(R.id.monthCategoryHolder);
-            _categoryTable = new MonthCategorySummaryTable(this, _month, _year);
-            _categoryTable.setup(expenditureEntities);
-            monthsCategoryContainer.addView(_categoryTable);
-
             createExtrasAndAdjustmentsTables(expenditureEntities);
 
             // Create the other tables first
             _viewModel.getMonthBudget(_budgets);
         }
-        else
-        {
-            _weeklyTable.updateExpenditures(expenditureEntities);
-            _categoryTable.updateExpenditures(expenditureEntities);
-        }
+        else { }
+    }
+
+    private void refreshTables(List<BudgetEntity> entities)
+    {
+        _weeklyTable.updateBudgets(entities);
+        _categoryTable.updateBudgets(entities);
+        _budgetTable.refreshTable(entities);
     }
 
     public void onRequestPermissionsResult(int requestCode,
@@ -303,13 +305,6 @@ public class MonthViewActivity extends AppCompatActivity
         _budgetTable.lockTable();
 
         _popupWindow.dismiss();
-    }
-
-    private void refreshTables(List<BudgetEntity> entities)
-    {
-        _weeklyTable.updateBudgets(entities);
-        _categoryTable.updateBudgets(entities);
-        _budgetTable.refreshTable(entities);
     }
 
     private void createExtrasAndAdjustmentsTables(List<ExpenditureEntity> expenditureEntities)

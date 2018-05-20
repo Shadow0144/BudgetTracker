@@ -19,6 +19,7 @@ import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
+import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.R;
@@ -43,6 +44,10 @@ public class YearViewActivity extends AppCompatActivity
 
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _yearExps;
+    private MutableLiveData<List<BudgetEntity>> _budgets;
+
+    private YearMonthlySummaryTable _monthlyTable;
+    private YearCategorySummaryTable _categoryTable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -71,9 +76,29 @@ public class YearViewActivity extends AppCompatActivity
             }
         };
 
+        final Observer<List<BudgetEntity>> budgetObserver = new Observer<List<BudgetEntity>>()
+        {
+            @Override
+            public void onChanged(@Nullable List<BudgetEntity> budgetEntities)
+            {
+                if (budgetEntities != null) // returning from a query
+                {
+                    refreshTables(budgetEntities);
+                    //_loaded = true;
+                }
+                else // else - returning from an add / edit / remove
+                {
+                    // Call for a refresh
+                    _viewModel.getMonthBudget(_budgets);
+                }
+            }
+        };
+
         _yearExps = new MutableLiveData<List<ExpenditureEntity>>();
-        _viewModel.getYear(_yearExps);
         _yearExps.observe(this, entityObserver);
+        _budgets = new MutableLiveData<List<BudgetEntity>>();
+        _budgets.observe(this, budgetObserver);
+        _viewModel.getYear(_yearExps);
 
         TextView header = findViewById(R.id.yearView);
         DateFormatSymbols dfs = new DateFormatSymbols();
@@ -88,6 +113,14 @@ public class YearViewActivity extends AppCompatActivity
             }
         });
 
+        FrameLayout yearMonthlyContainer = findViewById(R.id.yearMonthlyHolder);
+        _monthlyTable = new YearMonthlySummaryTable(this, _year);
+        yearMonthlyContainer.addView(_monthlyTable);
+
+        FrameLayout yearsCategoryContainer = findViewById(R.id.yearCategoryHolder);
+        _categoryTable = new YearCategorySummaryTable(this, _year);
+        yearsCategoryContainer.addView(_categoryTable);
+
         FrameLayout budgetContainer = findViewById(R.id.yearBudgetHolder);
         TableLayout budgetTable = new TableLayout(this);
         setupBudgetTable(budgetTable);
@@ -98,15 +131,16 @@ public class YearViewActivity extends AppCompatActivity
 
     private void yearLoaded(List<ExpenditureEntity> expenditureEntities)
     {
-        FrameLayout yearMonthlyContainer = findViewById(R.id.yearMonthlyHolder);
-        YearMonthlySummaryTable monthlyTable = new YearMonthlySummaryTable(this, _year);
-        monthlyTable.setup(expenditureEntities);
-        yearMonthlyContainer.addView(monthlyTable);
+        _monthlyTable.updateExpenditures(expenditureEntities);
+        _categoryTable.updateExpenditures(expenditureEntities);
 
-        FrameLayout yearsCategoryContainer = findViewById(R.id.yearCategoryHolder);
-        YearCategorySummaryTable categoryTable = new YearCategorySummaryTable(this, _year);
-        categoryTable.setup(expenditureEntities);
-        yearsCategoryContainer.addView(categoryTable);
+        _viewModel.getYearBudget(_budgets);
+    }
+
+    private void refreshTables(List<BudgetEntity> entities)
+    {
+        _monthlyTable.updateBudgets(entities);
+        _categoryTable.updateBudgets(entities);
     }
 
     public void onRequestPermissionsResult(int requestCode,

@@ -60,6 +60,12 @@ public class SettingsActivity extends AppCompatActivity
     private MutableLiveData<List<ExpenditureEntity>> _exps;
     private MutableLiveData<List<BudgetEntity>> _budgets;
 
+    // Force updates in other activities after a change has occurred
+    public static boolean grandTotalNeedsUpdating = false;
+    public static boolean yearNeedsUpdating = false;
+    public static boolean monthNeedsUpdating = false;
+    public static boolean dayNeedsUpdating = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -183,12 +189,18 @@ public class SettingsActivity extends AppCompatActivity
 
     private void expendituresUpdated()
     {
-
+        grandTotalNeedsUpdating = true;
+        yearNeedsUpdating = true;
+        monthNeedsUpdating = true;
+        dayNeedsUpdating = true;
     }
 
     private void budgetsUpdated()
     {
-
+        grandTotalNeedsUpdating = true;
+        yearNeedsUpdating = true;
+        monthNeedsUpdating = true;
+        dayNeedsUpdating = true;
     }
 
     public void cancel(View v)

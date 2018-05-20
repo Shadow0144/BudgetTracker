@@ -9,12 +9,15 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 
 import java.text.DateFormatSymbols;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.TableCell;
+import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.month.MonthViewActivity;
@@ -31,12 +34,28 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
 
     private int _year;
 
+    private List<Float> _expenses;
+    private float _totalExpenses;
+
+    private List<TableCell> _expenseCells;
+    private TableCell _totalExpenseCell;
+
+    private List<TableCell> _budgetCells;
+    private TableCell _totalBudgetCell;
+
+    private List<TableCell> _remainingCells;
+    private TableCell _totalRemainingCell;
+
+    private int _months;
+
     public YearMonthlySummaryTable(Context context)
     {
         super(context);
         _context = context;
 
         _year = 2018;
+
+        createTable();
     }
 
     public YearMonthlySummaryTable(Context context, AttributeSet attrs)
@@ -61,6 +80,8 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
         {
             a.recycle();
         }
+
+        createTable();
     }
 
     public YearMonthlySummaryTable(Context context, int year)
@@ -69,12 +90,13 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
         _context = context;
 
         _year = year;
+
+        createTable();
     }
 
     public void onClick(View v)
     {
         Intent intent = new Intent(_context, MonthViewActivity.class);
-        Calendar date = Calendar.getInstance();
         int month = v.getId();
         intent.putExtra(MonthViewActivity.MONTH_INTENT, month);
         intent.putExtra(MonthViewActivity.YEAR_INTENT, _year);
@@ -83,8 +105,13 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
         ((YearViewActivity)_context).finish();
     }
 
-    public void setup(List<ExpenditureEntity> yearExpenditures)
+    private void createTable()
     {
+        _expenses = new ArrayList<Float>();
+        _expenseCells = new ArrayList<TableCell>();
+        _budgetCells = new ArrayList<TableCell>();
+        _remainingCells = new ArrayList<TableCell>();
+
         // Setup the table
         setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         setStretchAllColumns(true);
@@ -102,6 +129,8 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
         titleCell.setLayoutParams(params);
         titleRow.addView(titleCell);
         addView(titleRow);
+
+        _months = 12;
 
         // Setup the header
         TableRow headerRow = new TableRow(_context);
@@ -138,13 +167,22 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
             budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
             remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
 
-            float total = getMonthTotal(yearExpenditures, i+1);
+            float total = 0.0f; //getMonthTotal(yearExpenditures, i+1);
             yearTotal += total;
+
+            _expenses.add(total);
+            _expenseCells.add(expenseCell);
+            _budgetCells.add(budgetCell);
+            _remainingCells.add(remainingCell);
 
             monthCell.setText(months[i]);
             expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
             budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, budget));
             remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, (budget - total)));
+
+            expenseCell.setLoading(true);
+            budgetCell.setLoading(true);
+            remainingCell.setLoading(true);
 
             monthCell.setId(i + 1);
             monthCell.setOnClickListener(this);
@@ -159,14 +197,22 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
         // Add the final totals row
         TableRow totalRow = new TableRow(_context);
         monthCell = new TableCell(_context, TableCell.HEADER_CELL);
-        expenseCell = new TableCell(_context, TableCell.DEFAULT_CELL);
-        budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
-        remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+        expenseCell = new TableCell(_context, TableCell.BOLD_CELL);
+        budgetCell = new TableCell(_context, TableCell.BOLD_CELL);
+        remainingCell = new TableCell(_context, TableCell.BOLD_CELL);
+
+        _totalExpenseCell = expenseCell;
+        _totalBudgetCell = budgetCell;
+        _totalRemainingCell = remainingCell;
 
         monthCell.setText(R.string.total);
         expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, yearTotal));
         budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, yearBudget));
         remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, (yearBudget - yearTotal)));
+
+        expenseCell.setLoading(true);
+        budgetCell.setLoading(true);
+        remainingCell.setLoading(true);
 
         totalRow.addView(monthCell);
         totalRow.addView(expenseCell);
@@ -190,5 +236,52 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
         }
 
         return total;
+    }
+
+    public void updateExpenditures(List<ExpenditureEntity> expenditureEntities)
+    {
+        float total = 0.0f;
+        int size = _expenseCells.size();
+        for (int i = 0; i < size; i++)
+        {
+            float monthTotal = getMonthTotal(expenditureEntities, i);
+            total += monthTotal;
+            _expenses.set(i, monthTotal);
+            _expenseCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, monthTotal));
+            _expenseCells.get(i).setLoading(false);
+        }
+        _totalExpenses = total;
+        _totalExpenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+        _totalExpenseCell.setLoading(false);
+    }
+
+    public void updateBudgets(List<BudgetEntity> budgetEntities)
+    {
+        if (_budgetCells != null)
+        {
+            float total = 0.0f;
+            int catSize = Categories.getCategories().length;
+            for (int i = 0; i < _months; i++)
+            {
+                float monthTotal = 0.0f;
+                for (int j = 0; j < catSize; j++)
+                {
+                    BudgetEntity entity = budgetEntities.get((i*catSize)+j);
+                    monthTotal += entity.getAmount();
+                    total += entity.getAmount();
+                }
+                _budgetCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, monthTotal));
+                _budgetCells.get(i).setLoading(false);
+                float remaining = monthTotal - _expenses.get(i);
+                _remainingCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
+                _remainingCells.get(i).setLoading(false);
+            }
+            _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+            _totalBudgetCell.setLoading(false);
+            float totalRemaining = total - _totalExpenses;
+            _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
+            _totalRemainingCell.setLoading(false);
+        }
+        else { }
     }
 }

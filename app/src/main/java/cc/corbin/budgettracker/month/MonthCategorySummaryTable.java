@@ -42,8 +42,6 @@ public class MonthCategorySummaryTable extends TableLayout
     private List<TableCell> _remainingCells;
     private TableCell _totalRemainingCell;
 
-    private List<BudgetEntity> _budgetEntities;
-
     private String[] _categories;
 
     public MonthCategorySummaryTable(Context context)
@@ -53,6 +51,8 @@ public class MonthCategorySummaryTable extends TableLayout
 
         _month = 1;
         _year = 2018;
+
+        createTable();
     }
 
     public MonthCategorySummaryTable(Context context, AttributeSet attrs)
@@ -79,6 +79,8 @@ public class MonthCategorySummaryTable extends TableLayout
         {
             a.recycle();
         }
+
+        createTable();
     }
 
     public MonthCategorySummaryTable(Context context, int month, int year)
@@ -88,9 +90,11 @@ public class MonthCategorySummaryTable extends TableLayout
 
         _month = month;
         _year = year;
+
+        createTable();
     }
 
-    public void setup(List<ExpenditureEntity> monthExpenditures)
+    private void createTable()
     {
         _expenses = new ArrayList<Float>();
         _expenseCells = new ArrayList<TableCell>();
@@ -155,7 +159,7 @@ public class MonthCategorySummaryTable extends TableLayout
             budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
             remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
 
-            float total = getCategoryTotal(monthExpenditures, _categories[i]);
+            float total = 0.0f; //getCategoryTotal(monthExpenditures, _categories[i]);
             monthTotal += total;
 
             _expenses.add(total);
@@ -167,6 +171,10 @@ public class MonthCategorySummaryTable extends TableLayout
             expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
             budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, budget[i]));
             remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, (budget[i] - total)));
+
+            expenseCell.setLoading(true);
+            budgetCell.setLoading(true);
+            remainingCell.setLoading(true);
 
             categoryRow.addView(categoryCell);
             categoryRow.addView(expenseCell);
@@ -186,6 +194,10 @@ public class MonthCategorySummaryTable extends TableLayout
         expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, monthTotal));
         budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, monthBudget));
         remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, (monthBudget - monthTotal)));
+
+        expenseCell.setLoading(true);
+        budgetCell.setLoading(true);
+        remainingCell.setLoading(true);
 
         _totalExpenses = monthTotal;
         _totalExpenseCell = expenseCell;
@@ -216,9 +228,25 @@ public class MonthCategorySummaryTable extends TableLayout
         return total;
     }
 
+    public void updateExpenditures(List<ExpenditureEntity> expenditureEntities)
+    {
+        float total = 0.0f;
+        int size = _expenseCells.size();
+        for (int i = 0; i < size; i++)
+        {
+            float categoryTotal = getCategoryTotal(expenditureEntities, _categories[i]);
+            _expenses.set(i, categoryTotal);
+            _expenseCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, categoryTotal));
+            _expenseCells.get(i).setLoading(false);
+            total += categoryTotal;
+        }
+        _totalExpenses = total;
+        _totalExpenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+        _totalExpenseCell.setLoading(false);
+    }
+
     public void updateBudgets(List<BudgetEntity> budgetEntities)
     {
-        _budgetEntities = budgetEntities;
         if (_budgetCells != null)
         {
             int size = _budgetCells.size();
@@ -227,27 +255,18 @@ public class MonthCategorySummaryTable extends TableLayout
             {
                 BudgetEntity entity = budgetEntities.get(i);
                 _budgetCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, entity.getAmount()));
+                _budgetCells.get(i).setLoading(false);
                 total += entity.getAmount();
                 float remaining = entity.getAmount() - _expenses.get(i);
                 _remainingCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
+                _remainingCells.get(i).setLoading(false);
             }
             _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+            _totalBudgetCell.setLoading(false);
             float totalRemaining = total - _totalExpenses;
             _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
+            _totalRemainingCell.setLoading(false);
         }
         else { }
-    }
-
-    public void updateExpenditures(List<ExpenditureEntity> expenditureEntities)
-    {
-        float total = 0.0f;
-        int size = _expenseCells.size();
-        for (int i = 0; i < size; i++)
-        {
-            float categoryTotal = getCategoryTotal(expenditureEntities, _categories[i]);
-            _expenseCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, categoryTotal));
-            total += categoryTotal;
-        }
-        _totalExpenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
     }
 }
