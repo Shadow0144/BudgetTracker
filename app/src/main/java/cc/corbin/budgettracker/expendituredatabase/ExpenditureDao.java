@@ -21,11 +21,14 @@ public interface ExpenditureDao
     @Query("SELECT * FROM expenditureentity WHERE year = (:year) AND month = (:month) AND day = (:day)")
     List<ExpenditureEntity> getDay(int year, int month, int day);
 
-    @Query("SELECT * FROM expenditureentity WHERE year = (:year) AND month = (:month)")
+    @Query("SELECT * FROM expenditureentity WHERE year = (:year) AND month = (:month) ORDER BY day ASC")
     List<ExpenditureEntity> getMonth(int year, int month);
 
-    @Query("SELECT * FROM expenditureentity WHERE year = (:year)")
+    @Query("SELECT * FROM expenditureentity WHERE year = (:year) ORDER BY month, day ASC")
     List<ExpenditureEntity> getYear(int year);
+
+    @Query("SELECT * FROM expenditureentity ORDER BY year, month, day ASC")
+    List<ExpenditureEntity> getTotal();
 
     @Query("SELECT * FROM expenditureentity WHERE (" +
             "year = (:year) AND " +

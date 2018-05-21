@@ -91,7 +91,7 @@ public class DatabaseThread extends Thread
                         entities = _dbE.expenditureDao().getYear(event.getYear());
                         break;
                     case total:
-                        entities = _dbE.expenditureDao().getAll();
+                        entities = _dbE.expenditureDao().getTotal();
                         break;
                 }
                 event.setEntities(entities);
@@ -200,6 +200,10 @@ public class DatabaseThread extends Thread
                                 entities.add(getMonthCategoryBudget(i, year, categories[j]));
                             }
                         }
+                        break;
+                    case total:
+                        entities = new ArrayList<BudgetEntity>();
+
                         break;
                 }
                 event.setEntities(entities);

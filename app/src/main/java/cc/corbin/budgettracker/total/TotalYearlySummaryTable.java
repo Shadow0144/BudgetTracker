@@ -7,11 +7,13 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 
 import java.text.DateFormatSymbols;
+import java.util.ArrayList;
 import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.TableCell;
+import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 
 /**
@@ -24,10 +26,21 @@ public class TotalYearlySummaryTable extends TableLayout
 
     private Context _context;
 
+    private List<Float> _expenses;
+    private float _totalExpenses;
+
+    private List<TableCell> _budgetCells;
+    private TableCell _totalBudgetCell;
+
+    private List<TableCell> _remainingCells;
+    private TableCell _totalRemainingCell;
+
     public TotalYearlySummaryTable(Context context)
     {
         super(context);
         _context = context;
+
+        createTable();
     }
 
     public TotalYearlySummaryTable(Context context, AttributeSet attrs)
@@ -39,15 +52,73 @@ public class TotalYearlySummaryTable extends TableLayout
                 attrs,
                 R.styleable.MonthTable,
                 0, 0);
+
+        createTable();
     }
 
-    public void setup(List<ExpenditureEntity> yearExpenditures)
+    private void createTable()
     {
         // Setup the table
         setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         setStretchAllColumns(true);
         setColumnShrinkable(0, true);
 
+        createHeaders();
+
+        // Setup the loading bar
+        /*TableRow loadRow = new TableRow(_context);
+        TableCell loadCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+        TableRow.LayoutParams params = new TableRow.LayoutParams(
+                TableRow.LayoutParams.MATCH_PARENT,
+                TableRow.LayoutParams.WRAP_CONTENT
+        );
+        params.span = 4;
+        loadCell.setLayoutParams(params);
+        loadCell.setLoading(true);
+        loadRow.addView(loadCell);
+        addView(loadRow);*/
+
+        // Setup the loading row
+        TableRow tableRow = new TableRow(_context);
+        TableCell yearCell = new TableCell(_context, TableCell.HEADER_CELL);
+        TableCell expenseCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+        TableCell budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+        TableCell remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+
+        yearCell.setLoading(true);
+        expenseCell.setLoading(true);
+        budgetCell.setLoading(true);
+        remainingCell.setLoading(true);
+
+        tableRow.addView(yearCell);
+        tableRow.addView(expenseCell);
+        tableRow.addView(budgetCell);
+        tableRow.addView(remainingCell);
+
+        addView(tableRow);
+
+        // Setup the total row
+        tableRow = new TableRow(_context);
+        yearCell = new TableCell(_context, TableCell.HEADER_CELL);
+        expenseCell = new TableCell(_context, TableCell.BOLD_CELL);
+        budgetCell = new TableCell(_context, TableCell.BOLD_CELL);
+        remainingCell = new TableCell(_context, TableCell.BOLD_CELL);
+
+        yearCell.setText(R.string.total);
+        expenseCell.setLoading(true);
+        budgetCell.setLoading(true);
+        remainingCell.setLoading(true);
+
+        tableRow.addView(yearCell);
+        tableRow.addView(expenseCell);
+        tableRow.addView(budgetCell);
+        tableRow.addView(remainingCell);
+
+        addView(tableRow);
+    }
+
+    private void createHeaders()
+    {
         // Setup the title
         TableRow titleRow = new TableRow(_context);
         TableCell titleCell = new TableCell(_context, TableCell.TITLE_CELL);
@@ -63,87 +134,122 @@ public class TotalYearlySummaryTable extends TableLayout
 
         // Setup the header
         TableRow headerRow = new TableRow(_context);
-        TableCell monthCell = new TableCell(_context, TableCell.HEADER_CELL);
+        TableCell yearCell = new TableCell(_context, TableCell.HEADER_CELL);
         TableCell expenseCell = new TableCell(_context, TableCell.HEADER_CELL);
         TableCell budgetCell = new TableCell(_context, TableCell.HEADER_CELL);
         TableCell remainingCell = new TableCell(_context, TableCell.HEADER_CELL);
 
         // Set the text
-        monthCell.setText("Month");
+        yearCell.setText("Year");
         expenseCell.setText("Spent");
         budgetCell.setText("Budget");
         remainingCell.setText("Remaining");
 
         // Add the header row
-        headerRow.addView(monthCell);
+        headerRow.addView(yearCell);
         headerRow.addView(expenseCell);
         headerRow.addView(budgetCell);
         headerRow.addView(remainingCell);
         addView(headerRow);
-
-        DateFormatSymbols dfs = new DateFormatSymbols();
-        String[] months = dfs.getMonths();
-
-        float yearBudget = 0.0f;
-        float budget = yearBudget / 12;
-
-        float yearTotal = 0.0f;
-        for (int i = 0; i < 12; i++) // Add a row for each month
-        {
-            TableRow weekRow = new TableRow(_context);
-            monthCell = new TableCell(_context, TableCell.HEADER_CELL);
-            expenseCell = new TableCell(_context, TableCell.DEFAULT_CELL);
-            budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
-            remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
-
-            float total = getMonthTotal(yearExpenditures, i+1);
-            yearTotal += total;
-
-            monthCell.setText(months[i]);
-            expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
-            budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, budget));
-            remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, (budget - total)));
-
-            weekRow.addView(monthCell);
-            weekRow.addView(expenseCell);
-            weekRow.addView(budgetCell);
-            weekRow.addView(remainingCell);
-            addView(weekRow);
-        }
-
-        // Add the final totals row
-        TableRow totalRow = new TableRow(_context);
-        monthCell = new TableCell(_context, TableCell.HEADER_CELL);
-        expenseCell = new TableCell(_context, TableCell.DEFAULT_CELL);
-        budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
-        remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
-
-        monthCell.setText(R.string.total);
-        expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, yearTotal));
-        budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, yearBudget));
-        remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, (yearBudget - yearTotal)));
-
-        totalRow.addView(monthCell);
-        totalRow.addView(expenseCell);
-        totalRow.addView(budgetCell);
-        totalRow.addView(remainingCell);
-        addView(totalRow);
     }
 
-    private float getMonthTotal(List<ExpenditureEntity> expenditureEntities, int monthNum)
+    public void updateExpenditures(List<ExpenditureEntity> expenditureEntities)
     {
-        float total = 0.0f;
-        int count = expenditureEntities.size();
-        for (int i = 0; i < count; i++)
+        if (expenditureEntities != null)
         {
-            ExpenditureEntity exp = expenditureEntities.get(i);
-            if (exp.getMonth() == monthNum) // Items are not sorted
+            int size = expenditureEntities.size();
+            if (size > 0)
             {
-                total += exp.getAmount();
+                removeAllViews();
+
+                createHeaders();
+
+                _expenses = new ArrayList<Float>();
+                _budgetCells = new ArrayList<TableCell>();
+                _remainingCells = new ArrayList<TableCell>();
+
+                int start = expenditureEntities.get(0).getYear();
+                int end = expenditureEntities.get(size - 1).getYear();
+                int year = start;
+                int index = 0;
+
+                float totalTotal = 0.0f;
+
+                while (year <= end)
+                {
+                    // One row per year
+                    TableRow tableRow = new TableRow(_context);
+                    TableCell yearCell = new TableCell(_context, TableCell.HEADER_CELL);
+                    TableCell expenseCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+                    TableCell budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+                    TableCell remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+
+                    float yearTotal = 0.0f;
+                    int entityYear = 0;
+                    do
+                    {
+                        if (index < size)
+                        {
+                            ExpenditureEntity entity = expenditureEntities.get(index);
+                            yearTotal += entity.getAmount();
+                            entityYear = entity.getYear();
+                            index++;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    while (entityYear == year && index < size);
+
+                    yearCell.setText(""+(year++));
+                    expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, yearTotal));
+                    budgetCell.setLoading(true);
+                    remainingCell.setLoading(true);
+
+                    _expenses.add(yearTotal);
+                    _budgetCells.add(budgetCell);
+                    _remainingCells.add(remainingCell);
+
+                    tableRow.addView(yearCell);
+                    tableRow.addView(expenseCell);
+                    tableRow.addView(budgetCell);
+                    tableRow.addView(remainingCell);
+
+                    addView(tableRow);
+
+                    totalTotal += yearTotal;
+                } // end while (year <= end)
+
+                TableRow tableRow = new TableRow(_context);
+                TableCell yearCell = new TableCell(_context, TableCell.HEADER_CELL);
+                TableCell expenseCell = new TableCell(_context, TableCell.BOLD_CELL);
+                TableCell budgetCell = new TableCell(_context, TableCell.BOLD_CELL);
+                TableCell remainingCell = new TableCell(_context, TableCell.BOLD_CELL);
+
+                yearCell.setText(R.string.total);
+                expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalTotal));
+                budgetCell.setLoading(true);
+                remainingCell.setLoading(true);
+
+                _totalExpenses = totalTotal;
+                _totalBudgetCell = budgetCell;
+                _totalRemainingCell = remainingCell;
+
+                tableRow.addView(yearCell);
+                tableRow.addView(expenseCell);
+                tableRow.addView(budgetCell);
+                tableRow.addView(remainingCell);
+
+                addView(tableRow);
             }
             else { }
         }
+        else { }
+    }
 
-        return total;
+    public void updateBudgets(List<BudgetEntity> budgetEntities)
+    {
+        /// TODO
     }
 }

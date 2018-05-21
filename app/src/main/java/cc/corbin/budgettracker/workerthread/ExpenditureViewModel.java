@@ -169,6 +169,12 @@ public class ExpenditureViewModel extends ViewModel
         _budEvents.add(event);
     }
 
+    public void getTotalBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData)
+    {
+        BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.query, _year, _month, BudgetDatabaseEvent.QueryType.total);
+        _budEvents.add(event);
+    }
+
     public void insertBudgetEntity(MutableLiveData<List<BudgetEntity>> mutableLiveData, BudgetEntity budgetEntity)
     {
         BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.insert, _year, _month, budgetEntity);

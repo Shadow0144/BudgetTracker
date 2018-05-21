@@ -15,6 +15,7 @@ import java.text.DateFormatSymbols;
 import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
+import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.R;
@@ -32,6 +33,10 @@ public class TotalViewActivity extends AppCompatActivity
 
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _totalExps;
+    private MutableLiveData<List<BudgetEntity>> _budgets;
+
+    private TotalYearlySummaryTable _yearlyTable;
+    private TotalCategorySummaryTable _categoryTable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -58,8 +63,28 @@ public class TotalViewActivity extends AppCompatActivity
             }
         };
 
+        final Observer<List<BudgetEntity>> budgetObserver = new Observer<List<BudgetEntity>>()
+        {
+            @Override
+            public void onChanged(@Nullable List<BudgetEntity> budgetEntities)
+            {
+                if (budgetEntities != null) // returning from a query
+                {
+                    refreshTables(budgetEntities);
+                    //_loaded = true;
+                }
+                else // else - returning from an add / edit / remove
+                {
+                    // Call for a refresh
+                    _viewModel.getTotalBudget(_budgets);
+                }
+            }
+        };
+
         _totalExps = new MutableLiveData<List<ExpenditureEntity>>();
         _totalExps.observe(this, entityObserver);
+        _budgets = new MutableLiveData<List<BudgetEntity>>();
+        _budgets.observe(this, budgetObserver);
         _viewModel.getTotal(_totalExps);
 
         TextView header = findViewById(R.id.totalView);
@@ -75,20 +100,28 @@ public class TotalViewActivity extends AppCompatActivity
             }
         });
 
+        FrameLayout totalYearlyContainer = findViewById(R.id.totalYearlyHolder);
+        _yearlyTable = new TotalYearlySummaryTable(this);
+        totalYearlyContainer.addView(_yearlyTable);
+
+        FrameLayout totalCategoryContainer = findViewById(R.id.totalCategoryHolder);
+        _categoryTable = new TotalCategorySummaryTable(this);
+        totalCategoryContainer.addView(_categoryTable);
+
         ExcelExporter.checkPermissions(this);
     }
 
     private void totalLoaded(List<ExpenditureEntity> expenditureEntities)
     {
-        FrameLayout totalYearlyContainer = findViewById(R.id.totalYearlyHolder);
-        TotalYearlySummaryTable yearlyTable = new TotalYearlySummaryTable(this);
-        yearlyTable.setup(expenditureEntities);
-        totalYearlyContainer.addView(yearlyTable);
+        _yearlyTable.updateExpenditures(expenditureEntities);
+        _categoryTable.updateExpenditures(expenditureEntities);
+        _viewModel.getTotalBudget(_budgets);
+    }
 
-        FrameLayout totalCategoryContainer = findViewById(R.id.totalCategoryHolder);
-        TotalCategorySummaryTable categoryTable = new TotalCategorySummaryTable(this);
-        categoryTable.setup(expenditureEntities);
-        totalCategoryContainer.addView(categoryTable);
+    private void refreshTables(List<BudgetEntity> budgetEntities)
+    {
+        _yearlyTable.updateBudgets(budgetEntities);
+        _categoryTable.updateBudgets(budgetEntities);
     }
 
     public void onRequestPermissionsResult(int requestCode,

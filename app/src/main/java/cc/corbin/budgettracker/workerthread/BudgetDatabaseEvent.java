@@ -23,7 +23,8 @@ public class BudgetDatabaseEvent
     public enum QueryType
     {
         month,
-        year
+        year,
+        total
     };
 
     private MutableLiveData<List<BudgetEntity>> _mutableLiveData;
