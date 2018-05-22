@@ -58,7 +58,7 @@ public class BudgetDatabaseEvent
         _queryType = queryType;
         _eventType = eventType;
         _year = year;
-        _month = month;
+        _month = month; // Can also be used as a final year
         _id = id++;
         _entities = null;
     }

@@ -41,6 +41,9 @@ public class TotalCategorySummaryTable extends TableLayout
 
     private String[] _categories;
 
+    private int _startYear;
+    private int _endYear;
+
     public TotalCategorySummaryTable(Context context)
     {
         super(context);
@@ -198,9 +201,13 @@ public class TotalCategorySummaryTable extends TableLayout
 
     public void updateExpenditures(List<ExpenditureEntity> expenditureEntities)
     {
+        int catSize = Categories.getCategories().length;
+        int expSize = expenditureEntities.size();
+        _startYear = expenditureEntities.get(0).getYear();
+        _endYear = expenditureEntities.get(expSize - 1).getYear();
+
         float total = 0.0f;
-        int size = _expenseCells.size();
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i < catSize; i++)
         {
             float categoryTotal = getCategoryTotal(expenditureEntities, _categories[i]);
             _expenses.set(i, categoryTotal);
@@ -215,6 +222,39 @@ public class TotalCategorySummaryTable extends TableLayout
 
     public void updateBudgets(List<BudgetEntity> budgetEntities)
     {
-        /// TODO
+        if (_budgetCells != null)
+        {
+            float totalBudget = 0.0f;
+            int size = _endYear - _startYear + 1;
+            int catSize = Categories.getCategories().length;
+            for (int k = 0; k < catSize; k++)
+            {
+                float catBudget = 0.0f;
+                for (int i = 0; i < size; i++)
+                {
+                    for (int j = 0; j < 12; j++)
+                    {
+                        int index = (((i * 12) + j) * catSize) + k;
+                        BudgetEntity budgetEntity = budgetEntities.get(index);
+                        catBudget += budgetEntity.getAmount();
+                    }
+                }
+                TableCell budgetCell = _budgetCells.get(k);
+                budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, catBudget));
+                budgetCell.setLoading(false);
+                float remaining = catBudget - _expenses.get(k);
+                TableCell remainingCell = _remainingCells.get(k);
+                remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
+                remainingCell.setLoading(false);
+                totalBudget += catBudget;
+            }
+
+            _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalBudget));
+            _totalBudgetCell.setLoading(false);
+            float totalRemaining = totalBudget - _totalExpenses;
+            _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
+            _totalRemainingCell.setLoading(false);
+        }
+        else { }
     }
 }

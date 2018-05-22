@@ -179,6 +179,7 @@ public class DatabaseThread extends Thread
                 String[] categories = Categories.getCategories();
                 int month;
                 int year;
+                int endyear;
                 switch (event.getQueryType())
                 {
                     case month:
@@ -203,7 +204,18 @@ public class DatabaseThread extends Thread
                         break;
                     case total:
                         entities = new ArrayList<BudgetEntity>();
-
+                        year = event.getYear();
+                        endyear = event.getMonth();
+                        for (int l = year; l <= endyear; l++)
+                        {
+                            for (int i = 1; i < 12 + 1; i++)
+                            {
+                                for (int j = 0; j < categories.length; j++)
+                                {
+                                    entities.add(getMonthCategoryBudget(i, year, categories[j]));
+                                }
+                            }
+                        }
                         break;
                 }
                 event.setEntities(entities);

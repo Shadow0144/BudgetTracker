@@ -38,6 +38,9 @@ public class TotalViewActivity extends AppCompatActivity
     private TotalYearlySummaryTable _yearlyTable;
     private TotalCategorySummaryTable _categoryTable;
 
+    private int _startYear;
+    private int _endYear;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -76,7 +79,7 @@ public class TotalViewActivity extends AppCompatActivity
                 else // else - returning from an add / edit / remove
                 {
                     // Call for a refresh
-                    _viewModel.getTotalBudget(_budgets);
+                    _viewModel.getTotalBudget(_budgets, _startYear, _endYear);
                 }
             }
         };
@@ -115,7 +118,9 @@ public class TotalViewActivity extends AppCompatActivity
     {
         _yearlyTable.updateExpenditures(expenditureEntities);
         _categoryTable.updateExpenditures(expenditureEntities);
-        _viewModel.getTotalBudget(_budgets);
+        _startYear = _yearlyTable.getStartYear();
+        _endYear = _yearlyTable.getEndYear();
+        _viewModel.getTotalBudget(_budgets, _startYear, _endYear);
     }
 
     private void refreshTables(List<BudgetEntity> budgetEntities)

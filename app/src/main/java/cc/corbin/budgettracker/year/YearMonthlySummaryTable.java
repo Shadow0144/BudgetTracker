@@ -244,7 +244,7 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
         int size = _expenseCells.size();
         for (int i = 0; i < size; i++)
         {
-            float monthTotal = getMonthTotal(expenditureEntities, i);
+            float monthTotal = getMonthTotal(expenditureEntities, i+1);
             total += monthTotal;
             _expenses.set(i, monthTotal);
             _expenseCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, monthTotal));

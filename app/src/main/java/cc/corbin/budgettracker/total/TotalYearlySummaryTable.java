@@ -3,6 +3,7 @@ package cc.corbin.budgettracker.total;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
@@ -10,6 +11,7 @@ import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
 
+import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.TableCell;
@@ -34,6 +36,9 @@ public class TotalYearlySummaryTable extends TableLayout
 
     private List<TableCell> _remainingCells;
     private TableCell _totalRemainingCell;
+
+    private int _startYear;
+    private int _endYear;
 
     public TotalYearlySummaryTable(Context context)
     {
@@ -168,14 +173,14 @@ public class TotalYearlySummaryTable extends TableLayout
                 _budgetCells = new ArrayList<TableCell>();
                 _remainingCells = new ArrayList<TableCell>();
 
-                int start = expenditureEntities.get(0).getYear();
-                int end = expenditureEntities.get(size - 1).getYear();
-                int year = start;
+                _startYear = expenditureEntities.get(0).getYear();
+                _endYear = expenditureEntities.get(size - 1).getYear();
+                int year = _startYear;
                 int index = 0;
 
                 float totalTotal = 0.0f;
 
-                while (year <= end)
+                while (year <= _endYear)
                 {
                     // One row per year
                     TableRow tableRow = new TableRow(_context);
@@ -185,22 +190,14 @@ public class TotalYearlySummaryTable extends TableLayout
                     TableCell remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
 
                     float yearTotal = 0.0f;
-                    int entityYear = 0;
                     do
                     {
-                        if (index < size)
-                        {
-                            ExpenditureEntity entity = expenditureEntities.get(index);
-                            yearTotal += entity.getAmount();
-                            entityYear = entity.getYear();
-                            index++;
-                        }
-                        else
-                        {
-                            break;
-                        }
+                        ExpenditureEntity entity = expenditureEntities.get(index);
+                        yearTotal += entity.getAmount();
+                        index++;
                     }
-                    while (entityYear == year && index < size);
+                    while ((index < size) && (year == expenditureEntities.get(index).getYear()));
+                    // Continue until we run out of items, or the next item's year does not match
 
                     yearCell.setText(""+(year++));
                     expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, yearTotal));
@@ -250,6 +247,48 @@ public class TotalYearlySummaryTable extends TableLayout
 
     public void updateBudgets(List<BudgetEntity> budgetEntities)
     {
-        /// TODO
+        if (_budgetCells != null)
+        {
+            float totalBudget = 0.0f;
+            int size = _endYear - _startYear + 1;
+            int catSize = Categories.getCategories().length;
+            for (int i = 0; i < size; i++)
+            {
+                float yearBudget = 0.0f;
+                for (int j = 0; j < 12; j++)
+                {
+                    for (int k = 0; k < catSize; k++)
+                    {
+                        int index = (((i * 12) + j) * catSize) + k;
+                        BudgetEntity budgetEntity = budgetEntities.get(index);
+                        yearBudget += budgetEntity.getAmount();
+                    }
+                }
+                TableCell budgetCell = _budgetCells.get(i);
+                budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, yearBudget));
+                budgetCell.setLoading(false);
+                float remaining = yearBudget - _expenses.get(i);
+                TableCell remainingCell = _remainingCells.get(i);
+                remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
+                remainingCell.setLoading(false);
+                totalBudget += yearBudget;
+            }
+            _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalBudget));
+            _totalBudgetCell.setLoading(false);
+            float totalRemaining = totalBudget - _totalExpenses;
+            _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
+            _totalRemainingCell.setLoading(false);
+        }
+        else { }
+    }
+
+    public int getStartYear()
+    {
+        return _startYear;
+    }
+
+    public int getEndYear()
+    {
+        return _endYear;
     }
 }
