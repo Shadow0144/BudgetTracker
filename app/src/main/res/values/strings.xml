@@ -10,6 +10,7 @@
     <string name="leftarrow">&lt;-</string>
     <string name="rightarrow">-&gt;</string>
     <string name="total">Total</string>
+    <string name="total_colon">Total:</string>
     <string name="x">X</string>
     <string name="negative">-</string>
     <string name="expenses">Expenses for:&#160;</string>

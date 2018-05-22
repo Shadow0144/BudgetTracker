@@ -60,24 +60,22 @@
 
             <TextView
                 android:id="@+id/totalTextView"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/total"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:text="@string/total_colon"
+                android:textAlignment="textEnd"
                 android:textSize="24sp" />
-
-            <Spinner
-                android:id="@+id/totalCurrencySpinner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0" />
 
             <TextView
                 android:id="@+id/totalAmountTextView"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textSize="24sp" />
+
         </LinearLayout>
 
         <android.support.v4.view.ViewPager

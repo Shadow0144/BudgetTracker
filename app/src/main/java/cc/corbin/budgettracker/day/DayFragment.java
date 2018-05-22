@@ -41,14 +41,6 @@ public class DayFragment extends Fragment
     private int _month;
     private int _day;
 
-    public void setParameters(DayFragmentPagerAdapter parent, int year, int month, int day)
-    {
-        _parent = parent;
-        _year = year;
-        _month = month;
-        _day = day;
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
@@ -69,12 +61,31 @@ public class DayFragment extends Fragment
                 onLoadExpenses(expenditureEntities);
             }
         };
-
         _entities.observe(this, entityObserver);
 
-        _viewModel.getDay(_entities);
+        // Make the call to getDay here if this occurs last
+        if (_parent != null)
+        {
+            _viewModel.getDay(_entities);
+        }
+        else { }
 
         return _view;
+    }
+
+    public void setParameters(DayFragmentPagerAdapter parent, int year, int month, int day)
+    {
+        _parent = parent;
+        _year = year;
+        _month = month;
+        _day = day;
+
+        // Make the call to getDay here if this occurs last
+        if (_entities != null)
+        {
+            _viewModel.getDay(_entities);
+        }
+        else { }
     }
 
     public void refreshView()

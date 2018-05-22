@@ -51,6 +51,8 @@ public class DayViewActivity extends AppCompatActivity
     private Button _previousDay;
     private Button _nextDay;
 
+    private TextView _totalAmountTextView;
+
     private Calendar _currentDate;
 
     private int _year;
@@ -59,8 +61,6 @@ public class DayViewActivity extends AppCompatActivity
 
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _entities;
-
-    private static String[] _categories;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -162,15 +162,9 @@ public class DayViewActivity extends AppCompatActivity
             _nextDay.setText(getString(R.string.next));
         }
 
-        final Spinner totalCurrencySpinner = findViewById(R.id.totalCurrencySpinner);
-        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
-                this, android.R.layout.simple_spinner_item, Currencies.symbols);
-        totalCurrencySpinner.setAdapter(spinnerArrayAdapter);
-        totalCurrencySpinner.setSelection(Currencies.default_currency);
-
-        final TextView totalAmountTextView = findViewById(R.id.totalAmountTextView);
-        String cost = Currencies.formatCurrency(Currencies.integer[totalCurrencySpinner.getSelectedItemPosition()], 0.0f);
-        totalAmountTextView.setText(cost);
+        _totalAmountTextView = findViewById(R.id.totalAmountTextView);
+        String cost = Currencies.formatCurrency(Currencies.default_currency, 0.0f);
+        _totalAmountTextView.setText(cost);
 
         updateDay();
     }
@@ -347,25 +341,15 @@ public class DayViewActivity extends AppCompatActivity
     {
         if (day == _day)
         {
-            final TextView totalAmountTextView = findViewById(R.id.totalAmountTextView);
-            final Spinner totalCurrencySpinner = findViewById(R.id.totalCurrencySpinner);
-            String cost = Currencies.formatCurrency(Currencies.integer[totalCurrencySpinner.getSelectedItemPosition()], amount);
-            totalAmountTextView.setText(cost);
+            String cost = Currencies.formatCurrency(Currencies.default_currency, amount);
+            _totalAmountTextView.setText(cost);
         }
         else { }
     }
 
     private void getUpdatedTotal(int day)
     {
-        if (day == _day)
-        {
-            final TextView totalAmountTextView = findViewById(R.id.totalAmountTextView);
-            final Spinner totalCurrencySpinner = findViewById(R.id.totalCurrencySpinner);
-            float amount = _adapter.getItem(day-1).calculateTotal();
-            String cost = Currencies.formatCurrency(Currencies.integer[totalCurrencySpinner.getSelectedItemPosition()], amount);
-            totalAmountTextView.setText(cost);
-        }
-        else { }
+        updateTotal(day, _adapter.getItem(day-1).calculateTotal());
     }
 
     /* Checks if external storage is available for read and write */
