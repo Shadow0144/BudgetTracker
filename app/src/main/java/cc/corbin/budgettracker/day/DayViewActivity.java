@@ -50,6 +50,7 @@ public class DayViewActivity extends AppCompatActivity
 
     private Button _previousDay;
     private Button _nextDay;
+    private Button _addButton;
 
     private TextView _totalAmountTextView;
 
@@ -73,6 +74,7 @@ public class DayViewActivity extends AppCompatActivity
 
         _previousDay = findViewById(R.id.yesterdayButton);
         _nextDay = findViewById(R.id.tomorrowButton);
+        _addButton = findViewById(R.id.addItemButton);
 
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
         _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
@@ -312,6 +314,7 @@ public class DayViewActivity extends AppCompatActivity
     {
         _previousDay.setEnabled(false);
         _nextDay.setEnabled(false);
+        _addButton.setEnabled(false);
         _adapter.getItem(_pagerView.getCurrentItem()).lock();
     }
 
@@ -319,12 +322,14 @@ public class DayViewActivity extends AppCompatActivity
     {
         _previousDay.setEnabled(true);
         _nextDay.setEnabled(true);
+        _addButton.setEnabled(true);
     }
 
     private void unlockAll()
     {
         _previousDay.setEnabled(true);
         _nextDay.setEnabled(true);
+        _addButton.setEnabled(true);
         _adapter.getItem(_pagerView.getCurrentItem()).unlock();
     }
 
