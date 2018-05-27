@@ -99,11 +99,9 @@ public class ExpenditureViewModel extends ViewModel
     // When a database event has finished
     public void checkQueue()
     {
-        Log.e(TAG, "ViewModel: List: " + _completedExpEvents.size());
         while (!_completedExpEvents.isEmpty())
         {
             ExpDatabaseEvent expDatabaseEvent = _completedExpEvents.poll();
-            Log.e(TAG, "ViewModel: Day: " + expDatabaseEvent.getDay());
             if (expDatabaseEvent.getMutableLiveData() != null)
             {
                 expDatabaseEvent.getMutableLiveData().postValue(expDatabaseEvent.getEntities());

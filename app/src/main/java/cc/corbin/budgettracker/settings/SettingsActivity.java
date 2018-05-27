@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
@@ -58,7 +60,7 @@ public class SettingsActivity extends AppCompatActivity
     public static boolean grandTotalNeedsUpdating = false;
     public static boolean yearNeedsUpdating = false;
     public static boolean monthNeedsUpdating = false;
-    public static boolean dayNeedsUpdating = false;
+    public static int dayNeedsUpdating = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -179,13 +181,6 @@ public class SettingsActivity extends AppCompatActivity
         defaultCurrencyContentRow.addView(defaultCurrencySymbolCell);
         defaultCurrencyContentRow.addView(defaultCurrencyNameCell);
         defaultCurrencyTable.addView(defaultCurrencyContentRow);
-
-        // TODO TEMP
-        grandTotalNeedsUpdating = true;
-        yearNeedsUpdating = true;
-        monthNeedsUpdating = true;
-        dayNeedsUpdating = true;
-        // TODO TEMP
     }
 
     private void expendituresUpdated()
@@ -193,7 +188,7 @@ public class SettingsActivity extends AppCompatActivity
         grandTotalNeedsUpdating = true;
         yearNeedsUpdating = true;
         monthNeedsUpdating = true;
-        dayNeedsUpdating = true;
+        dayNeedsUpdating = 3;
     }
 
     private void budgetsUpdated()
@@ -201,7 +196,7 @@ public class SettingsActivity extends AppCompatActivity
         grandTotalNeedsUpdating = true;
         yearNeedsUpdating = true;
         monthNeedsUpdating = true;
-        dayNeedsUpdating = true;
+        dayNeedsUpdating = 3;
     }
 
     public void cancel(View v)
@@ -224,7 +219,6 @@ public class SettingsActivity extends AppCompatActivity
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after)
             {
-
             }
 
             @Override
@@ -250,6 +244,23 @@ public class SettingsActivity extends AppCompatActivity
                 confirmButton.setEnabled(unmatched && (text.length() > 0));
             }
         });
+        categoryEditText.setFilters(new InputFilter [] { new InputFilter()
+        {
+            private final String bannedCharacters = "|";
+
+            @Override
+            public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend)
+            {
+                if (source != null && bannedCharacters.contains(source))
+                {
+                    return "";
+                }
+                else
+                {
+                    return source;
+                }
+            }
+        } });
 
         _popupWindow = new PopupWindow(categoryEditView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         _popupWindow.setFocusable(true);
@@ -268,21 +279,11 @@ public class SettingsActivity extends AppCompatActivity
 
         _categories[_categoryEditIndex] = newCategoryName;
 
-        Log.e(TAG, "Edit: " + _categoryEditIndex);
         final TableCell editedCategory = _categoriesTable.findViewById(_categoryEditIndex);
         editedCategory.setText(_categories[_categoryEditIndex]);
 
         // Save the updated categories
-        LinkedHashSet<String> categoriesNewSet = new LinkedHashSet<String>();
-        for (int i = 0; i < _categories.length; i++)
-        {
-            categoriesNewSet.add(_categories[i]);
-        }
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.budget_tracker_preferences_key), Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putStringSet(getString(R.string.categories_list_key), categoriesNewSet);
-        Categories.setCategories(_categories);
-        editor.commit();
+        saveUpdatedCategories();
 
         _popupWindow.dismiss();
     }
@@ -371,17 +372,7 @@ public class SettingsActivity extends AppCompatActivity
         _categoriesTable.removeViewAt(_categoryEditIndex+1); // +1 for the column header
 
         // Save the updated categories
-        LinkedHashSet<String> categoriesNewSet = new LinkedHashSet<String>();
-        for (int i = 0; i < _categories.length; i++)
-        {
-            categoriesNewSet.add(_categories[i]);
-        }
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.budget_tracker_preferences_key), Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putStringSet(getString(R.string.categories_list_key), categoriesNewSet);
-        Categories.setCategories(_categories);
-        editor.commit();
-
+        saveUpdatedCategories();
 
         _popupWindow.dismiss();
     }
@@ -467,17 +458,22 @@ public class SettingsActivity extends AppCompatActivity
         _categories = categoriesNew;
 
         // Save the updated categories
-        LinkedHashSet<String> categoriesNewSet = new LinkedHashSet<String>();
-        for (i = 0; i < _categories.length; i++)
+        saveUpdatedCategories();
+
+        _popupWindow.dismiss();
+    }
+
+    private void saveUpdatedCategories()
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < _categories.length; i++)
         {
-            categoriesNewSet.add(_categories[i]);
+            sb.append(_categories[i]).append("|");
         }
         SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.budget_tracker_preferences_key), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putStringSet(getString(R.string.categories_list_key), categoriesNewSet);
+        editor.putString(getString(R.string.categories_list_key), sb.toString());
         Categories.setCategories(_categories);
         editor.commit();
-
-        _popupWindow.dismiss();
     }
 }

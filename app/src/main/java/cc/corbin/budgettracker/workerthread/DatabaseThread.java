@@ -82,7 +82,6 @@ public class DatabaseThread extends Thread
                 switch (event.getQueryType())
                 {
                     case day:
-                        Log.e(TAG, "Processed Day event");
                         entities = _dbE.expenditureDao().getDay(event.getYear(), event.getMonth(), event.getDay());
                         break;
                     case month:
@@ -168,6 +167,11 @@ public class DatabaseThread extends Thread
         }
 
         return entity;
+    }
+
+    private void updateYearBudget(int year, int category)
+    {
+
     }
 
     private void processBudEvent(BudgetDatabaseEvent event)

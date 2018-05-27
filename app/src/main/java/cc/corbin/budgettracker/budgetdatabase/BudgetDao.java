@@ -23,7 +23,7 @@ public interface BudgetDao
     List<BudgetEntity> getMonth(int year, int month);
 
     @Query("SELECT * FROM budgetentity WHERE year = (:year) AND month = (:month)")
-    List<BudgetEntity> getOnlyMonth(int year, int month);
+    List<BudgetEntity> getExactMonth(int year, int month);
 
     @Query("SELECT * FROM budgetentity WHERE " +
             "year = (SELECT MAX(year) FROM " +
@@ -35,19 +35,16 @@ public interface BudgetDao
     List<BudgetEntity> getMonth(int year, int month, int category); // TODO BROKEN!
 
     @Query("SELECT * FROM budgetentity WHERE year = (:year) AND month = (:month) AND category = (:category)")
-    List<BudgetEntity> getOnlyMonth(int year, int month, int category);
+    List<BudgetEntity> getExactMonth(int year, int month, int category);
 
-    @Query("SELECT * FROM budgetentity WHERE year = (:year)")  /// TODO Fix
+    @Query("SELECT * FROM budgetentity WHERE year = (:year) AND NOT (month = 0 OR month = 13)")
+    List<BudgetEntity> getYearAsMonths(int year);
+
+    @Query("SELECT * FROM budgetentity WHERE year = (:year) AND (month = 0 OR month = 13)")
     List<BudgetEntity> getYear(int year);
 
-    @Query("SELECT * FROM budgetentity WHERE year = (:year)")
-    List<BudgetEntity> getOnlyYear(int year);
-
-    @Query("SELECT * FROM budgetentity WHERE year = (:year) AND category = (:category)")  /// TODO Fix
+    @Query("SELECT * FROM budgetentity WHERE year = (:year)  AND (month = 0 OR month = 13) AND category = (:category)")
     List<BudgetEntity> getYear(int year, int category);
-
-    @Query("SELECT * FROM budgetentity WHERE year = (:year) AND category = (:category)")
-    List<BudgetEntity> getOnlyYear(int year, int category);
 
     @Query("SELECT * FROM budgetentity WHERE ( " +
             "year = (:year) AND " +
@@ -64,7 +61,7 @@ public interface BudgetDao
 
     @Query("SELECT * FROM budgetentity WHERE ( " +
             "category = (:category) " +
-            "AND (year < (:year) OR (year = (:year) AND month <= (:month))) AND month != 0" +
+            "AND (year < (:year) OR (year = (:year) AND month <= (:month))) AND month != 0 AND month != 13" +
             " )")
     List<BudgetEntity> getCategoryBeforeMonth(int year, int month, int category);
 

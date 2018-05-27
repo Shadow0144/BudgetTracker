@@ -80,9 +80,10 @@ public class DayFragment extends Fragment
     @Override
     public void onResume()
     {
-        if (SettingsActivity.dayNeedsUpdating)
+        if (SettingsActivity.dayNeedsUpdating > 0)
         {
             refreshView();
+            SettingsActivity.dayNeedsUpdating--;
         }
         else { }
         super.onResume();

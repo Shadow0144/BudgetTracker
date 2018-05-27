@@ -175,14 +175,7 @@ public class DayViewActivity extends AppCompatActivity
     @Override
     protected void onResume()
     {
-        if (SettingsActivity.dayNeedsUpdating)
-        {
-            // TODO - Refresh
-            _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
-
-            //SettingsActivity.dayNeedsUpdating = false;
-        }
-        else { }
+        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
 
         super.onResume();
     }
