@@ -34,7 +34,10 @@ public class ExpenditureEntity implements Parcelable
     private float amount;
 
     @ColumnInfo
-    private String expenseType;
+    private int category;
+
+    @ColumnInfo
+    private String categoryName;
 
     @ColumnInfo
     private int baseCurrency;
@@ -56,20 +59,22 @@ public class ExpenditureEntity implements Parcelable
         this.month = 0;
         this.year = 0;
         this.amount = 0.0f;
-        this.expenseType = "";
+        this.category = 0;
+        this.categoryName = "";
         this.baseCurrency = 0;
         this.baseAmount = 0.0f;
         this.conversionRate = 0.0f;
         this.note = "";
     }
 
-    // Previous constructor
+    // Previous constructor (currency is ignored as it is always the default)
     @Ignore
-    public ExpenditureEntity(long date, int currency, float amount, String expenseType, String note)
+    public ExpenditureEntity(long date, int currency, float amount, String categoryName, String note)
     {
         this.id = 0;
         this.amount = amount;
-        this.expenseType = expenseType;
+        this.category = category;
+        this.categoryName = categoryName;
         this.baseCurrency = Currencies.default_currency;
         this.baseAmount = amount;
         this.conversionRate = 1.0f;
@@ -86,7 +91,8 @@ public class ExpenditureEntity implements Parcelable
         this.month = month;
         this.year = year;
         this.amount = 0.0f;
-        this.expenseType = "";
+        this.category = 0;
+        this.categoryName = "";
         this.baseCurrency = Currencies.default_currency;
         this.baseAmount = amount;
         this.conversionRate = 1.0f;
@@ -95,14 +101,15 @@ public class ExpenditureEntity implements Parcelable
     }
 
     @Ignore
-    public ExpenditureEntity(int day, int month, int year, float amount, String expenseType, String note)
+    public ExpenditureEntity(int day, int month, int year, float amount, int category, String categoryName, String note)
     {
         this.id = 0;
         this.day = day;
         this.month = month;
         this.year = year;
         this.amount = amount;
-        this.expenseType = expenseType;
+        this.category = category;
+        this.categoryName = categoryName;
         this.baseCurrency = Currencies.default_currency;
         this.baseAmount = amount;
         this.conversionRate = 1.0f;
@@ -111,14 +118,15 @@ public class ExpenditureEntity implements Parcelable
     }
 
     @Ignore
-    public ExpenditureEntity(long id, int day, int month, int year, float amount, String expenseType, String note)
+    public ExpenditureEntity(long id, int day, int month, int year, float amount, int category, String categoryName, String note)
     {
         this.id = id;
         this.day = day;
         this.month = month;
         this.year = year;
         this.amount = amount;
-        this.expenseType = expenseType;
+        this.category = 0;
+        this.categoryName = categoryName;
         this.baseCurrency = Currencies.default_currency;
         this.baseAmount = amount;
         this.conversionRate = 1.0f;
@@ -126,14 +134,16 @@ public class ExpenditureEntity implements Parcelable
         checkNullStrings();
     }
 
-    public ExpenditureEntity(long id, int day, int month, int year, float amount, String expenseType, int baseCurrency, float baseAmount, float conversionRate, String note)
+    public ExpenditureEntity(long id, int day, int month, int year, float amount, int category, String categoryName,
+                             int baseCurrency, float baseAmount, float conversionRate, String note)
     {
         this.id = id;
         this.day = day;
         this.month = month;
         this.year = year;
         this.amount = amount;
-        this.expenseType = expenseType;
+        this.category = category;
+        this.categoryName = categoryName;
         this.baseCurrency = baseCurrency;
         this.baseAmount = baseAmount;
         this.conversionRate = conversionRate;
@@ -191,14 +201,20 @@ public class ExpenditureEntity implements Parcelable
         this.amount = amount;
     }
 
-    public String getExpenseType()
+    public int getCategory()
     {
-        return expenseType;
+        return category;
     }
 
-    public void setExpenseType(String expenseType)
+    public String getCategoryName()
     {
-        this.expenseType = expenseType;
+        return categoryName;
+    }
+
+    public void setCategory(int category, String categoryName)
+    {
+        this.category = category;
+        this.categoryName = categoryName;
     }
 
     public int getBaseCurrency()
@@ -244,7 +260,7 @@ public class ExpenditureEntity implements Parcelable
     @Ignore
     private void checkNullStrings()
     {
-        if (this.expenseType == null) this.expenseType = "";
+        if (this.categoryName == null) this.categoryName = "";
         if (this.note == null) this.note = "";
     }
 
@@ -264,7 +280,8 @@ public class ExpenditureEntity implements Parcelable
     public void update(ExpenditureEntity expenditureEntity)
     {
         amount = expenditureEntity.amount;
-        expenseType = expenditureEntity.expenseType;
+        category = expenditureEntity.category;
+        categoryName = expenditureEntity.categoryName;
         baseCurrency = expenditureEntity.baseCurrency;
         baseAmount = expenditureEntity.baseAmount;
         conversionRate = expenditureEntity.conversionRate;
@@ -292,7 +309,8 @@ public class ExpenditureEntity implements Parcelable
         out.writeInt(month);
         out.writeInt(year);
         out.writeFloat(amount);
-        out.writeString(expenseType);
+        out.writeInt(category);
+        out.writeString(categoryName);
         out.writeInt(baseCurrency);
         out.writeFloat(baseAmount);
         out.writeFloat(conversionRate);
@@ -306,7 +324,8 @@ public class ExpenditureEntity implements Parcelable
         month = in.readInt();
         year = in.readInt();
         amount = in.readFloat();
-        expenseType = in.readString();
+        category = in.readInt();
+        categoryName = in.readString();
         baseCurrency = in.readInt();
         baseAmount = in.readFloat();
         conversionRate = in.readFloat();

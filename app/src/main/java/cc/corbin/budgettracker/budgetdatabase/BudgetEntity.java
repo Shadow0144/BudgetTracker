@@ -25,13 +25,13 @@ public class BudgetEntity
     private int year;
 
     @ColumnInfo
-    private int currency;
-
-    @ColumnInfo
     private float amount;
 
     @ColumnInfo
-    private String expenseType;
+    private int category;
+
+    @ColumnInfo
+    private String categoryName;
 
     @Ignore
     public BudgetEntity()
@@ -39,30 +39,30 @@ public class BudgetEntity
         this.id = 0;
         this.month = 0;
         this.year = 0;
-        this.currency = 0;
         this.amount = 0.0f;
-        this.expenseType = "";
+        this.category = 0;
+        this.categoryName = "";
     }
 
     @Ignore
-    public BudgetEntity(int month, int year, int currency, float amount, String expenseType)
+    public BudgetEntity(int month, int year, float amount, int category, String categoryName)
     {
         this.id = 0;
         this.month = month;
         this.year = year;
-        this.currency = currency;
         this.amount = amount;
-        this.expenseType = expenseType;
+        this.category = category;
+        this.categoryName = categoryName;
     }
 
-    public BudgetEntity(long id, int month, int year, int currency, float amount, String expenseType)
+    public BudgetEntity(long id, int month, int year, float amount, int category, String categoryName)
     {
         this.id = id;
         this.month = month;
         this.year = year;
-        this.currency = currency;
         this.amount = amount;
-        this.expenseType = expenseType;
+        this.category = category;
+        this.categoryName = categoryName;
     }
 
     public long getId()
@@ -95,16 +95,6 @@ public class BudgetEntity
         this.year = year;
     }
 
-    public int getCurrency()
-    {
-        return currency;
-    }
-
-    public void setCurrency(int currency)
-    {
-        this.currency = currency;
-    }
-
     public float getAmount()
     {
         return amount;
@@ -115,13 +105,16 @@ public class BudgetEntity
         this.amount = amount;
     }
 
-    public String getExpenseType()
+    public int getCategory() { return category; }
+
+    public String getCategoryName()
     {
-        return expenseType;
+        return categoryName;
     }
 
-    public void setExpenseType(String expenseType)
+    public void setCategory(int category, String categoryName)
     {
-        this.expenseType = expenseType;
+        this.category = category;
+        this.categoryName = categoryName;
     }
 }

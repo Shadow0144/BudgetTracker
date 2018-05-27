@@ -37,8 +37,6 @@ public class MonthBudgetTable extends TableLayout
     private TableCell _totalBudgetCell;
     private TableCell _totalDateCell;
 
-    private boolean _setup;
-
     public MonthBudgetTable(Context context)
     {
         super(context);
@@ -47,7 +45,7 @@ public class MonthBudgetTable extends TableLayout
         _month = 1;
         _year = 2018;
 
-        _setup = false;
+        setupTable();
     }
 
     public MonthBudgetTable(Context context, AttributeSet attrs)
@@ -75,7 +73,7 @@ public class MonthBudgetTable extends TableLayout
             a.recycle();
         }
 
-        _setup = false;
+        setupTable();
     }
 
     public MonthBudgetTable(Context context, int month, int year)
@@ -86,12 +84,11 @@ public class MonthBudgetTable extends TableLayout
         _month = month;
         _year = year;
 
-        _setup = false;
+        setupTable();
     }
 
-    public void setup(List<BudgetEntity> budgets)
+    public void setupTable()
     {
-        _budgets = budgets;
         _budgetCells = new ArrayList<TableCell>();
         _dateCells = new ArrayList<TableCell>();
 
@@ -135,6 +132,9 @@ public class MonthBudgetTable extends TableLayout
             _budgetCells.add(contentCell);
             _dateCells.add(dateCell);
 
+            contentCell.setLoading(true);
+            dateCell.setLoading(true);
+
             tableRow.addView(headerCell);
             tableRow.addView(contentCell);
             tableRow.addView(dateCell);
@@ -150,6 +150,9 @@ public class MonthBudgetTable extends TableLayout
         _totalBudgetCell = totalContentCell;
         _totalDateCell = totalDateCell;
 
+        _totalBudgetCell.setLoading(true);
+        _totalDateCell.setLoading(true);
+
         totalHeaderCell.setText(_context.getString(R.string.total));
 
         totalRow.addView(totalHeaderCell);
@@ -157,8 +160,12 @@ public class MonthBudgetTable extends TableLayout
         totalRow.addView(totalDateCell);
 
         addView(totalRow);
+    }
 
-        _setup = true;
+    public void resetTable()
+    {
+        removeAllViews();
+        setupTable();
     }
 
     public void refreshTable(List<BudgetEntity> budgets)
@@ -166,14 +173,6 @@ public class MonthBudgetTable extends TableLayout
         if (budgets != null)
         {
             _budgets = budgets;
-
-            if (!_setup) // Run once the first time
-            {
-                setup(_budgets);
-            }
-            else
-            {
-            }
 
             int count = _budgets.size();
             float total = 0.0f;
@@ -183,17 +182,17 @@ public class MonthBudgetTable extends TableLayout
             {
                 // The entities and cells should be in the same order
                 BudgetEntity entity = _budgets.get(i);
-                TableCell cell = _budgetCells.get(i);
-                cell.setText(Currencies.formatCurrency(entity.getCurrency(), entity.getAmount()));
+                TableCell budgetCell = _budgetCells.get(i);
+                budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, entity.getAmount()));
                 total += entity.getAmount();
 
                 if (entity.getMonth() == _month && entity.getYear() == _year)
                 {
-                    cell.setup(_context, TableCell.SPECIAL_CELL);
+                    budgetCell.setType(TableCell.SPECIAL_CELL);
                 }
                 else
                 {
-                    cell.setup(_context, TableCell.DEFAULT_CELL);
+                    budgetCell.setType(TableCell.DEFAULT_CELL);
                 }
 
                 TableCell dateCell = _dateCells.get(i);
@@ -212,6 +211,9 @@ public class MonthBudgetTable extends TableLayout
                 {
                     dateCell.setText(_context.getString(R.string.budget_unset));
                 }
+
+                budgetCell.setLoading(false);
+                dateCell.setLoading(false);
             }
 
             _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
@@ -224,6 +226,8 @@ public class MonthBudgetTable extends TableLayout
             {
                 _totalDateCell.setText(_context.getString(R.string.budget_unset));
             }
+            _totalBudgetCell.setLoading(false);
+            _totalDateCell.setLoading(false);
 
             unlockTable();
         }

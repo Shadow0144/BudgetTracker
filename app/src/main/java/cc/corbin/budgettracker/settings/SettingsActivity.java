@@ -25,14 +25,8 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-
-import org.w3c.dom.Text;
-
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Categories;
@@ -140,7 +134,7 @@ public class SettingsActivity extends AppCompatActivity
         }
 
         _otherCategoryCell = categoryCell; // The last item
-        _otherCategoryCell.setup(this, TableCell.SEMI_SPECIAL_CELL);
+        _otherCategoryCell.setType(TableCell.SEMI_SPECIAL_CELL);
 
         // Add the add button
         categoryRow = new TableRow(this);
@@ -185,6 +179,13 @@ public class SettingsActivity extends AppCompatActivity
         defaultCurrencyContentRow.addView(defaultCurrencySymbolCell);
         defaultCurrencyContentRow.addView(defaultCurrencyNameCell);
         defaultCurrencyTable.addView(defaultCurrencyContentRow);
+
+        // TODO TEMP
+        grandTotalNeedsUpdating = true;
+        yearNeedsUpdating = true;
+        monthNeedsUpdating = true;
+        dayNeedsUpdating = true;
+        // TODO TEMP
     }
 
     private void expendituresUpdated()
@@ -215,7 +216,7 @@ public class SettingsActivity extends AppCompatActivity
         final View categoryEditView = getLayoutInflater().inflate(R.layout.popup_edit_category, null);
 
         final EditText categoryEditText = categoryEditView.findViewById(R.id.categoryEditText);
-        categoryEditText.setText(((TextView)v).getText());
+        categoryEditText.setText(((TableCell)v).getText());
 
         final Button confirmButton = categoryEditView.findViewById(R.id.confirmButton);
         categoryEditText.addTextChangedListener(new TextWatcher()
@@ -260,19 +261,19 @@ public class SettingsActivity extends AppCompatActivity
     {
         final EditText categoryEditText = _popupWindow.getContentView().findViewById(R.id.categoryEditText);
 
-        String oldCategory = _categories[_categoryEditIndex];
-        String newCategory = categoryEditText.getText().toString();
+        String newCategoryName = categoryEditText.getText().toString();
 
-        _viewModel.recategorizeExpenditureEntities(_exps, oldCategory, newCategory);
-        _viewModel.recategorizeBudgetEntities(_budgets, oldCategory, newCategory);
+        _viewModel.recategorizeExpenditureEntities(_exps, _categoryEditIndex, newCategoryName);
+        _viewModel.recategorizeBudgetEntities(_budgets, _categoryEditIndex, newCategoryName);
 
-        _categories[_categoryEditIndex] = newCategory;
+        _categories[_categoryEditIndex] = newCategoryName;
 
-        final TextView editedCategory = _categoriesTable.findViewById(_categoryEditIndex);
+        Log.e(TAG, "Edit: " + _categoryEditIndex);
+        final TableCell editedCategory = _categoriesTable.findViewById(_categoryEditIndex);
         editedCategory.setText(_categories[_categoryEditIndex]);
 
         // Save the updated categories
-        TreeSet<String> categoriesNewSet = new TreeSet<String>();
+        LinkedHashSet<String> categoriesNewSet = new LinkedHashSet<String>();
         for (int i = 0; i < _categories.length; i++)
         {
             categoriesNewSet.add(_categories[i]);
@@ -344,14 +345,13 @@ public class SettingsActivity extends AppCompatActivity
     // Called from the final warning screen
     public void confirmRemoveAndRecategorize(View v)
     {
-        final TextView originalCategoryTextView = _popupWindow.getContentView().findViewById(R.id.originalCategoryTextView);
+        //final TextView originalCategoryTextView = _popupWindow.getContentView().findViewById(R.id.originalCategoryTextView);
         final TextView newCategoryTextView = _popupWindow.getContentView().findViewById(R.id.newCategoryTextView);
 
-        String originalCategory = originalCategoryTextView.getText().toString();
-        String newCategory = newCategoryTextView.getText().toString();
+        String newCategoryName = newCategoryTextView.getText().toString();
 
-        _viewModel.recategorizeExpenditureEntities(_exps, originalCategory, newCategory);
-        _viewModel.recategorizeBudgetEntities(_budgets, originalCategory, newCategory);
+        _viewModel.recategorizeExpenditureEntities(_exps, _categoryEditIndex, newCategoryName);
+        _viewModel.recategorizeBudgetEntities(_budgets, _categoryEditIndex, newCategoryName);
 
         // Remove from the list and commit the change
         String[] newCategories = new String[_categories.length-1];
@@ -371,7 +371,7 @@ public class SettingsActivity extends AppCompatActivity
         _categoriesTable.removeViewAt(_categoryEditIndex+1); // +1 for the column header
 
         // Save the updated categories
-        TreeSet<String> categoriesNewSet = new TreeSet<String>();
+        LinkedHashSet<String> categoriesNewSet = new LinkedHashSet<String>();
         for (int i = 0; i < _categories.length; i++)
         {
             categoriesNewSet.add(_categories[i]);
@@ -467,7 +467,7 @@ public class SettingsActivity extends AppCompatActivity
         _categories = categoriesNew;
 
         // Save the updated categories
-        TreeSet<String> categoriesNewSet = new TreeSet<String>();
+        LinkedHashSet<String> categoriesNewSet = new LinkedHashSet<String>();
         for (i = 0; i < _categories.length; i++)
         {
             categoriesNewSet.add(_categories[i]);

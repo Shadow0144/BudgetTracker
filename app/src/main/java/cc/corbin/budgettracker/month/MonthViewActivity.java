@@ -29,6 +29,8 @@ import cc.corbin.budgettracker.auxilliary.ExcelExporter;
 import cc.corbin.budgettracker.auxilliary.TableCell;
 import cc.corbin.budgettracker.day.ExpenditureEditActivity;
 import cc.corbin.budgettracker.day.ExpenditureItem;
+import cc.corbin.budgettracker.settings.SettingsActivity;
+import cc.corbin.budgettracker.tables.CategorySummaryTable;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.year.YearViewActivity;
@@ -63,7 +65,7 @@ public class MonthViewActivity extends AppCompatActivity
     private int _year;
 
     private MonthWeeklySummaryTable _weeklyTable;
-    private MonthCategorySummaryTable _categoryTable;
+    private CategorySummaryTable _categoryTable;
     private MonthBudgetTable _budgetTable;
 
     private ExpenditureViewModel _viewModel;
@@ -121,12 +123,6 @@ public class MonthViewActivity extends AppCompatActivity
             }
         };
 
-        _monthExps = new MutableLiveData<List<ExpenditureEntity>>();
-        _monthExps.observe(this, entityObserver);
-        _budgets = new MutableLiveData<List<BudgetEntity>>();
-        _budgets.observe(this, budgetObserver);
-        _viewModel.getMonth(_monthExps);
-
         TextView header = findViewById(R.id.monthView);
         DateFormatSymbols dfs = new DateFormatSymbols();
         header.setText(dfs.getMonths()[_month-1] + " " + _year);
@@ -146,28 +142,54 @@ public class MonthViewActivity extends AppCompatActivity
         monthsWeeklyContainer.addView(_weeklyTable);
 
         FrameLayout monthsCategoryContainer = findViewById(R.id.monthCategoryHolder);
-        _categoryTable = new MonthCategorySummaryTable(this, _month, _year);
+        _categoryTable = new CategorySummaryTable(this);
         monthsCategoryContainer.addView(_categoryTable);
 
         FrameLayout budgetContainer = findViewById(R.id.monthBudgetHolder);
         _budgetTable = new MonthBudgetTable(this, _month, _year);
         budgetContainer.addView(_budgetTable);
 
+        _monthExps = new MutableLiveData<List<ExpenditureEntity>>();
+        _monthExps.observe(this, entityObserver);
+        _budgets = new MutableLiveData<List<BudgetEntity>>();
+        _budgets.observe(this, budgetObserver);
+        _viewModel.getMonth(_monthExps);
+
         ExcelExporter.checkPermissions(this);
+    }
+
+    @Override
+    protected void onResume()
+    {
+        if (SettingsActivity.monthNeedsUpdating)
+        {
+            _weeklyTable.resetTable();
+            _categoryTable.resetTable();
+            _budgetTable.resetTable();
+
+            _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
+            _viewModel.setDate(_year, _month, 0);
+            _viewModel.getMonth(_monthExps);
+
+            SettingsActivity.monthNeedsUpdating = false;
+        }
+        else { }
+
+        super.onResume();
     }
 
     private void monthLoaded(List<ExpenditureEntity> expenditureEntities)
     {
         _weeklyTable.updateExpenditures(expenditureEntities);
         _categoryTable.updateExpenditures(expenditureEntities);
+
         if (!_loaded)
         {
             createExtrasAndAdjustmentsTables(expenditureEntities);
-
-            // Create the other tables first
-            _viewModel.getMonthBudget(_budgets);
         }
         else { }
+
+        _viewModel.getMonthBudget(_budgets);
     }
 
     private void refreshTables(List<BudgetEntity> entities)
@@ -225,7 +247,7 @@ public class MonthViewActivity extends AppCompatActivity
         final View budgetEditView = getLayoutInflater().inflate(R.layout.popup_set_budget, null);
 
         final TextView categoryTextView = budgetEditView.findViewById(R.id.categoryTextView);
-        categoryTextView.setText(entity.getExpenseType() + ": ");
+        categoryTextView.setText(entity.getCategoryName() + ": ");
 
         final TextView currencyTextView = budgetEditView.findViewById(R.id.currencyTextView);
         currencyTextView.setText(Currencies.symbols[Currencies.default_currency]);

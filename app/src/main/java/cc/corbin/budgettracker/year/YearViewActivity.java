@@ -16,10 +16,13 @@ import android.widget.TextView;
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Set;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
+import cc.corbin.budgettracker.settings.SettingsActivity;
+import cc.corbin.budgettracker.tables.CategorySummaryTable;
 import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.R;
@@ -47,7 +50,7 @@ public class YearViewActivity extends AppCompatActivity
     private MutableLiveData<List<BudgetEntity>> _budgets;
 
     private YearMonthlySummaryTable _monthlyTable;
-    private YearCategorySummaryTable _categoryTable;
+    private CategorySummaryTable _categoryTable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -59,8 +62,6 @@ public class YearViewActivity extends AppCompatActivity
 
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
         _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
-
-        _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
         _viewModel.setDate(_year, 0, 0);
 
         final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
@@ -94,12 +95,6 @@ public class YearViewActivity extends AppCompatActivity
             }
         };
 
-        _yearExps = new MutableLiveData<List<ExpenditureEntity>>();
-        _yearExps.observe(this, entityObserver);
-        _budgets = new MutableLiveData<List<BudgetEntity>>();
-        _budgets.observe(this, budgetObserver);
-        _viewModel.getYear(_yearExps);
-
         TextView header = findViewById(R.id.yearView);
         DateFormatSymbols dfs = new DateFormatSymbols();
         header.setText("" + _year);
@@ -118,15 +113,41 @@ public class YearViewActivity extends AppCompatActivity
         yearMonthlyContainer.addView(_monthlyTable);
 
         FrameLayout yearsCategoryContainer = findViewById(R.id.yearCategoryHolder);
-        _categoryTable = new YearCategorySummaryTable(this, _year);
+        _categoryTable = new CategorySummaryTable(this);
         yearsCategoryContainer.addView(_categoryTable);
 
+        // TODO Make into real budget table
         FrameLayout budgetContainer = findViewById(R.id.yearBudgetHolder);
         TableLayout budgetTable = new TableLayout(this);
         setupBudgetTable(budgetTable);
         budgetContainer.addView(budgetTable);
 
+        _yearExps = new MutableLiveData<List<ExpenditureEntity>>();
+        _yearExps.observe(this, entityObserver);
+        _budgets = new MutableLiveData<List<BudgetEntity>>();
+        _budgets.observe(this, budgetObserver);
+        _viewModel.getYear(_yearExps);
+
         ExcelExporter.checkPermissions(this);
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
+        if (SettingsActivity.yearNeedsUpdating)
+        {
+            _monthlyTable.resetTable();
+            _categoryTable.resetTable();
+
+            _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
+            _viewModel.setDate(_year, 0, 0);
+            _viewModel.getYear(_yearExps);
+
+            SettingsActivity.yearNeedsUpdating = false;
+        }
+        else { }
     }
 
     private void yearLoaded(List<ExpenditureEntity> expenditureEntities)

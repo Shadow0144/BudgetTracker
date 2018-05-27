@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
@@ -55,7 +56,7 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
 
         _year = 2018;
 
-        createTable();
+        setupTable();
     }
 
     public YearMonthlySummaryTable(Context context, AttributeSet attrs)
@@ -81,7 +82,7 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
             a.recycle();
         }
 
-        createTable();
+        setupTable();
     }
 
     public YearMonthlySummaryTable(Context context, int year)
@@ -91,7 +92,7 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
 
         _year = year;
 
-        createTable();
+        setupTable();
     }
 
     public void onClick(View v)
@@ -105,7 +106,7 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
         ((YearViewActivity)_context).finish();
     }
 
-    private void createTable()
+    private void setupTable()
     {
         _expenses = new ArrayList<Float>();
         _expenseCells = new ArrayList<TableCell>();
@@ -113,7 +114,9 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
         _remainingCells = new ArrayList<TableCell>();
 
         // Setup the table
-        setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        setLayoutParams(new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT));
         setStretchAllColumns(true);
         setColumnShrinkable(0, true);
 
@@ -219,6 +222,12 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
         totalRow.addView(budgetCell);
         totalRow.addView(remainingCell);
         addView(totalRow);
+    }
+
+    public void resetTable()
+    {
+        removeAllViews();
+        setupTable();
     }
 
     private float getMonthTotal(List<ExpenditureEntity> expenditureEntities, int monthNum)

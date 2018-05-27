@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
@@ -54,7 +55,7 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
         _month = 1;
         _year = 2018;
 
-        createTable();
+        setupTable();
     }
 
     public MonthWeeklySummaryTable(Context context, AttributeSet attrs)
@@ -82,7 +83,7 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
             a.recycle();
         }
 
-        createTable();
+        setupTable();
     }
 
     public MonthWeeklySummaryTable(Context context, int month, int year)
@@ -93,7 +94,7 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
         _month = month;
         _year = year;
 
-        createTable();
+        setupTable();
     }
 
     public void onClick(View v)
@@ -108,7 +109,7 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
         ((MonthViewActivity)_context).finish();
     }
 
-    private void createTable()
+    private void setupTable()
     {
         _expenses = new ArrayList<Float>();
         _expenseCells = new ArrayList<TableCell>();
@@ -116,7 +117,9 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
         _remainingCells = new ArrayList<TableCell>();
 
         // Setup the table
-        setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        setLayoutParams(new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT));
         setStretchAllColumns(true);
         setColumnShrinkable(0, true);
 
@@ -294,6 +297,12 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
         totalRow.addView(budgetCell);
         totalRow.addView(remainingCell);
         addView(totalRow);
+    }
+
+    public void resetTable()
+    {
+        removeAllViews();
+        setupTable();
     }
 
     private float getWeekTotal(List<ExpenditureEntity> expenditureEntities, int weekNum)

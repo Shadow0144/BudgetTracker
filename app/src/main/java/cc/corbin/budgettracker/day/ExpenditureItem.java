@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
@@ -74,7 +75,7 @@ public class ExpenditureItem extends LinearLayout
         else { }
 
         final TextView categoryView = view.findViewById(R.id.categoryView);
-        categoryView.setText(_expenditure.getExpenseType());
+        categoryView.setText(_expenditure.getCategoryName());
 
         final TextView costView = view.findViewById(R.id.costView);
         String cost = Currencies.formatCurrency(Currencies.integer[Currencies.default_currency], _expenditure.getAmount()); // TODO - Format better

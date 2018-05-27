@@ -159,7 +159,6 @@ public class ExpenditureEditActivity extends AppCompatActivity
         final EditText valueEditText = findViewById(R.id.valueEditText);
         final EditText conversionRateEditText = findViewById(R.id.convertedAmountEditText);
         final RadioGroup categoriesHolder = findViewById(R.id.categoriesHolder);
-        final RadioButton button = categoriesHolder.findViewById(categoriesHolder.getCheckedRadioButtonId());
         final EditText noteEditText = findViewById(R.id.noteEditText);
 
         NumberFormat formatter = NumberFormat.getInstance(Locale.getDefault());
@@ -182,7 +181,9 @@ public class ExpenditureEditActivity extends AppCompatActivity
         {
             _expenditure.setAmount(0.0f);
         }
-        _expenditure.setExpenseType(button.getText().toString());
+        int category = categoriesHolder.getCheckedRadioButtonId();
+        Log.e(TAG, "category: " + category + " " + Categories.getCategories().length);
+        _expenditure.setCategory(category, Categories.getCategories()[category]);
         _expenditure.setBaseCurrency(_symbolSpinner.getSelectedItemPosition());
         String baseAmount = valueEditText.getText().toString();
         if (baseAmount.length() > 0)
@@ -463,6 +464,7 @@ public class ExpenditureEditActivity extends AppCompatActivity
         for (int i = 0; i < count; i++)
         {
             final RadioButton button = new RadioButton(this);
+            button.setId(i);
             button.setText(categories[i]);
             categoriesHolder.addView(button);
             categoriesHolder.check(button.getId());
@@ -471,12 +473,12 @@ public class ExpenditureEditActivity extends AppCompatActivity
         // Setup the values if they already exist
         if (_expenditure != null)
         {
-            String expenseType = _expenditure.getExpenseType();
+            String categoryName = _expenditure.getCategoryName();
             for (int i = 0; i < count; i++)
-            {
+            { // TODO - Check if this is the best way to compare this
                 RadioButton button = ((RadioButton) (categoriesHolder.getChildAt(i)));
                 String category = button.getText().toString();
-                if (expenseType.equals(category))
+                if (categoryName.equals(category))
                 {
                     categoriesHolder.check(button.getId());
                     break;

@@ -82,6 +82,7 @@ public class DatabaseThread extends Thread
                 switch (event.getQueryType())
                 {
                     case day:
+                        Log.e(TAG, "Processed Day event");
                         entities = _dbE.expenditureDao().getDay(event.getYear(), event.getMonth(), event.getDay());
                         break;
                     case month:
@@ -119,14 +120,14 @@ public class DatabaseThread extends Thread
                 break;
 
             case recategorize:
-                _dbE.expenditureDao().recategorize(event.getOldCategory(), event.getNewCategory());
+                _dbE.expenditureDao().recategorize(event.getCategory(), event.getNewCategoryName());
                 _completedExpEvents.add(event);
                 _handler.post(new ExpenditureRunnable());
                 break;
         }
     }
 
-    private BudgetEntity getMonthCategoryBudget(int month, int year, String category)
+    private BudgetEntity getMonthCategoryBudget(int month, int year, int category)
     {
         BudgetEntity entity;
 
@@ -134,8 +135,7 @@ public class DatabaseThread extends Thread
         if (catEntities.size() == 0)
         {
             BudgetEntity newEntity = new BudgetEntity();
-            newEntity.setExpenseType(category);
-            newEntity.setCurrency(Currencies.default_currency);
+            newEntity.setCategory(category, Categories.getCategories()[category]);
             entity = newEntity;
         }
         else
@@ -188,7 +188,7 @@ public class DatabaseThread extends Thread
                         year = event.getYear();
                         for (int i = 0; i < categories.length; i++)
                         {
-                            entities.add(getMonthCategoryBudget(month, year, categories[i]));
+                            entities.add(getMonthCategoryBudget(month, year, i));
                         }
                         break;
                     case year:
@@ -198,7 +198,7 @@ public class DatabaseThread extends Thread
                         {
                             for (int j = 0; j < categories.length; j++)
                             {
-                                entities.add(getMonthCategoryBudget(i, year, categories[j]));
+                                entities.add(getMonthCategoryBudget(i, year, j));
                             }
                         }
                         break;
@@ -212,7 +212,7 @@ public class DatabaseThread extends Thread
                             {
                                 for (int j = 0; j < categories.length; j++)
                                 {
-                                    entities.add(getMonthCategoryBudget(i, year, categories[j]));
+                                    entities.add(getMonthCategoryBudget(i, year, j));
                                 }
                             }
                         }
@@ -243,7 +243,7 @@ public class DatabaseThread extends Thread
                 break;
 
             case recategorize:
-                _dbB.budgetDao().recategorize(event.getOldCategory(), event.getNewCategory());
+                _dbB.budgetDao().recategorize(event.getCategory(), event.getNewCategoryName());
                 _completedBudEvents.add(event);
                 _handler.post(new ExpenditureRunnable());
                 break;

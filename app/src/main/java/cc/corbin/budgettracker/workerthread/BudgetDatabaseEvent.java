@@ -32,8 +32,8 @@ public class BudgetDatabaseEvent
     private int _id;
     private int _year;
     private int _month;
-    private String _oldCategory;
-    private String _newCategory;
+    private int _category;
+    private String _newCategoryName;
     private EventType _eventType;
     private QueryType _queryType;
     private BudgetEntity _entity;
@@ -64,12 +64,12 @@ public class BudgetDatabaseEvent
     }
 
     public BudgetDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
-                               String oldCategory, String newCategory)
+                               int category, String newCategoryName)
     {
         _mutableLiveData = mutableLiveData;
         _eventType = eventType;
-        _oldCategory = oldCategory;
-        _newCategory = newCategory;
+        _category = category;
+        _newCategoryName = newCategoryName;
         _id = id++;
         _entities = null;
     }
@@ -119,13 +119,13 @@ public class BudgetDatabaseEvent
         return _month;
     }
 
-    public String getOldCategory()
+    public int getCategory()
     {
-        return _oldCategory;
+        return _category;
     }
 
-    public String getNewCategory()
+    public String getNewCategoryName()
     {
-        return _newCategory;
+        return _newCategoryName;
     }
 }

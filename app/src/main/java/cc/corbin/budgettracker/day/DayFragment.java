@@ -15,8 +15,10 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import java.util.List;
+import java.util.Set;
 
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
+import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.R;
 
@@ -70,7 +72,20 @@ public class DayFragment extends Fragment
         }
         else { }
 
+        Log.e(TAG, "onCreate");
+
         return _view;
+    }
+
+    @Override
+    public void onResume()
+    {
+        if (SettingsActivity.dayNeedsUpdating)
+        {
+            refreshView();
+        }
+        else { }
+        super.onResume();
     }
 
     public void setParameters(DayFragmentPagerAdapter parent, int year, int month, int day)
@@ -102,12 +117,14 @@ public class DayFragment extends Fragment
         }
         else { }
 
+        Log.e(TAG, "Day: " + _day + " Entities: " + _entities.hasActiveObservers() + " " + _entities.hasObservers());
         _viewModel.setDate(_year, _month, _day);
         _viewModel.getDay(_entities);
     }
 
     public void onLoadExpenses(@Nullable List<ExpenditureEntity> expenditureEntities)
     {
+        Log.e(TAG, "Day: " + _day + " Loaded: " + (expenditureEntities != null));
         if (expenditureEntities != null)
         {
             _expenditureEntities = expenditureEntities;
@@ -190,12 +207,14 @@ public class DayFragment extends Fragment
 
     public void lock()
     {
+        Log.e(TAG, "Lock");
         _itemsContainer.setEnabled(false);
         _view.findViewById(R.id.newProgressFrame).setVisibility(View.VISIBLE);
     }
 
     public void unlock()
     {
+        Log.e(TAG, "Unlock");
         _itemsContainer.setEnabled(true);
         _view.findViewById(R.id.newProgressFrame).setVisibility(View.GONE);
     }

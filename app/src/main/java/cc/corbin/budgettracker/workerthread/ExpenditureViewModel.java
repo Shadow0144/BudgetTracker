@@ -20,38 +20,42 @@ public class ExpenditureViewModel extends ViewModel
 {
     private final String TAG = "ExpenditureViewModel";
 
-    private DatabaseThread _dataBaseThread;
+    private static DatabaseThread _dataBaseThread;
 
-    private ExpenditureDatabase _dbE;
-    private BudgetDatabase _dbB;
+    private static ExpenditureDatabase _dbE;
+    private static BudgetDatabase _dbB;
 
-    private int _year;
-    private int _month;
-    private int _day;
+    private static int _year;
+    private static int _month;
+    private static int _day;
 
-    private ConcurrentLinkedQueue<ExpDatabaseEvent> _expEvents;
-    private ConcurrentLinkedQueue<BudgetDatabaseEvent> _budEvents;
-    private ConcurrentLinkedQueue<ExpDatabaseEvent> _completedExpEvents;
-    private ConcurrentLinkedQueue<BudgetDatabaseEvent> _completedBudEvents;
+    private static ConcurrentLinkedQueue<ExpDatabaseEvent> _expEvents;
+    private static ConcurrentLinkedQueue<BudgetDatabaseEvent> _budEvents;
+    private static ConcurrentLinkedQueue<ExpDatabaseEvent> _completedExpEvents;
+    private static ConcurrentLinkedQueue<BudgetDatabaseEvent> _completedBudEvents;
 
-    private Handler _handler;
+    private static Handler _handler;
 
     public ExpenditureViewModel()
     {
-        _expEvents = new ConcurrentLinkedQueue<ExpDatabaseEvent>();
-        _budEvents = new ConcurrentLinkedQueue<BudgetDatabaseEvent>();
-        _completedExpEvents = new ConcurrentLinkedQueue<ExpDatabaseEvent>();
-        _completedBudEvents = new ConcurrentLinkedQueue<BudgetDatabaseEvent>();
-        _dbE = null;
-        _dbB = null;
+        if (_expEvents == null || _budEvents == null)
+        {
+            _expEvents = new ConcurrentLinkedQueue<ExpDatabaseEvent>();
+            _budEvents = new ConcurrentLinkedQueue<BudgetDatabaseEvent>();
+            _completedExpEvents = new ConcurrentLinkedQueue<ExpDatabaseEvent>();
+            _completedBudEvents = new ConcurrentLinkedQueue<BudgetDatabaseEvent>();
+            _dbE = null;
+            _dbB = null;
+            _handler = new Handler();
+        }
+        else { }
         ExpenditureRunnable.viewModel = this;
     }
 
     public void setDatabases(ExpenditureDatabase dbE, BudgetDatabase dbB)
     {
-        if (_dbE == null || _dbB == null)
+        if (_dataBaseThread == null || _dbE == null || _dbB == null)
         {
-            _handler = new Handler();
             _dbE = dbE;
             _dbB = dbB;
             _dataBaseThread = new DatabaseThread(_dbE, _dbB,
@@ -73,23 +77,33 @@ public class ExpenditureViewModel extends ViewModel
     @Override
     public void onCleared()
     {
-        _dataBaseThread.finish();
-        try
+        Log.e(TAG, "Cleared");
+        if (_dataBaseThread != null)
         {
-            _dataBaseThread.join();
+            _dataBaseThread.finish();
+            try
+            {
+                _dataBaseThread.join();
+                _dataBaseThread = null;
+                _dbE = null;
+                _dbB = null;
+            }
+            catch (Exception e)
+            {
+                Log.e(TAG, e.toString());
+            }
         }
-        catch (Exception e)
-        {
-            Log.e(TAG, e.toString());
-        }
+        else { }
     }
 
     // When a database event has finished
     public void checkQueue()
     {
+        Log.e(TAG, "ViewModel: List: " + _completedExpEvents.size());
         while (!_completedExpEvents.isEmpty())
         {
             ExpDatabaseEvent expDatabaseEvent = _completedExpEvents.poll();
+            Log.e(TAG, "ViewModel: Day: " + expDatabaseEvent.getDay());
             if (expDatabaseEvent.getMutableLiveData() != null)
             {
                 expDatabaseEvent.getMutableLiveData().postValue(expDatabaseEvent.getEntities());
@@ -111,6 +125,7 @@ public class ExpenditureViewModel extends ViewModel
     public void getDay(MutableLiveData<List<ExpenditureEntity>> mutableLiveData)
     {
         ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.query, _year, _month, _day, ExpDatabaseEvent.QueryType.day);
+        Log.e(TAG, "Adding day query");
         _expEvents.add(event);
     }
 
@@ -130,7 +145,6 @@ public class ExpenditureViewModel extends ViewModel
     {
         ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.query, _year, _month, _day, ExpDatabaseEvent.QueryType.total);
         _expEvents.add(event);
-
     }
 
     public void insertExpEntity(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, ExpenditureEntity entity)
@@ -151,9 +165,9 @@ public class ExpenditureViewModel extends ViewModel
         _expEvents.add(event);
     }
 
-    public void recategorizeExpenditureEntities(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, String oldCategory, String newCategory)
+    public void recategorizeExpenditureEntities(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, int category, String newCategoryName)
     {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.recategorize, oldCategory, newCategory);
+        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.recategorize, category, newCategoryName);
         _expEvents.add(event);
     }
 
@@ -193,9 +207,9 @@ public class ExpenditureViewModel extends ViewModel
         _budEvents.add(event);
     }
 
-    public void recategorizeBudgetEntities(MutableLiveData<List<BudgetEntity>> mutableLiveData, String oldCategory, String newCategory)
+    public void recategorizeBudgetEntities(MutableLiveData<List<BudgetEntity>> mutableLiveData, int category, String newCategoryName)
     {
-        BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.recategorize, oldCategory, newCategory);
+        BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.recategorize, category, newCategoryName);
         _budEvents.add(event);
     }
 }

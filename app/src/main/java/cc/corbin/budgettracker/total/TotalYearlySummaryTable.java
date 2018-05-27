@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.widget.FrameLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
@@ -45,7 +46,7 @@ public class TotalYearlySummaryTable extends TableLayout
         super(context);
         _context = context;
 
-        createTable();
+        setupTable();
     }
 
     public TotalYearlySummaryTable(Context context, AttributeSet attrs)
@@ -53,18 +54,15 @@ public class TotalYearlySummaryTable extends TableLayout
         super(context, attrs);
         _context = context;
 
-        TypedArray a = context.getTheme().obtainStyledAttributes(
-                attrs,
-                R.styleable.MonthTable,
-                0, 0);
-
-        createTable();
+        setupTable();
     }
 
-    private void createTable()
+    private void setupTable()
     {
         // Setup the table
-        setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        setLayoutParams(new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT));
         setStretchAllColumns(true);
         setColumnShrinkable(0, true);
 
@@ -156,6 +154,12 @@ public class TotalYearlySummaryTable extends TableLayout
         headerRow.addView(budgetCell);
         headerRow.addView(remainingCell);
         addView(headerRow);
+    }
+
+    public void resetTable()
+    {
+        removeAllViews();
+        setupTable();
     }
 
     public void updateExpenditures(List<ExpenditureEntity> expenditureEntities)

@@ -1,4 +1,4 @@
-package cc.corbin.budgettracker.budgetdatabase;
+package cc.corbin.budgettracker;
 
 import android.app.Application;
 import android.content.SharedPreferences;

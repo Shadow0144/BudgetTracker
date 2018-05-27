@@ -25,6 +25,7 @@ import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
+import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.month.MonthViewActivity;
 import cc.corbin.budgettracker.R;
@@ -169,6 +170,21 @@ public class DayViewActivity extends AppCompatActivity
         _totalAmountTextView.setText(cost);
 
         updateDay();
+    }
+
+    @Override
+    protected void onResume()
+    {
+        if (SettingsActivity.dayNeedsUpdating)
+        {
+            // TODO - Refresh
+            _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
+
+            //SettingsActivity.dayNeedsUpdating = false;
+        }
+        else { }
+
+        super.onResume();
     }
 
     public void previousDay(View v)

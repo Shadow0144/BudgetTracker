@@ -41,6 +41,8 @@ public class TableCell extends RelativeLayout
     public final static int SEMI_SPECIAL_CELL = 6;
     public final static int BOLD_CELL = 7;
 
+    private Context _context;
+
     private final int BUFFER = 20;
 
     public TableCell(Context context)
@@ -103,11 +105,13 @@ public class TableCell extends RelativeLayout
         setup(context, cellType);
     }
 
-    public void setup(Context context, int cellType)
+    private void setup(Context context, int cellType)
     {
+        _context = context;
+
         _progressBar = new ProgressBar(context);
         _textView = new AppCompatTextView(context);
-        int id = 1; // Need some non-zero id set so that the progress bar sizes correctly
+        int id = Integer.MAX_VALUE; // Need some non-zero ID which won't be found by a findByID search set so that the progress bar sizes correctly
         _textView.setId(id);
 
         _progressBar.setVisibility(INVISIBLE);
@@ -126,57 +130,62 @@ public class TableCell extends RelativeLayout
         _textView.setEllipsize(TextUtils.TruncateAt.END);
         _textView.setLines(1);
 
+        addView(_textView);
+        addView(_progressBar);
+
+        setType(cellType);
+    }
+
+    public void setType(int cellType)
+    {
         switch (cellType)
         {
             case DEFAULT_CELL: // Default
-                setBackground(context.getDrawable(R.drawable.cell_shape));
+                setBackground(_context.getDrawable(R.drawable.cell_shape));
                 _textView.setTypeface(null, Typeface.NORMAL);
-                _textView.setTextColor(context.getColor(R.color.black));
+                _textView.setTextColor(_context.getColor(R.color.black));
                 break;
             case HEADER_CELL: // Header
-                setBackground(context.getDrawable(R.drawable.header_cell_shape));
+                setBackground(_context.getDrawable(R.drawable.header_cell_shape));
                 _textView.setTypeface(null, Typeface.NORMAL);
-                _textView.setTextColor(context.getColor(R.color.white));
+                _textView.setTextColor(_context.getColor(R.color.white));
                 break;
             case TITLE_CELL: // Title
-                setBackground(context.getDrawable(R.drawable.title_cell_shape));
+                setBackground(_context.getDrawable(R.drawable.title_cell_shape));
                 _textView.setTypeface(null, Typeface.NORMAL);
-                _textView.setTextColor(context.getColor(R.color.white));
+                _textView.setTextColor(_context.getColor(R.color.white));
                 break;
             case TOTAL_CELL: // Total
-                setBackground(context.getDrawable(R.drawable.cell_shape));
+                setBackground(_context.getDrawable(R.drawable.cell_shape));
                 _textView.setTypeface(null, Typeface.BOLD);
-                _textView.setTextColor(context.getColor(R.color.black));
+                _textView.setTextColor(_context.getColor(R.color.black));
                 break;
             case GRAND_TOTAL_CELL: // Grand Total
-                setBackground(context.getDrawable(R.drawable.cell_shape));
+                setBackground(_context.getDrawable(R.drawable.cell_shape));
                 _textView.setTypeface(null, Typeface.BOLD);
-                _textView.setTextColor(context.getColor(R.color.blue));
+                _textView.setTextColor(_context.getColor(R.color.blue));
                 break;
             case SPECIAL_CELL: // Special
-                setBackground(context.getDrawable(R.drawable.special_cell_shape));
+                setBackground(_context.getDrawable(R.drawable.special_cell_shape));
                 _textView.setTypeface(null, Typeface.BOLD);
-                _textView.setTextColor(context.getColor(R.color.black));
+                _textView.setTextColor(_context.getColor(R.color.black));
                 break;
             case SEMI_SPECIAL_CELL: // Semi-Special
-                setBackground(context.getDrawable(R.drawable.semi_special_cell_shape));
+                setBackground(_context.getDrawable(R.drawable.semi_special_cell_shape));
                 _textView.setTypeface(null, Typeface.BOLD);
-                _textView.setTextColor(context.getColor(R.color.black));
+                _textView.setTextColor(_context.getColor(R.color.black));
                 break;
             case BOLD_CELL: // Bold
-                setBackground(context.getDrawable(R.drawable.cell_shape));
+                setBackground(_context.getDrawable(R.drawable.cell_shape));
                 _textView.setTypeface(null, Typeface.BOLD);
-                _textView.setTextColor(context.getColor(R.color.black));
+                _textView.setTextColor(_context.getColor(R.color.black));
                 break;
             default:
-                setBackground(context.getDrawable(R.drawable.cell_shape));
+                setBackground(_context.getDrawable(R.drawable.cell_shape));
                 _textView.setTypeface(null, Typeface.NORMAL);
-                _textView.setTextColor(context.getColor(R.color.black));
+                _textView.setTextColor(_context.getColor(R.color.black));
                 break;
         }
-
-        addView(_textView);
-        addView(_progressBar);
 
         invalidate();
     }
@@ -189,6 +198,11 @@ public class TableCell extends RelativeLayout
     public void setText(CharSequence text)
     {
         _textView.setText(text);
+    }
+
+    public CharSequence getText()
+    {
+        return _textView.getText();
     }
 
     public void setLoading(boolean loading)

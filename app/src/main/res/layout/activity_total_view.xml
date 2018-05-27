@@ -16,6 +16,15 @@
             android:background="@color/colorPrimaryDark"
             android:orientation="horizontal">
 
+            <Button
+                android:id="@+id/previousButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="@string/previous"
+                android:visibility="invisible" />
+
             <TextView
                 android:id="@+id/totalView"
                 android:layout_width="match_parent"
@@ -28,6 +37,15 @@
                 android:textColor="@android:color/background_light"
                 android:textSize="24sp"
                 android:textStyle="normal|bold" />
+
+            <Button
+                android:id="@+id/nextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="@string/next"
+                android:visibility="invisible" />
 
         </LinearLayout>
 

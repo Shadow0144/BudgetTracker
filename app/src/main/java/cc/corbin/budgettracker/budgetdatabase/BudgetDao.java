@@ -28,14 +28,14 @@ public interface BudgetDao
     @Query("SELECT * FROM budgetentity WHERE " +
             "year = (SELECT MAX(year) FROM " +
             "(SELECT * FROM budgetentity WHERE " +
-            "(((year < (:year)) OR (year = (:year) AND month <= (:month))) AND expenseType = (:category))" +
+            "(((year < (:year)) OR (year = (:year) AND month <= (:month))) AND category = (:category))" +
             ")) " +
             "ORDER BY month DESC " +
             "LIMIT 1")
-    List<BudgetEntity> getMonth(int year, int month, String category); // TODO BROKEN!
+    List<BudgetEntity> getMonth(int year, int month, int category); // TODO BROKEN!
 
-    @Query("SELECT * FROM budgetentity WHERE year = (:year) AND month = (:month) AND expenseType = (:category)")
-    List<BudgetEntity> getOnlyMonth(int year, int month, String category);
+    @Query("SELECT * FROM budgetentity WHERE year = (:year) AND month = (:month) AND category = (:category)")
+    List<BudgetEntity> getOnlyMonth(int year, int month, int category);
 
     @Query("SELECT * FROM budgetentity WHERE year = (:year)")  /// TODO Fix
     List<BudgetEntity> getYear(int year);
@@ -43,11 +43,11 @@ public interface BudgetDao
     @Query("SELECT * FROM budgetentity WHERE year = (:year)")
     List<BudgetEntity> getOnlyYear(int year);
 
-    @Query("SELECT * FROM budgetentity WHERE year = (:year) AND expenseType = (:category)")  /// TODO Fix
-    List<BudgetEntity> getYear(int year, String category);
+    @Query("SELECT * FROM budgetentity WHERE year = (:year) AND category = (:category)")  /// TODO Fix
+    List<BudgetEntity> getYear(int year, int category);
 
-    @Query("SELECT * FROM budgetentity WHERE year = (:year) AND expenseType = (:category)")
-    List<BudgetEntity> getOnlyYear(int year, String category);
+    @Query("SELECT * FROM budgetentity WHERE year = (:year) AND category = (:category)")
+    List<BudgetEntity> getOnlyYear(int year, int category);
 
     @Query("SELECT * FROM budgetentity WHERE ( " +
             "year = (:year) AND " +
@@ -58,26 +58,26 @@ public interface BudgetDao
     @Query("SELECT * FROM budgetentity WHERE ( " +
             "year = (:year) AND " +
             "month BETWEEN (:sMonth) AND (:eMonth) AND " +
-            "expenseType = (:category)" +
+            "category = (:category)" +
             " )")
-    List<BudgetEntity> getTimeSpan(int year, int sMonth, int eMonth, String category);
+    List<BudgetEntity> getTimeSpan(int year, int sMonth, int eMonth, int category);
 
     @Query("SELECT * FROM budgetentity WHERE ( " +
-            "expenseType = (:category) " +
+            "category = (:category) " +
             "AND (year < (:year) OR (year = (:year) AND month <= (:month))) AND month != 0" +
             " )")
-    List<BudgetEntity> getCategoryBeforeMonth(int year, int month, String category);
+    List<BudgetEntity> getCategoryBeforeMonth(int year, int month, int category);
 
     @Query("SELECT * FROM budgetentity WHERE ( " +
-            "expenseType = (:category)" +
+            "category = (:category)" +
             " )")
-    List<BudgetEntity> getCategory(String category);
+    List<BudgetEntity> getCategory(int category);
 
     @Query("SELECT * FROM budgetentity WHERE id IN (:budgetsIds)")
     List<BudgetEntity> loadAllByIds(int[] budgetsIds);
 
-    @Query("UPDATE budgetentity SET expenseType = (:newCategory) WHERE expenseType = (:currentCategory)")
-    void recategorize(String currentCategory, String newCategory);
+    @Query("UPDATE budgetentity SET categoryName = (:newCategoryName)  WHERE category = (:category)")
+    void recategorize(int category, String newCategoryName);
 
     @Insert
     long insert(BudgetEntity budget);

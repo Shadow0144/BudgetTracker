@@ -221,7 +221,7 @@ public class ExcelExporter
                                 }
                                 alt = !alt;
                                 sheet.addCell(new Label(0, r, "" + exp.getAmount(), format));
-                                sheet.addCell(new Label(1, r, "" + exp.getExpenseType(), format));
+                                sheet.addCell(new Label(1, r, "" + exp.getCategoryName(), format));
                                 if (exp.getNote().length() > 0)
                                 {
                                     sheet.addCell(new Label(2, r, "" + note, superFormat));

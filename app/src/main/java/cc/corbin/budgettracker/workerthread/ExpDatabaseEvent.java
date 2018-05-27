@@ -35,8 +35,8 @@ public class ExpDatabaseEvent
     private int _year;
     private int _month;
     private int _day;
-    private String _oldCategory;
-    private String _newCategory;
+    private int _category;
+    private String _newCategoryName;
     private EventType _eventType;
     private ExpenditureEntity _entity;
     private QueryType _queryType;
@@ -67,12 +67,12 @@ public class ExpDatabaseEvent
     }
 
     public ExpDatabaseEvent(MutableLiveData<List<ExpenditureEntity>> mutableLiveData,
-                            EventType eventType, String oldCategory, String newCategory)
+                            EventType eventType, int category, String newCategoryName)
     {
         _mutableLiveData = mutableLiveData;
         _eventType = eventType;
-        _oldCategory = oldCategory;
-        _newCategory = newCategory;
+        _category = category;
+        _newCategoryName = newCategoryName;
         _id = id++;
     }
 
@@ -126,13 +126,13 @@ public class ExpDatabaseEvent
         return _day;
     }
 
-    public String getOldCategory()
+    public int getCategory()
     {
-        return _oldCategory;
+        return _category;
     }
 
-    public String getNewCategory()
+    public String getNewCategoryName()
     {
-        return _newCategory;
+        return _newCategoryName;
     }
 }

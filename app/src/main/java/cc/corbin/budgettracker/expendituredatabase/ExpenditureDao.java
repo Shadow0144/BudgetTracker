@@ -53,8 +53,8 @@ public interface ExpenditureDao
             "year = (:year) AND " +
             "month = (:month) AND " +
             "day BETWEEN (:sDay) AND (:eDay)) AND " +
-            "expenseType = (:category)")
-    List<ExpenditureEntity> getTimeSpan(int year, int month, int sDay, int eDay, String category);
+            "category = (:category)")
+    List<ExpenditureEntity> getTimeSpan(int year, int month, int sDay, int eDay, int category);
 
     @Query("SELECT * FROM expenditureentity WHERE (" +
             "(" +
@@ -68,15 +68,15 @@ public interface ExpenditureDao
             "(year = (:sYear) AND year = (:eYear) AND month > (:sMonth) AND month = (:eMonth) AND day <= (:eDay)) OR " +
             "(year = (:sYear) AND year = (:eYear) AND month = (:sMonth) AND month = (:eMonth) AND day >= (:sDay) AND day <= (:eDay)))" +
             ") AND " +
-            " expenseType = (:category) " +
+            " category = (:category) " +
             ")")
-    List<ExpenditureEntity> getTimeSpan(int sYear, int sMonth, int sDay, int eYear, int eMonth, int eDay, String category);
+    List<ExpenditureEntity> getTimeSpan(int sYear, int sMonth, int sDay, int eYear, int eMonth, int eDay, int category);
 
     @Query("SELECT * FROM expenditureentity WHERE id IN (:expenditureIds)")
     List<ExpenditureEntity> loadAllByIds(long[] expenditureIds);
 
-    @Query("UPDATE expenditureentity SET expenseType = (:newCategory) WHERE expenseType = (:currentCategory)")
-    void recategorize(String currentCategory, String newCategory);
+    @Query("UPDATE expenditureentity SET categoryName = (:newCategoryName) WHERE category = (:category)")
+    void recategorize(int category, String newCategoryName);
 
     @Insert
     long insert(ExpenditureEntity expenditures);

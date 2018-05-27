@@ -7,16 +7,22 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import java.text.DateFormatSymbols;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import cc.corbin.budgettracker.auxilliary.Categories;
+import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.settings.SettingsActivity;
+import cc.corbin.budgettracker.tables.CategorySummaryTable;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
@@ -36,7 +42,7 @@ public class TotalViewActivity extends AppCompatActivity
     private MutableLiveData<List<BudgetEntity>> _budgets;
 
     private TotalYearlySummaryTable _yearlyTable;
-    private TotalCategorySummaryTable _categoryTable;
+    private CategorySummaryTable _categoryTable;
 
     private int _startYear;
     private int _endYear;
@@ -49,8 +55,6 @@ public class TotalViewActivity extends AppCompatActivity
 
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
         _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
-
-        _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
         _viewModel.setDate(0, 0, 0);
 
         final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
@@ -84,12 +88,6 @@ public class TotalViewActivity extends AppCompatActivity
             }
         };
 
-        _totalExps = new MutableLiveData<List<ExpenditureEntity>>();
-        _totalExps.observe(this, entityObserver);
-        _budgets = new MutableLiveData<List<BudgetEntity>>();
-        _budgets.observe(this, budgetObserver);
-        _viewModel.getTotal(_totalExps);
-
         TextView header = findViewById(R.id.totalView);
         DateFormatSymbols dfs = new DateFormatSymbols();
         header.setText("" + "Total"); // TODO
@@ -108,10 +106,51 @@ public class TotalViewActivity extends AppCompatActivity
         totalYearlyContainer.addView(_yearlyTable);
 
         FrameLayout totalCategoryContainer = findViewById(R.id.totalCategoryHolder);
-        _categoryTable = new TotalCategorySummaryTable(this);
+        _categoryTable = new CategorySummaryTable(this);
         totalCategoryContainer.addView(_categoryTable);
 
+        // TODO - Add total budget table?
+
+        _totalExps = new MutableLiveData<List<ExpenditureEntity>>();
+        _totalExps.observe(this, entityObserver);
+        _budgets = new MutableLiveData<List<BudgetEntity>>();
+        _budgets.observe(this, budgetObserver);
+
+        /*String cat = Categories.getCategories()[0];
+        for (int i = 0; i < 1000; i++)
+        {
+            ExpenditureEntity entity = new ExpenditureEntity();
+            entity.setDay(1);
+            entity.setMonth(1);
+            entity.setYear(2018);
+            entity.setBaseAmount(1.0f);
+            entity.setAmount(1.0f);
+            entity.setBaseCurrency(Currencies.default_currency);
+            entity.setExpenseType(cat);
+            _viewModel.insertExpEntity(_totalExps, entity);
+        }*/
+
+        _viewModel.getTotal(_totalExps);
+
         ExcelExporter.checkPermissions(this);
+    }
+
+    @Override
+    protected void onResume()
+    {
+        if (SettingsActivity.grandTotalNeedsUpdating)
+        {
+            _yearlyTable.resetTable();
+            _categoryTable.resetTable();
+
+            _viewModel.setDate(0, 0, 0);
+            _viewModel.getTotal(_totalExps);
+
+            SettingsActivity.grandTotalNeedsUpdating = false;
+        }
+        else { }
+
+        super.onResume();
     }
 
     private void totalLoaded(List<ExpenditureEntity> expenditureEntities)

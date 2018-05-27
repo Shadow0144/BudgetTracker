@@ -1,8 +1,10 @@
-package cc.corbin.budgettracker.total;
+package cc.corbin.budgettracker.tables;
 
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.widget.FrameLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
@@ -21,9 +23,9 @@ import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
  * Created by Corbin on 1/29/2018.
  */
 
-public class TotalCategorySummaryTable extends TableLayout
+public class CategorySummaryTable extends TableLayout
 {
-    private final String TAG = "TotalCategorySummaryTable";
+    private final String TAG = "CategorySummaryTable";
 
     private Context _context;
 
@@ -41,10 +43,7 @@ public class TotalCategorySummaryTable extends TableLayout
 
     private String[] _categories;
 
-    private int _startYear;
-    private int _endYear;
-
-    public TotalCategorySummaryTable(Context context)
+    public CategorySummaryTable(Context context)
     {
         super(context);
         _context = context;
@@ -52,15 +51,10 @@ public class TotalCategorySummaryTable extends TableLayout
         setupTable();
     }
 
-    public TotalCategorySummaryTable(Context context, AttributeSet attrs)
+    public CategorySummaryTable(Context context, AttributeSet attrs)
     {
         super(context, attrs);
         _context = context;
-
-        TypedArray a = context.getTheme().obtainStyledAttributes(
-                attrs,
-                R.styleable.MonthTable,
-                0, 0);
 
         setupTable();
     }
@@ -76,7 +70,9 @@ public class TotalCategorySummaryTable extends TableLayout
         int rows = _categories.length;
 
         // Setup the table
-        setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        setLayoutParams(new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT));
         setStretchAllColumns(true);
         setColumnShrinkable(0, true);
 
@@ -182,6 +178,12 @@ public class TotalCategorySummaryTable extends TableLayout
         addView(totalRow);
     }
 
+    public void resetTable()
+    {
+        removeAllViews();
+        setupTable();
+    }
+
     private float getCategoryTotal(List<ExpenditureEntity> expenditureEntities, String category)
     {
         float total = 0.0f;
@@ -189,7 +191,7 @@ public class TotalCategorySummaryTable extends TableLayout
         for (int i = 0; i < count; i++)
         {
             ExpenditureEntity exp = expenditureEntities.get(i);
-            if (exp.getExpenseType().equals(category))
+            if (exp.getCategory() == i)
             {
                 total += exp.getAmount();
             }
@@ -201,19 +203,28 @@ public class TotalCategorySummaryTable extends TableLayout
 
     public void updateExpenditures(List<ExpenditureEntity> expenditureEntities)
     {
+        int size = expenditureEntities.size();
         int catSize = Categories.getCategories().length;
-        int expSize = expenditureEntities.size();
-        _startYear = expenditureEntities.get(0).getYear();
-        _endYear = expenditureEntities.get(expSize - 1).getYear();
 
-        float total = 0.0f;
+        float[] totals = new float[catSize];
         for (int i = 0; i < catSize; i++)
         {
-            float categoryTotal = getCategoryTotal(expenditureEntities, _categories[i]);
-            _expenses.set(i, categoryTotal);
-            _expenseCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, categoryTotal));
+            totals[i] = 0.0f;
+        }
+        float total = 0.0f;
+
+        for (int i = 0; i < size; i++)
+        {
+            ExpenditureEntity entity = expenditureEntities.get(i);
+            totals[entity.getCategory()] += entity.getAmount();
+        }
+
+        for (int i = 0; i < catSize; i++)
+        {
+            _expenses.set(i, totals[i]);
+            _expenseCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, totals[i]));
             _expenseCells.get(i).setLoading(false);
-            total += categoryTotal;
+            total += totals[i];
         }
         _totalExpenses = total;
         _totalExpenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
@@ -225,19 +236,19 @@ public class TotalCategorySummaryTable extends TableLayout
         if (_budgetCells != null)
         {
             float totalBudget = 0.0f;
-            int size = _endYear - _startYear + 1;
             int catSize = Categories.getCategories().length;
-            for (int k = 0; k < catSize; k++)
+            // Month - category number of items
+            // Year - category number of items
+            // Total - year * category number of items
+            int size = budgetEntities.size() / catSize; // Only non-one when total view
+            for (int k = 0; k < catSize; k++) // Loop through each of the categories
             {
                 float catBudget = 0.0f;
-                for (int i = 0; i < size; i++)
+                for (int i = 0; i < size; i++) // Sum up the totals for each time segment
                 {
-                    for (int j = 0; j < 12; j++)
-                    {
-                        int index = (((i * 12) + j) * catSize) + k;
-                        BudgetEntity budgetEntity = budgetEntities.get(index);
-                        catBudget += budgetEntity.getAmount();
-                    }
+                    int index = (i * catSize) + k;
+                    BudgetEntity budgetEntity = budgetEntities.get(index);
+                    catBudget += budgetEntity.getAmount();
                 }
                 TableCell budgetCell = _budgetCells.get(k);
                 budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, catBudget));
