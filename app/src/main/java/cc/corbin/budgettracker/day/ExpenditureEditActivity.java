@@ -44,6 +44,9 @@ import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.MoneyValueFilter;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
+import cc.corbin.budgettracker.month.MonthViewActivity;
+import cc.corbin.budgettracker.total.TotalViewActivity;
+import cc.corbin.budgettracker.year.YearViewActivity;
 
 import static android.Manifest.permission.INTERNET;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -182,7 +185,7 @@ public class ExpenditureEditActivity extends AppCompatActivity
             _expenditure.setAmount(0.0f);
         }
         int category = categoriesHolder.getCheckedRadioButtonId();
-        Log.e(TAG, "category: " + category + " " + Categories.getCategories().length);
+
         _expenditure.setCategory(category, Categories.getCategories()[category]);
         _expenditure.setBaseCurrency(_symbolSpinner.getSelectedItemPosition());
         String baseAmount = valueEditText.getText().toString();
@@ -227,6 +230,8 @@ public class ExpenditureEditActivity extends AppCompatActivity
 
         setResult(DayViewActivity.SUCCEED, intent);
 
+        DayViewActivity.dataInvalid = true;
+
         finish();
     }
 
@@ -260,6 +265,11 @@ public class ExpenditureEditActivity extends AppCompatActivity
         intent.putExtra(INDEX_INTENT, _index);
 
         setResult(DayViewActivity.DELETE, intent);
+
+        DayViewActivity.dataInvalid = true;
+        MonthViewActivity.dataInvalid = true;
+        YearViewActivity.dataInvalid = true;
+        TotalViewActivity.dataInvalid = true;
 
         finish();
     }

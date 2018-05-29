@@ -64,11 +64,15 @@ public class DayViewActivity extends AppCompatActivity
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _entities;
 
+    public static boolean dataInvalid;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_day_view);
+
+        DayViewActivity.dataInvalid = true;
 
         _dateView = findViewById(R.id.dateView);
         _pagerView = findViewById(R.id.itemsPager);
@@ -110,7 +114,6 @@ public class DayViewActivity extends AppCompatActivity
             {
                 // This is only called from a return from add / edit / remove
                 _adapter.getItem(_pagerView.getCurrentItem()).refreshView();
-                unlock();
             }
         };
 
@@ -285,7 +288,6 @@ public class DayViewActivity extends AppCompatActivity
         }
         else
         {
-            lock();
             if (requestCode == CREATE_EXPENDITURE)
             {
                 if (resultCode == SUCCEED)
@@ -313,33 +315,10 @@ public class DayViewActivity extends AppCompatActivity
 
             if (resultCode == CANCEL)
             {
-                unlockAll();
+
             }
             else { }
         }
-    }
-
-    private void lock()
-    {
-        _previousDay.setEnabled(false);
-        _nextDay.setEnabled(false);
-        _addButton.setEnabled(false);
-        _adapter.getItem(_pagerView.getCurrentItem()).lock();
-    }
-
-    private void unlock()
-    {
-        _previousDay.setEnabled(true);
-        _nextDay.setEnabled(true);
-        _addButton.setEnabled(true);
-    }
-
-    private void unlockAll()
-    {
-        _previousDay.setEnabled(true);
-        _nextDay.setEnabled(true);
-        _addButton.setEnabled(true);
-        _adapter.getItem(_pagerView.getCurrentItem()).unlock();
     }
 
     public void moveToMonthView(View v)

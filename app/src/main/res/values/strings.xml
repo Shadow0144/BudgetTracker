@@ -33,7 +33,8 @@
     <string name="month_title">Expenditures</string>
     <string name="month_weekly_title">Expenditures by Week</string>
     <string name="month_category_title">Expenditures by Category</string>
-    <string name="budget_title">Monthly Budget Limits</string>
+    <string name="monthly_budget_title">Monthly Budget Limits</string>
+    <string name="yearly_budget_title">Yearly Budget Limits</string>
     <string name="year_monthly_title">Expenditures by Year</string>
     <string name="year_category_title">Expenditures by Category</string>
     <string name="year_budget_title">Yearly Budget Limits</string>

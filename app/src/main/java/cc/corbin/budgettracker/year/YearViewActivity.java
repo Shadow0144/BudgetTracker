@@ -7,8 +7,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.PopupWindow;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -19,9 +25,11 @@ import java.util.List;
 import java.util.Set;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
+import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.settings.SettingsActivity;
+import cc.corbin.budgettracker.tables.BudgetTable;
 import cc.corbin.budgettracker.tables.CategorySummaryTable;
 import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
@@ -51,12 +59,20 @@ public class YearViewActivity extends AppCompatActivity
 
     private YearMonthlySummaryTable _monthlyTable;
     private CategorySummaryTable _categoryTable;
+    private BudgetTable _budgetTable;
+
+    private int _budgetId; // ID of the budget entity being edited
+    private PopupWindow _popupWindow; // For editing budgets
+
+    public static boolean dataInvalid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_year_view);
+
+        YearViewActivity.dataInvalid = true;
 
         _year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
 
@@ -118,15 +134,14 @@ public class YearViewActivity extends AppCompatActivity
 
         // TODO Make into real budget table
         FrameLayout budgetContainer = findViewById(R.id.yearBudgetHolder);
-        TableLayout budgetTable = new TableLayout(this);
-        setupBudgetTable(budgetTable);
-        budgetContainer.addView(budgetTable);
+        _budgetTable = new BudgetTable(this, _year);
+        budgetContainer.addView(_budgetTable);
 
         _yearExps = new MutableLiveData<List<ExpenditureEntity>>();
         _yearExps.observe(this, entityObserver);
         _budgets = new MutableLiveData<List<BudgetEntity>>();
         _budgets.observe(this, budgetObserver);
-        _viewModel.getYear(_yearExps);
+        //_viewModel.getYear(_yearExps);
 
         ExcelExporter.checkPermissions(this);
     }
@@ -136,7 +151,7 @@ public class YearViewActivity extends AppCompatActivity
     {
         super.onResume();
 
-        if (SettingsActivity.yearNeedsUpdating)
+        if (YearViewActivity.dataInvalid)
         {
             _monthlyTable.resetTable();
             _categoryTable.resetTable();
@@ -144,8 +159,6 @@ public class YearViewActivity extends AppCompatActivity
             _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
             _viewModel.setDate(_year, 0, 0);
             _viewModel.getYear(_yearExps);
-
-            SettingsActivity.yearNeedsUpdating = false;
         }
         else { }
     }
@@ -155,6 +168,8 @@ public class YearViewActivity extends AppCompatActivity
         _monthlyTable.updateExpenditures(expenditureEntities);
         _categoryTable.updateExpenditures(expenditureEntities);
 
+        YearViewActivity.dataInvalid = false;
+
         _viewModel.getYearBudget(_budgets);
     }
 
@@ -162,6 +177,7 @@ public class YearViewActivity extends AppCompatActivity
     {
         _monthlyTable.updateBudgets(entities);
         _categoryTable.updateBudgets(entities);
+        _budgetTable.refreshTable(entities);
     }
 
     public void onRequestPermissionsResult(int requestCode,
@@ -186,41 +202,95 @@ public class YearViewActivity extends AppCompatActivity
         finish();
     }
 
-    private void setupBudgetTable(TableLayout budgetTable)
+    public void editBudgetItem(int id)
     {
-        String[] categories = Categories.getCategories();
-        int count = categories.length;
+        _budgetId = id;
+        BudgetEntity entity = _budgets.getValue().get(_budgetId);
 
-        TableRow titleRow = new TableRow(this);
-        TableCell titleCell = new TableCell(this, TableCell.TITLE_CELL);
-        titleCell.setText(R.string.year_budget_title);
+        final View budgetEditView = getLayoutInflater().inflate(R.layout.popup_set_budget, null);
 
-        TableRow.LayoutParams params = new TableRow.LayoutParams(
-                TableRow.LayoutParams.MATCH_PARENT,
-                TableRow.LayoutParams.WRAP_CONTENT
-        );
-        params.span = 2;
-        titleCell.setLayoutParams(params);
+        final TextView categoryTextView = budgetEditView.findViewById(R.id.categoryTextView);
+        categoryTextView.setText(entity.getCategoryName() + ": ");
 
-        titleRow.addView(titleCell);
-        budgetTable.addView(titleRow);
+        final TextView currencyTextView = budgetEditView.findViewById(R.id.currencyTextView);
+        currencyTextView.setText(Currencies.symbols[Currencies.default_currency]);
 
-        budgetTable.setColumnStretchable(1, true);
-
-        for (int i = 0; i < count; i++)
+        final EditText budgetEditText = budgetEditView.findViewById(R.id.amountEditText);
+        if (Currencies.integer[Currencies.default_currency])
         {
-            TableRow tableRow = new TableRow(this);
-            TableCell headerCell = new TableCell(this, TableCell.HEADER_CELL);
-            TableCell contentCell = new TableCell(this, TableCell.DEFAULT_CELL);
-
-            headerCell.setText(categories[i]);
-            contentCell.setText("0");
-
-            tableRow.addView(headerCell);
-            tableRow.addView(contentCell);
-
-            budgetTable.addView(tableRow);
+            budgetEditText.setHint("0");
         }
+        else
+        {
+            budgetEditText.setHint("0.00");
+        }
+
+        if (entity.getId() != 0)
+        {
+            final Button removeButton = budgetEditView.findViewById(R.id.removeButton);
+            removeButton.setEnabled(true);
+        }
+        else { }
+
+        _popupWindow = new PopupWindow(budgetEditView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        _popupWindow.setFocusable(true);
+        _popupWindow.update();
+        _popupWindow.showAtLocation(findViewById(R.id.monthRootLayout), Gravity.CENTER, 0, 0);
+    }
+
+    public void confirmBudgetItemEdit(View v)
+    {
+        BudgetEntity entity = _budgets.getValue().get(_budgetId);
+
+        final EditText amountTextEdit = _popupWindow.getContentView().findViewById(R.id.amountEditText);
+        float amount = 0.0f;
+        try
+        {
+            amount = Float.parseFloat(amountTextEdit.getText().toString());
+        }
+        catch (Exception e)
+        {
+            Log.e(TAG, "Empty amount");
+        }
+        entity.setAmount(amount);
+
+        if (entity.getId() != 0) // Edit
+        {
+            _budgets.getValue().get(_budgetId).setAmount(amount);
+            entity.setMonth(13);
+            _viewModel.updateBudgetEntity(_budgets, entity);
+        }
+        else // Add
+        {
+            entity.setId(0);
+            entity.setMonth(13);
+            entity.setYear(_year);
+            _budgets.getValue().add(entity);
+            _viewModel.insertBudgetEntity(_budgets, entity);
+        }
+
+        // Lock the BudgetTable
+        _budgetTable.lockTable();
+
+        _popupWindow.dismiss();
+    }
+
+    public void cancelBudgetItemEdit(View v)
+    {
+        _popupWindow.dismiss();
+    }
+
+    public void removeBudgeItem(View v)
+    {
+        BudgetEntity entity = _budgets.getValue().get(_budgetId);
+
+        _budgets.getValue().remove(_budgetId);
+        _viewModel.removeBudgetEntity(_budgets, entity);
+
+        // Lock the BudgetTable
+        _budgetTable.lockTable();
+
+        _popupWindow.dismiss();
     }
 
     public void exportYear(View v)

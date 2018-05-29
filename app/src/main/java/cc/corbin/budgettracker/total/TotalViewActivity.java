@@ -47,11 +47,15 @@ public class TotalViewActivity extends AppCompatActivity
     private int _startYear;
     private int _endYear;
 
+    public static boolean dataInvalid;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_total_view);
+
+        TotalViewActivity.dataInvalid = true;
 
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
         _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
@@ -130,7 +134,7 @@ public class TotalViewActivity extends AppCompatActivity
             _viewModel.insertExpEntity(_totalExps, entity);
         }*/
 
-        _viewModel.getTotal(_totalExps);
+        //_viewModel.getTotal(_totalExps);
 
         ExcelExporter.checkPermissions(this);
     }
@@ -138,15 +142,13 @@ public class TotalViewActivity extends AppCompatActivity
     @Override
     protected void onResume()
     {
-        if (SettingsActivity.grandTotalNeedsUpdating)
+        if (TotalViewActivity.dataInvalid)
         {
             _yearlyTable.resetTable();
             _categoryTable.resetTable();
 
             _viewModel.setDate(0, 0, 0);
             _viewModel.getTotal(_totalExps);
-
-            SettingsActivity.grandTotalNeedsUpdating = false;
         }
         else { }
 
@@ -159,6 +161,7 @@ public class TotalViewActivity extends AppCompatActivity
         _categoryTable.updateExpenditures(expenditureEntities);
         _startYear = _yearlyTable.getStartYear();
         _endYear = _yearlyTable.getEndYear();
+        TotalViewActivity.dataInvalid = false;
         _viewModel.getTotalBudget(_budgets, _startYear, _endYear);
     }
 

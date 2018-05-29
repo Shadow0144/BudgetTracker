@@ -32,7 +32,7 @@ public interface BudgetDao
             ")) " +
             "ORDER BY month DESC " +
             "LIMIT 1")
-    List<BudgetEntity> getMonth(int year, int month, int category); // TODO BROKEN!
+    BudgetEntity getMonth(int year, int month, int category); // TODO BROKEN!
 
     @Query("SELECT * FROM budgetentity WHERE year = (:year) AND month = (:month) AND category = (:category)")
     List<BudgetEntity> getExactMonth(int year, int month, int category);
@@ -45,6 +45,9 @@ public interface BudgetDao
 
     @Query("SELECT * FROM budgetentity WHERE year = (:year)  AND (month = 0 OR month = 13) AND category = (:category)")
     List<BudgetEntity> getYear(int year, int category);
+
+    @Query("SELECT * FROM budgetentity WHERE year = (:year)  AND (month = 0) AND category = (:category) LIMIT 1")
+    BudgetEntity getAutoYear(int year, int category);
 
     @Query("SELECT * FROM budgetentity WHERE ( " +
             "year = (:year) AND " +

@@ -169,9 +169,42 @@ public class DatabaseThread extends Thread
         return entity;
     }
 
+    private BudgetEntity getYearCategoryBudget(int year, int category)
+    {
+        BudgetEntity budgetEntity;
+
+        List<BudgetEntity> budgetEntities = _dbB.budgetDao().getYear(year, category);
+        if (budgetEntities != null && budgetEntities.size() > 0)
+        {
+            budgetEntity = budgetEntities.get(budgetEntities.size()-1);
+        }
+        else
+        {
+            budgetEntity = new BudgetEntity();
+        }
+
+        return budgetEntity;
+    }
+
     private void updateYearBudget(int year, int category)
     {
-
+        float total = 0.0f;
+        for (int i = 1; i < (12+1); i++)
+        {
+            BudgetEntity entity = getMonthCategoryBudget(i, year, category);
+            total += entity.getAmount();
+        }
+        BudgetEntity yearBudget = _dbB.budgetDao().getAutoYear(year, category);
+        if (yearBudget == null)
+        {
+            yearBudget = new BudgetEntity(0, year, total, category, Categories.getCategories()[category]);
+            _dbB.budgetDao().insert(yearBudget);
+        }
+        else
+        {
+            yearBudget.setAmount(total);
+            _dbB.budgetDao().update(yearBudget);
+        }
     }
 
     private void processBudEvent(BudgetDatabaseEvent event)
@@ -198,12 +231,9 @@ public class DatabaseThread extends Thread
                     case year:
                         entities = new ArrayList<BudgetEntity>();
                         year = event.getYear();
-                        for (int i = 1; i < 12+1; i++)
+                        for (int i = 0; i < categories.length; i++)
                         {
-                            for (int j = 0; j < categories.length; j++)
-                            {
-                                entities.add(getMonthCategoryBudget(i, year, j));
-                            }
+                                entities.add(getYearCategoryBudget(year, i));
                         }
                         break;
                     case total:
@@ -212,7 +242,7 @@ public class DatabaseThread extends Thread
                         endyear = event.getMonth();
                         for (int l = year; l <= endyear; l++)
                         {
-                            for (int i = 1; i < 12 + 1; i++)
+                            for (int i = 1; i < (12+1); i++)
                             {
                                 for (int j = 0; j < categories.length; j++)
                                 {
@@ -230,18 +260,21 @@ public class DatabaseThread extends Thread
             case insert:
                 long id = _dbB.budgetDao().insert(event.getEntity());
                 event.getEntity().setId(id);
+                updateYearBudget(event.getYear(), event.getCategory());
                 _completedBudEvents.add(event);
                 _handler.post(new ExpenditureRunnable());
                 break;
 
             case update:
                 _dbB.budgetDao().update(event.getEntity());
+                updateYearBudget(event.getYear(), event.getCategory());
                 _completedBudEvents.add(event);
                 _handler.post(new ExpenditureRunnable());
                 break;
 
             case remove:
                 _dbB.budgetDao().delete(event.getEntity());
+                updateYearBudget(event.getYear(), event.getCategory());
                 _completedBudEvents.add(event);
                 _handler.post(new ExpenditureRunnable());
                 break;

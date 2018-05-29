@@ -68,11 +68,9 @@ public class DayFragment extends Fragment
         // Make the call to getDay here if this occurs last
         if (_parent != null)
         {
-            _viewModel.getDay(_entities);
+            //_viewModel.getDay(_entities);
         }
         else { }
-
-        Log.e(TAG, "onCreate");
 
         return _view;
     }
@@ -80,10 +78,9 @@ public class DayFragment extends Fragment
     @Override
     public void onResume()
     {
-        if (SettingsActivity.dayNeedsUpdating > 0)
+        if (DayViewActivity.dataInvalid)
         {
             refreshView();
-            SettingsActivity.dayNeedsUpdating--;
         }
         else { }
         super.onResume();
@@ -99,7 +96,7 @@ public class DayFragment extends Fragment
         // Make the call to getDay here if this occurs last
         if (_entities != null)
         {
-            _viewModel.getDay(_entities);
+            //_viewModel.getDay(_entities);
         }
         else { }
     }
@@ -118,14 +115,12 @@ public class DayFragment extends Fragment
         }
         else { }
 
-        Log.e(TAG, "Day: " + _day + " Entities: " + _entities.hasActiveObservers() + " " + _entities.hasObservers());
         _viewModel.setDate(_year, _month, _day);
         _viewModel.getDay(_entities);
     }
 
-    public void onLoadExpenses(@Nullable List<ExpenditureEntity> expenditureEntities)
+    private void onLoadExpenses(@Nullable List<ExpenditureEntity> expenditureEntities)
     {
-        Log.e(TAG, "Day: " + _day + " Loaded: " + (expenditureEntities != null));
         if (expenditureEntities != null)
         {
             _expenditureEntities = expenditureEntities;
@@ -149,7 +144,7 @@ public class DayFragment extends Fragment
 
             setUpExpenditures();
 
-            unlock();
+            DayViewActivity.dataInvalid = false;
         }
         else { }
     }
@@ -204,19 +199,5 @@ public class DayFragment extends Fragment
         }
         else { }
         return total;
-    }
-
-    public void lock()
-    {
-        Log.e(TAG, "Lock");
-        _itemsContainer.setEnabled(false);
-        _view.findViewById(R.id.newProgressFrame).setVisibility(View.VISIBLE);
-    }
-
-    public void unlock()
-    {
-        Log.e(TAG, "Unlock");
-        _itemsContainer.setEnabled(true);
-        _view.findViewById(R.id.newProgressFrame).setVisibility(View.GONE);
     }
 }

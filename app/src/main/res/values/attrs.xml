@@ -7,8 +7,15 @@
             <enum name="titleCell" value="2"/>
         </attr>
     </declare-styleable>
-    <declare-styleable name="MonthTable">
+    <declare-styleable name="Table">
+        <attr name="day" format="integer"/>
         <attr name="month" format="integer"/>
         <attr name="year" format="integer"/>
+        <attr name="timespan" format="enum">
+            <enum name="daily" value="0"/>
+            <enum name="monthly" value="1"/>
+            <enum name="yearly" value="2"/>
+            <enum name="total" value="3"/>
+        </attr>
     </declare-styleable>
 </resources>

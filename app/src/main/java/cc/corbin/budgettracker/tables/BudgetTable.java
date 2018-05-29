@@ -1,8 +1,9 @@
-package cc.corbin.budgettracker.month;
+package cc.corbin.budgettracker.tables;
 
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -10,25 +11,32 @@ import android.widget.TableRow;
 import java.util.ArrayList;
 import java.util.List;
 
+import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
-import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.TableCell;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
-import cc.corbin.budgettracker.day.DayViewActivity;
+import cc.corbin.budgettracker.month.MonthViewActivity;
+import cc.corbin.budgettracker.year.YearViewActivity;
 
-/**
- * Created by Corbin on 1/29/2018.
- */
-
-public class MonthBudgetTable extends TableLayout
+public class BudgetTable extends TableLayout
 {
-    private final String TAG = "MonthBudgetTable";
+
+    private final String TAG = "BudgetTable";
 
     private Context _context;
 
     private int _month;
     private int _year;
+
+    public enum timespans
+    {
+        daily,
+        monthly,
+        yearly,
+        total
+    };
+    private timespans _timespan;
 
     private List<BudgetEntity> _budgets;
 
@@ -37,36 +45,39 @@ public class MonthBudgetTable extends TableLayout
     private TableCell _totalBudgetCell;
     private TableCell _totalDateCell;
 
-    public MonthBudgetTable(Context context)
+    public BudgetTable(Context context)
     {
         super(context);
         _context = context;
 
         _month = 1;
         _year = 2018;
+        _timespan = timespans.daily;
 
         setupTable();
     }
 
-    public MonthBudgetTable(Context context, AttributeSet attrs)
+    public BudgetTable(Context context, AttributeSet attrs)
     {
         super(context, attrs);
         _context = context;
 
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs,
-                R.styleable.MonthTable,
+                R.styleable.Table,
                 0, 0);
 
         try
         {
-            _month = a.getInteger(R.styleable.MonthTable_month, 1);
-            _year = a.getInteger(R.styleable.MonthTable_year, 2018);
+            _month = a.getInteger(R.styleable.Table_month, 1);
+            _year = a.getInteger(R.styleable.Table_year, 2018);
+            _timespan = timespans.values()[a.getInteger(R.styleable.Table_timespan, timespans.daily.ordinal())];
         }
         catch (Exception e)
         {
             _month = 1;
             _year = 2018;
+            _timespan = timespans.daily;
         }
         finally
         {
@@ -76,13 +87,26 @@ public class MonthBudgetTable extends TableLayout
         setupTable();
     }
 
-    public MonthBudgetTable(Context context, int month, int year)
+    public BudgetTable(Context context, int month, int year)
     {
         super(context);
         _context = context;
 
         _month = month;
         _year = year;
+        _timespan = timespans.monthly;
+
+        setupTable();
+    }
+
+    public BudgetTable(Context context, int year)
+    {
+        super(context);
+        _context = context;
+
+        _month = 0;
+        _year = year;
+        _timespan = timespans.yearly;
 
         setupTable();
     }
@@ -97,7 +121,14 @@ public class MonthBudgetTable extends TableLayout
 
         TableRow titleRow = new TableRow(_context);
         TableCell titleCell = new TableCell(_context, TableCell.TITLE_CELL);
-        titleCell.setText(R.string.budget_title);
+        if (_timespan == timespans.monthly)
+        {
+            titleCell.setText(R.string.monthly_budget_title);
+        }
+        else
+        {
+            titleCell.setText(R.string.yearly_budget_title);
+        }
 
         TableRow.LayoutParams params = new TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
@@ -198,8 +229,15 @@ public class MonthBudgetTable extends TableLayout
                 TableCell dateCell = _dateCells.get(i);
                 if (entity.getId() != 0)
                 {
-                    String month = String.format("%02d", entity.getMonth());
-                    dateCell.setText(_context.getString(R.string.budget_as_of) + month + "/" + entity.getYear());
+                    if (_timespan == timespans.monthly)
+                    {
+                        String month = String.format("%02d", entity.getMonth());
+                        dateCell.setText(_context.getString(R.string.budget_as_of) + month + "/" + entity.getYear());
+                    }
+                    else
+                    {
+                        dateCell.setText(_context.getString(R.string.budget_as_of) + entity.getYear());
+                    }
                     if ((entity.getYear() > maxYear) || (entity.getMonth() > maxMonth && entity.getYear() == maxYear))
                     {
                         maxMonth = entity.getMonth();
@@ -236,7 +274,15 @@ public class MonthBudgetTable extends TableLayout
 
     private void editBudgetItem(int id)
     {
-        ((MonthViewActivity)_context).editBudgetItem(id);
+        if (_timespan == timespans.monthly)
+        {
+            ((MonthViewActivity) _context).editBudgetItem(id);
+        }
+        else if (_timespan == timespans.yearly)
+        {
+            ((YearViewActivity) _context).editBudgetItem(id);
+        }
+        else { }
     }
 
     public void lockTable()

@@ -66,12 +66,12 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
 
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs,
-                R.styleable.MonthTable,
+                R.styleable.Table,
                 0, 0);
 
         try
         {
-            _year = a.getInteger(R.styleable.MonthTable_year, 2018);
+            _year = a.getInteger(R.styleable.Table_year, 2018);
         }
         catch (Exception e)
         {
@@ -266,7 +266,7 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
 
     public void updateBudgets(List<BudgetEntity> budgetEntities)
     {
-        if (_budgetCells != null)
+        /*if (_budgetCells != null)
         {
             float total = 0.0f;
             int catSize = Categories.getCategories().length;
@@ -291,6 +291,6 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
             _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
             _totalRemainingCell.setLoading(false);
         }
-        else { }
+        else { }*/
     }
 }

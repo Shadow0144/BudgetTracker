@@ -36,9 +36,13 @@ import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.TableCell;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
+import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
+import cc.corbin.budgettracker.month.MonthViewActivity;
+import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
+import cc.corbin.budgettracker.year.YearViewActivity;
 
 public class SettingsActivity extends AppCompatActivity
 {
@@ -55,12 +59,6 @@ public class SettingsActivity extends AppCompatActivity
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _exps;
     private MutableLiveData<List<BudgetEntity>> _budgets;
-
-    // Force updates in other activities after a change has occurred
-    public static boolean grandTotalNeedsUpdating = false;
-    public static boolean yearNeedsUpdating = false;
-    public static boolean monthNeedsUpdating = false;
-    public static int dayNeedsUpdating = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -185,18 +183,18 @@ public class SettingsActivity extends AppCompatActivity
 
     private void expendituresUpdated()
     {
-        grandTotalNeedsUpdating = true;
-        yearNeedsUpdating = true;
-        monthNeedsUpdating = true;
-        dayNeedsUpdating = 3;
+        TotalViewActivity.dataInvalid = true;
+        YearViewActivity.dataInvalid = true;
+        MonthViewActivity.dataInvalid = true;
+        DayViewActivity.dataInvalid = true;
     }
 
     private void budgetsUpdated()
     {
-        grandTotalNeedsUpdating = true;
-        yearNeedsUpdating = true;
-        monthNeedsUpdating = true;
-        dayNeedsUpdating = 3;
+        TotalViewActivity.dataInvalid = true;
+        YearViewActivity.dataInvalid = true;
+        MonthViewActivity.dataInvalid = true;
+        DayViewActivity.dataInvalid = true;
     }
 
     public void cancel(View v)

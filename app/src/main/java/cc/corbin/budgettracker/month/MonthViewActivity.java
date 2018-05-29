@@ -30,6 +30,7 @@ import cc.corbin.budgettracker.auxilliary.TableCell;
 import cc.corbin.budgettracker.day.ExpenditureEditActivity;
 import cc.corbin.budgettracker.day.ExpenditureItem;
 import cc.corbin.budgettracker.settings.SettingsActivity;
+import cc.corbin.budgettracker.tables.BudgetTable;
 import cc.corbin.budgettracker.tables.CategorySummaryTable;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.R;
@@ -66,7 +67,7 @@ public class MonthViewActivity extends AppCompatActivity
 
     private MonthWeeklySummaryTable _weeklyTable;
     private CategorySummaryTable _categoryTable;
-    private MonthBudgetTable _budgetTable;
+    private BudgetTable _budgetTable;
 
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _monthExps;
@@ -75,7 +76,7 @@ public class MonthViewActivity extends AppCompatActivity
     private int _budgetId; // ID of the budget entity being edited
     private PopupWindow _popupWindow; // For editing budgets
 
-    private boolean _loaded;
+    public static boolean dataInvalid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -83,7 +84,7 @@ public class MonthViewActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_month_view);
 
-        _loaded = false;
+        MonthViewActivity.dataInvalid = true;
 
         _month = getIntent().getIntExtra(MONTH_INTENT, Calendar.getInstance().get(Calendar.MONTH)+1);
         _year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
@@ -113,7 +114,6 @@ public class MonthViewActivity extends AppCompatActivity
                 if (budgetEntities != null) // returning from a query
                 {
                     refreshTables(budgetEntities);
-                    _loaded = true;
                 }
                 else // else - returning from an add / edit / remove
                 {
@@ -146,14 +146,16 @@ public class MonthViewActivity extends AppCompatActivity
         monthsCategoryContainer.addView(_categoryTable);
 
         FrameLayout budgetContainer = findViewById(R.id.monthBudgetHolder);
-        _budgetTable = new MonthBudgetTable(this, _month, _year);
+        _budgetTable = new BudgetTable(this, _month, _year);
         budgetContainer.addView(_budgetTable);
 
         _monthExps = new MutableLiveData<List<ExpenditureEntity>>();
         _monthExps.observe(this, entityObserver);
         _budgets = new MutableLiveData<List<BudgetEntity>>();
         _budgets.observe(this, budgetObserver);
-        _viewModel.getMonth(_monthExps);
+        //_viewModel.getMonth(_monthExps);
+
+        createExtrasAndAdjustmentsTables();
 
         ExcelExporter.checkPermissions(this);
     }
@@ -161,7 +163,7 @@ public class MonthViewActivity extends AppCompatActivity
     @Override
     protected void onResume()
     {
-        if (SettingsActivity.monthNeedsUpdating)
+        if (MonthViewActivity.dataInvalid)
         {
             _weeklyTable.resetTable();
             _categoryTable.resetTable();
@@ -170,8 +172,6 @@ public class MonthViewActivity extends AppCompatActivity
             _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
             _viewModel.setDate(_year, _month, 0);
             _viewModel.getMonth(_monthExps);
-
-            SettingsActivity.monthNeedsUpdating = false;
         }
         else { }
 
@@ -183,11 +183,9 @@ public class MonthViewActivity extends AppCompatActivity
         _weeklyTable.updateExpenditures(expenditureEntities);
         _categoryTable.updateExpenditures(expenditureEntities);
 
-        if (!_loaded)
-        {
-            createExtrasAndAdjustmentsTables(expenditureEntities);
-        }
-        else { }
+        // TODO: Update extras etc table
+
+        MonthViewActivity.dataInvalid = false;
 
         _viewModel.getMonthBudget(_budgets);
     }
@@ -329,9 +327,9 @@ public class MonthViewActivity extends AppCompatActivity
         _popupWindow.dismiss();
     }
 
-    private void createExtrasAndAdjustmentsTables(List<ExpenditureEntity> expenditureEntities)
+    private void createExtrasAndAdjustmentsTables()
     {
-        int size = expenditureEntities.size();
+        //int size = expenditureEntities.size();
 
         FrameLayout extrasContainer = findViewById(R.id.monthExtraHolder);
         FrameLayout adjustmentsContainer = findViewById(R.id.monthAdjustmentHolder);
@@ -360,7 +358,7 @@ public class MonthViewActivity extends AppCompatActivity
         adjustmentsTable.addView(adjustmentsTableRow);
         adjustmentsContainer.addView(adjustmentsTable);
 
-        for (int i = 0; i < size; i++)
+        /*for (int i = 0; i < size; i++)
         {
             ExpenditureEntity entity = expenditureEntities.get(i);
             if (entity.getDay() == 0)
@@ -378,7 +376,7 @@ public class MonthViewActivity extends AppCompatActivity
                 adjustmentsTable.addView(adjustmentsTableRow);
             }
             else { }
-        }
+        }*/
 
         Button extrasTableAddButton = new Button(this);
         extrasTableAddButton.setText("Add");

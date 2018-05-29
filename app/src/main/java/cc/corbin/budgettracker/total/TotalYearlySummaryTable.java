@@ -251,7 +251,7 @@ public class TotalYearlySummaryTable extends TableLayout
 
     public void updateBudgets(List<BudgetEntity> budgetEntities)
     {
-        if (_budgetCells != null)
+        /*if (_budgetCells != null)
         {
             float totalBudget = 0.0f;
             int size = _endYear - _startYear + 1;
@@ -283,7 +283,7 @@ public class TotalYearlySummaryTable extends TableLayout
             _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
             _totalRemainingCell.setLoading(false);
         }
-        else { }
+        else { }*/
     }
 
     public int getStartYear()

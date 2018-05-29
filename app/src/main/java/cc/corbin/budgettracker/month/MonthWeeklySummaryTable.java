@@ -65,13 +65,13 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
 
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs,
-                R.styleable.MonthTable,
+                R.styleable.Table,
                 0, 0);
 
         try
         {
-            _month = a.getInteger(R.styleable.MonthTable_month, 1);
-            _year = a.getInteger(R.styleable.MonthTable_year, 2018);
+            _month = a.getInteger(R.styleable.Table_month, 1);
+            _year = a.getInteger(R.styleable.Table_year, 2018);
         }
         catch (Exception e)
         {
