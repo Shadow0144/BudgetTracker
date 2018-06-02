@@ -151,6 +151,21 @@ public class SettingsActivity extends AppCompatActivity
         categoryRow.addView(categoryCell);
         _categoriesTable.addView(categoryRow);
 
+        // Add the resort button
+        categoryRow = new TableRow(this);
+        categoryCell = new TableCell(this, TableCell.SPECIAL_CELL);
+        categoryCell.setText("<Resort>");
+        categoryCell.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                resortCategories(v);
+            }
+        });
+        categoryRow.addView(categoryCell);
+        _categoriesTable.addView(categoryRow);
+
         categoriesLayout.addView(_categoriesTable);
 
         final TableLayout defaultCurrencyTable = findViewById(R.id.defaultCurrencyTable);
@@ -503,6 +518,19 @@ public class SettingsActivity extends AppCompatActivity
 
     ///
     /// / Add
+    ///
+
+    ///
+    /// Resort
+    ///
+
+    private void resortCategories(View v)
+    {
+
+    }
+
+    ///
+    /// / Resort
     ///
 
     private void saveUpdatedCategories()

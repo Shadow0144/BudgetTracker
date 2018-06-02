@@ -30,15 +30,28 @@ public class PieChart extends RelativeLayout
 
     private Context _context;
 
-    private Paint _piePaint;
     private Paint _shadowPaint;
+    private Paint _emptyPiePaint;
+    private Paint _piePaint;
 
     private Paint[] _piecePaints;
-    private Paint[] _textPaints;
 
-    private float _textHeight;
+    private String _title;
+    private Paint _titlePaint;
+    private Paint _textPaint;
 
     private final float PIE_PADDING = 0.1f;
+    private final float PIE_OFFSET = 0.125f;
+    private final float LEGEND_START_OFFSET = 0.25f;
+    private final float LEGEND_OFFSET = 0.01f;
+    private final float SHADOW_OFFSET = 0.015f;
+    private final float TITLE_SCALING = 0.05f;
+    private final float TEXT_SCALING = 0.035f;
+    private final float TEXT_PADDING = 0.065f;
+    private final float TITLE_OFFSET = 0.065f;
+    private final float LEGEND_BOX_SIZE = 0.01f;
+
+    private final int MAX_CHARACTERS = 10;
 
     private ProgressBar _progressBar;
 
@@ -92,31 +105,40 @@ public class PieChart extends RelativeLayout
 
         _dataAvailable = false;
 
+        _title = "";
+
         _progressBar = new ProgressBar(_context);
         RelativeLayout.LayoutParams layoutParams =
                 new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         layoutParams.addRule(CENTER_IN_PARENT);
         _progressBar.setLayoutParams(layoutParams);
         addView(_progressBar);
-        
-        /*_textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        _textPaint.setColor(_textColor);
-        if (_textHeight == 0)
-        {
-            _textHeight = _textPaint.getTextSize();
-        }
-        else
-        {
-            _textPaint.setTextSize(_textHeight);
-        }*/
+
+        _titlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        _titlePaint.setColor(Color.BLACK);
+        _titlePaint.setTextAlign(Paint.Align.CENTER);
+        _titlePaint.setUnderlineText(true);
+
+        _textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        _textPaint.setColor(Color.BLACK);
+        _textPaint.setTextAlign(Paint.Align.LEFT);
+
+        _shadowPaint = new Paint(0);
+        _shadowPaint.setColor(Color.DKGRAY);
+        _shadowPaint.setMaskFilter(new BlurMaskFilter(8, BlurMaskFilter.Blur.NORMAL));
+
+        _emptyPiePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        _emptyPiePaint.setColor(Color.WHITE);
+        _emptyPiePaint.setStyle(Paint.Style.FILL);
 
         _piePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         _piePaint.setColor(Color.BLACK);
         _piePaint.setStyle(Paint.Style.STROKE);
+    }
 
-        _shadowPaint = new Paint(0);
-        _shadowPaint.setColor(0xff101010);
-        _shadowPaint.setMaskFilter(new BlurMaskFilter(8, BlurMaskFilter.Blur.NORMAL));
+    public void setTitle(String title)
+    {
+        _title = title;
     }
 
     @Override
@@ -142,20 +164,51 @@ public class PieChart extends RelativeLayout
 
         int w = getWidth();
         int h = getHeight();
+
         int cX = w / 2;
         int cY = h / 2;
         int hW = w / 2 - (int)(2 * PIE_PADDING * w);
-        int hH = h / 2 - (int)(2 * PIE_PADDING * h);
+        int hH = h / 2 - (int)(2 * PIE_PADDING * h); // Not used
 
-        canvas.drawCircle(cX, cY, hW, _piePaint);
+        int pieOffset = (int)(w * PIE_OFFSET);
+        int shadowOffset = (int)(w * SHADOW_OFFSET);
+        int legendStartOffset = (int)(w * LEGEND_START_OFFSET);
+        int legendOffset = (int)(w * LEGEND_OFFSET);
+        int legendBoxSize = (int)(w * LEGEND_BOX_SIZE);
+
+        _titlePaint.setTextSize(TITLE_SCALING * h);
+        _textPaint.setTextSize(TEXT_SCALING * h);
+
+        int textSize = (int)((_textPaint.descent() + _textPaint.ascent()) / 2);
+        int textPadding = (int)(h * TEXT_PADDING);
+
+        // Draw the title
+        canvas.drawText(_title, cX, cY - hW - (TITLE_OFFSET * h), _titlePaint);
+
+        canvas.drawCircle(cX-shadowOffset-pieOffset, cY+shadowOffset, hW, _shadowPaint);
+        canvas.drawCircle(cX-pieOffset, cY, hW, _emptyPiePaint);
+        canvas.drawCircle(cX-pieOffset, cY, hW, _piePaint);
 
         if (_dataAvailable)
         {
+            // Draw the arcs and legend
             int startAngle = 0;
+            int x = cX + legendStartOffset;
+            int textX = x + legendOffset + legendBoxSize;
+            int y = cY - (_arcs.length * (textPadding + textSize) / 2) - ((_arcs.length % 2 == 1) ? 0 : (textSize / 2));
+            int textY = y - (textSize / 2);
             for (int i = 0; i < _arcs.length; i++)
             {
-                canvas.drawArc(cX - hW, cY - hH, cX + hW, cY + hH, startAngle, _arcs[i], true, _piecePaints[i % _piecePaints.length]);
+                canvas.drawArc(cX - hW - pieOffset, cY - hW, cX + hW - pieOffset, cY + hW,
+                        startAngle, _arcs[i], true, _piecePaints[i % _piecePaints.length]);
                 startAngle += _arcs[i];
+
+                canvas.drawRect(x - legendBoxSize, y - legendBoxSize, x + legendBoxSize, y + legendBoxSize,
+                        _piecePaints[i % _piecePaints.length]);
+
+                canvas.drawText(_labels[i], textX, textY, _textPaint);
+                y += textPadding + textSize;
+                textY += textPadding + textSize;
             }
         }
         else { }
@@ -178,6 +231,11 @@ public class PieChart extends RelativeLayout
         {
             _arcs[i] = (_amounts[i] / _total) * 360.0f;
             remainder += _arcs[i] - ((int)_arcs[i]);
+            if (_labels[i].length() > MAX_CHARACTERS)
+            {
+                _labels[i] = _labels[i].substring(0, MAX_CHARACTERS-3) + "...";
+            }
+            else { }
         }
 
         int index = 0;
@@ -193,7 +251,7 @@ public class PieChart extends RelativeLayout
                 }
                 else { }
             }
-            else if (arcRemain > 0.0f) // If the remaining value is not substaintial, then just place it in any non-zero slice
+            else if (arcRemain > 0.0f) // If the remaining value is not substantial, then just place it in any non-zero slice
             {
                 _arcs[index] += remainder;
                 remainder = 0.0f;

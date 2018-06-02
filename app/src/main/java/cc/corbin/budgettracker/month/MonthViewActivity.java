@@ -159,10 +159,12 @@ public class MonthViewActivity extends AppCompatActivity
 
         FrameLayout weeklyPieContainer = findViewById(R.id.monthWeeklyPieHolder);
         _weeklyPieChart = new PieChart(this);
+        _weeklyPieChart.setTitle("Weekly Spending");
         weeklyPieContainer.addView(_weeklyPieChart);
 
         FrameLayout categoryPieContainer = findViewById(R.id.monthCategoryPieHolder);
         _categoryPieChart = new PieChart(this);
+        _categoryPieChart.setTitle("Categorical Spending");
         categoryPieContainer.addView(_categoryPieChart);
 
         _monthExps = new MutableLiveData<List<ExpenditureEntity>>();
@@ -511,7 +513,6 @@ public class MonthViewActivity extends AppCompatActivity
         for (int i = 0; i < categories.length; i++)
         {
             categories[i] = 0.0f;
-
         }
 
         for (int i = 0; i < size; i++)
