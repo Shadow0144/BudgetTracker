@@ -18,7 +18,7 @@ import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 
 public class ExpenditureViewModel extends ViewModel
 {
-    private final String TAG = "ExpenditureViewModel";
+    private static final String TAG = "ExpenditureViewModel";
 
     private static DatabaseThread _dataBaseThread;
 
@@ -78,6 +78,12 @@ public class ExpenditureViewModel extends ViewModel
     public void onCleared()
     {
         Log.e(TAG, "Cleared");
+        super.onCleared();
+    }
+
+    public static void shutdown()
+    {
+        Log.e(TAG, "Shutdown");
         if (_dataBaseThread != null)
         {
             _dataBaseThread.finish();
@@ -123,7 +129,6 @@ public class ExpenditureViewModel extends ViewModel
     public void getDay(MutableLiveData<List<ExpenditureEntity>> mutableLiveData)
     {
         ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.query, _year, _month, _day, ExpDatabaseEvent.QueryType.day);
-        Log.e(TAG, "Adding day query");
         _expEvents.add(event);
     }
 

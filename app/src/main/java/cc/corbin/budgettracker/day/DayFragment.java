@@ -58,6 +58,7 @@ public class DayFragment extends Fragment
             @Override
             public void onChanged(@Nullable List<ExpenditureEntity> expenditureEntities)
             {
+                Log.e(TAG, "onChanged: " + _day);
                 // Null check in the method
                 onLoadExpenses(expenditureEntities);
             }
