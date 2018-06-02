@@ -51,7 +51,6 @@ public class DayFragment extends Fragment
          _view = inflater.inflate(R.layout.fragment_day, container, false);
 
         _viewModel = ViewModelProviders.of(getActivity()).get(ExpenditureViewModel.class);
-        _viewModel.setDate(_year, _month, _day);
         _entities = new MutableLiveData<List<ExpenditureEntity>>();
 
         final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
@@ -68,7 +67,8 @@ public class DayFragment extends Fragment
         // Make the call to getDay here if this occurs last
         if (_parent != null)
         {
-            //_viewModel.getDay(_entities);
+            _viewModel.setDate(_year, _month, _day);
+            _viewModel.getDay(_entities);
         }
         else { }
 
@@ -96,7 +96,8 @@ public class DayFragment extends Fragment
         // Make the call to getDay here if this occurs last
         if (_entities != null)
         {
-            //_viewModel.getDay(_entities);
+            _viewModel.setDate(_year, _month, _day);
+            _viewModel.getDay(_entities);
         }
         else { }
     }

@@ -169,6 +169,18 @@ public class ExpenditureViewModel extends ViewModel
         _expEvents.add(event);
     }
 
+    public void addExpenditureCategory(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, int category)
+    {
+        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.addcategory, category);
+        _expEvents.add(event);
+    }
+
+    public void removeExpenditureCategory(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, int category)
+    {
+        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.removecategory, category);
+        _expEvents.add(event);
+    }
+
     public void getMonthBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData)
     {
         BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.query, _year, _month, BudgetDatabaseEvent.QueryType.month);
@@ -208,6 +220,18 @@ public class ExpenditureViewModel extends ViewModel
     public void recategorizeBudgetEntities(MutableLiveData<List<BudgetEntity>> mutableLiveData, int category, String newCategoryName)
     {
         BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.recategorize, category, newCategoryName);
+        _budEvents.add(event);
+    }
+
+    public void addBudgetCategory(MutableLiveData<List<BudgetEntity>> mutableLiveData, int category)
+    {
+        BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.addcategory, category);
+        _budEvents.add(event);
+    }
+
+    public void removeBudgetCategory(MutableLiveData<List<BudgetEntity>> mutableLiveData, int category)
+    {
+        BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.removecategory, category);
         _budEvents.add(event);
     }
 }

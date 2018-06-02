@@ -17,7 +17,9 @@ public class BudgetDatabaseEvent
         insert,
         update,
         remove,
-        recategorize
+        recategorize,
+        addcategory,
+        removecategory
     };
 
     public enum QueryType
@@ -70,6 +72,16 @@ public class BudgetDatabaseEvent
         _eventType = eventType;
         _category = category;
         _newCategoryName = newCategoryName;
+        _id = id++;
+        _entities = null;
+    }
+
+    public BudgetDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
+                               int category)
+    {
+        _mutableLiveData = mutableLiveData;
+        _eventType = eventType;
+        _category = category;
         _id = id++;
         _entities = null;
     }

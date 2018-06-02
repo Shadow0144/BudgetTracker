@@ -95,35 +95,35 @@ public class DatabaseThread extends Thread
                         break;
                 }
                 event.setEntities(entities);
-                _completedExpEvents.add(event);
-                _handler.post(new ExpenditureRunnable());
                 break;
 
             case insert:
                 long id = _dbE.expenditureDao().insert(event.getEntity());
                 event.getEntity().setId(id);
-                _completedExpEvents.add(event);
-                _handler.post(new ExpenditureRunnable());
                 break;
 
             case update:
                 _dbE.expenditureDao().update(event.getEntity());
-                _completedExpEvents.add(event);
-                _handler.post(new ExpenditureRunnable());
                 break;
 
             case remove:
                 _dbE.expenditureDao().delete(event.getEntity());
-                _completedExpEvents.add(event);
-                _handler.post(new ExpenditureRunnable());
                 break;
 
             case recategorize:
                 _dbE.expenditureDao().recategorize(event.getCategory(), event.getNewCategoryName());
-                _completedExpEvents.add(event);
-                _handler.post(new ExpenditureRunnable());
+                break;
+
+            case addcategory:
+                _dbE.expenditureDao().increaseCategoryNumber(event.getCategory());
+                break;
+
+            case removecategory:
+                _dbE.expenditureDao().decreaseCategoryNumber(event.getCategory());
                 break;
         }
+        _completedExpEvents.add(event);
+        _handler.post(new ExpenditureRunnable());
     }
 
     private BudgetEntity getMonthCategoryBudget(int month, int year, int category)
@@ -253,37 +253,37 @@ public class DatabaseThread extends Thread
                         break;
                 }
                 event.setEntities(entities);
-                _completedBudEvents.add(event);
-                _handler.post(new ExpenditureRunnable());
                 break;
 
             case insert:
                 long id = _dbB.budgetDao().insert(event.getEntity());
                 event.getEntity().setId(id);
                 updateYearBudget(event.getYear(), event.getCategory());
-                _completedBudEvents.add(event);
-                _handler.post(new ExpenditureRunnable());
                 break;
 
             case update:
                 _dbB.budgetDao().update(event.getEntity());
                 updateYearBudget(event.getYear(), event.getCategory());
-                _completedBudEvents.add(event);
-                _handler.post(new ExpenditureRunnable());
                 break;
 
             case remove:
                 _dbB.budgetDao().delete(event.getEntity());
                 updateYearBudget(event.getYear(), event.getCategory());
-                _completedBudEvents.add(event);
-                _handler.post(new ExpenditureRunnable());
                 break;
 
             case recategorize:
                 _dbB.budgetDao().recategorize(event.getCategory(), event.getNewCategoryName());
-                _completedBudEvents.add(event);
-                _handler.post(new ExpenditureRunnable());
+                break;
+
+            case addcategory:
+                _dbB.budgetDao().increaseCategoryNumber(event.getCategory());
+                break;
+
+            case removecategory:
+                _dbB.budgetDao().decreaseCategoryNumber(event.getCategory());
                 break;
         }
+        _completedBudEvents.add(event);
+        _handler.post(new ExpenditureRunnable());
     }
 }

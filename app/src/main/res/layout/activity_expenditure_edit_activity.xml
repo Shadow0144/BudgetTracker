@@ -19,13 +19,6 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <Spinner
-                android:id="@+id/currencySelector"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:spinnerMode="dialog" />
-
             <TextView
                 android:id="@+id/negativeView"
                 android:layout_width="wrap_content"
@@ -33,6 +26,13 @@
                 android:layout_weight="0"
                 android:text="@string/negative"
                 android:textSize="24sp" />
+
+            <Spinner
+                android:id="@+id/currencySelector"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:spinnerMode="dialog" />
 
             <EditText
                 android:id="@+id/valueEditText"

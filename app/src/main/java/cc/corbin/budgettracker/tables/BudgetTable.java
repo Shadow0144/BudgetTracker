@@ -3,7 +3,6 @@ package cc.corbin.budgettracker.tables;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -29,14 +28,14 @@ public class BudgetTable extends TableLayout
     private int _month;
     private int _year;
 
-    public enum timespans
+    public enum timeframe
     {
         daily,
         monthly,
         yearly,
         total
     };
-    private timespans _timespan;
+    private timeframe _timeframe;
 
     private List<BudgetEntity> _budgets;
 
@@ -52,7 +51,7 @@ public class BudgetTable extends TableLayout
 
         _month = 1;
         _year = 2018;
-        _timespan = timespans.daily;
+        _timeframe = timeframe.daily;
 
         setupTable();
     }
@@ -71,13 +70,13 @@ public class BudgetTable extends TableLayout
         {
             _month = a.getInteger(R.styleable.Table_month, 1);
             _year = a.getInteger(R.styleable.Table_year, 2018);
-            _timespan = timespans.values()[a.getInteger(R.styleable.Table_timespan, timespans.daily.ordinal())];
+            _timeframe = timeframe.values()[a.getInteger(R.styleable.Table_timeframe, timeframe.daily.ordinal())];
         }
         catch (Exception e)
         {
             _month = 1;
             _year = 2018;
-            _timespan = timespans.daily;
+            _timeframe = timeframe.daily;
         }
         finally
         {
@@ -94,7 +93,7 @@ public class BudgetTable extends TableLayout
 
         _month = month;
         _year = year;
-        _timespan = timespans.monthly;
+        _timeframe = timeframe.monthly;
 
         setupTable();
     }
@@ -106,7 +105,7 @@ public class BudgetTable extends TableLayout
 
         _month = 0;
         _year = year;
-        _timespan = timespans.yearly;
+        _timeframe = timeframe.yearly;
 
         setupTable();
     }
@@ -121,7 +120,7 @@ public class BudgetTable extends TableLayout
 
         TableRow titleRow = new TableRow(_context);
         TableCell titleCell = new TableCell(_context, TableCell.TITLE_CELL);
-        if (_timespan == timespans.monthly)
+        if (_timeframe == timeframe.monthly)
         {
             titleCell.setText(R.string.monthly_budget_title);
         }
@@ -229,7 +228,7 @@ public class BudgetTable extends TableLayout
                 TableCell dateCell = _dateCells.get(i);
                 if (entity.getId() != 0)
                 {
-                    if (_timespan == timespans.monthly)
+                    if (_timeframe == timeframe.monthly)
                     {
                         String month = String.format("%02d", entity.getMonth());
                         dateCell.setText(_context.getString(R.string.budget_as_of) + month + "/" + entity.getYear());
@@ -274,11 +273,11 @@ public class BudgetTable extends TableLayout
 
     private void editBudgetItem(int id)
     {
-        if (_timespan == timespans.monthly)
+        if (_timeframe == timeframe.monthly)
         {
             ((MonthViewActivity) _context).editBudgetItem(id);
         }
-        else if (_timespan == timespans.yearly)
+        else if (_timeframe == timeframe.yearly)
         {
             ((YearViewActivity) _context).editBudgetItem(id);
         }

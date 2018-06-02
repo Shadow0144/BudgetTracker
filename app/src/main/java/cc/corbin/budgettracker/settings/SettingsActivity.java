@@ -217,6 +217,7 @@ public class SettingsActivity extends AppCompatActivity
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after)
             {
+
             }
 
             @Override
@@ -473,5 +474,8 @@ public class SettingsActivity extends AppCompatActivity
         editor.putString(getString(R.string.categories_list_key), sb.toString());
         Categories.setCategories(_categories);
         editor.commit();
+
+        expendituresUpdated();
+        budgetsUpdated();
     }
 }

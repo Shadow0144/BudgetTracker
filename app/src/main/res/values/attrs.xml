@@ -11,7 +11,7 @@
         <attr name="day" format="integer"/>
         <attr name="month" format="integer"/>
         <attr name="year" format="integer"/>
-        <attr name="timespan" format="enum">
+        <attr name="timeframe" format="enum">
             <enum name="daily" value="0"/>
             <enum name="monthly" value="1"/>
             <enum name="yearly" value="2"/>

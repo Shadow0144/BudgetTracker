@@ -78,6 +78,12 @@ public interface ExpenditureDao
     @Query("UPDATE expenditureentity SET categoryName = (:newCategoryName) WHERE category = (:category)")
     void recategorize(int category, String newCategoryName);
 
+    @Query("UPDATE expenditureentity SET category = (category+1) WHERE category >= (:category)")
+    void increaseCategoryNumber(int category);
+
+    @Query("UPDATE expenditureentity SET category = (category-1) WHERE category > (:category)")
+    void decreaseCategoryNumber(int category);
+
     @Insert
     long insert(ExpenditureEntity expenditures);
 

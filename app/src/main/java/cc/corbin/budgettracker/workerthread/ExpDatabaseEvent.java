@@ -18,7 +18,9 @@ public class ExpDatabaseEvent
         insert,
         update,
         remove,
-        recategorize
+        recategorize,
+        addcategory,
+        removecategory
     };
 
     public enum QueryType
@@ -73,6 +75,15 @@ public class ExpDatabaseEvent
         _eventType = eventType;
         _category = category;
         _newCategoryName = newCategoryName;
+        _id = id++;
+    }
+
+    public ExpDatabaseEvent(MutableLiveData<List<ExpenditureEntity>> mutableLiveData,
+                            EventType eventType, int category)
+    {
+        _mutableLiveData = mutableLiveData;
+        _eventType = eventType;
+        _category = category;
         _id = id++;
     }
 
