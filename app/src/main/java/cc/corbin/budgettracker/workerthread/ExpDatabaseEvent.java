@@ -18,9 +18,10 @@ public class ExpDatabaseEvent
         insert,
         update,
         remove,
-        recategorize,
-        addcategory,
-        removecategory
+        renameCategory,
+        mergeCategory,
+        addCategory,
+        removeCategory
     };
 
     public enum QueryType
@@ -38,6 +39,7 @@ public class ExpDatabaseEvent
     private int _month;
     private int _day;
     private int _category;
+    private int _newCategory;
     private String _newCategoryName;
     private EventType _eventType;
     private ExpenditureEntity _entity;
@@ -68,6 +70,7 @@ public class ExpDatabaseEvent
         _id = id++;
     }
 
+    // Rename
     public ExpDatabaseEvent(MutableLiveData<List<ExpenditureEntity>> mutableLiveData,
                             EventType eventType, int category, String newCategoryName)
     {
@@ -78,12 +81,25 @@ public class ExpDatabaseEvent
         _id = id++;
     }
 
+    // Add or remove
     public ExpDatabaseEvent(MutableLiveData<List<ExpenditureEntity>> mutableLiveData,
                             EventType eventType, int category)
     {
         _mutableLiveData = mutableLiveData;
         _eventType = eventType;
         _category = category;
+        _id = id++;
+    }
+
+    // Merge
+    public ExpDatabaseEvent(MutableLiveData<List<ExpenditureEntity>> mutableLiveData,
+                            EventType eventType, int category, int newCategory, String newCategoryName)
+    {
+        _mutableLiveData = mutableLiveData;
+        _eventType = eventType;
+        _category = category;
+        _newCategory = newCategory;
+        _newCategoryName = newCategoryName;
         _id = id++;
     }
 
@@ -140,6 +156,11 @@ public class ExpDatabaseEvent
     public int getCategory()
     {
         return _category;
+    }
+
+    public int getNewCategory()
+    {
+        return _newCategory;
     }
 
     public String getNewCategoryName()

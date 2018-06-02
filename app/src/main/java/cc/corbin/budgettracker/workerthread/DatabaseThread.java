@@ -110,15 +110,20 @@ public class DatabaseThread extends Thread
                 _dbE.expenditureDao().delete(event.getEntity());
                 break;
 
-            case recategorize:
-                _dbE.expenditureDao().recategorize(event.getCategory(), event.getNewCategoryName());
+            case renameCategory:
+                _dbE.expenditureDao().renameCategory(event.getCategory(), event.getNewCategoryName());
                 break;
 
-            case addcategory:
+            case mergeCategory:
+                Log.e(TAG, "Event: " + event.getCategory() + " " + event.getNewCategory() + " " + event.getNewCategoryName());
+                _dbE.expenditureDao().mergeCategory(event.getCategory(), event.getNewCategory(), event.getNewCategoryName());
+                break;
+
+            case addCategory:
                 _dbE.expenditureDao().increaseCategoryNumber(event.getCategory());
                 break;
 
-            case removecategory:
+            case removeCategory:
                 _dbE.expenditureDao().decreaseCategoryNumber(event.getCategory());
                 break;
         }
@@ -271,15 +276,19 @@ public class DatabaseThread extends Thread
                 updateYearBudget(event.getYear(), event.getCategory());
                 break;
 
-            case recategorize:
-                _dbB.budgetDao().recategorize(event.getCategory(), event.getNewCategoryName());
+            case renameCategory:
+                _dbB.budgetDao().renameCategory(event.getCategory(), event.getNewCategoryName());
                 break;
 
-            case addcategory:
+            case mergeCategory:
+                _dbB.budgetDao().mergeCategory(event.getCategory(), event.getNewCategory(), event.getNewCategoryName());
+                break;
+
+            case addCategory:
                 _dbB.budgetDao().increaseCategoryNumber(event.getCategory());
                 break;
 
-            case removecategory:
+            case removeCategory:
                 _dbB.budgetDao().decreaseCategoryNumber(event.getCategory());
                 break;
         }

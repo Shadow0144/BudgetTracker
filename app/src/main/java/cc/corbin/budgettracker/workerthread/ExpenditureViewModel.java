@@ -77,13 +77,11 @@ public class ExpenditureViewModel extends ViewModel
     @Override
     public void onCleared()
     {
-        Log.e(TAG, "Cleared");
         super.onCleared();
     }
 
     public static void shutdown()
     {
-        Log.e(TAG, "Shutdown");
         if (_dataBaseThread != null)
         {
             _dataBaseThread.finish();
@@ -168,21 +166,27 @@ public class ExpenditureViewModel extends ViewModel
         _expEvents.add(event);
     }
 
-    public void recategorizeExpenditureEntities(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, int category, String newCategoryName)
+    public void renameExpenditureCategory(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, int category, String newCategoryName)
     {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.recategorize, category, newCategoryName);
+        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.renameCategory, category, newCategoryName);
+        _expEvents.add(event);
+    }
+
+    public void mergeExpenditureCategory(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, int category, int newCategory, String newCategoryName)
+    {
+        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.mergeCategory, category, newCategory, newCategoryName);
         _expEvents.add(event);
     }
 
     public void addExpenditureCategory(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, int category)
     {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.addcategory, category);
+        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.addCategory, category);
         _expEvents.add(event);
     }
 
     public void removeExpenditureCategory(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, int category)
     {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.removecategory, category);
+        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.removeCategory, category);
         _expEvents.add(event);
     }
 
@@ -222,21 +226,27 @@ public class ExpenditureViewModel extends ViewModel
         _budEvents.add(event);
     }
 
-    public void recategorizeBudgetEntities(MutableLiveData<List<BudgetEntity>> mutableLiveData, int category, String newCategoryName)
+    public void renameBudgetCategory(MutableLiveData<List<BudgetEntity>> mutableLiveData, int category, String newCategoryName)
     {
-        BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.recategorize, category, newCategoryName);
+        BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.renameCategory, category, newCategoryName);
+        _budEvents.add(event);
+    }
+
+    public void mergeBudgetCategory(MutableLiveData<List<BudgetEntity>> mutableLiveData, int category, int newCategory, String newCategoryName)
+    {
+        BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.mergeCategory, category, newCategory, newCategoryName);
         _budEvents.add(event);
     }
 
     public void addBudgetCategory(MutableLiveData<List<BudgetEntity>> mutableLiveData, int category)
     {
-        BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.addcategory, category);
+        BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.addCategory, category);
         _budEvents.add(event);
     }
 
     public void removeBudgetCategory(MutableLiveData<List<BudgetEntity>> mutableLiveData, int category)
     {
-        BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.removecategory, category);
+        BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.removeCategory, category);
         _budEvents.add(event);
     }
 }

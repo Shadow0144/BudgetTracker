@@ -77,7 +77,10 @@ public interface BudgetDao
     List<BudgetEntity> loadAllByIds(int[] budgetsIds);
 
     @Query("UPDATE budgetentity SET categoryName = (:newCategoryName) WHERE category = (:category)")
-    void recategorize(int category, String newCategoryName);
+    void renameCategory(int category, String newCategoryName);
+
+    @Query("UPDATE budgetentity SET category = (:newCategory), categoryName = (:newCategoryName) WHERE category = (:category)")
+    void mergeCategory(int category, int newCategory, String newCategoryName);
 
     @Query("UPDATE budgetentity SET category = (category+1) WHERE category >= (:category)")
     void increaseCategoryNumber(int category);

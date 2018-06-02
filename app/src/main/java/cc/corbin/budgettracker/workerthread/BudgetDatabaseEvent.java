@@ -17,9 +17,10 @@ public class BudgetDatabaseEvent
         insert,
         update,
         remove,
-        recategorize,
-        addcategory,
-        removecategory
+        renameCategory,
+        mergeCategory,
+        addCategory,
+        removeCategory
     };
 
     public enum QueryType
@@ -35,6 +36,7 @@ public class BudgetDatabaseEvent
     private int _year;
     private int _month;
     private int _category;
+    private int _newCategory;
     private String _newCategoryName;
     private EventType _eventType;
     private QueryType _queryType;
@@ -65,6 +67,7 @@ public class BudgetDatabaseEvent
         _entities = null;
     }
 
+    // Rename
     public BudgetDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
                                int category, String newCategoryName)
     {
@@ -76,12 +79,26 @@ public class BudgetDatabaseEvent
         _entities = null;
     }
 
+    // Add or remove
     public BudgetDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
                                int category)
     {
         _mutableLiveData = mutableLiveData;
         _eventType = eventType;
         _category = category;
+        _id = id++;
+        _entities = null;
+    }
+
+    // Merge
+    public BudgetDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
+                               int category, int newCategory, String newCategoryName)
+    {
+        _mutableLiveData = mutableLiveData;
+        _eventType = eventType;
+        _category = category;
+        _newCategory = newCategory;
+        _newCategoryName = newCategoryName;
         _id = id++;
         _entities = null;
     }
@@ -134,6 +151,11 @@ public class BudgetDatabaseEvent
     public int getCategory()
     {
         return _category;
+    }
+
+    public int getNewCategory()
+    {
+        return _newCategory;
     }
 
     public String getNewCategoryName()

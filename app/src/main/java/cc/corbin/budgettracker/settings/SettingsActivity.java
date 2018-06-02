@@ -54,6 +54,9 @@ public class SettingsActivity extends AppCompatActivity
     private TableCell _otherCategoryCell;
 
     private int _categoryEditIndex;
+    private int _newCategoryIndex;
+    private String _newCategoryString;
+
     private PopupWindow _popupWindow;
 
     private ExpenditureViewModel _viewModel;
@@ -197,10 +200,22 @@ public class SettingsActivity extends AppCompatActivity
         DayViewActivity.dataInvalid = true;
     }
 
+    ///
+    /// Cancel
+    ///
+
     public void cancel(View v)
     {
         _popupWindow.dismiss();
     }
+
+    ///
+    /// / Cancel
+    ///
+
+    ///
+    /// Edit
+    ///
 
     private void editCategory(View v)
     {
@@ -273,8 +288,8 @@ public class SettingsActivity extends AppCompatActivity
 
         String newCategoryName = categoryEditText.getText().toString();
 
-        _viewModel.recategorizeExpenditureEntities(_exps, _categoryEditIndex, newCategoryName);
-        _viewModel.recategorizeBudgetEntities(_budgets, _categoryEditIndex, newCategoryName);
+        _viewModel.renameExpenditureCategory(_exps, _categoryEditIndex, newCategoryName);
+        _viewModel.renameBudgetCategory(_budgets, _categoryEditIndex, newCategoryName);
 
         _categories[_categoryEditIndex] = newCategoryName;
 
@@ -286,6 +301,14 @@ public class SettingsActivity extends AppCompatActivity
 
         _popupWindow.dismiss();
     }
+
+    ///
+    /// / Edit
+    ///
+
+    ///
+    /// Remove
+    ///
 
     // Called from the Remove button
     public void recategorizeCategory(View v)
@@ -324,8 +347,10 @@ public class SettingsActivity extends AppCompatActivity
     // Called from the Confirm button of the recategorization popup
     public void confirmRecategorize(View v)
     {
+        // Grab all the info before dismissing the popup
         final Spinner newCategorySpinner = _popupWindow.getContentView().findViewById(R.id.newCategorySpinner);
-        String newCategory = newCategorySpinner.getSelectedItem().toString();
+        _newCategoryIndex = newCategorySpinner.getSelectedItemPosition();
+        _newCategoryString = newCategorySpinner.getSelectedItem().toString();
         _popupWindow.dismiss();
 
         final View confirmRemoveCategoryLayout = getLayoutInflater().inflate(R.layout.popup_confirm_remove_category, null);
@@ -334,7 +359,7 @@ public class SettingsActivity extends AppCompatActivity
         final TextView newCategoryTextView = confirmRemoveCategoryLayout.findViewById(R.id.newCategoryTextView);
 
         originalCategoryTextView.setText(_categories[_categoryEditIndex]);
-        newCategoryTextView.setText(newCategory);
+        newCategoryTextView.setText(_newCategoryString);
 
         _popupWindow = new PopupWindow(confirmRemoveCategoryLayout, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         _popupWindow.setFocusable(true);
@@ -345,13 +370,11 @@ public class SettingsActivity extends AppCompatActivity
     // Called from the final warning screen
     public void confirmRemoveAndRecategorize(View v)
     {
-        //final TextView originalCategoryTextView = _popupWindow.getContentView().findViewById(R.id.originalCategoryTextView);
-        final TextView newCategoryTextView = _popupWindow.getContentView().findViewById(R.id.newCategoryTextView);
-
-        String newCategoryName = newCategoryTextView.getText().toString();
-
-        _viewModel.recategorizeExpenditureEntities(_exps, _categoryEditIndex, newCategoryName);
-        _viewModel.recategorizeBudgetEntities(_budgets, _categoryEditIndex, newCategoryName);
+        // Update all the expenditures and budgets
+        _viewModel.mergeExpenditureCategory(_exps, _categoryEditIndex, _newCategoryIndex, _newCategoryString);
+        _viewModel.mergeBudgetCategory(_budgets, _categoryEditIndex, _newCategoryIndex, _newCategoryString);
+        _viewModel.removeExpenditureCategory(_exps, _categoryEditIndex);
+        _viewModel.removeBudgetCategory(_budgets, _categoryEditIndex);
 
         // Remove from the list and commit the change
         String[] newCategories = new String[_categories.length-1];
@@ -375,6 +398,14 @@ public class SettingsActivity extends AppCompatActivity
 
         _popupWindow.dismiss();
     }
+
+    ///
+    /// / Remove
+    ///
+
+    ///
+    /// Add
+    ///
 
     private void addCategory(View v)
     {
@@ -449,6 +480,14 @@ public class SettingsActivity extends AppCompatActivity
         TableRow categoryRow = new TableRow(this);
         TableCell categoryCell = new TableCell(this, TableCell.DEFAULT_CELL);
         categoryCell.setText(categoriesNew[end]);
+        categoryCell.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                editCategory(v);
+            }
+        });
         categoryRow.setId(end);
 
         categoryRow.addView(categoryCell);
@@ -456,11 +495,18 @@ public class SettingsActivity extends AppCompatActivity
 
         _categories = categoriesNew;
 
+        _viewModel.addExpenditureCategory(_exps, end+1);
+        _viewModel.addBudgetCategory(_budgets, end+1);
+
         // Save the updated categories
         saveUpdatedCategories();
 
         _popupWindow.dismiss();
     }
+
+    ///
+    /// / Add
+    ///
 
     private void saveUpdatedCategories()
     {
