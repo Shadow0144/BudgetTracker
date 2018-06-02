@@ -25,8 +25,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
+import cc.corbin.budgettracker.auxilliary.PieChart;
 import cc.corbin.budgettracker.tables.ExtrasTable;
 import cc.corbin.budgettracker.tables.TableCell;
 import cc.corbin.budgettracker.day.ExpenditureEditActivity;
@@ -71,6 +73,9 @@ public class MonthViewActivity extends AppCompatActivity
     private BudgetTable _budgetTable;
     private ExtrasTable _extrasTable;
     private ExtrasTable _adjustmentsTable;
+
+    private PieChart _weeklyPieChart;
+    private PieChart _categoryPieChart;
 
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _monthExps;
@@ -152,6 +157,14 @@ public class MonthViewActivity extends AppCompatActivity
         _budgetTable = new BudgetTable(this, _month, _year);
         budgetContainer.addView(_budgetTable);
 
+        FrameLayout weeklyPieContainer = findViewById(R.id.monthWeeklyPieHolder);
+        _weeklyPieChart = new PieChart(this);
+        weeklyPieContainer.addView(_weeklyPieChart);
+
+        FrameLayout categoryPieContainer = findViewById(R.id.monthCategoryPieHolder);
+        _categoryPieChart = new PieChart(this);
+        categoryPieContainer.addView(_categoryPieChart);
+
         _monthExps = new MutableLiveData<List<ExpenditureEntity>>();
         _monthExps.observe(this, entityObserver);
         _budgets = new MutableLiveData<List<BudgetEntity>>();
@@ -171,6 +184,8 @@ public class MonthViewActivity extends AppCompatActivity
             _weeklyTable.resetTable();
             _categoryTable.resetTable();
             _budgetTable.resetTable();
+            _weeklyPieChart.clearData();
+            _categoryPieChart.clearData();
 
             _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
             _viewModel.setDate(_year, _month, 0);
@@ -187,6 +202,8 @@ public class MonthViewActivity extends AppCompatActivity
         _categoryTable.updateExpenditures(expenditureEntities);
         _extrasTable.updateExpenditures(expenditureEntities);
         _adjustmentsTable.updateExpenditures(expenditureEntities);
+
+        setupPieCharts(expenditureEntities);
 
         MonthViewActivity.dataInvalid = false;
 
@@ -428,6 +445,83 @@ public class MonthViewActivity extends AppCompatActivity
             }
             else { }
         }
+    }
+
+    private void setupPieCharts(List<ExpenditureEntity> entities)
+    {
+        int size = entities.size();
+
+        // Setup Weekly Pie
+
+        float[] weeks = new float[7];
+        for (int i = 0; i < weeks.length; i++)
+        {
+            weeks[i] = 0.0f;
+        }
+
+        for (int i = 0; i < size; i++)
+        {
+            ExpenditureEntity entity = entities.get(i);
+            int day = entity.getDay();
+            if (day == 0)
+            {
+                weeks[0] += entity.getAmount();
+            }
+            else if (day < 8)
+            {
+                weeks[1] += entity.getAmount();
+            }
+            else if (day < 15)
+            {
+                weeks[2] += entity.getAmount();
+            }
+            else if (day < 22)
+            {
+                weeks[3] += entity.getAmount();
+            }
+            else if (day < 29)
+            {
+                weeks[4] += entity.getAmount();
+            }
+            else if (day < 32)
+            {
+                weeks[5] += entity.getAmount();
+            }
+            else // day == 32
+            {
+                weeks[6] += entity.getAmount();
+            }
+        }
+
+        String[] weekLabels = new String[7];
+        weekLabels[0] = "Extras";
+        weekLabels[1] = "Week 1";
+        weekLabels[2] = "Week 2";
+        weekLabels[3] = "Week 3";
+        weekLabels[4] = "Week 4";
+        weekLabels[5] = "Week 5";
+        weekLabels[6] = "Adjustments";
+
+        _weeklyPieChart.setData(weeks, weekLabels);
+
+        // Setup Category Pie
+
+        String[] categoryLabels = Categories.getCategories();
+        float[] categories = new float[categoryLabels.length];
+        for (int i = 0; i < categories.length; i++)
+        {
+            categories[i] = 0.0f;
+
+        }
+
+        for (int i = 0; i < size; i++)
+        {
+            ExpenditureEntity entity = entities.get(i);
+            int category = entity.getCategory();
+            categories[category] += entity.getAmount();
+        }
+
+        _categoryPieChart.setData(categories, categoryLabels);
     }
 
     public void exportMonth(View v)

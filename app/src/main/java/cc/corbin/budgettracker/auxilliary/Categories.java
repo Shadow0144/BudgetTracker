@@ -30,9 +30,7 @@ public class Categories
         }
         else
         {
-            Log.e(TAG, categoriesSet);
             _categories = categoriesSet.split("\\|");
-            Log.e(TAG, _categories[0] + " " + _categories[1] + " " + _categories[2]);
         }
 
         _categoriesSet = true;
