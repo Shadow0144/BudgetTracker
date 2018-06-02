@@ -21,15 +21,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.DateFormatSymbols;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
-import cc.corbin.budgettracker.auxilliary.TableCell;
+import cc.corbin.budgettracker.tables.ExtrasTable;
+import cc.corbin.budgettracker.tables.TableCell;
 import cc.corbin.budgettracker.day.ExpenditureEditActivity;
 import cc.corbin.budgettracker.day.ExpenditureItem;
-import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.tables.BudgetTable;
 import cc.corbin.budgettracker.tables.CategorySummaryTable;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
@@ -68,6 +69,8 @@ public class MonthViewActivity extends AppCompatActivity
     private MonthWeeklySummaryTable _weeklyTable;
     private CategorySummaryTable _categoryTable;
     private BudgetTable _budgetTable;
+    private ExtrasTable _extrasTable;
+    private ExtrasTable _adjustmentsTable;
 
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _monthExps;
@@ -182,8 +185,8 @@ public class MonthViewActivity extends AppCompatActivity
     {
         _weeklyTable.updateExpenditures(expenditureEntities);
         _categoryTable.updateExpenditures(expenditureEntities);
-
-        // TODO: Update extras etc table
+        _extrasTable.updateExpenditures(expenditureEntities);
+        _adjustmentsTable.updateExpenditures(expenditureEntities);
 
         MonthViewActivity.dataInvalid = false;
 
@@ -329,85 +332,19 @@ public class MonthViewActivity extends AppCompatActivity
 
     private void createExtrasAndAdjustmentsTables()
     {
-        //int size = expenditureEntities.size();
-
         FrameLayout extrasContainer = findViewById(R.id.monthExtraHolder);
         FrameLayout adjustmentsContainer = findViewById(R.id.monthAdjustmentHolder);
 
         // Create the extras table
-        TableLayout extrasTable = new TableLayout(this);
-        TableRow extrasTableRow = new TableRow(this);
-        TableCell extrasTableCell = new TableCell(this, TableCell.TITLE_CELL);
+        _extrasTable = new ExtrasTable(this, ExtrasTable.tableType.extras, _year, _month);
+        extrasContainer.addView(_extrasTable);
 
-        extrasTable.setColumnStretchable(0, true);
-
-        extrasTableCell.setText("Extras");
-        extrasTableRow.addView(extrasTableCell);
-        extrasTable.addView(extrasTableRow);
-        extrasContainer.addView(extrasTable);
-
-        // Create the extras table
-        TableLayout adjustmentsTable = new TableLayout(this);
-        TableRow adjustmentsTableRow = new TableRow(this);
-        TableCell adjustmentsTableCell = new TableCell(this, TableCell.TITLE_CELL);
-
-        adjustmentsTable.setColumnStretchable(0, true);
-
-        adjustmentsTableCell.setText("Adjustments");
-        adjustmentsTableRow.addView(adjustmentsTableCell);
-        adjustmentsTable.addView(adjustmentsTableRow);
-        adjustmentsContainer.addView(adjustmentsTable);
-
-        /*for (int i = 0; i < size; i++)
-        {
-            ExpenditureEntity entity = expenditureEntities.get(i);
-            if (entity.getDay() == 0)
-            {
-                ExpenditureItem item = new ExpenditureItem(this, entity);
-                extrasTableRow = new TableRow(this);
-                extrasTableRow.addView(item);
-                extrasTable.addView(extrasTableRow);
-            }
-            else if (entity.getDay() == 32)
-            {
-                ExpenditureItem item = new ExpenditureItem(this, entity);
-                adjustmentsTableRow = new TableRow(this);
-                adjustmentsTableRow.addView(item);
-                adjustmentsTable.addView(adjustmentsTableRow);
-            }
-            else { }
-        }*/
-
-        Button extrasTableAddButton = new Button(this);
-        extrasTableAddButton.setText("Add");
-        extrasTableAddButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                createExtraExpenditure(v);
-            }
-        });
-        extrasTableRow = new TableRow(this);
-        extrasTableRow.addView(extrasTableAddButton);
-        extrasTable.addView(extrasTableRow);
-
-        Button adjustmentsTableAddButton = new Button(this);
-        adjustmentsTableAddButton.setText("Add");
-        adjustmentsTableAddButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                createAdjustmentExpenditure(v);
-            }
-        });
-        adjustmentsTableRow = new TableRow(this);
-        adjustmentsTableRow.addView(adjustmentsTableAddButton);
-        adjustmentsTable.addView(adjustmentsTableRow);
+        // Create the adjustments table
+        _adjustmentsTable = new ExtrasTable(this, ExtrasTable.tableType.adjustments, _year, _month);
+        adjustmentsContainer.addView(_adjustmentsTable);
     }
 
-    private void createExtraExpenditure(View v)
+    public void createExtraExpenditure()
     {
         Intent intent = new Intent(getApplicationContext(), ExpenditureEditActivity.class);
         intent.putExtra(ExpenditureEditActivity.YEAR_INTENT, _year);
@@ -417,19 +354,36 @@ public class MonthViewActivity extends AppCompatActivity
         startActivityForResult(intent, CREATE_EXT_EXPENDITURE);
     }
 
-    private void editExtraExpenditure(View v)
+    public void editExtraExpenditure(ExpenditureEntity entity)
     {
-
+        Intent intent = new Intent(getApplicationContext(), ExpenditureEditActivity.class);
+        intent.putExtra(ExpenditureEditActivity.YEAR_INTENT, _year);
+        intent.putExtra(ExpenditureEditActivity.MONTH_INTENT, _month);
+        intent.putExtra(ExpenditureEditActivity.DAY_INTENT, 0);
+        intent.putExtra(ExpenditureEditActivity.EXPENDITURE_INTENT, entity);
+        intent.putExtra(ExpenditureEditActivity.TYPE_INTENT, EDIT_EXT_EXPENDITURE);
+        startActivityForResult(intent, EDIT_EXT_EXPENDITURE);
     }
 
-    private void createAdjustmentExpenditure(View v)
+    public void createAdjustmentExpenditure()
     {
-
+        Intent intent = new Intent(getApplicationContext(), ExpenditureEditActivity.class);
+        intent.putExtra(ExpenditureEditActivity.YEAR_INTENT, _year);
+        intent.putExtra(ExpenditureEditActivity.MONTH_INTENT, _month);
+        intent.putExtra(ExpenditureEditActivity.DAY_INTENT, 32);
+        intent.putExtra(ExpenditureEditActivity.TYPE_INTENT, CREATE_EXT_EXPENDITURE);
+        startActivityForResult(intent, CREATE_EXT_EXPENDITURE);
     }
 
-    private void editAdjustmentExpenditure(View v)
+    public void editAdjustmentExpenditure(ExpenditureEntity entity)
     {
-
+        Intent intent = new Intent(getApplicationContext(), ExpenditureEditActivity.class);
+        intent.putExtra(ExpenditureEditActivity.YEAR_INTENT, _year);
+        intent.putExtra(ExpenditureEditActivity.MONTH_INTENT, _month);
+        intent.putExtra(ExpenditureEditActivity.DAY_INTENT, 0);
+        intent.putExtra(ExpenditureEditActivity.EXPENDITURE_INTENT, entity);
+        intent.putExtra(ExpenditureEditActivity.TYPE_INTENT, EDIT_EXT_EXPENDITURE);
+        startActivityForResult(intent, EDIT_EXT_EXPENDITURE);
     }
 
     @Override

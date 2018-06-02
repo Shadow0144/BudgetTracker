@@ -15,28 +15,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.PopupWindow;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Set;
 
-import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
-import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.tables.BudgetTable;
 import cc.corbin.budgettracker.tables.CategorySummaryTable;
 import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.R;
-import cc.corbin.budgettracker.auxilliary.TableCell;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
-import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.month.MonthViewActivity;

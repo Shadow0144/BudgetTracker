@@ -1,6 +1,5 @@
 package cc.corbin.budgettracker.settings;
 
-import android.app.ActionBar;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
@@ -13,7 +12,6 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,13 +25,12 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import java.util.LinkedHashSet;
 import java.util.List;
 
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
-import cc.corbin.budgettracker.auxilliary.TableCell;
+import cc.corbin.budgettracker.tables.TableCell;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.day.DayViewActivity;

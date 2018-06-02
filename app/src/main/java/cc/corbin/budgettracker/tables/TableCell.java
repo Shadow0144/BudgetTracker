@@ -1,4 +1,4 @@
-package cc.corbin.budgettracker.auxilliary;
+package cc.corbin.budgettracker.tables;
 
 import android.content.Context;
 import android.content.res.Resources;

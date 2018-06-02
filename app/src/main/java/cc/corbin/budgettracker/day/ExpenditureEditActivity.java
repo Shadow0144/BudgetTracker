@@ -231,6 +231,9 @@ public class ExpenditureEditActivity extends AppCompatActivity
         setResult(DayViewActivity.SUCCEED, intent);
 
         DayViewActivity.dataInvalid = true;
+        MonthViewActivity.dataInvalid = true;
+        YearViewActivity.dataInvalid = true;
+        TotalViewActivity.dataInvalid = true;
 
         finish();
     }

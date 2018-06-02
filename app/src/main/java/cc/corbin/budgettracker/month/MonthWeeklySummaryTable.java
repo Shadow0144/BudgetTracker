@@ -15,7 +15,7 @@ import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.R;
-import cc.corbin.budgettracker.auxilliary.TableCell;
+import cc.corbin.budgettracker.tables.TableCell;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
