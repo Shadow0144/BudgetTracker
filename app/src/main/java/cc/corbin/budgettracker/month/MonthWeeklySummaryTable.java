@@ -245,6 +245,11 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
             budgetCell.setText("---");
             remainingCell.setText("---");
 
+            _expenses.add(0.0f);
+            _expenseCells.add(expenseCell);
+            _budgetCells.add(budgetCell);
+            _remainingCells.add(remainingCell);
+
             weekRow.addView(weekCell);
             weekRow.addView(expenseCell);
             weekRow.addView(budgetCell);
@@ -264,6 +269,11 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
         expenseCell.setText("---");
         budgetCell.setText("---");
         remainingCell.setText("---");
+
+        _expenses.add(total);
+        _expenseCells.add(expenseCell);
+        _budgetCells.add(budgetCell);
+        _remainingCells.add(remainingCell);
 
         weekRow.addView(weekCell);
         weekRow.addView(expenseCell);
@@ -358,6 +368,25 @@ public class MonthWeeklySummaryTable extends TableLayout implements View.OnClick
             total += weekTotal;
             _expenses.set(i, weekTotal);
             _expenseCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, weekTotal));
+            _expenseCells.get(i).setLoading(false);
+        }
+        _totalExpenses = total;
+        _totalExpenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+        _totalExpenseCell.setLoading(false);
+    }
+
+    public void updateExpenditures(float[] amounts)
+    {
+        float total = 0.0f;
+        for (int i = 0; i < amounts.length; i++)
+        {
+            total += amounts[i];
+            if (!((_weeks == 4) && (i == 4)))
+            {
+                _expenses.set(i, amounts[i]);
+                _expenseCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, amounts[i]));
+            }
+            else { }
             _expenseCells.get(i).setLoading(false);
         }
         _totalExpenses = total;

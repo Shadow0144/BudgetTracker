@@ -29,6 +29,7 @@ import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
 import cc.corbin.budgettracker.auxilliary.PieChart;
+import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
 import cc.corbin.budgettracker.tables.ExtrasTable;
 import cc.corbin.budgettracker.tables.TableCell;
 import cc.corbin.budgettracker.day.ExpenditureEditActivity;
@@ -81,6 +82,9 @@ public class MonthViewActivity extends AppCompatActivity
     private MutableLiveData<List<ExpenditureEntity>> _monthExps;
     private MutableLiveData<List<BudgetEntity>> _budgets;
 
+    private MutableLiveData<float[]> _weeklyAmounts;
+    private MutableLiveData<float[]> _categoricalAmounts;
+
     private int _budgetId; // ID of the budget entity being edited
     private PopupWindow _popupWindow; // For editing budgets
 
@@ -131,6 +135,42 @@ public class MonthViewActivity extends AppCompatActivity
             }
         };
 
+        final Observer<float[]> weeklyAmountsObserver = new Observer<float[]>()
+        {
+            @Override
+            public void onChanged(@Nullable float[] amounts)
+            {
+                _weeklyTable.updateExpenditures(amounts);
+
+                String[] weekLabels = new String[7];
+                weekLabels[0] = "Extras";
+                weekLabels[1] = "Week 1";
+                weekLabels[2] = "Week 2";
+                weekLabels[3] = "Week 3";
+                weekLabels[4] = "Week 4";
+                weekLabels[5] = "Week 5";
+                weekLabels[6] = "Adjustments";
+                _weeklyPieChart.setData(amounts, weekLabels);
+            }
+        };
+
+        final Observer<float[]> categoricalAmountsObserver = new Observer<float[]>()
+        {
+            @Override
+            public void onChanged(@Nullable float[] amounts)
+            {
+                _categoryTable.updateExpenditures(amounts);
+
+                String[] categoryLabels = Categories.getCategories();
+                _categoryPieChart.setData(amounts, categoryLabels);
+
+                MonthViewActivity.dataInvalid = false;
+
+                // Update the budgets
+                _viewModel.getMonthBudget(_budgets);
+            }
+        };
+
         TextView header = findViewById(R.id.monthView);
         DateFormatSymbols dfs = new DateFormatSymbols();
         header.setText(dfs.getMonths()[_month-1] + " " + _year);
@@ -144,6 +184,12 @@ public class MonthViewActivity extends AppCompatActivity
                 startActivity(intent);
             }
         });
+
+        _weeklyAmounts = new MutableLiveData<float[]>();
+        _weeklyAmounts.observe(this, weeklyAmountsObserver);
+
+        _categoricalAmounts = new MutableLiveData<float[]>();
+        _categoricalAmounts.observe(this, categoricalAmountsObserver);
 
         FrameLayout monthsWeeklyContainer = findViewById(R.id.monthWeeklyHolder);
         _weeklyTable = new MonthWeeklySummaryTable(this, _month, _year);
@@ -200,16 +246,11 @@ public class MonthViewActivity extends AppCompatActivity
 
     private void monthLoaded(List<ExpenditureEntity> expenditureEntities)
     {
-        _weeklyTable.updateExpenditures(expenditureEntities);
-        _categoryTable.updateExpenditures(expenditureEntities);
         _extrasTable.updateExpenditures(expenditureEntities);
         _adjustmentsTable.updateExpenditures(expenditureEntities);
 
-        setupPieCharts(expenditureEntities);
-
-        MonthViewActivity.dataInvalid = false;
-
-        _viewModel.getMonthBudget(_budgets);
+        SummationAsyncTask summationAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.weekly, _weeklyAmounts, _categoricalAmounts);
+        summationAsyncTask.execute(expenditureEntities);
     }
 
     private void refreshTables(List<BudgetEntity> entities)
@@ -447,82 +488,6 @@ public class MonthViewActivity extends AppCompatActivity
             }
             else { }
         }
-    }
-
-    private void setupPieCharts(List<ExpenditureEntity> entities)
-    {
-        int size = entities.size();
-
-        // Setup Weekly Pie
-
-        float[] weeks = new float[7];
-        for (int i = 0; i < weeks.length; i++)
-        {
-            weeks[i] = 0.0f;
-        }
-
-        for (int i = 0; i < size; i++)
-        {
-            ExpenditureEntity entity = entities.get(i);
-            int day = entity.getDay();
-            if (day == 0)
-            {
-                weeks[0] += entity.getAmount();
-            }
-            else if (day < 8)
-            {
-                weeks[1] += entity.getAmount();
-            }
-            else if (day < 15)
-            {
-                weeks[2] += entity.getAmount();
-            }
-            else if (day < 22)
-            {
-                weeks[3] += entity.getAmount();
-            }
-            else if (day < 29)
-            {
-                weeks[4] += entity.getAmount();
-            }
-            else if (day < 32)
-            {
-                weeks[5] += entity.getAmount();
-            }
-            else // day == 32
-            {
-                weeks[6] += entity.getAmount();
-            }
-        }
-
-        String[] weekLabels = new String[7];
-        weekLabels[0] = "Extras";
-        weekLabels[1] = "Week 1";
-        weekLabels[2] = "Week 2";
-        weekLabels[3] = "Week 3";
-        weekLabels[4] = "Week 4";
-        weekLabels[5] = "Week 5";
-        weekLabels[6] = "Adjustments";
-
-        _weeklyPieChart.setData(weeks, weekLabels);
-
-        // Setup Category Pie
-
-        String[] categoryLabels = Categories.getCategories();
-        float[] categories = new float[categoryLabels.length];
-        for (int i = 0; i < categories.length; i++)
-        {
-            categories[i] = 0.0f;
-        }
-
-        for (int i = 0; i < size; i++)
-        {
-            ExpenditureEntity entity = entities.get(i);
-            int category = entity.getCategory();
-            categories[category] += entity.getAmount();
-        }
-
-        _categoryPieChart.setData(categories, categoryLabels);
     }
 
     public void exportMonth(View v)

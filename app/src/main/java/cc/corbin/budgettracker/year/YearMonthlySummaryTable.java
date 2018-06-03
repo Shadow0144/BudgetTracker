@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TableLayout;
@@ -152,6 +153,35 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
         headerRow.addView(remainingCell);
         addView(headerRow);
 
+        // Add the extras row
+        TableRow weekRow = new TableRow(_context);
+        monthCell = new TableCell(_context, TableCell.HEADER_CELL);
+        expenseCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+        budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+        remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+
+        float total = 0.0f; //getMonthTotal(yearExpenditures, i+1);
+
+        _expenses.add(total);
+        _expenseCells.add(expenseCell);
+        _budgetCells.add(budgetCell);
+        _remainingCells.add(remainingCell);
+
+        monthCell.setText("Extras");
+        expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+        budgetCell.setText("---");
+        remainingCell.setText("---");
+
+        expenseCell.setLoading(true);
+        budgetCell.setLoading(true);
+        remainingCell.setLoading(true);
+
+        weekRow.addView(monthCell);
+        weekRow.addView(expenseCell);
+        weekRow.addView(budgetCell);
+        weekRow.addView(remainingCell);
+        addView(weekRow);
+
         DateFormatSymbols dfs = new DateFormatSymbols();
         String[] months = dfs.getMonths();
 
@@ -161,13 +191,13 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
         float yearTotal = 0.0f;
         for (int i = 0; i < 12; i++) // Add a row for each month
         {
-            TableRow weekRow = new TableRow(_context);
+            weekRow = new TableRow(_context);
             monthCell = new TableCell(_context, TableCell.HEADER_CELL);
             expenseCell = new TableCell(_context, TableCell.DEFAULT_CELL);
             budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
             remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
 
-            float total = 0.0f; //getMonthTotal(yearExpenditures, i+1);
+            total = 0.0f; //getMonthTotal(yearExpenditures, i+1);
             yearTotal += total;
 
             _expenses.add(total);
@@ -193,6 +223,35 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
             weekRow.addView(remainingCell);
             addView(weekRow);
         }
+
+        // Add the adjustments row
+        weekRow = new TableRow(_context);
+        monthCell = new TableCell(_context, TableCell.HEADER_CELL);
+        expenseCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+        budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+        remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+
+        total = 0.0f; //getMonthTotal(yearExpenditures, i+1);
+
+        _expenses.add(total);
+        _expenseCells.add(expenseCell);
+        _budgetCells.add(budgetCell);
+        _remainingCells.add(remainingCell);
+
+        monthCell.setText("Adjustments");
+        expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+        budgetCell.setText("---");
+        remainingCell.setText("---");
+
+        expenseCell.setLoading(true);
+        budgetCell.setLoading(true);
+        remainingCell.setLoading(true);
+
+        weekRow.addView(monthCell);
+        weekRow.addView(expenseCell);
+        weekRow.addView(budgetCell);
+        weekRow.addView(remainingCell);
+        addView(weekRow);
 
         // Add the final totals row
         TableRow totalRow = new TableRow(_context);
@@ -254,6 +313,21 @@ public class YearMonthlySummaryTable extends TableLayout implements View.OnClick
             total += monthTotal;
             _expenses.set(i, monthTotal);
             _expenseCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, monthTotal));
+            _expenseCells.get(i).setLoading(false);
+        }
+        _totalExpenses = total;
+        _totalExpenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+        _totalExpenseCell.setLoading(false);
+    }
+
+    public void updateExpenditures(float[] amounts)
+    {
+        float total = 0.0f;
+        for (int i = 0; i < amounts.length; i++)
+        {
+            total += amounts[i];
+            _expenses.set(i, amounts[i]);
+            _expenseCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, amounts[i]));
             _expenseCells.get(i).setLoading(false);
         }
         _totalExpenses = total;

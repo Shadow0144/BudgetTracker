@@ -20,7 +20,10 @@ import java.util.Set;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
+import cc.corbin.budgettracker.auxilliary.PieChart;
+import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
+import cc.corbin.budgettracker.month.MonthViewActivity;
 import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.tables.CategorySummaryTable;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
@@ -41,8 +44,14 @@ public class TotalViewActivity extends AppCompatActivity
     private MutableLiveData<List<ExpenditureEntity>> _totalExps;
     private MutableLiveData<List<BudgetEntity>> _budgets;
 
+    private MutableLiveData<float[]> _yearlyAmounts;
+    private MutableLiveData<float[]> _categoricalAmounts;
+
     private TotalYearlySummaryTable _yearlyTable;
     private CategorySummaryTable _categoryTable;
+
+    private PieChart _yearlyPieChart;
+    private PieChart _categoryPieChart;
 
     private int _startYear;
     private int _endYear;
@@ -82,13 +91,45 @@ public class TotalViewActivity extends AppCompatActivity
                 if (budgetEntities != null) // returning from a query
                 {
                     refreshTables(budgetEntities);
-                    //_loaded = true;
                 }
                 else // else - returning from an add / edit / remove
                 {
                     // Call for a refresh
                     _viewModel.getTotalBudget(_budgets, _startYear, _endYear);
                 }
+            }
+        };
+
+        final Observer<float[]> yearlyAmountsObserver = new Observer<float[]>()
+        {
+            @Override
+            public void onChanged(@Nullable float[] amounts)
+            {
+                _yearlyTable.updateExpenditures(_startYear, amounts);
+
+                String[] yearLabels = new String[amounts.length];
+                for (int i = 0; i < amounts.length; i++)
+                {
+                    yearLabels[i] = "" + (i + _startYear);
+                }
+                _yearlyPieChart.setData(amounts, yearLabels);
+            }
+        };
+
+        final Observer<float[]> categoricalAmountsObserver = new Observer<float[]>()
+        {
+            @Override
+            public void onChanged(@Nullable float[] amounts)
+            {
+                _categoryTable.updateExpenditures(amounts);
+
+                String[] categoryLabels = Categories.getCategories();
+                _categoryPieChart.setData(amounts, categoryLabels);
+
+                TotalViewActivity.dataInvalid = false;
+
+                // Update the budgets
+                _viewModel.getTotalBudget(_budgets, _startYear, _endYear);
             }
         };
 
@@ -105,6 +146,12 @@ public class TotalViewActivity extends AppCompatActivity
             }
         });
 
+        _yearlyAmounts = new MutableLiveData<float[]>();
+        _yearlyAmounts.observe(this, yearlyAmountsObserver);
+
+        _categoricalAmounts = new MutableLiveData<float[]>();
+        _categoricalAmounts.observe(this, categoricalAmountsObserver);
+
         FrameLayout totalYearlyContainer = findViewById(R.id.totalYearlyHolder);
         _yearlyTable = new TotalYearlySummaryTable(this);
         totalYearlyContainer.addView(_yearlyTable);
@@ -113,28 +160,22 @@ public class TotalViewActivity extends AppCompatActivity
         _categoryTable = new CategorySummaryTable(this);
         totalCategoryContainer.addView(_categoryTable);
 
+        FrameLayout yearlyPieContainer = findViewById(R.id.totalYearlyPieHolder);
+        _yearlyPieChart = new PieChart(this);
+        _yearlyPieChart.setTitle("Yearly Spending");
+        yearlyPieContainer.addView(_yearlyPieChart);
+
+        FrameLayout categoryPieContainer = findViewById(R.id.totalCategoryPieHolder);
+        _categoryPieChart = new PieChart(this);
+        _categoryPieChart.setTitle("Categorical Spending");
+        categoryPieContainer.addView(_categoryPieChart);
+
         // TODO - Add total budget table?
 
         _totalExps = new MutableLiveData<List<ExpenditureEntity>>();
         _totalExps.observe(this, entityObserver);
         _budgets = new MutableLiveData<List<BudgetEntity>>();
         _budgets.observe(this, budgetObserver);
-
-        /*String cat = Categories.getCategories()[0];
-        for (int i = 0; i < 1000; i++)
-        {
-            ExpenditureEntity entity = new ExpenditureEntity();
-            entity.setDay(1);
-            entity.setMonth(1);
-            entity.setYear(2018);
-            entity.setBaseAmount(1.0f);
-            entity.setAmount(1.0f);
-            entity.setBaseCurrency(Currencies.default_currency);
-            entity.setExpenseType(cat);
-            _viewModel.insertExpEntity(_totalExps, entity);
-        }*/
-
-        //_viewModel.getTotal(_totalExps);
 
         ExcelExporter.checkPermissions(this);
     }
@@ -157,12 +198,15 @@ public class TotalViewActivity extends AppCompatActivity
 
     private void totalLoaded(List<ExpenditureEntity> expenditureEntities)
     {
-        _yearlyTable.updateExpenditures(expenditureEntities);
-        _categoryTable.updateExpenditures(expenditureEntities);
-        _startYear = _yearlyTable.getStartYear();
-        _endYear = _yearlyTable.getEndYear();
-        TotalViewActivity.dataInvalid = false;
-        _viewModel.getTotalBudget(_budgets, _startYear, _endYear);
+        if (expenditureEntities.size() > 0)
+        {
+            _startYear = expenditureEntities.get(0).getYear();
+            _endYear = expenditureEntities.get(expenditureEntities.size()-1).getYear();
+
+            SummationAsyncTask summationAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.yearly, _yearlyAmounts, _categoricalAmounts);
+            summationAsyncTask.execute(expenditureEntities);
+        }
+        else { }
     }
 
     private void refreshTables(List<BudgetEntity> budgetEntities)

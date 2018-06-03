@@ -152,6 +152,31 @@ public class TotalYearlySummaryTable extends TableLayout
         addView(headerRow);
     }
 
+    private void createTotals(float totalTotal)
+    {
+        TableRow tableRow = new TableRow(_context);
+        TableCell yearCell = new TableCell(_context, TableCell.HEADER_CELL);
+        TableCell expenseCell = new TableCell(_context, TableCell.BOLD_CELL);
+        TableCell budgetCell = new TableCell(_context, TableCell.BOLD_CELL);
+        TableCell remainingCell = new TableCell(_context, TableCell.BOLD_CELL);
+
+        yearCell.setText(R.string.total);
+        expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalTotal));
+        budgetCell.setLoading(true);
+        remainingCell.setLoading(true);
+
+        _totalExpenses = totalTotal;
+        _totalBudgetCell = budgetCell;
+        _totalRemainingCell = remainingCell;
+
+        tableRow.addView(yearCell);
+        tableRow.addView(expenseCell);
+        tableRow.addView(budgetCell);
+        tableRow.addView(remainingCell);
+
+        addView(tableRow);
+    }
+
     public void resetTable()
     {
         removeAllViews();
@@ -243,6 +268,51 @@ public class TotalYearlySummaryTable extends TableLayout
             else { }
         }
         else { }
+    }
+
+    public void updateExpenditures(int startYear, float[] amounts)
+    {
+        removeAllViews();
+
+        createHeaders();
+
+        _startYear = startYear;
+        _endYear = startYear + amounts.length - 1;
+
+        _expenses = new ArrayList<Float>();
+        _budgetCells = new ArrayList<TableCell>();
+        _remainingCells = new ArrayList<TableCell>();
+
+        float total = 0.0f;
+        for (int i = 0; i < amounts.length; i++)
+        {
+            // One row per year
+            TableRow tableRow = new TableRow(_context);
+            TableCell yearCell = new TableCell(_context, TableCell.HEADER_CELL);
+            TableCell expenseCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+            TableCell budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+            TableCell remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+
+            yearCell.setText("" + (i + startYear));
+            expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, amounts[i]));
+            budgetCell.setLoading(true);
+            remainingCell.setLoading(true);
+
+            _expenses.add(amounts[i]);
+            _budgetCells.add(budgetCell);
+            _remainingCells.add(remainingCell);
+
+            tableRow.addView(yearCell);
+            tableRow.addView(expenseCell);
+            tableRow.addView(budgetCell);
+            tableRow.addView(remainingCell);
+
+            addView(tableRow);
+
+            total += amounts[i];
+        }
+
+        createTotals(total);
     }
 
     public void updateBudgets(List<BudgetEntity> budgetEntities)

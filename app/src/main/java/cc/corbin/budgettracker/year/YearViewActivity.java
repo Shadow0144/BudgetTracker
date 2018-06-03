@@ -21,8 +21,11 @@ import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.List;
 
+import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
+import cc.corbin.budgettracker.auxilliary.PieChart;
+import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.tables.BudgetTable;
 import cc.corbin.budgettracker.tables.CategorySummaryTable;
@@ -50,9 +53,15 @@ public class YearViewActivity extends AppCompatActivity
     private MutableLiveData<List<ExpenditureEntity>> _yearExps;
     private MutableLiveData<List<BudgetEntity>> _budgets;
 
+    private MutableLiveData<float[]> _monthlyAmounts;
+    private MutableLiveData<float[]> _categoricalAmounts;
+
     private YearMonthlySummaryTable _monthlyTable;
     private CategorySummaryTable _categoryTable;
     private BudgetTable _budgetTable;
+
+    private PieChart _monthlyPieChart;
+    private PieChart _categoryPieChart;
 
     private int _budgetId; // ID of the budget entity being edited
     private PopupWindow _popupWindow; // For editing budgets
@@ -104,6 +113,49 @@ public class YearViewActivity extends AppCompatActivity
             }
         };
 
+        final Observer<float[]> monthlyAmountsObserver = new Observer<float[]>()
+        {
+            @Override
+            public void onChanged(@Nullable float[] amounts)
+            {
+                _monthlyTable.updateExpenditures(amounts);
+
+                String[] monthLabels = new String[14];
+                monthLabels[0] = "Extras";
+                monthLabels[1] = "January";
+                monthLabels[2] = "February";
+                monthLabels[3] = "March";
+                monthLabels[4] = "April";
+                monthLabels[5] = "May";
+                monthLabels[6] = "June";
+                monthLabels[7] = "July";
+                monthLabels[8] = "August";
+                monthLabels[9] = "September";
+                monthLabels[10] = "October";
+                monthLabels[11] = "November";
+                monthLabels[12] = "December";
+                monthLabels[13] = "Adjustments";
+                _monthlyPieChart.setData(amounts, monthLabels);
+            }
+        };
+
+        final Observer<float[]> categoricalAmountsObserver = new Observer<float[]>()
+        {
+            @Override
+            public void onChanged(@Nullable float[] amounts)
+            {
+                _categoryTable.updateExpenditures(amounts);
+
+                String[] categoryLabels = Categories.getCategories();
+                _categoryPieChart.setData(amounts, categoryLabels);
+
+                YearViewActivity.dataInvalid = false;
+
+                // Update the budgets
+                _viewModel.getYearBudget(_budgets);
+            }
+        };
+
         TextView header = findViewById(R.id.yearView);
         DateFormatSymbols dfs = new DateFormatSymbols();
         header.setText("" + _year);
@@ -117,6 +169,12 @@ public class YearViewActivity extends AppCompatActivity
             }
         });
 
+        _monthlyAmounts = new MutableLiveData<float[]>();
+        _monthlyAmounts.observe(this, monthlyAmountsObserver);
+
+        _categoricalAmounts = new MutableLiveData<float[]>();
+        _categoricalAmounts.observe(this, categoricalAmountsObserver);
+
         FrameLayout yearMonthlyContainer = findViewById(R.id.yearMonthlyHolder);
         _monthlyTable = new YearMonthlySummaryTable(this, _year);
         yearMonthlyContainer.addView(_monthlyTable);
@@ -125,7 +183,16 @@ public class YearViewActivity extends AppCompatActivity
         _categoryTable = new CategorySummaryTable(this);
         yearsCategoryContainer.addView(_categoryTable);
 
-        // TODO Make into real budget table
+        FrameLayout monthlyPieContainer = findViewById(R.id.yearMonthlyPieHolder);
+        _monthlyPieChart = new PieChart(this);
+        _monthlyPieChart.setTitle("Monthly Spending");
+        monthlyPieContainer.addView(_monthlyPieChart);
+
+        FrameLayout categoryPieContainer = findViewById(R.id.yearCategoryPieHolder);
+        _categoryPieChart = new PieChart(this);
+        _categoryPieChart.setTitle("Categorical Spending");
+        categoryPieContainer.addView(_categoryPieChart);
+
         FrameLayout budgetContainer = findViewById(R.id.yearBudgetHolder);
         _budgetTable = new BudgetTable(this, _year);
         budgetContainer.addView(_budgetTable);
@@ -149,6 +216,9 @@ public class YearViewActivity extends AppCompatActivity
             _monthlyTable.resetTable();
             _categoryTable.resetTable();
 
+            _monthlyPieChart.clearData();
+            _categoryPieChart.clearData();
+
             _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
             _viewModel.setDate(_year, 0, 0);
             _viewModel.getYear(_yearExps);
@@ -158,12 +228,13 @@ public class YearViewActivity extends AppCompatActivity
 
     private void yearLoaded(List<ExpenditureEntity> expenditureEntities)
     {
-        _monthlyTable.updateExpenditures(expenditureEntities);
-        _categoryTable.updateExpenditures(expenditureEntities);
+        //_monthlyTable.updateExpenditures(expenditureEntities);
+        //_categoryTable.updateExpenditures(expenditureEntities);
 
-        YearViewActivity.dataInvalid = false;
+        //setupPieCharts(expenditureEntities);
 
-        _viewModel.getYearBudget(_budgets);
+        SummationAsyncTask summationAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.monthly, _monthlyAmounts, _categoricalAmounts);
+        summationAsyncTask.execute(expenditureEntities);
     }
 
     private void refreshTables(List<BudgetEntity> entities)
@@ -284,6 +355,52 @@ public class YearViewActivity extends AppCompatActivity
         _budgetTable.lockTable();
 
         _popupWindow.dismiss();
+    }
+
+    private void setupPieCharts(List<ExpenditureEntity> entities)
+    {
+        int size = entities.size();
+
+        float[] months = new float[14];
+        for (int i = 0; i < months.length; i++)
+        {
+            months[i] = 0.0f;
+        }
+
+        String[] categoryLabels = Categories.getCategories();
+        float[] categories = new float[categoryLabels.length];
+        for (int i = 0; i < categories.length; i++)
+        {
+            categories[i] = 0.0f;
+        }
+
+        for (int i = 0; i < size; i++)
+        {
+            ExpenditureEntity entity = entities.get(i);
+            int month = entity.getMonth();
+            months[month] += entity.getAmount();
+            int category = entity.getCategory();
+            categories[category] += entity.getAmount();
+        }
+
+        String[] monthLabels = new String[14];
+        monthLabels[0] = "Extras";
+        monthLabels[1] = "January";
+        monthLabels[2] = "February";
+        monthLabels[3] = "March";
+        monthLabels[4] = "April";
+        monthLabels[5] = "May";
+        monthLabels[6] = "June";
+        monthLabels[7] = "July";
+        monthLabels[8] = "August";
+        monthLabels[9] = "September";
+        monthLabels[10] = "October";
+        monthLabels[11] = "November";
+        monthLabels[12] = "December";
+        monthLabels[13] = "Adjustments";
+
+        _monthlyPieChart.setData(months, monthLabels);
+        _categoryPieChart.setData(categories, categoryLabels);
     }
 
     public void exportYear(View v)

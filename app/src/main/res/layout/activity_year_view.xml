@@ -67,7 +67,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0">
-
                 </FrameLayout>
 
                 <Space
@@ -80,7 +79,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0">
-
                 </FrameLayout>
 
                 <Space
@@ -89,17 +87,40 @@
                     android:layout_weight="0" />
 
                 <FrameLayout
-                    android:id="@+id/yearBudgetHolder"
+                    android:id="@+id/yearMonthlyPieHolder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0">
-
                 </FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
                     android:layout_height="15dp"
                     android:layout_weight="0" />
+
+                <FrameLayout
+                    android:id="@+id/yearCategoryPieHolder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0">
+                </FrameLayout>
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="15dp"
+                    android:layout_weight="0" />
+
+                <Space
+                android:layout_width="match_parent"
+                android:layout_height="15dp"
+                android:layout_weight="0" />
+
+                <FrameLayout
+                    android:id="@+id/yearBudgetHolder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0">
+                </FrameLayout>
 
                 <Button
                     android:id="@+id/exportYearButton"

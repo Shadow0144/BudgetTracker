@@ -69,7 +69,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0">
-
                 </FrameLayout>
 
                 <Space
@@ -82,7 +81,30 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0">
+                </FrameLayout>
 
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="15dp"
+                    android:layout_weight="0" />
+
+                <FrameLayout
+                    android:id="@+id/totalYearlyPieHolder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0">
+                </FrameLayout>
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="15dp"
+                    android:layout_weight="0" />
+
+                <FrameLayout
+                    android:id="@+id/totalCategoryPieHolder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0">
                 </FrameLayout>
 
                 <Space

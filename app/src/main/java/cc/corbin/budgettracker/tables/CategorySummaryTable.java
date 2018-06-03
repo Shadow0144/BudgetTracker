@@ -227,6 +227,21 @@ public class CategorySummaryTable extends TableLayout
         _totalExpenseCell.setLoading(false);
     }
 
+    public void updateExpenditures(float[] amounts)
+    {
+        float total = 0.0f;
+        for (int i = 0; i < amounts.length; i++)
+        {
+            _expenses.set(i, amounts[i]);
+            _expenseCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, amounts[i]));
+            _expenseCells.get(i).setLoading(false);
+            total += amounts[i];
+        }
+        _totalExpenses = total;
+        _totalExpenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+        _totalExpenseCell.setLoading(false);
+    }
+
     public void updateBudgets(List<BudgetEntity> budgetEntities)
     {
         if (_budgetCells != null)
