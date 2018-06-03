@@ -24,6 +24,7 @@ import java.util.List;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
+import cc.corbin.budgettracker.auxilliary.LineGraph;
 import cc.corbin.budgettracker.auxilliary.PieChart;
 import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
@@ -62,6 +63,8 @@ public class YearViewActivity extends AppCompatActivity
 
     private PieChart _monthlyPieChart;
     private PieChart _categoryPieChart;
+
+    private LineGraph _monthlyLineGraph;
 
     private int _budgetId; // ID of the budget entity being edited
     private PopupWindow _popupWindow; // For editing budgets
@@ -135,7 +138,9 @@ public class YearViewActivity extends AppCompatActivity
                 monthLabels[11] = "November";
                 monthLabels[12] = "December";
                 monthLabels[13] = "Adjustments";
+
                 _monthlyPieChart.setData(amounts, monthLabels);
+                _monthlyLineGraph.setData(amounts, monthLabels);
             }
         };
 
@@ -192,6 +197,11 @@ public class YearViewActivity extends AppCompatActivity
         _categoryPieChart = new PieChart(this);
         _categoryPieChart.setTitle("Categorical Spending");
         categoryPieContainer.addView(_categoryPieChart);
+
+        FrameLayout monthlyLineGraphHolder = findViewById(R.id.yearMonthlyLineGraphHolder);
+        _monthlyLineGraph = new LineGraph(this);
+        _monthlyLineGraph.setTitle("Monthly Spending");
+        monthlyLineGraphHolder.addView(_monthlyLineGraph);
 
         FrameLayout budgetContainer = findViewById(R.id.yearBudgetHolder);
         _budgetTable = new BudgetTable(this, _year);

@@ -28,6 +28,7 @@ import java.util.List;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
+import cc.corbin.budgettracker.auxilliary.LineGraph;
 import cc.corbin.budgettracker.auxilliary.PieChart;
 import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
 import cc.corbin.budgettracker.tables.ExtrasTable;
@@ -77,6 +78,8 @@ public class MonthViewActivity extends AppCompatActivity
 
     private PieChart _weeklyPieChart;
     private PieChart _categoryPieChart;
+
+    private LineGraph _weeklyLineGraph;
 
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _monthExps;
@@ -150,7 +153,9 @@ public class MonthViewActivity extends AppCompatActivity
                 weekLabels[4] = "Week 4";
                 weekLabels[5] = "Week 5";
                 weekLabels[6] = "Adjustments";
+
                 _weeklyPieChart.setData(amounts, weekLabels);
+                _weeklyLineGraph.setData(amounts, weekLabels);
             }
         };
 
@@ -213,11 +218,15 @@ public class MonthViewActivity extends AppCompatActivity
         _categoryPieChart.setTitle("Categorical Spending");
         categoryPieContainer.addView(_categoryPieChart);
 
+        FrameLayout weeklyLineGraphHolder = findViewById(R.id.monthWeeklyLineGraphHolder);
+        _weeklyLineGraph = new LineGraph(this);
+        _weeklyLineGraph.setTitle("Weekly Spending");
+        weeklyLineGraphHolder.addView(_weeklyLineGraph);
+
         _monthExps = new MutableLiveData<List<ExpenditureEntity>>();
         _monthExps.observe(this, entityObserver);
         _budgets = new MutableLiveData<List<BudgetEntity>>();
         _budgets.observe(this, budgetObserver);
-        //_viewModel.getMonth(_monthExps);
 
         createExtrasAndAdjustmentsTables();
 
@@ -234,6 +243,7 @@ public class MonthViewActivity extends AppCompatActivity
             _budgetTable.resetTable();
             _weeklyPieChart.clearData();
             _categoryPieChart.clearData();
+            _weeklyLineGraph.clearData();
 
             _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
             _viewModel.setDate(_year, _month, 0);

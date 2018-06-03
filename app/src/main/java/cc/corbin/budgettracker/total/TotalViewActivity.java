@@ -20,6 +20,7 @@ import java.util.Set;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
+import cc.corbin.budgettracker.auxilliary.LineGraph;
 import cc.corbin.budgettracker.auxilliary.PieChart;
 import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
@@ -52,6 +53,8 @@ public class TotalViewActivity extends AppCompatActivity
 
     private PieChart _yearlyPieChart;
     private PieChart _categoryPieChart;
+
+    private LineGraph _yearlyLineGraph;
 
     private int _startYear;
     private int _endYear;
@@ -112,7 +115,9 @@ public class TotalViewActivity extends AppCompatActivity
                 {
                     yearLabels[i] = "" + (i + _startYear);
                 }
+
                 _yearlyPieChart.setData(amounts, yearLabels);
+                _yearlyLineGraph.setData(amounts, yearLabels);
             }
         };
 
@@ -169,6 +174,11 @@ public class TotalViewActivity extends AppCompatActivity
         _categoryPieChart = new PieChart(this);
         _categoryPieChart.setTitle("Categorical Spending");
         categoryPieContainer.addView(_categoryPieChart);
+
+        FrameLayout yearlyLineGraphHolder = findViewById(R.id.totalYearlyLineGraphHolder);
+        _yearlyLineGraph = new LineGraph(this);
+        _yearlyLineGraph.setTitle("Yearly Spending");
+        yearlyLineGraphHolder.addView(_yearlyLineGraph);
 
         // TODO - Add total budget table?
 
