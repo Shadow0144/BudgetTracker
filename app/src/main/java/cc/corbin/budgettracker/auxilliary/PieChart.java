@@ -40,8 +40,10 @@ public class PieChart extends RelativeLayout
     private Paint _titlePaint;
     private Paint _textPaint;
 
+    private final float PIE_RATIO = 0.75f;
     private final float PIE_PADDING = 0.1f;
     private final float PIE_OFFSET = 0.125f;
+    private final float VERTICAL_OFFSET = 0.05f;
     private final float LEGEND_START_OFFSET = 0.25f;
     private final float LEGEND_OFFSET = 0.01f;
     private final float SHADOW_OFFSET = 0.015f;
@@ -50,6 +52,8 @@ public class PieChart extends RelativeLayout
     private final float TEXT_PADDING = 0.065f;
     private final float TITLE_OFFSET = 0.065f;
     private final float LEGEND_BOX_SIZE = 0.01f;
+    private final float PROGRESS_BAR_PADDING = 0.25f;
+    private final float PROGRESS_BAR_OFFSET = 0.125f;
 
     private final int MAX_CHARACTERS = 10;
 
@@ -109,7 +113,8 @@ public class PieChart extends RelativeLayout
 
         _progressBar = new ProgressBar(_context);
         RelativeLayout.LayoutParams layoutParams =
-                new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+                //new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+                new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         layoutParams.addRule(CENTER_IN_PARENT);
         _progressBar.setLayoutParams(layoutParams);
         addView(_progressBar);
@@ -144,17 +149,37 @@ public class PieChart extends RelativeLayout
     @Override
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
     {
-        if (widthMeasureSpec > heightMeasureSpec)
+        int sizeW = MeasureSpec.getSize(widthMeasureSpec);
+        int sizeH = ((int)(sizeW * PIE_RATIO));
+
+        heightMeasureSpec = MeasureSpec.makeMeasureSpec(sizeH, MeasureSpec.AT_MOST);
+
+        /*if (widthMeasureSpec > heightMeasureSpec)
         {
             heightMeasureSpec = widthMeasureSpec;
         }
         else
         {
             widthMeasureSpec = heightMeasureSpec;
-        }
+        }*/
 
         setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b)
+    {
+        int w = r - l;
+        int h = b - t; // Not used
+
+        _progressBar.setPadding(
+                ((int)((w * PROGRESS_BAR_PADDING) - (w * PROGRESS_BAR_OFFSET))),
+                ((int)((w * PROGRESS_BAR_PADDING) + (h * VERTICAL_OFFSET))),
+                ((int)((w * PROGRESS_BAR_PADDING) + (w * PROGRESS_BAR_OFFSET))),
+                ((int)((w * PROGRESS_BAR_PADDING) - (h * VERTICAL_OFFSET))));
+
+        super.onLayout(changed, l, t, r, b);
     }
 
     @Override
@@ -166,9 +191,9 @@ public class PieChart extends RelativeLayout
         int h = getHeight();
 
         int cX = w / 2;
-        int cY = h / 2;
+        int cY = (int)((h / 2) + (h * VERTICAL_OFFSET));
         int hW = w / 2 - (int)(2 * PIE_PADDING * w);
-        int hH = h / 2 - (int)(2 * PIE_PADDING * h); // Not used
+        //int hH = h / 2 - (int)(2 * PIE_PADDING * h); // Not used
 
         int pieOffset = (int)(w * PIE_OFFSET);
         int shadowOffset = (int)(w * SHADOW_OFFSET);
@@ -176,14 +201,14 @@ public class PieChart extends RelativeLayout
         int legendOffset = (int)(w * LEGEND_OFFSET);
         int legendBoxSize = (int)(w * LEGEND_BOX_SIZE);
 
-        _titlePaint.setTextSize(TITLE_SCALING * h);
-        _textPaint.setTextSize(TEXT_SCALING * h);
+        _titlePaint.setTextSize(TITLE_SCALING * w);
+        _textPaint.setTextSize(TEXT_SCALING * w);
 
         int textSize = (int)((_textPaint.descent() + _textPaint.ascent()) / 2);
-        int textPadding = (int)(h * TEXT_PADDING);
+        int textPadding = (int)(w * TEXT_PADDING);
 
         // Draw the title
-        canvas.drawText(_title, cX, cY - hW - (TITLE_OFFSET * h), _titlePaint);
+        canvas.drawText(_title, cX, cY - hW - (TITLE_OFFSET * w), _titlePaint);
 
         canvas.drawCircle(cX-shadowOffset-pieOffset, cY+shadowOffset, hW, _shadowPaint);
         canvas.drawCircle(cX-pieOffset, cY, hW, _emptyPiePaint);
@@ -260,7 +285,8 @@ public class PieChart extends RelativeLayout
             index = (index + 1) % _arcs.length;
         }
 
-        _progressBar.setVisibility(GONE);
+        // ProgressBar cannot be set to GONE or the canvas disappears
+        _progressBar.setVisibility(INVISIBLE);
 
         setupColors(_arcs.length);
 
