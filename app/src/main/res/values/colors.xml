@@ -10,4 +10,5 @@
     <color name="blue">#0000ff</color>
     <color name="translucent">#88888888</color>
     <color name="silver">#e6e6e6</color>
+    <color name="insert">#880000CC</color>
 </resources>

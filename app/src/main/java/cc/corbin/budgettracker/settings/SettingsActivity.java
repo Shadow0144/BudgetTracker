@@ -12,6 +12,7 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,8 @@ import java.util.List;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
+import cc.corbin.budgettracker.auxilliary.SortableItem;
+import cc.corbin.budgettracker.auxilliary.SortableLinearLayout;
 import cc.corbin.budgettracker.tables.TableCell;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
@@ -45,9 +48,10 @@ public class SettingsActivity extends AppCompatActivity
 {
     private final String TAG = "SettingsActivity";
 
+    private MutableLiveData<String[]> _categoriesLiveData;
     private String[] _categories;
 
-    private TableLayout _categoriesTable;
+    private SortableLinearLayout _sortableCategoriesTable;
     private TableCell _otherCategoryCell;
 
     private int _categoryEditIndex;
@@ -66,7 +70,14 @@ public class SettingsActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+        _categoriesLiveData = new MutableLiveData<String[]>();
         _categories = Categories.getCategories();
+        String[] withoutOther = new String[_categories.length-1];
+        for (int i = 0; i < withoutOther.length; i++)
+        {
+            withoutOther[i] = _categories[i];
+        }
+        _categoriesLiveData.setValue(withoutOther);
 
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
         _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
@@ -98,46 +109,49 @@ public class SettingsActivity extends AppCompatActivity
 
         final LinearLayout categoriesLayout = findViewById(R.id.categoriesLayout);
 
-        _categoriesTable = new TableLayout(this);
-        _categoriesTable.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT));
-        _categoriesTable.setStretchAllColumns(true);
-        _categoriesTable.setColumnShrinkable(0, true);
-
-        TableRow categoryRow = new TableRow(this);
         TableCell categoryCell = new TableCell(this, TableCell.TITLE_CELL);
         categoryCell.setText("Categories");
-        categoryRow.addView(categoryCell);
-        _categoriesTable.addView(categoryRow);
+        categoriesLayout.addView(categoryCell);
 
-        String[] categories = Categories.getCategories();
-        int size = categories.length;
+        _sortableCategoriesTable = new SortableLinearLayout(this);
+        _sortableCategoriesTable.setItems(_categoriesLiveData);
+        int size = _categories.length-1;
         for (int i = 0; i < size; i++)
         {
-            categoryRow = new TableRow(this);
-            categoryCell = new TableCell(this, TableCell.DEFAULT_CELL);
-            categoryCell.setText(categories[i]);
-            if (i < (size-1)) // Do not add a listener for editing or removing "Other"
+            SortableItem categoryCellSort = new SortableItem(this);
+            categoryCellSort.setText(_categories[i]);
+            categoryCellSort.setOnClickListener(new View.OnClickListener()
             {
-                categoryCell.setOnClickListener(new View.OnClickListener()
+                @Override
+                public void onClick(View v)
                 {
-                    @Override
-                    public void onClick(View v)
-                    {
-                        editCategory(v);
-                    }
-                });
-            }
-            else { }
-            categoryCell.setId(i);
-            categoryRow.addView(categoryCell);
-            _categoriesTable.addView(categoryRow);
+                    editCategory(v);
+                }
+            });
+            categoryCellSort.setId(i);
+            _sortableCategoriesTable.insertSortableView(categoryCellSort);
         }
+        categoriesLayout.addView(_sortableCategoriesTable);
 
-        _otherCategoryCell = categoryCell; // The last item
-        _otherCategoryCell.setType(TableCell.SEMI_SPECIAL_CELL);
+        final Observer<String[]> categoriesObserver = new Observer<String[]>()
+        {
+            @Override
+            public void onChanged(@Nullable String[] categories)
+            {
+                if (categories != null)
+                {
+                    categoriesResorted(categories);
+                }
+                else { }
+            }
+        };
+        _categoriesLiveData.observe(this, categoriesObserver);
+
+        _otherCategoryCell = new TableCell(this, TableCell.SEMI_SPECIAL_CELL);
+        _otherCategoryCell.setText(_categories[size]); // The last item
+        categoriesLayout.addView(_otherCategoryCell);
 
         // Add the add button
-        categoryRow = new TableRow(this);
         categoryCell = new TableCell(this, TableCell.SPECIAL_CELL);
         categoryCell.setText("<Add>");
         categoryCell.setOnClickListener(new View.OnClickListener()
@@ -148,25 +162,9 @@ public class SettingsActivity extends AppCompatActivity
                 addCategory(v);
             }
         });
-        categoryRow.addView(categoryCell);
-        _categoriesTable.addView(categoryRow);
+        categoriesLayout.addView(categoryCell);
 
-        // Add the resort button
-        categoryRow = new TableRow(this);
-        categoryCell = new TableCell(this, TableCell.SPECIAL_CELL);
-        categoryCell.setText("<Resort>");
-        categoryCell.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                resortCategories(v);
-            }
-        });
-        categoryRow.addView(categoryCell);
-        _categoriesTable.addView(categoryRow);
-
-        categoriesLayout.addView(_categoriesTable);
+        // Setup the default categories
 
         final TableLayout defaultCurrencyTable = findViewById(R.id.defaultCurrencyTable);
         defaultCurrencyTable.setColumnStretchable(0, true);
@@ -236,7 +234,7 @@ public class SettingsActivity extends AppCompatActivity
         final View categoryEditView = getLayoutInflater().inflate(R.layout.popup_edit_category, null);
 
         final EditText categoryEditText = categoryEditView.findViewById(R.id.categoryEditText);
-        categoryEditText.setText(((TableCell)v).getText());
+        categoryEditText.setText(((SortableItem)v).getText());
 
         final Button confirmButton = categoryEditView.findViewById(R.id.confirmButton);
         categoryEditText.addTextChangedListener(new TextWatcher()
@@ -303,13 +301,7 @@ public class SettingsActivity extends AppCompatActivity
         _viewModel.renameExpenditureCategory(_exps, _categoryEditIndex, newCategoryName);
         _viewModel.renameBudgetCategory(_budgets, _categoryEditIndex, newCategoryName);
 
-        _categories[_categoryEditIndex] = newCategoryName;
-
-        final TableCell editedCategory = _categoriesTable.findViewById(_categoryEditIndex);
-        editedCategory.setText(_categories[_categoryEditIndex]);
-
-        // Save the updated categories
-        saveUpdatedCategories();
+        _sortableCategoriesTable.updateItemText(_categoryEditIndex, newCategoryName);
 
         _popupWindow.dismiss();
     }
@@ -400,13 +392,9 @@ public class SettingsActivity extends AppCompatActivity
             }
             else { }
         }
-        _categories = newCategories;
 
         // Remove the view
-        _categoriesTable.removeViewAt(_categoryEditIndex+1); // +1 for the column header
-
-        // Save the updated categories
-        saveUpdatedCategories();
+        _sortableCategoriesTable.removeSortableView(_categoryEditIndex);
 
         _popupWindow.dismiss();
     }
@@ -489,8 +477,7 @@ public class SettingsActivity extends AppCompatActivity
         categoriesNew[i++] = ((EditText)(_popupWindow.getContentView().findViewById(R.id.categoryEditText))).getText().toString();
         categoriesNew[i] = _categories[end];
 
-        TableRow categoryRow = new TableRow(this);
-        TableCell categoryCell = new TableCell(this, TableCell.DEFAULT_CELL);
+        SortableItem categoryCell = new SortableItem(this);
         categoryCell.setText(categoriesNew[end]);
         categoryCell.setOnClickListener(new View.OnClickListener()
         {
@@ -500,18 +487,12 @@ public class SettingsActivity extends AppCompatActivity
                 editCategory(v);
             }
         });
-        categoryRow.setId(end);
+        categoryCell.setId(end);
 
-        categoryRow.addView(categoryCell);
-        _categoriesTable.addView(categoryRow, end+1);
-
-        _categories = categoriesNew;
+        _sortableCategoriesTable.insertSortableView(categoryCell);
 
         _viewModel.addExpenditureCategory(_exps, end+1);
         _viewModel.addBudgetCategory(_budgets, end+1);
-
-        // Save the updated categories
-        saveUpdatedCategories();
 
         _popupWindow.dismiss();
     }
@@ -524,9 +505,17 @@ public class SettingsActivity extends AppCompatActivity
     /// Resort
     ///
 
-    private void resortCategories(View v)
+    private void categoriesResorted(String[] categories)
     {
-
+        String other = _categories[_categories.length-1];
+        _categories = new String[categories.length+1];
+        int i = 0;
+        for (; i < categories.length; i++)
+        {
+            _categories[i] = categories[i];
+        }
+        _categories[i] = other;
+        saveUpdatedCategories();
     }
 
     ///
