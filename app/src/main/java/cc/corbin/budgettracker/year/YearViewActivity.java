@@ -30,6 +30,7 @@ import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.tables.BudgetTable;
 import cc.corbin.budgettracker.tables.CategorySummaryTable;
+import cc.corbin.budgettracker.tables.TimeSummaryTable;
 import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.R;
@@ -57,7 +58,7 @@ public class YearViewActivity extends AppCompatActivity
     private MutableLiveData<float[]> _monthlyAmounts;
     private MutableLiveData<float[]> _categoricalAmounts;
 
-    private YearMonthlySummaryTable _monthlyTable;
+    private TimeSummaryTable _monthlyTable;
     private CategorySummaryTable _categoryTable;
     private BudgetTable _budgetTable;
 
@@ -106,7 +107,6 @@ public class YearViewActivity extends AppCompatActivity
                 if (budgetEntities != null) // returning from a query
                 {
                     refreshTables(budgetEntities);
-                    //_loaded = true;
                 }
                 else // else - returning from an add / edit / remove
                 {
@@ -181,7 +181,7 @@ public class YearViewActivity extends AppCompatActivity
         _categoricalAmounts.observe(this, categoricalAmountsObserver);
 
         FrameLayout yearMonthlyContainer = findViewById(R.id.yearMonthlyHolder);
-        _monthlyTable = new YearMonthlySummaryTable(this, _year);
+        _monthlyTable = new TimeSummaryTable(this, _year);
         yearMonthlyContainer.addView(_monthlyTable);
 
         FrameLayout yearsCategoryContainer = findViewById(R.id.yearCategoryHolder);
@@ -238,18 +238,13 @@ public class YearViewActivity extends AppCompatActivity
 
     private void yearLoaded(List<ExpenditureEntity> expenditureEntities)
     {
-        //_monthlyTable.updateExpenditures(expenditureEntities);
-        //_categoryTable.updateExpenditures(expenditureEntities);
-
-        //setupPieCharts(expenditureEntities);
-
         SummationAsyncTask summationAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.monthly, _monthlyAmounts, _categoricalAmounts);
         summationAsyncTask.execute(expenditureEntities);
     }
 
     private void refreshTables(List<BudgetEntity> entities)
     {
-        _monthlyTable.updateBudgets(entities);
+        //_monthlyTable.updateBudgets(entities);
         _categoryTable.updateBudgets(entities);
         _budgetTable.refreshTable(entities);
     }

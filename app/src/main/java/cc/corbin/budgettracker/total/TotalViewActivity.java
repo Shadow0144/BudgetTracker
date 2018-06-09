@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.month.MonthViewActivity;
 import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.tables.CategorySummaryTable;
+import cc.corbin.budgettracker.tables.TimeSummaryTable;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
@@ -48,7 +50,7 @@ public class TotalViewActivity extends AppCompatActivity
     private MutableLiveData<float[]> _yearlyAmounts;
     private MutableLiveData<float[]> _categoricalAmounts;
 
-    private TotalYearlySummaryTable _yearlyTable;
+    private TimeSummaryTable _yearlyTable;
     private CategorySummaryTable _categoryTable;
 
     private PieChart _yearlyPieChart;
@@ -139,8 +141,7 @@ public class TotalViewActivity extends AppCompatActivity
         };
 
         TextView header = findViewById(R.id.totalView);
-        DateFormatSymbols dfs = new DateFormatSymbols();
-        header.setText("" + "Total"); // TODO
+        header.setText(R.string.total);
         header.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -158,7 +159,7 @@ public class TotalViewActivity extends AppCompatActivity
         _categoricalAmounts.observe(this, categoricalAmountsObserver);
 
         FrameLayout totalYearlyContainer = findViewById(R.id.totalYearlyHolder);
-        _yearlyTable = new TotalYearlySummaryTable(this);
+        _yearlyTable = new TimeSummaryTable(this);
         totalYearlyContainer.addView(_yearlyTable);
 
         FrameLayout totalCategoryContainer = findViewById(R.id.totalCategoryHolder);
@@ -167,20 +168,20 @@ public class TotalViewActivity extends AppCompatActivity
 
         FrameLayout yearlyPieContainer = findViewById(R.id.totalYearlyPieHolder);
         _yearlyPieChart = new PieChart(this);
-        _yearlyPieChart.setTitle("Yearly Spending");
+        _yearlyPieChart.setTitle(getString(R.string.yearly_spending));
         yearlyPieContainer.addView(_yearlyPieChart);
 
         FrameLayout categoryPieContainer = findViewById(R.id.totalCategoryPieHolder);
         _categoryPieChart = new PieChart(this);
-        _categoryPieChart.setTitle("Categorical Spending");
+        _categoryPieChart.setTitle(getString(R.string.categorical_spending));
         categoryPieContainer.addView(_categoryPieChart);
 
         FrameLayout yearlyLineGraphHolder = findViewById(R.id.totalYearlyLineGraphHolder);
         _yearlyLineGraph = new LineGraph(this);
-        _yearlyLineGraph.setTitle("Yearly Spending");
+        _yearlyLineGraph.setTitle(getString(R.string.yearly_spending));
         yearlyLineGraphHolder.addView(_yearlyLineGraph);
 
-        // TODO - Add total budget table?
+        // No budget table
 
         _totalExps = new MutableLiveData<List<ExpenditureEntity>>();
         _totalExps.observe(this, entityObserver);
@@ -211,17 +212,22 @@ public class TotalViewActivity extends AppCompatActivity
         if (expenditureEntities.size() > 0)
         {
             _startYear = expenditureEntities.get(0).getYear();
-            _endYear = expenditureEntities.get(expenditureEntities.size()-1).getYear();
-
-            SummationAsyncTask summationAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.yearly, _yearlyAmounts, _categoricalAmounts);
-            summationAsyncTask.execute(expenditureEntities);
+            _endYear = expenditureEntities.get(expenditureEntities.size() - 1).getYear();
         }
-        else { }
+        else
+        {
+            Calendar calendar = Calendar.getInstance();
+            _startYear = calendar.get(Calendar.YEAR);
+            _endYear = calendar.get(Calendar.YEAR);
+        }
+
+        SummationAsyncTask summationAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.yearly, _yearlyAmounts, _categoricalAmounts);
+        summationAsyncTask.execute(expenditureEntities);
     }
 
     private void refreshTables(List<BudgetEntity> budgetEntities)
     {
-        _yearlyTable.updateBudgets(budgetEntities);
+        //_yearlyTable.updateBudgets(budgetEntities);
         _categoryTable.updateBudgets(budgetEntities);
     }
 

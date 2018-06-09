@@ -22,7 +22,9 @@
         <item>Food</item>
         <item>Essentials</item>
         <item>Transportation</item>
-        <item>Accomodation</item>
+        <item>Accommodation</item>
+        <item>Travel</item>
+        <item>Utilities</item>
         <item>Other</item>
     </string-array>
     <string name="recompense">Recompense</string>
@@ -30,13 +32,35 @@
     <string name="alert_body">Confirm Removing Expense</string>
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
-    <string name="month_title">Expenditures</string>
+
+    <string name="daily_title">Expenditures by Day</string>
     <string name="month_weekly_title">Expenditures by Week</string>
-    <string name="month_category_title">Expenditures by Category</string>
+    <string name="year_monthly_title">Expenditures by Month</string>
+    <string name="total_yearly_title">Expenditures by Year</string>
+
+    <string name="category_title">Expenditures by Category</string>
+
+    <string name="day">Day</string>
+    <string name="week">Week</string>
+    <string name="month">Month</string>
+    <string name="year">Year</string>
+
+    <string name="spent">Spent</string>
+    <string name="budget">Budget</string>
+    <string name="remaining">Remaining</string>
+
+    <string name="empty">---</string>
+
+    <string name="daily_spending">Daily Spending</string>
+    <string name="weekly_spending">Weekly Spending</string>
+    <string name="monthly_spending">Monthly Spending</string>
+    <string name="yearly_spending">Total Spending</string>
+    <string name="categorical_spending">Categorical Spending</string>
+
+    <string name="extras">Extras</string>
+
     <string name="monthly_budget_title">Monthly Budget Limits</string>
     <string name="yearly_budget_title">Yearly Budget Limits</string>
-    <string name="year_monthly_title">Expenditures by Year</string>
-    <string name="year_category_title">Expenditures by Category</string>
     <string name="year_budget_title">Yearly Budget Limits</string>
     <string name="budget_as_of">As of&#160;</string>
     <string name="budget_unset">No budget set</string>

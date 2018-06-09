@@ -75,7 +75,7 @@ public class CategorySummaryTable extends TableLayout
         // Setup the title
         TableRow titleRow = new TableRow(_context);
         TableCell titleCell = new TableCell(_context, TableCell.TITLE_CELL);
-        titleCell.setText(R.string.year_category_title);
+        titleCell.setText(R.string.category_title);
         TableRow.LayoutParams params = new TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.WRAP_CONTENT

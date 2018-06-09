@@ -67,12 +67,12 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Void,
         switch (_summationType)
         {
             case weekly:
-                sums = new float[7];
+                sums = new float[6]; // + 1 for extras
                 getWeeklySummations(sums, catSums, entities);
                 break;
 
             case monthly:
-                sums = new float[14];
+                sums = new float[13]; // + 1 for extras
                 getMonthlySummations(sums, catSums, entities);
                 break;
 
@@ -155,14 +155,14 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Void,
             {
                 weeks[4] += entity.getAmount();
             }
-            else if (day < 32)
+            else // if (day < 32)
             {
                 weeks[5] += entity.getAmount();
             }
-            else // day == 32
+            /*else // day == 32
             {
                 weeks[6] += entity.getAmount();
-            }
+            }*/
             if (_dualAmounts)
             {
                 int category = entity.getCategory();
@@ -197,6 +197,7 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Void,
         }
     }
 
+    // Warning: Does not allow for total extras
     private void getYearlySummations(float[] years, float[] categories, List<ExpenditureEntity> entities, int minYear)
     {
         for (int i = 0; i < years.length; i++)

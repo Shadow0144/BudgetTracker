@@ -37,6 +37,7 @@ import cc.corbin.budgettracker.day.ExpenditureEditActivity;
 import cc.corbin.budgettracker.day.ExpenditureItem;
 import cc.corbin.budgettracker.tables.BudgetTable;
 import cc.corbin.budgettracker.tables.CategorySummaryTable;
+import cc.corbin.budgettracker.tables.TimeSummaryTable;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.year.YearViewActivity;
@@ -70,11 +71,11 @@ public class MonthViewActivity extends AppCompatActivity
     private int _month;
     private int _year;
 
-    private MonthWeeklySummaryTable _weeklyTable;
+    private TimeSummaryTable _weeklyTable;
     private CategorySummaryTable _categoryTable;
     private BudgetTable _budgetTable;
     private ExtrasTable _extrasTable;
-    private ExtrasTable _adjustmentsTable;
+    //private ExtrasTable _adjustmentsTable;
 
     private PieChart _weeklyPieChart;
     private PieChart _categoryPieChart;
@@ -197,7 +198,7 @@ public class MonthViewActivity extends AppCompatActivity
         _categoricalAmounts.observe(this, categoricalAmountsObserver);
 
         FrameLayout monthsWeeklyContainer = findViewById(R.id.monthWeeklyHolder);
-        _weeklyTable = new MonthWeeklySummaryTable(this, _month, _year);
+        _weeklyTable = new TimeSummaryTable(this, _month, _year);
         monthsWeeklyContainer.addView(_weeklyTable);
 
         FrameLayout monthsCategoryContainer = findViewById(R.id.monthCategoryHolder);
@@ -210,17 +211,17 @@ public class MonthViewActivity extends AppCompatActivity
 
         FrameLayout weeklyPieContainer = findViewById(R.id.monthWeeklyPieHolder);
         _weeklyPieChart = new PieChart(this);
-        _weeklyPieChart.setTitle("Weekly Spending");
+        _weeklyPieChart.setTitle(getString(R.string.weekly_spending));
         weeklyPieContainer.addView(_weeklyPieChart);
 
         FrameLayout categoryPieContainer = findViewById(R.id.monthCategoryPieHolder);
         _categoryPieChart = new PieChart(this);
-        _categoryPieChart.setTitle("Categorical Spending");
+        _categoryPieChart.setTitle(getString(R.string.categorical_spending));
         categoryPieContainer.addView(_categoryPieChart);
 
         FrameLayout weeklyLineGraphHolder = findViewById(R.id.monthWeeklyLineGraphHolder);
         _weeklyLineGraph = new LineGraph(this);
-        _weeklyLineGraph.setTitle("Weekly Spending");
+        _weeklyLineGraph.setTitle(getString(R.string.weekly_spending));
         weeklyLineGraphHolder.addView(_weeklyLineGraph);
 
         _monthExps = new MutableLiveData<List<ExpenditureEntity>>();
@@ -257,7 +258,6 @@ public class MonthViewActivity extends AppCompatActivity
     private void monthLoaded(List<ExpenditureEntity> expenditureEntities)
     {
         _extrasTable.updateExpenditures(expenditureEntities);
-        _adjustmentsTable.updateExpenditures(expenditureEntities);
 
         SummationAsyncTask summationAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.weekly, _weeklyAmounts, _categoricalAmounts);
         summationAsyncTask.execute(expenditureEntities);
@@ -406,12 +406,12 @@ public class MonthViewActivity extends AppCompatActivity
         FrameLayout adjustmentsContainer = findViewById(R.id.monthAdjustmentHolder);
 
         // Create the extras table
-        _extrasTable = new ExtrasTable(this, ExtrasTable.tableType.extras, _year, _month);
+        _extrasTable = new ExtrasTable(this, _year, _month);
         extrasContainer.addView(_extrasTable);
 
         // Create the adjustments table
-        _adjustmentsTable = new ExtrasTable(this, ExtrasTable.tableType.adjustments, _year, _month);
-        adjustmentsContainer.addView(_adjustmentsTable);
+        //_adjustmentsTable = new ExtrasTable(this, ExtrasTable.tableType.adjustments, _year, _month);
+        //adjustmentsContainer.addView(_adjustmentsTable);
     }
 
     public void createExtraExpenditure()

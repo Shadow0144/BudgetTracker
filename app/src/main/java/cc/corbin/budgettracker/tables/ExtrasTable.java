@@ -24,13 +24,6 @@ public class ExtrasTable extends TableLayout
     private int _month;
     private int _year;
 
-    public enum tableType
-    {
-        extras,
-        adjustments
-    };
-    private tableType _tableType;
-
     private List<ExpenditureEntity> _extras;
 
     public ExtrasTable(Context context)
@@ -38,43 +31,28 @@ public class ExtrasTable extends TableLayout
         super(context);
 
         _context = context;
-        _tableType = tableType.extras;
         _year = 0;
         _month = 0;
 
         setupTable();
     }
 
-    public ExtrasTable(Context context, tableType table)
+    public ExtrasTable(Context context, int year)
     {
         super(context);
 
         _context = context;
-        _tableType = table;
-        _year = 0;
-        _month = 0;
-
-        setupTable();
-    }
-
-    public ExtrasTable(Context context, tableType table, int year)
-    {
-        super(context);
-
-        _context = context;
-        _tableType = table;
         _year = year;
         _month = 0;
 
         setupTable();
     }
 
-    public ExtrasTable(Context context, tableType table, int year, int month)
+    public ExtrasTable(Context context, int year, int month)
     {
         super(context);
 
         _context = context;
-        _tableType = table;
         _year = year;
         _month = month;
 
@@ -94,16 +72,7 @@ public class ExtrasTable extends TableLayout
         TableRow extrasTableRow = new TableRow(_context);
         TableCell extrasTableCell = new TableCell(_context, TableCell.TITLE_CELL);
 
-        switch (_tableType)
-        {
-            case extras:
-                extrasTableCell.setText("Extras");
-                break;
-
-            case adjustments:
-                extrasTableCell.setText("Adjustments");
-                break;
-        }
+        extrasTableCell.setText(R.string.extras);
 
         extrasTableRow.addView(extrasTableCell);
         addView(extrasTableRow);
@@ -112,7 +81,7 @@ public class ExtrasTable extends TableLayout
     private void addAddButtons()
     {
         Button extrasTableAddButton = new Button(_context);
-        extrasTableAddButton.setText("Add");
+        extrasTableAddButton.setText(R.string.add_item);
         extrasTableAddButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -136,15 +105,6 @@ public class ExtrasTable extends TableLayout
         setupTitle();
 
         int selection = 0;
-        switch (_tableType)
-        {
-            case extras:
-                selection = 0;
-                break;
-            case adjustments:
-                selection = 32;
-                break;
-        }
 
         int size = expenditureEntities.size();
         for (int i = 0; i < size; i++)
@@ -175,43 +135,20 @@ public class ExtrasTable extends TableLayout
 
     private void createExtraExpenditure(View v)
     {
-        switch (_tableType)
+        if (_month != 0) // Month Activity
         {
-            case extras:
-                if (_month != 0)
-                {
-                    ((MonthViewActivity)_context).createExtraExpenditure();
-                }
-                else
-                {
-                    if (_year != 0)
-                    {
+            ((MonthViewActivity)_context).createExtraExpenditure();
+        }
+        else
+        {
+            if (_year != 0) // Year Activity
+            {
 
-                    }
-                    else
-                    {
+            }
+            else // Total Activity
+            {
 
-                    }
-                }
-                break;
-
-            case adjustments:
-                if (_month != 0)
-                {
-                    ((MonthViewActivity)_context).createAdjustmentExpenditure();
-                }
-                else
-                {
-                    if (_year != 0)
-                    {
-
-                    }
-                    else
-                    {
-
-                    }
-                }
-                break;
+            }
         }
     }
 
@@ -221,43 +158,20 @@ public class ExtrasTable extends TableLayout
         index--;
         ExpenditureEntity entity = _extras.get(index);
 
-        switch (_tableType)
+        if (_month != 0) // Month Activity
         {
-            case extras:
-                if (_month != 0)
-                {
-                    ((MonthViewActivity)_context).editExtraExpenditure(entity, index);
-                }
-                else
-                {
-                    if (_year != 0)
-                    {
+            ((MonthViewActivity)_context).editExtraExpenditure(entity, index);
+        }
+        else
+        {
+            if (_year != 0) // Year Activity
+            {
 
-                    }
-                    else
-                    {
+            }
+            else // Total Activity
+            {
 
-                    }
-                }
-                break;
-
-            case adjustments:
-                if (_month != 0)
-                {
-                    ((MonthViewActivity)_context).editAdjustmentExpenditure(entity);
-                }
-                else
-                {
-                    if (_year != 0)
-                    {
-
-                    }
-                    else
-                    {
-
-                    }
-                }
-                break;
+            }
         }
     }
 }
