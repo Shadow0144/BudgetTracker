@@ -424,12 +424,13 @@ public class MonthViewActivity extends AppCompatActivity
         startActivityForResult(intent, CREATE_EXT_EXPENDITURE);
     }
 
-    public void editExtraExpenditure(ExpenditureEntity entity)
+    public void editExtraExpenditure(ExpenditureEntity entity, int index)
     {
         Intent intent = new Intent(getApplicationContext(), ExpenditureEditActivity.class);
         intent.putExtra(ExpenditureEditActivity.YEAR_INTENT, _year);
         intent.putExtra(ExpenditureEditActivity.MONTH_INTENT, _month);
         intent.putExtra(ExpenditureEditActivity.DAY_INTENT, 0);
+        intent.putExtra(ExpenditureEditActivity.INDEX_INTENT, index);
         intent.putExtra(ExpenditureEditActivity.EXPENDITURE_INTENT, entity);
         intent.putExtra(ExpenditureEditActivity.TYPE_INTENT, EDIT_EXT_EXPENDITURE);
         startActivityForResult(intent, EDIT_EXT_EXPENDITURE);

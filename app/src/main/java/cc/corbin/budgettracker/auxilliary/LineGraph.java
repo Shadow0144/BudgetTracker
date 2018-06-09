@@ -272,8 +272,8 @@ public class LineGraph extends RelativeLayout
 
     public void setData(float[] amounts, String[] labels)
     {
-        _amounts = amounts;
-        _labels = labels;
+        _amounts = amounts.clone();
+        _labels = labels.clone();
         _points = new float[_amounts.length];
         _scale = new String[NUM_LINES+1];
 
@@ -281,6 +281,7 @@ public class LineGraph extends RelativeLayout
         float maxValue = 0.0f;
         for (int i = 0; i < _amounts.length; i++)
         {
+            _amounts[i] = _amounts[i] >= 0.0f ? _amounts[i] : 0.0f;
             if (_amounts[i] > maxValue)
             {
                 maxValue = _amounts[i];

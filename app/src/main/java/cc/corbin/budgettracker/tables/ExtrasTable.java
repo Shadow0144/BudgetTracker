@@ -226,7 +226,7 @@ public class ExtrasTable extends TableLayout
             case extras:
                 if (_month != 0)
                 {
-                    ((MonthViewActivity)_context).editExtraExpenditure(entity);
+                    ((MonthViewActivity)_context).editExtraExpenditure(entity, index);
                 }
                 else
                 {

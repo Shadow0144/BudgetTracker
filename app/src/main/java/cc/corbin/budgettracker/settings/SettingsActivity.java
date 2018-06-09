@@ -491,8 +491,8 @@ public class SettingsActivity extends AppCompatActivity
 
         _sortableCategoriesTable.insertSortableView(categoryCell);
 
-        _viewModel.addExpenditureCategory(_exps, end+1);
-        _viewModel.addBudgetCategory(_budgets, end+1);
+        _viewModel.addExpenditureCategory(_exps, end);
+        _viewModel.addBudgetCategory(_budgets, end);
 
         _popupWindow.dismiss();
     }
@@ -515,6 +515,10 @@ public class SettingsActivity extends AppCompatActivity
             _categories[i] = categories[i];
         }
         _categories[i] = other;
+
+        _viewModel.updateExpenditureCategories(_exps, _categories);
+        _viewModel.updateBudgetCategories(_budgets, _categories);
+
         saveUpdatedCategories();
     }
 

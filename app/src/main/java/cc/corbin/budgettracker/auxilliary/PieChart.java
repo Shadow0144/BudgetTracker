@@ -241,12 +241,14 @@ public class PieChart extends RelativeLayout
 
     public void setData(float[] amounts, String[] labels)
     {
-        _amounts = amounts;
-        _labels = labels;
+        _amounts = amounts.clone();
+        _labels = labels.clone();
 
         _total = 0.0f;
         for (int i = 0; i < _amounts.length; i++)
         {
+            // Ensure the amount is greater than zero and then add it to the total
+            _amounts[i] = _amounts[i] >= 0.0f ? _amounts[i] : 0.0f;
             _total += _amounts[i];
         }
 

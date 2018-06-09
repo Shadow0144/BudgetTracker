@@ -161,7 +161,8 @@ public class DayFragment extends Fragment
             addExpenditureView(exp, i);
         }
 
-        if (count == 0) // Set the total to zero here if no expenditures are getting added
+        // Ensure the parent has been set first
+        if (_parent != null && count == 0) // Set the total to zero here if no expenditures are getting added
         {
             _parent.updateTotal(_day, 0.0f);
         }

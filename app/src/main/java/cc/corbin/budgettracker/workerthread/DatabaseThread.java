@@ -115,16 +115,23 @@ public class DatabaseThread extends Thread
                 break;
 
             case mergeCategory:
-                Log.e(TAG, "Event: " + event.getCategory() + " " + event.getNewCategory() + " " + event.getNewCategoryName());
                 _dbE.expenditureDao().mergeCategory(event.getCategory(), event.getNewCategory(), event.getNewCategoryName());
                 break;
 
             case addCategory:
-                _dbE.expenditureDao().increaseCategoryNumber(event.getCategory());
+                _dbE.expenditureDao().increaseCategoryNumbers(event.getCategory());
                 break;
 
             case removeCategory:
-                _dbE.expenditureDao().decreaseCategoryNumber(event.getCategory());
+                _dbE.expenditureDao().decreaseCategoryNumbers(event.getCategory());
+                break;
+
+            case resortCategories:
+                String[] newCategoryNames = event.getNewCategoryNames();
+                for (int i = 0; i < newCategoryNames.length; i++)
+                {
+                    _dbE.expenditureDao().updateCategoryNumber(newCategoryNames[i], i);
+                }
                 break;
         }
         _completedExpEvents.add(event);
@@ -290,6 +297,14 @@ public class DatabaseThread extends Thread
 
             case removeCategory:
                 _dbB.budgetDao().decreaseCategoryNumber(event.getCategory());
+                break;
+
+            case resortCategories:
+                String[] newCategoryNames = event.getNewCategoryNames();
+                for (int i = 0; i < newCategoryNames.length; i++)
+                {
+                    _dbE.expenditureDao().updateCategoryNumber(newCategoryNames[i], i);
+                }
                 break;
         }
         _completedBudEvents.add(event);

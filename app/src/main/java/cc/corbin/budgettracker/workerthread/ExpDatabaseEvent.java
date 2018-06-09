@@ -21,7 +21,8 @@ public class ExpDatabaseEvent
         renameCategory,
         mergeCategory,
         addCategory,
-        removeCategory
+        removeCategory,
+        resortCategories
     };
 
     public enum QueryType
@@ -41,6 +42,7 @@ public class ExpDatabaseEvent
     private int _category;
     private int _newCategory;
     private String _newCategoryName;
+    private String[] _newCategoryNames;
     private EventType _eventType;
     private ExpenditureEntity _entity;
     private QueryType _queryType;
@@ -100,6 +102,16 @@ public class ExpDatabaseEvent
         _category = category;
         _newCategory = newCategory;
         _newCategoryName = newCategoryName;
+        _id = id++;
+    }
+
+    // Categories resorted
+    public ExpDatabaseEvent(MutableLiveData<List<ExpenditureEntity>> mutableLiveData,
+                            EventType eventType, String[] newCategoryNames)
+    {
+        _mutableLiveData = mutableLiveData;
+        _eventType = eventType;
+        _newCategoryNames = newCategoryNames;
         _id = id++;
     }
 
@@ -166,5 +178,10 @@ public class ExpDatabaseEvent
     public String getNewCategoryName()
     {
         return _newCategoryName;
+    }
+
+    public String[] getNewCategoryNames()
+    {
+        return _newCategoryNames;
     }
 }
