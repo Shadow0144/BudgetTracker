@@ -279,6 +279,7 @@ public class DatabaseThread extends Thread
 
             case update:
                 _dbB.budgetDao().update(event.getEntity());
+                Log.e(TAG, "Updating budget: " + event.getCategory());
                 updateYearBudget(event.getYear(), event.getCategory());
                 break;
 

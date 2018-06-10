@@ -23,7 +23,7 @@
         <activity android:name=".month.MonthViewActivity"></activity>
         <activity android:name=".year.YearViewActivity"></activity>
         <activity android:name=".total.TotalViewActivity"></activity>
-        <activity android:name=".day.ExpenditureEditActivity"></activity>
+        <activity android:name=".edit.ExpenditureEditActivity"></activity>
         <activity android:name=".settings.SettingsActivity"></activity>
         <activity android:name=".custom.CreateCustomViewActivity"></activity>
         <activity android:name=".custom.CustomViewActivity"></activity>

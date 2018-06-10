@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputFilter;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -15,13 +16,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.PopupWindow;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.DateFormatSymbols;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -29,12 +27,11 @@ import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
 import cc.corbin.budgettracker.auxilliary.LineGraph;
+import cc.corbin.budgettracker.auxilliary.MoneyValueFilter;
 import cc.corbin.budgettracker.auxilliary.PieChart;
 import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
 import cc.corbin.budgettracker.tables.ExtrasTable;
-import cc.corbin.budgettracker.tables.TableCell;
-import cc.corbin.budgettracker.day.ExpenditureEditActivity;
-import cc.corbin.budgettracker.day.ExpenditureItem;
+import cc.corbin.budgettracker.edit.ExpenditureEditActivity;
 import cc.corbin.budgettracker.tables.BudgetTable;
 import cc.corbin.budgettracker.tables.CategorySummaryTable;
 import cc.corbin.budgettracker.tables.TimeSummaryTable;
@@ -324,6 +321,9 @@ public class MonthViewActivity extends AppCompatActivity
         currencyTextView.setText(Currencies.symbols[Currencies.default_currency]);
 
         final EditText budgetEditText = budgetEditView.findViewById(R.id.amountEditText);
+        final MoneyValueFilter moneyValueFilter = new MoneyValueFilter();
+        moneyValueFilter.setDigits(Currencies.integer[Currencies.default_currency] ? 0 : 2);
+        budgetEditText.setFilters(new InputFilter[]{moneyValueFilter});
         if (Currencies.integer[Currencies.default_currency])
         {
             budgetEditText.setHint("0");
@@ -332,6 +332,11 @@ public class MonthViewActivity extends AppCompatActivity
         {
             budgetEditText.setHint("0.00");
         }
+        if (entity.getId() != 0)
+        {
+            budgetEditText.setText(Currencies.formatCurrency(Currencies.integer[Currencies.default_currency], entity.getAmount()));
+        }
+        else { }
 
         if (entity.getMonth() == _month && entity.getYear() == _year) // If the ID is not 0
         {

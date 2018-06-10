@@ -1,4 +1,4 @@
-package cc.corbin.budgettracker.day;
+package cc.corbin.budgettracker.edit;
 
 import android.app.Activity;
 import android.arch.lifecycle.MutableLiveData;
@@ -43,6 +43,7 @@ import cc.corbin.budgettracker.auxilliary.ConversionRateAsyncTask;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.MoneyValueFilter;
 import cc.corbin.budgettracker.R;
+import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.month.MonthViewActivity;
 import cc.corbin.budgettracker.total.TotalViewActivity;

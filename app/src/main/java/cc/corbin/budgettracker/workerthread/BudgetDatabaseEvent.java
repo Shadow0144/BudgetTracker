@@ -54,6 +54,7 @@ public class BudgetDatabaseEvent
         _year = year;
         _month = month;
         _entity = entity;
+        _category = entity.getCategory(); // Set this in case of updating
         _id = id++;
         _entities = null;
     }

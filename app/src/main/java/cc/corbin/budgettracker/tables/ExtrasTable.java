@@ -1,10 +1,8 @@
 package cc.corbin.budgettracker.tables;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
@@ -12,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cc.corbin.budgettracker.R;
-import cc.corbin.budgettracker.day.ExpenditureEditActivity;
 import cc.corbin.budgettracker.day.ExpenditureItem;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.month.MonthViewActivity;
