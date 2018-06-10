@@ -183,17 +183,12 @@ public class DatabaseThread extends Thread
 
     private BudgetEntity getYearCategoryBudget(int year, int category)
     {
-        BudgetEntity budgetEntity;
-
-        List<BudgetEntity> budgetEntities = _dbB.budgetDao().getYear(year, category);
-        if (budgetEntities != null && budgetEntities.size() > 0)
-        {
-            budgetEntity = budgetEntities.get(budgetEntities.size()-1);
-        }
-        else
+        BudgetEntity budgetEntity = _dbB.budgetDao().getYear(year, category);
+        if (budgetEntity == null)
         {
             budgetEntity = new BudgetEntity();
         }
+        else { }
 
         return budgetEntity;
     }
@@ -201,12 +196,12 @@ public class DatabaseThread extends Thread
     private void updateYearBudget(int year, int category)
     {
         float total = 0.0f;
-        for (int i = 1; i < (12+1); i++)
+        for (int i = 1; i <= 12; i++)
         {
             BudgetEntity entity = getMonthCategoryBudget(i, year, category);
             total += entity.getAmount();
         }
-        BudgetEntity yearBudget = _dbB.budgetDao().getAutoYear(year, category);
+        BudgetEntity yearBudget = _dbB.budgetDao().getYear(year, category);
         if (yearBudget == null)
         {
             yearBudget = new BudgetEntity(0, year, total, category, Categories.getCategories()[category]);
@@ -228,7 +223,7 @@ public class DatabaseThread extends Thread
                 String[] categories = Categories.getCategories();
                 int month;
                 int year;
-                int endyear;
+                int endYear;
                 switch (event.getQueryType())
                 {
                     case month:
@@ -240,26 +235,35 @@ public class DatabaseThread extends Thread
                             entities.add(getMonthCategoryBudget(month, year, i));
                         }
                         break;
+                    case months:
+                        entities = new ArrayList<BudgetEntity>();
+                        year = event.getYear();
+                        for (int i = 0; i < categories.length; i++)
+                        {
+                            entities.add(getYearCategoryBudget(year, i));
+                            for (int j = 1; j <= 12; j++)
+                            {
+                                entities.add(getMonthCategoryBudget(j, year, i));
+                            }
+                        }
+                        break;
                     case year:
                         entities = new ArrayList<BudgetEntity>();
                         year = event.getYear();
                         for (int i = 0; i < categories.length; i++)
                         {
-                                entities.add(getYearCategoryBudget(year, i));
+                            entities.add(getYearCategoryBudget(year, i));
                         }
                         break;
                     case total:
                         entities = new ArrayList<BudgetEntity>();
                         year = event.getYear();
-                        endyear = event.getMonth();
-                        for (int l = year; l <= endyear; l++)
+                        endYear = event.getMonth();
+                        for (int i = year; i <= endYear; i++)
                         {
-                            for (int i = 1; i < (12+1); i++)
+                            for (int j = 0; j < categories.length; j++)
                             {
-                                for (int j = 0; j < categories.length; j++)
-                                {
-                                    entities.add(getMonthCategoryBudget(i, year, j));
-                                }
+                                entities.add(getYearCategoryBudget(i, j));
                             }
                         }
                         break;
@@ -289,14 +293,15 @@ public class DatabaseThread extends Thread
 
             case mergeCategory:
                 _dbB.budgetDao().mergeCategory(event.getCategory(), event.getNewCategory(), event.getNewCategoryName());
+                updateYearBudget(event.getYear(), event.getNewCategory());
                 break;
 
             case addCategory:
-                _dbB.budgetDao().increaseCategoryNumber(event.getCategory());
+                _dbB.budgetDao().increaseCategoryNumbers(event.getCategory());
                 break;
 
             case removeCategory:
-                _dbB.budgetDao().decreaseCategoryNumber(event.getCategory());
+                _dbB.budgetDao().decreaseCategoryNumbers(event.getCategory());
                 break;
 
             case resortCategories:

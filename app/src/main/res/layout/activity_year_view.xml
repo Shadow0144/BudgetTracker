@@ -122,13 +122,6 @@
                     android:layout_height="15dp"
                     android:layout_weight="0" />
 
-                <FrameLayout
-                    android:id="@+id/yearBudgetHolder"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0">
-                </FrameLayout>
-
                 <Button
                     android:id="@+id/exportYearButton"
                     android:layout_width="match_parent"

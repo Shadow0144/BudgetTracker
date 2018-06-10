@@ -27,6 +27,7 @@ public class BudgetDatabaseEvent
     public enum QueryType
     {
         month,
+        months,
         year,
         total
     };

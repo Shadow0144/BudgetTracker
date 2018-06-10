@@ -39,5 +39,8 @@ dependencies {
     // Room (use 1.1.0-alpha1 for latest alpha)
     implementation 'android.arch.persistence.room:runtime:1.0.0'
     annotationProcessor "android.arch.persistence.room:compiler:1.0.0"
+    // Android Navigation Drawer
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:design:27.1.1'
     compile files('libs/jxl.jar')
 }

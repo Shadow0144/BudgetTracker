@@ -16,6 +16,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import cc.corbin.budgettracker.R;
+import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.day.DayViewActivity;
@@ -357,6 +358,7 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
         DateFormatSymbols dfs = new DateFormatSymbols();
         String[] months = dfs.getMonths();
 
+        _rows = 12;
         for (int i = 0; i < 12; i++) // Add a row for each month
         {
             addContentRow(months[i], (i+1));
@@ -383,6 +385,8 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
         tableRow.addView(remainingCell);
 
         addView(tableRow);
+
+        _rows = 0;
     }
 
     private void setupTotalRow()
@@ -488,7 +492,6 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
         TableCell budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
         TableCell remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
 
-        String week = getResources().getString(R.string.week) + " ";
         weekCell.setText(R.string.extras);
         budgetCell.setText(R.string.empty);
         remainingCell.setText(R.string.empty);
@@ -497,8 +500,6 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
 
         _expenses.add(0.0f);
         _expenseCells.add(expenseCell);
-        _budgetCells.add(budgetCell);
-        _remainingCells.add(remainingCell);
 
         weekRow.addView(weekCell);
         weekRow.addView(expenseCell);
@@ -536,6 +537,7 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
         addView(tableRow);
     }
 
+    // Called by Total View
     private void addContentRow(String label, float amount, int id)
     {
         TableRow tableRow = new TableRow(_context);
@@ -554,6 +556,8 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
         _budgetCells.add(budgetCell);
         _remainingCells.add(remainingCell);
 
+        _rows++;
+
         labelCell.setId(id);
         labelCell.setOnClickListener(this);
 
@@ -569,89 +573,99 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
     {
         if (_budgetCells != null)
         {
-            int size = budgetEntities.size();
-            float total = 0.0f;
-            for (int i = 0; i < size; i++)
+            switch (_timeframe)
             {
-                BudgetEntity entity = budgetEntities.get(i);
-                total += entity.getAmount();
+                case month:
+                    updateBudgetsWeekly(budgetEntities);
+                    break;
+                case year:
+                    updateBudgetsMonthly(budgetEntities);
+                    break;
+                case total:
+                    updateBudgetsYearly(budgetEntities);
+                    break;
             }
-            float budget = total / _rows;
-            for (int i = 1; i < _rows+1; i++) // TODO
-            {
-                _budgetCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, budget));
-                _budgetCells.get(i).setLoading(false);
-                float remaining = budget - _expenses.get(i);
-                _remainingCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
-                _remainingCells.get(i).setLoading(false);
-            }
-            _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
-            _totalBudgetCell.setLoading(false);
-            float totalRemaining = total - _totalExpenses;
-            _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
-            _totalRemainingCell.setLoading(false);
         }
         else { }
     }
 
-    /*if (_budgetCells != null)
+    private void updateBudgetsWeekly(List<BudgetEntity> budgetEntities)
+    {
+        int size = budgetEntities.size();
+        float total = 0.0f;
+        // Sum up across categories and then divide the result by the number of weeks
+        for (int i = 0; i < size; i++)
         {
-            float total = 0.0f;
-            int catSize = Categories.getCategories().length;
-            for (int i = 0; i < _months; i++)
-            {
-                float monthTotal = 0.0f;
-                for (int j = 0; j < catSize; j++)
-                {
-                    BudgetEntity entity = budgetEntities.get((i*catSize)+j);
-                    monthTotal += entity.getAmount();
-                    total += entity.getAmount();
-                }
-                _budgetCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, monthTotal));
-                _budgetCells.get(i).setLoading(false);
-                float remaining = monthTotal - _expenses.get(i);
-                _remainingCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
-                _remainingCells.get(i).setLoading(false);
-            }
-            _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
-            _totalBudgetCell.setLoading(false);
-            float totalRemaining = total - _totalExpenses;
-            _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
-            _totalRemainingCell.setLoading(false);
+            BudgetEntity entity = budgetEntities.get(i);
+            total += entity.getAmount();
         }
-        else { }*/
+        float budget = total / _rows;
+        for (int i = 0; i < _rows; i++)
+        {
+            _budgetCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, budget));
+            _budgetCells.get(i).setLoading(false);
+            float remaining = budget - _expenses.get(i+1); // + 1 for extras
+            _remainingCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
+            _remainingCells.get(i).setLoading(false);
+        }
+        _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+        _totalBudgetCell.setLoading(false);
+        float totalRemaining = total - _totalExpenses;
+        _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
+        _totalRemainingCell.setLoading(false);
+    }
 
-    /*if (_budgetCells != null)
+    private void updateBudgetsMonthly(List<BudgetEntity> budgetEntities)
+    {
+        int catSize = Categories.getCategories().length;
+        float total = 0.0f;
+        for (int i = 0; i < _rows; i++)
         {
-            float totalBudget = 0.0f;
-            int size = _endYear - _startYear + 1;
-            int catSize = Categories.getCategories().length;
-            for (int i = 0; i < size; i++)
+            float budget = 0.0f;
+            // Sum up across categories
+            for (int j = 0; j < catSize; j++)
             {
-                float yearBudget = 0.0f;
-                for (int j = 0; j < 12; j++)
-                {
-                    for (int k = 0; k < catSize; k++)
-                    {
-                        int index = (((i * 12) + j) * catSize) + k;
-                        BudgetEntity budgetEntity = budgetEntities.get(index);
-                        yearBudget += budgetEntity.getAmount();
-                    }
-                }
-                TableCell budgetCell = _budgetCells.get(i);
-                budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, yearBudget));
-                budgetCell.setLoading(false);
-                float remaining = yearBudget - _expenses.get(i);
-                TableCell remainingCell = _remainingCells.get(i);
-                remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
-                remainingCell.setLoading(false);
-                totalBudget += yearBudget;
+                BudgetEntity entity = budgetEntities.get(i + (j * 13) + 1); // Skip the first item
+                budget += entity.getAmount();
             }
-            _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalBudget));
-            _totalBudgetCell.setLoading(false);
-            float totalRemaining = totalBudget - _totalExpenses;
-            _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
-            _totalRemainingCell.setLoading(false);
+            _budgetCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, budget));
+            _budgetCells.get(i).setLoading(false);
+            float remaining = budget - _expenses.get(i + 1); // + 1 for extras
+            _remainingCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
+            _remainingCells.get(i).setLoading(false);
+            total += budget;
         }
-        else { }*/
+        _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+        _totalBudgetCell.setLoading(false);
+        float totalRemaining = total - _totalExpenses;
+        _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
+        _totalRemainingCell.setLoading(false);
+    }
+
+    private void updateBudgetsYearly(List<BudgetEntity> budgetEntities)
+    {
+        int catSize = Categories.getCategories().length;
+        float total = 0.0f;
+        for (int i = 0; i < _rows; i++)
+        {
+            float budget = 0.0f;
+            // Sum up across categories
+            for (int j = 0; j < catSize; j++)
+            {
+                BudgetEntity entity = budgetEntities.get(i + (j * _rows));
+                budget += entity.getAmount();
+            }
+            _budgetCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, budget));
+            _budgetCells.get(i).setLoading(false);
+            float remaining = budget - _expenses.get(i); // No extras
+            _remainingCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
+            _remainingCells.get(i).setLoading(false);
+            total += budget;
+        }
+        _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+        _totalBudgetCell.setLoading(false);
+        float totalRemaining = total - _totalExpenses;
+        _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
+        _totalRemainingCell.setLoading(false);
+    }
 }

@@ -23,7 +23,7 @@ public interface BudgetDao
     List<BudgetEntity> getMonth(int year, int month);
 
     @Query("SELECT * FROM budgetentity WHERE year = (:year) AND month = (:month)")
-    List<BudgetEntity> getExactMonth(int year, int month);
+    BudgetEntity getExactMonth(int year, int month);
 
     @Query("SELECT * FROM budgetentity WHERE " +
             "year = (SELECT MAX(year) FROM " +
@@ -35,19 +35,16 @@ public interface BudgetDao
     BudgetEntity getMonth(int year, int month, int category); // TODO BROKEN!
 
     @Query("SELECT * FROM budgetentity WHERE year = (:year) AND month = (:month) AND category = (:category)")
-    List<BudgetEntity> getExactMonth(int year, int month, int category);
+    BudgetEntity getExactMonth(int year, int month, int category);
 
-    @Query("SELECT * FROM budgetentity WHERE year = (:year) AND NOT (month = 0 OR month = 13)")
+    @Query("SELECT * FROM budgetentity WHERE year = (:year) AND NOT month = 0")
     List<BudgetEntity> getYearAsMonths(int year);
 
-    @Query("SELECT * FROM budgetentity WHERE year = (:year) AND (month = 0 OR month = 13)")
-    List<BudgetEntity> getYear(int year);
+    @Query("SELECT * FROM budgetentity WHERE year = (:year) AND month = 0")
+    BudgetEntity getYear(int year);
 
-    @Query("SELECT * FROM budgetentity WHERE year = (:year)  AND (month = 0 OR month = 13) AND category = (:category)")
-    List<BudgetEntity> getYear(int year, int category);
-
-    @Query("SELECT * FROM budgetentity WHERE year = (:year)  AND (month = 0) AND category = (:category) LIMIT 1")
-    BudgetEntity getAutoYear(int year, int category);
+    @Query("SELECT * FROM budgetentity WHERE year = (:year)  AND month = 0 AND category = (:category)")
+    BudgetEntity getYear(int year, int category);
 
     @Query("SELECT * FROM budgetentity WHERE ( " +
             "year = (:year) AND " +
@@ -64,7 +61,7 @@ public interface BudgetDao
 
     @Query("SELECT * FROM budgetentity WHERE ( " +
             "category = (:category) " +
-            "AND (year < (:year) OR (year = (:year) AND month <= (:month))) AND month != 0 AND month != 13" +
+            "AND (year < (:year) OR (year = (:year) AND month <= (:month))) AND month != 0" +
             " )")
     List<BudgetEntity> getCategoryBeforeMonth(int year, int month, int category);
 
@@ -88,11 +85,11 @@ public interface BudgetDao
     @Query("UPDATE budgetentity SET category = (:newCategory) WHERE categoryName = (:categoryName)")
     void updateCategoryNumber(String categoryName, int newCategory);
 
-    @Query("UPDATE budgetentity SET category = (category+1) WHERE category >= (:category)")
-    void increaseCategoryNumber(int category);
+    @Query("UPDATE budgetentity SET category = (category+1) WHERE category > (:category)")
+    void increaseCategoryNumbers(int category);
 
     @Query("UPDATE budgetentity SET category = (category-1) WHERE category > (:category)")
-    void decreaseCategoryNumber(int category);
+    void decreaseCategoryNumbers(int category);
 
     @Insert
     long insert(BudgetEntity budget);

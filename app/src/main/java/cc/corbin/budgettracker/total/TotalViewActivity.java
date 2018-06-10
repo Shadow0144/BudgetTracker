@@ -227,7 +227,7 @@ public class TotalViewActivity extends AppCompatActivity
 
     private void refreshTables(List<BudgetEntity> budgetEntities)
     {
-        //_yearlyTable.updateBudgets(budgetEntities);
+        _yearlyTable.updateBudgets(budgetEntities);
         _categoryTable.updateBudgets(budgetEntities);
     }
 

@@ -242,15 +242,12 @@ public class CategorySummaryTable extends TableLayout
         _totalExpenseCell.setLoading(false);
     }
 
-    public void updateBudgets(List<BudgetEntity> budgetEntities)
+    public void updateBudgets(List<BudgetEntity> budgetEntities) // TODO - float
     {
         if (_budgetCells != null)
         {
             float totalBudget = 0.0f;
             int catSize = Categories.getCategories().length;
-            // Month - category number of items
-            // Year - category number of items
-            // Total - year * category number of items
             int size = budgetEntities.size() / catSize; // Only non-one when total view
             for (int k = 0; k < catSize; k++) // Loop through each of the categories
             {
@@ -278,5 +275,34 @@ public class CategorySummaryTable extends TableLayout
             _totalRemainingCell.setLoading(false);
         }
         else { }
+    }
+
+    // For use by the Year View
+    public void updateBudgetsTrim(List<BudgetEntity> budgetEntities)
+    {
+        if (_budgetCells != null)
+        {
+            float totalBudget = 0.0f;
+            int catSize = Categories.getCategories().length;
+            for (int i = 0; i < catSize; i++)
+            {
+                int index = i * 13;
+                TableCell budgetCell = _budgetCells.get(i);
+                float budget = budgetEntities.get(index).getAmount();
+                budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, budget));
+                budgetCell.setLoading(false);
+                float remaining = budget - _expenses.get(i);
+                TableCell remainingCell = _remainingCells.get(i);
+                remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
+                remainingCell.setLoading(false);
+                totalBudget += budget;
+            }
+
+            _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalBudget));
+            _totalBudgetCell.setLoading(false);
+            float totalRemaining = totalBudget - _totalExpenses;
+            _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
+            _totalRemainingCell.setLoading(false);
+        }
     }
 }
