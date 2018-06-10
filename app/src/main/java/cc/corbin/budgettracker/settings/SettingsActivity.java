@@ -4,16 +4,22 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -26,6 +32,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import java.util.Calendar;
 import java.util.List;
 
 import cc.corbin.budgettracker.R;
@@ -33,6 +40,7 @@ import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.SortableItem;
 import cc.corbin.budgettracker.auxilliary.SortableLinearLayout;
+import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
 import cc.corbin.budgettracker.tables.TableCell;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
@@ -47,6 +55,8 @@ import cc.corbin.budgettracker.year.YearViewActivity;
 public class SettingsActivity extends AppCompatActivity
 {
     private final String TAG = "SettingsActivity";
+
+    private DrawerLayout _drawerLayout;
 
     private MutableLiveData<String[]> _categoriesLiveData;
     private String[] _categories;
@@ -69,6 +79,13 @@ public class SettingsActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionbar = getSupportActionBar();
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        _drawerLayout = findViewById(R.id.rootLayout);
 
         _categoriesLiveData = new MutableLiveData<String[]>();
         _categories = Categories.getCategories();
@@ -194,6 +211,56 @@ public class SettingsActivity extends AppCompatActivity
         defaultCurrencyTable.addView(defaultCurrencyContentRow);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        Intent intent;
+        Calendar date;
+        Log.e(TAG, "ID: " + item.getItemId());
+        switch (item.getItemId())
+        {
+            case android.R.id.home:
+                _drawerLayout.openDrawer(GravityCompat.START);
+                return true;
+            case R.id.dayMenuItem:
+                intent = new Intent(getApplicationContext(), DayViewActivity.class);
+                date = Calendar.getInstance();
+                intent.putExtra(DayViewActivity.DATE_INTENT, date.getTimeInMillis());
+                startActivity(intent);
+                Log.e(TAG, "Day");
+                return true;
+            case R.id.monthMenuItem:
+                intent = new Intent(getApplicationContext(), MonthViewActivity.class);
+                date = Calendar.getInstance();
+                intent.putExtra(MonthViewActivity.YEAR_INTENT, date.get(Calendar.YEAR));
+                intent.putExtra(MonthViewActivity.MONTH_INTENT, date.get(Calendar.MONTH));
+                startActivity(intent);
+                Log.e(TAG, "Month");
+                return true;
+            case R.id.yearMenuItem:
+                intent = new Intent(getApplicationContext(), YearViewActivity.class);
+                date = Calendar.getInstance();
+                intent.putExtra(YearViewActivity.YEAR_INTENT, date.get(Calendar.YEAR));
+                startActivity(intent);
+                Log.e(TAG, "Year");
+                return true;
+            case R.id.totalMenuItem:
+                intent = new Intent(getApplicationContext(), TotalViewActivity.class);
+                startActivity(intent);
+                Log.e(TAG, "Total");
+                return true;
+            case R.id.customMenuItem:
+                intent = new Intent(getApplicationContext(), CreateCustomViewActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.settingsMenuItem:
+                intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                startActivity(intent);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void expendituresUpdated()
     {
         TotalViewActivity.dataInvalid = true;
@@ -289,7 +356,7 @@ public class SettingsActivity extends AppCompatActivity
         _popupWindow = new PopupWindow(categoryEditView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         _popupWindow.setFocusable(true);
         _popupWindow.update();
-        _popupWindow.showAtLocation(findViewById(R.id.settingsRootLayout), Gravity.CENTER, 0, 0);
+        _popupWindow.showAtLocation(findViewById(R.id.rootLayout), Gravity.CENTER, 0, 0);
     }
 
     public void confirmCategoryEdit(View v)
@@ -345,7 +412,7 @@ public class SettingsActivity extends AppCompatActivity
         _popupWindow = new PopupWindow(recategorizeView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         _popupWindow.setFocusable(true);
         _popupWindow.update();
-        _popupWindow.showAtLocation(findViewById(R.id.settingsRootLayout), Gravity.CENTER, 0, 0);
+        _popupWindow.showAtLocation(findViewById(R.id.rootLayout), Gravity.CENTER, 0, 0);
     }
 
     // Called from the Confirm button of the recategorization popup
@@ -368,7 +435,7 @@ public class SettingsActivity extends AppCompatActivity
         _popupWindow = new PopupWindow(confirmRemoveCategoryLayout, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         _popupWindow.setFocusable(true);
         _popupWindow.update();
-        _popupWindow.showAtLocation(findViewById(R.id.settingsRootLayout), Gravity.CENTER, 0, 0);
+        _popupWindow.showAtLocation(findViewById(R.id.rootLayout), Gravity.CENTER, 0, 0);
     }
 
     // Called from the final warning screen
@@ -460,7 +527,7 @@ public class SettingsActivity extends AppCompatActivity
         _popupWindow = new PopupWindow(categoryEditView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         _popupWindow.setFocusable(true);
         _popupWindow.update();
-        _popupWindow.showAtLocation(findViewById(R.id.settingsRootLayout), Gravity.CENTER, 0, 0);
+        _popupWindow.showAtLocation(findViewById(R.id.rootLayout), Gravity.CENTER, 0, 0);
     }
 
     public void confirmCategoryAdd(View v)
