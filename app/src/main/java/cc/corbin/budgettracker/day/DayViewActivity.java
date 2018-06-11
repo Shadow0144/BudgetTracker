@@ -6,6 +6,8 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.support.design.internal.NavigationMenu;
+import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -14,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -38,7 +41,7 @@ import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.year.YearViewActivity;
 
-public class DayViewActivity extends AppCompatActivity
+public class DayViewActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
 {
     private final String TAG = "DayViewActivity";
 
@@ -87,6 +90,8 @@ public class DayViewActivity extends AppCompatActivity
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
         _drawerLayout = findViewById(R.id.rootLayout);
+        NavigationView navigationView = findViewById(R.id.navView);
+        navigationView.setNavigationItemSelectedListener(this);
 
         DayViewActivity.dataInvalid = true;
 
@@ -203,48 +208,67 @@ public class DayViewActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item)
     {
         Intent intent;
-        Log.e(TAG, "ID: " + item.getItemId());
         switch (item.getItemId())
         {
             case android.R.id.home:
                 _drawerLayout.openDrawer(GravityCompat.START);
                 return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item)
+    {
+        Intent intent;
+        boolean handled = false;
+        switch (item.getItemId())
+        {
             case R.id.dayMenuItem:
                 intent = new Intent(getApplicationContext(), DayViewActivity.class);
                 Calendar date = Calendar.getInstance();
                 date.set(_year, _month, _day);
                 intent.putExtra(DayViewActivity.DATE_INTENT, date.getTimeInMillis());
                 startActivity(intent);
-                Log.e(TAG, "Day");
-                return true;
+                handled = true;
+                break;
             case R.id.monthMenuItem:
                 intent = new Intent(getApplicationContext(), MonthViewActivity.class);
                 intent.putExtra(MonthViewActivity.YEAR_INTENT, _year);
                 intent.putExtra(MonthViewActivity.MONTH_INTENT, _month);
                 startActivity(intent);
-                Log.e(TAG, "Month");
-                return true;
+                handled = true;
+                break;
             case R.id.yearMenuItem:
                 intent = new Intent(getApplicationContext(), YearViewActivity.class);
                 intent.putExtra(YearViewActivity.YEAR_INTENT, _year);
                 startActivity(intent);
-                Log.e(TAG, "Year");
-                return true;
+                handled = true;
+                break;
             case R.id.totalMenuItem:
                 intent = new Intent(getApplicationContext(), TotalViewActivity.class);
                 startActivity(intent);
-                Log.e(TAG, "Total");
-                return true;
+                handled = true;
+                break;
             case R.id.customMenuItem:
                 intent = new Intent(getApplicationContext(), CreateCustomViewActivity.class);
                 startActivity(intent);
-                return true;
+                handled = true;
+                break;
             case R.id.settingsMenuItem:
                 intent = new Intent(getApplicationContext(), SettingsActivity.class);
                 startActivity(intent);
-                return true;
+                handled = true;
+                break;
         }
-        return super.onOptionsItemSelected(item);
+
+        if (handled)
+        {
+            _drawerLayout.closeDrawer(GravityCompat.START);
+        }
+        else { }
+
+        return handled;
     }
 
     public void previousDay(View v)

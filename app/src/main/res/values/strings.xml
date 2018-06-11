@@ -61,6 +61,8 @@
 
     <string name="extras">Extras</string>
 
+    <string name="categories">Categories</string>
+
     <string name="monthly_budget_title">Monthly Budget Limits</string>
     <string name="yearly_budget_title">Yearly Budget Limits</string>
     <string name="year_budget_title">Yearly Budget Limits</string>
