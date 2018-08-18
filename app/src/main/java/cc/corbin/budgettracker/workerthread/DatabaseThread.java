@@ -15,6 +15,8 @@ import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
+
 public class DatabaseThread extends Thread
 {
     private final String TAG = "DatabaseThread";
@@ -45,6 +47,8 @@ public class DatabaseThread extends Thread
         _completedExpEvents = completedExpEvents;
         _completedBudEvents = completedBudEvents;
         _handler = handler;
+
+        setPriority(THREAD_PRIORITY_BACKGROUND);
     }
 
     @Override
@@ -279,7 +283,6 @@ public class DatabaseThread extends Thread
 
             case update:
                 _dbB.budgetDao().update(event.getEntity());
-                Log.e(TAG, "Updating budget: " + event.getCategory());
                 updateYearBudget(event.getYear(), event.getCategory());
                 break;
 

@@ -18,7 +18,7 @@ import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
  * Created by Corbin on 4/15/2018.
  */
 
-@Database(entities = {BudgetEntity.class}, version = 2)
+@Database(entities = {BudgetEntity.class}, version = 3)
 public abstract class BudgetDatabase extends RoomDatabase
 {
     public abstract BudgetDao budgetDao();
@@ -117,6 +117,19 @@ public abstract class BudgetDatabase extends RoomDatabase
         }
     };
 
+    static final Migration MIGRATION_2_3 = new Migration(2, 3)
+    {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database)
+        {
+            database.execSQL("ALTER TABLE BudgetEntity"
+                    + " ADD COLUMN adjustment INTEGER NOT NULL DEFAULT 0;");
+
+            database.execSQL("ALTER TABLE BudgetEntity"
+                    + " ADD COLUMN sisterAdjustment INTEGER NOT NULL DEFAULT -1;");
+        }
+    };
+
     public static BudgetDatabase getBudgetDatabase(Context context)
     {
         BudgetDatabase r;
@@ -126,6 +139,7 @@ public abstract class BudgetDatabase extends RoomDatabase
                     Room.databaseBuilder(context.getApplicationContext(), BudgetDatabase.class, "budgets")
                             //.fallbackToDestructiveMigration()
                             .addMigrations(MIGRATION_1_2)
+                            .addMigrations(MIGRATION_2_3)
                             //.allowMainThreadQueries()
                             .build();
         }

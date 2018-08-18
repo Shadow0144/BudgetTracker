@@ -9,7 +9,9 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 
@@ -19,6 +21,7 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Void,
 
     public enum summationType
     {
+        daily,
         weekly,
         monthly,
         yearly,
@@ -66,6 +69,27 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Void,
 
         switch (_summationType)
         {
+            case daily:
+                if (entities.size() > 0)
+                {
+                    // Assume entities are sorted
+                    ExpenditureEntity startEntity = entities.get(0);
+                    ExpenditureEntity endEntity = entities.get(entities.size() - 1);
+                    Calendar startDate = Calendar.getInstance();
+                    Calendar endDate = Calendar.getInstance();
+                    startDate.set(startEntity.getYear(), startEntity.getMonth()-1, startEntity.getDay());
+                    endDate.set(endEntity.getYear(), endEntity.getMonth()-1, endEntity.getDay());
+                    long days = TimeUnit.DAYS.convert((endDate.getTimeInMillis() - startDate.getTimeInMillis()), TimeUnit.MILLISECONDS);
+                    sums = new float[(int)(days + 1)];
+                    getDailySummations(sums, catSums, entities, startDate);
+                }
+                else
+                {
+                    // Do nothing
+                    sums = new float[0];
+                }
+                break;
+
             case weekly:
                 sums = new float[6]; // + 1 for extras
                 getWeeklySummations(sums, catSums, entities);
@@ -163,6 +187,44 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Void,
             {
                 weeks[6] += entity.getAmount();
             }*/
+            if (_dualAmounts)
+            {
+                int category = entity.getCategory();
+                categories[category] += entity.getAmount();
+            }
+            else { }
+        }
+    }
+
+    private void getDailySummations(float[] days, float[] categories, List<ExpenditureEntity> entities, Calendar startDate)
+    {
+        for (int i = 0; i < days.length; i++)
+        {
+            days[i] = 0.0f;
+        }
+        for (int i = 0; i < categories.length; i++)
+        {
+            categories[i] = 0.0f;
+        }
+        int size = entities.size();
+        int index = 0;
+        int currentDay = startDate.get(Calendar.DATE);
+        int currentMonth = startDate.get(Calendar.MONTH)+1;
+        int currentYear = startDate.get(Calendar.YEAR);
+        for (int i = 0; i < size; i++)
+        {
+            ExpenditureEntity entity = entities.get(i);
+            int day = entity.getDay();
+            int month = entity.getMonth();
+            int year = entity.getYear();
+            if (day != currentDay || month != currentMonth || year != currentYear)
+            {
+                currentDay = day;
+                currentMonth = month;
+                currentYear = year;
+                index++;
+            }
+            days[index] += entity.getAmount();
             if (_dualAmounts)
             {
                 int category = entity.getCategory();
