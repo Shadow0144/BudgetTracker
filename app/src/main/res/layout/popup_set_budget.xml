@@ -6,10 +6,12 @@
     android:layout_height="match_parent"
     android:background="@color/translucent">
 
-    <FrameLayout
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="15dp"
         android:background="@color/white"
+        android:orientation="vertical"
         android:padding="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -20,72 +22,68 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/categoryTextView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingBottom="5dp"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
 
-                <TextView
-                    android:id="@+id/categoryTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingBottom="5dp"
-                    android:textAlignment="center"
-                    android:textColor="@color/black"
-                    android:textSize="18sp" />
+            <TextView
+                android:id="@+id/currencyTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:paddingBottom="5dp"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
 
-                <TextView
-                    android:id="@+id/currencyTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0"
-                    android:paddingBottom="5dp"
-                    android:textAlignment="center"
-                    android:textColor="@color/black"
-                    android:textSize="18sp" />
-
-                <EditText
-                    android:id="@+id/amountEditText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ems="10"
-                    android:inputType="textPersonName" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/cancelButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="cancelBudgetItemEdit"
-                    android:text="Cancel" />
-
-                <Button
-                    android:id="@+id/removeButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:enabled="false"
-                    android:onClick="removeBudgeItem"
-                    android:text="Remove" />
-
-                <Button
-                    android:id="@+id/confirmButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="confirmBudgetItemEdit"
-                    android:text="Accept" />
-            </LinearLayout>
+            <EditText
+                android:id="@+id/amountEditText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="textPersonName" />
         </LinearLayout>
-    </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/cancelButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="cancelBudgetItemEdit"
+                android:text="@string/cancel" />
+
+            <Button
+                android:id="@+id/removeButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:onClick="removeBudgeItem"
+                android:text="@string/remove" />
+
+            <Button
+                android:id="@+id/confirmButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="confirmBudgetItemEdit"
+                android:text="@string/accept" />
+        </LinearLayout>
+
+    </LinearLayout>
+
 </android.support.constraint.ConstraintLayout>

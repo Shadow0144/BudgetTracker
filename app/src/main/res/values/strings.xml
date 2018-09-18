@@ -33,6 +33,17 @@
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
 
+    <string name="editing_warning">Editing a category will take some time. Proceed?</string>
+    <string name="proceed">Proceed</string>
+
+    <string name="delete_message">Delete this expenditure?</string>
+    <string name="delete">Delete</string>
+
+    <string name="remove_category_warning">Remove this category? Doing so is permanent and cannot be reversed.</string>
+    <string name="recategorization_warning">All expenditures of this category will be recategorized as follows:</string>
+
+    <string name="remove">Remove</string>
+
     <string name="daily_title">Expenditures by Day</string>
     <string name="month_weekly_title">Expenditures by Week</string>
     <string name="year_monthly_title">Expenditures by Month</string>
@@ -77,4 +88,8 @@
     <string name="one_with_two_digits">1.00</string>
     <string name="zero_with_zero_digits">0</string>
     <string name="zero_with_two_digits">0.00</string>
+
+    <string name="export_month">Export Month</string>
+    <string name="export_year">Export Year</string>
+    <string name="export_total">Export Total</string>
 </resources>

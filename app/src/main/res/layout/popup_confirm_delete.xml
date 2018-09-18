@@ -6,10 +6,12 @@
     android:layout_height="match_parent"
     android:background="@color/translucent">
 
-    <FrameLayout
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="15dp"
         android:background="@color/white"
+        android:orientation="vertical"
         android:padding="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -17,43 +19,39 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <TextView
+            android:id="@+id/confirmTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="5dp"
+            android:text="@string/delete_message"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/confirmTextView"
-                android:layout_width="match_parent"
+            <Button
+                android:id="@+id/cancelButton"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingBottom="5dp"
-                android:text="Delete this expenditure?"
-                android:textAlignment="center"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
+                android:layout_weight="1"
+                android:onClick="onCancelDelete"
+                android:text="@string/cancel" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/cancelButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="onCancelDelete"
-                    android:text="Cancel" />
-
-                <Button
-                    android:id="@+id/confirmButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="onConfirmDelete"
-                    android:text="Delete"
-                    android:textColor="@color/red" />
-            </LinearLayout>
+            <Button
+                android:id="@+id/confirmButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onConfirmDelete"
+                android:text="@string/delete"
+                android:textColor="@color/red" />
         </LinearLayout>
-    </FrameLayout>
+
+    </LinearLayout>
+
 </android.support.constraint.ConstraintLayout>

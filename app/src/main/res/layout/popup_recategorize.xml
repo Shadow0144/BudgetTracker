@@ -6,10 +6,12 @@
     android:layout_height="match_parent"
     android:background="@color/translucent">
 
-    <FrameLayout
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="15dp"
         android:background="@color/white"
+        android:orientation="vertical"
         android:padding="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -20,65 +22,57 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_marginBottom="15dp"
+            android:orientation="horizontal">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/originalCategoryTextView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:gravity="center" />
 
-                <TextView
-                    android:id="@+id/originalCategoryTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="2"
-                    android:gravity="center" />
+            <TextView
+                android:id="@+id/arrowTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:text="@string/rightarrow" />
 
-                <TextView
-                    android:id="@+id/arrowTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0"
-                    android:paddingLeft="15dp"
-                    android:paddingRight="15dp"
-                    android:text="->" />
-
-                <Spinner
-                    android:id="@+id/newCategorySpinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="2"
-                    android:gravity="center"
-                    android:spinnerMode="dialog" />
-            </LinearLayout>
-
-            <Space
+            <Spinner
+                android:id="@+id/newCategorySpinner"
                 android:layout_width="match_parent"
-                android:layout_height="15dp"
-                android:layout_weight="2" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/cancelButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="cancel"
-                    android:text="Cancel" />
-
-                <Button
-                    android:id="@+id/confirmButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="confirmRecategorize"
-                    android:text="Confirm"
-                    android:textColor="@color/red" />
-            </LinearLayout>
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:spinnerMode="dialog" />
         </LinearLayout>
-    </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/cancelButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="cancel"
+                android:text="@string/cancel" />
+
+            <Button
+                android:id="@+id/confirmButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="confirmRecategorize"
+                android:text="@string/accept"
+                android:textColor="@color/red" />
+        </LinearLayout>
+
+    </LinearLayout>
+
 </android.support.constraint.ConstraintLayout>
