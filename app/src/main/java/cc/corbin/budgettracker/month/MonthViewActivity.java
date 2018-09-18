@@ -33,7 +33,7 @@ import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
 import cc.corbin.budgettracker.auxilliary.LineGraph;
-import cc.corbin.budgettracker.auxilliary.MoneyValueFilter;
+import cc.corbin.budgettracker.numericalformatting.MoneyValueFilter;
 import cc.corbin.budgettracker.auxilliary.PieChart;
 import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
 import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
@@ -470,7 +470,7 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         }
 
         // Lock the BudgetTable
-        _budgetTable.lockTable();
+        //_budgetTable.lockTable();
 
         _popupWindow.dismiss();
     }
@@ -488,7 +488,7 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         _viewModel.removeBudgetEntity(_budgets, entity);
 
         // Lock the BudgetTable
-        _budgetTable.lockTable();
+        //_budgetTable.lockTable();
 
         _popupWindow.dismiss();
     }

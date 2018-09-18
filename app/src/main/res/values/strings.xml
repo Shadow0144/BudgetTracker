@@ -53,6 +53,8 @@
 
     <string name="empty">---</string>
 
+    <string name="at">\@</string>
+
     <string name="daily_spending">Daily Spending</string>
     <string name="weekly_spending">Weekly Spending</string>
     <string name="monthly_spending">Monthly Spending</string>

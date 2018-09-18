@@ -35,18 +35,21 @@ public final class Currencies
     public static final String DEFAULT_CURRENCY_KEY = "DEFAULT_CURRENCY";
     public static int default_currency;
 
+    // Maximum number of digits in a number (excluding decimal places)
+    public static final int MAX_INT_DIGITS = 15;
+
     public static String formatCurrency(boolean integer, float amount)
     {
         String cost;
 
         if (integer)
         {
-            DecimalFormat formatter = new DecimalFormat("###,###,###,###");
+            DecimalFormat formatter = new DecimalFormat("###,###,###,###,##0");
             cost = formatter.format(amount);
         }
         else
         {
-            DecimalFormat formatter = new DecimalFormat("###,###,###,##0.00");
+            DecimalFormat formatter = new DecimalFormat("###,###,###,###,##0.00");
             cost = formatter.format(amount);
         }
 
@@ -62,11 +65,11 @@ public final class Currencies
         DecimalFormat formatter;
         if (!decimal)
         {
-            formatter = new DecimalFormat("###,###,###,###");
+            formatter = new DecimalFormat("###,###,###,###,##0");
         }
         else
         {
-            formatter = new DecimalFormat("###,###,###,##0.00");
+            formatter = new DecimalFormat("###,###,###,###,##0.00");
         }
 
         if (amount >= 0)

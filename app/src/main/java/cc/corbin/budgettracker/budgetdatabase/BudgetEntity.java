@@ -39,6 +39,9 @@ public class BudgetEntity
     @ColumnInfo
     private long sisterAdjustment;
 
+    @ColumnInfo
+    private String note;
+
     @Ignore
     public BudgetEntity()
     {
@@ -50,6 +53,7 @@ public class BudgetEntity
         this.categoryName = "";
         this.adjustment = 0;
         this.sisterAdjustment = -1;
+        this.note = "";
     }
 
     @Ignore
@@ -63,10 +67,11 @@ public class BudgetEntity
         this.categoryName = categoryName;
         this.adjustment = 0;
         this.sisterAdjustment = -1;
+        this.note = "";
     }
 
     @Ignore
-    public BudgetEntity(int month, int year, float amount, int category, String categoryName, int adjustment, long sisterAdjustment)
+    public BudgetEntity(int month, int year, float amount, int category, String categoryName, int adjustment, long sisterAdjustment, String note)
     {
         this.id = 0;
         this.month = month;
@@ -76,6 +81,7 @@ public class BudgetEntity
         this.categoryName = categoryName;
         this.adjustment = adjustment;
         this.sisterAdjustment = sisterAdjustment;
+        this.note = note;
     }
 
     @Ignore
@@ -89,9 +95,10 @@ public class BudgetEntity
         this.categoryName = categoryName;
         this.adjustment = 0;
         this.sisterAdjustment = -1;
+        this.note = "";
     }
 
-    public BudgetEntity(long id, int month, int year, float amount, int category, String categoryName, int adjustment, long sisterAdjustment)
+    public BudgetEntity(long id, int month, int year, float amount, int category, String categoryName, int adjustment, long sisterAdjustment, String note)
     {
         this.id = id;
         this.month = month;
@@ -101,6 +108,7 @@ public class BudgetEntity
         this.categoryName = categoryName;
         this.adjustment = adjustment;
         this.sisterAdjustment = sisterAdjustment;
+        this.note = note;
     }
 
     public long getId()
@@ -177,5 +185,15 @@ public class BudgetEntity
     public void setSisterAdjustment(long sisterAdjustment)
     {
         this.sisterAdjustment = sisterAdjustment;
+    }
+
+    public String getNote()
+    {
+        return note;
+    }
+
+    public void setNote(String note)
+    {
+        this.note = note;
     }
 }

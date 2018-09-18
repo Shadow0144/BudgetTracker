@@ -34,13 +34,11 @@
                 android:layout_weight="0"
                 android:spinnerMode="dialog" />
 
-            <EditText
+            <cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText
                 android:id="@+id/valueEditText"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="numberDecimal"
-                android:maxLines="1" />
+                android:layout_weight="1" />
 
         </LinearLayout>
 
@@ -65,7 +63,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
                     android:paddingRight="5dp"
-                    android:text="@" />
+                    android:text="@string/at" />
 
                 <TextView
                     android:id="@+id/baseCurrencyTextView"

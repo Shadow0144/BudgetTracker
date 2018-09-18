@@ -1,6 +1,5 @@
 package cc.corbin.budgettracker.edit;
 
-import android.app.Activity;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Intent;
@@ -28,11 +27,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.math.RoundingMode;
-import java.net.URL;
-import java.net.URLConnection;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -41,8 +36,10 @@ import java.util.concurrent.TimeUnit;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.ConversionRateAsyncTask;
 import cc.corbin.budgettracker.auxilliary.Currencies;
-import cc.corbin.budgettracker.auxilliary.MoneyValueFilter;
+import cc.corbin.budgettracker.numericalformatting.MoneyValueFilter;
 import cc.corbin.budgettracker.R;
+import cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText;
+import cc.corbin.budgettracker.numericalformatting.NumericalFormattedCallback;
 import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.month.MonthViewActivity;
@@ -50,10 +47,8 @@ import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.year.YearViewActivity;
 
 import static android.Manifest.permission.INTERNET;
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
-public class ExpenditureEditActivity extends AppCompatActivity
+public class ExpenditureEditActivity extends AppCompatActivity implements NumericalFormattedCallback
 {
     private final String TAG = "ExpenditureEditActivity";
 
@@ -81,6 +76,7 @@ public class ExpenditureEditActivity extends AppCompatActivity
 
     private Spinner _symbolSpinner;
 
+    private NumericalFormattedEditText _amountEditText;
     private LinearLayout _conversionLayout;
     private EditText _convertedAmountEditText;
     private TextView _totalConvertedAmountTextView;
@@ -88,6 +84,7 @@ public class ExpenditureEditActivity extends AppCompatActivity
     private float _amount;
     private float _rateNumber;
     private float _totalConvertedAmount;
+    private int _baseCurrency;
 
     private MutableLiveData<String> _conversionRateStringMLD;
 
@@ -188,7 +185,7 @@ public class ExpenditureEditActivity extends AppCompatActivity
         int category = categoriesHolder.getCheckedRadioButtonId();
 
         _expenditure.setCategory(category, Categories.getCategories()[category]);
-        _expenditure.setBaseCurrency(_symbolSpinner.getSelectedItemPosition());
+        _expenditure.setBaseCurrency(_baseCurrency);
         String baseAmount = valueEditText.getText().toString();
         if (baseAmount.length() > 0)
         {
@@ -298,64 +295,15 @@ public class ExpenditureEditActivity extends AppCompatActivity
         else { }
 
         // Setup the amount edit
-        final EditText amountEditText = findViewById(R.id.valueEditText);
-        final MoneyValueFilter moneyValueFilter = new MoneyValueFilter();
+        _amountEditText = findViewById(R.id.valueEditText);
         if (_expenditure != null)
         {
-            moneyValueFilter.setDigits(Currencies.integer[_expenditure.getBaseCurrency()] ? 0 : 2);
-            if (Currencies.integer[_expenditure.getBaseCurrency()])
-            {
-                amountEditText.setHint("0");
-            }
-            else
-            {
-                amountEditText.setHint("0.00");
-            }
-            amountEditText.setText(Currencies.formatCurrency(Currencies.integer[_expenditure.getBaseCurrency()], _expenditure.getBaseAmount()));
+            _amountEditText.setup(this, _expenditure.getBaseCurrency(), _expenditure.getAmount());
         }
         else
         {
-            moneyValueFilter.setDigits(Currencies.integer[Currencies.default_currency] ? 0 : 2);
-            if (Currencies.integer[Currencies.default_currency])
-            {
-                amountEditText.setHint("0");
-            }
-            else
-            {
-                amountEditText.setHint("0.00");
-            }
+            _amountEditText.setup(this);
         }
-        amountEditText.setFilters(new InputFilter[]{moneyValueFilter});
-
-        amountEditText.addTextChangedListener(new TextWatcher()
-        {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after)
-            {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count)
-            {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s)
-            {
-                if (s.length() > 0)
-                {
-                    _amount = Float.parseFloat(s.toString());
-                }
-                else
-                {
-                    _amount = 0.0f;
-                }
-
-                updateConversionViews();
-            }
-        });
 
         // Base currency, which will match the currency being entered
         // Always allow up to two digits of precision
@@ -424,17 +372,18 @@ public class ExpenditureEditActivity extends AppCompatActivity
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
             {
-                moneyValueFilter.setDigits(Currencies.integer[position] ? 0 : 2);
-                if (Currencies.integer[position])
+                _baseCurrency = position;
+                _amountEditText.setDigits(Currencies.integer[_baseCurrency] ? 0 : 2);
+                if (Currencies.integer[_baseCurrency])
                 {
-                    amountEditText.setHint("0");
+                    _amountEditText.setHint("0");
                 }
                 else
                 {
-                    amountEditText.setHint("0.00");
+                    _amountEditText.setHint("0.00");
                 }
-                baseCurrencyTextView.setText(Currencies.symbols[position]);
-                if (position == Currencies.default_currency)
+                baseCurrencyTextView.setText(Currencies.symbols[_baseCurrency]);
+                if (_baseCurrency == Currencies.default_currency)
                 {
                     _conversionLayout.setVisibility(View.GONE);
                 }
@@ -630,8 +579,10 @@ public class ExpenditureEditActivity extends AppCompatActivity
         {
             Log.e(TAG, "Failed to parse number");
             _rateNumber = 1.00f;
+
             _convertedAmountEditText.setText("");
-            _totalConvertedAmountTextView.setText("");
+
+            updateConversionViews();
         }
     }
 
@@ -639,5 +590,12 @@ public class ExpenditureEditActivity extends AppCompatActivity
     {
         _totalConvertedAmount = _amount * _rateNumber;
         _totalConvertedAmountTextView.setText(Currencies.formatCurrency(Currencies.integer[Currencies.default_currency], _totalConvertedAmount));
+    }
+
+    @Override
+    public void valueChanged(int id, float value)
+    {
+        _amount = value;
+        updateConversionViews();
     }
 }
