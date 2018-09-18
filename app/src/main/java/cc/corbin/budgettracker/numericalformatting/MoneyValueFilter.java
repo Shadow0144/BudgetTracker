@@ -42,7 +42,7 @@ public class MoneyValueFilter extends DigitsKeyListener
         {
             if ((dlen > 0) && ((dend == dlen) || (((dend+1) < dlen) && (dest.toString().charAt(dend+1) == '.'))))
             {
-                out = "000";
+                out = ",000";
             }
             else
             {
