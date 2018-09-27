@@ -17,7 +17,7 @@ import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
-public class DatabaseThread extends Thread
+public class DatabaseThread
 {
     private final String TAG = "DatabaseThread";
 
@@ -29,16 +29,11 @@ public class DatabaseThread extends Thread
     private ExpenditureDatabase _dbE;
     private BudgetDatabase _dbB;
 
-    private Handler _handler;
-
-    private volatile boolean _running;
-
     public DatabaseThread(ExpenditureDatabase dbE, BudgetDatabase dbB,
                           ConcurrentLinkedQueue<ExpDatabaseEvent> eEvents,
                           ConcurrentLinkedQueue<BudgetDatabaseEvent> bEvents,
                           ConcurrentLinkedQueue<ExpDatabaseEvent> completedExpEvents,
-                          ConcurrentLinkedQueue<BudgetDatabaseEvent> completedBudEvents,
-                          Handler handler)
+                          ConcurrentLinkedQueue<BudgetDatabaseEvent> completedBudEvents)
     {
         _dbE = dbE;
         _dbB = dbB;
@@ -46,35 +41,19 @@ public class DatabaseThread extends Thread
         _budEvents = bEvents;
         _completedExpEvents = completedExpEvents;
         _completedBudEvents = completedBudEvents;
-        _handler = handler;
-
-        setPriority(THREAD_PRIORITY_BACKGROUND);
     }
 
-    @Override
     public void run()
     {
-        _running = true;
-        while (_running)
+        while (!_expEvents.isEmpty())
         {
-            if (!_expEvents.isEmpty())
-            {
-                processExpEvent(_expEvents.poll());
-            }
-            else { }
-
-            if (!_budEvents.isEmpty())
-            {
-                processBudEvent(_budEvents.poll());
-            }
-            else { }
+            processExpEvent(_expEvents.poll());
         }
-    }
 
-    public void finish()
-    {
-        while (!_expEvents.isEmpty() || !_budEvents.isEmpty());
-        _running = false;
+        while (!_budEvents.isEmpty())
+        {
+            processBudEvent(_budEvents.poll());
+        }
     }
 
     private void processExpEvent(ExpDatabaseEvent event)
@@ -139,7 +118,6 @@ public class DatabaseThread extends Thread
                 break;
         }
         _completedExpEvents.add(event);
-        _handler.post(new ExpenditureRunnable());
     }
 
     private BudgetEntity getMonthCategoryBudget(int month, int year, int category)
@@ -317,6 +295,5 @@ public class DatabaseThread extends Thread
                 break;
         }
         _completedBudEvents.add(event);
-        _handler.post(new ExpenditureRunnable());
     }
 }
