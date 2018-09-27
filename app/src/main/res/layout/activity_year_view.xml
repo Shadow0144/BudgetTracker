@@ -71,74 +71,57 @@
 
                 <Space
                     android:layout_width="match_parent"
-                    android:layout_height="15dp"
-                    android:layout_weight="0" />
+                    android:layout_height="15dp" />
 
                 <FrameLayout
                     android:id="@+id/yearMonthlyHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0">
-                </FrameLayout>
+                    android:layout_height="wrap_content"></FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
-                    android:layout_height="15dp"
-                    android:layout_weight="0" />
+                    android:layout_height="15dp" />
 
                 <FrameLayout
                     android:id="@+id/yearCategoryHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0">
-                </FrameLayout>
+                    android:layout_height="wrap_content"></FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
-                    android:layout_height="15dp"
-                    android:layout_weight="0" />
+                    android:layout_height="15dp" />
 
                 <FrameLayout
                     android:id="@+id/yearMonthlyPieHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0">
-                </FrameLayout>
+                    android:layout_height="wrap_content"></FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
-                    android:layout_height="15dp"
-                    android:layout_weight="0" />
+                    android:layout_height="15dp" />
 
                 <FrameLayout
                     android:id="@+id/yearCategoryPieHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0">
-                </FrameLayout>
+                    android:layout_height="wrap_content"></FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
-                    android:layout_height="15dp"
-                    android:layout_weight="0" />
+                    android:layout_height="15dp" />
 
                 <FrameLayout
                     android:id="@+id/yearMonthlyLineGraphHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0">
-                </FrameLayout>
+                    android:layout_height="wrap_content"></FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
-                    android:layout_height="15dp"
-                    android:layout_weight="0" />
+                    android:layout_height="15dp" />
 
                 <Button
                     android:id="@+id/exportYearButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0"
                     android:onClick="exportYear"
                     android:text="@string/export_year" />
 

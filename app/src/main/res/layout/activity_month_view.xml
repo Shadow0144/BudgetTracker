@@ -72,110 +72,84 @@
 
                 <Space
                     android:layout_width="match_parent"
-                    android:layout_height="15dp"
-                    android:layout_weight="0" />
+                    android:layout_height="15dp" />
 
                 <FrameLayout
                     android:id="@+id/monthWeeklyHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0">
-                </FrameLayout>
+                    android:layout_height="wrap_content"></FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
-                    android:layout_height="15dp"
-                    android:layout_weight="0" />
+                    android:layout_height="15dp" />
 
                 <FrameLayout
                     android:id="@+id/monthCategoryHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0">
-                </FrameLayout>
+                    android:layout_height="wrap_content"></FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
-                    android:layout_height="15dp"
-                    android:layout_weight="0" />
+                    android:layout_height="15dp" />
 
                 <FrameLayout
                     android:id="@+id/monthExtraHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0">
-                </FrameLayout>
+                    android:layout_height="wrap_content"></FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
-                    android:layout_height="15dp"
-                    android:layout_weight="0" />
+                    android:layout_height="15dp" />
 
                 <FrameLayout
                     android:id="@+id/monthAdjustmentHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0">
-                </FrameLayout>
+                    android:layout_height="wrap_content"></FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
-                    android:layout_height="15dp"
-                    android:layout_weight="0" />
+                    android:layout_height="15dp" />
 
                 <FrameLayout
                     android:id="@+id/monthWeeklyPieHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0">
-                </FrameLayout>
+                    android:layout_height="wrap_content"></FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
-                    android:layout_height="15dp"
-                    android:layout_weight="0" />
+                    android:layout_height="15dp" />
 
                 <FrameLayout
                     android:id="@+id/monthCategoryPieHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0">
-                </FrameLayout>
+                    android:layout_height="wrap_content"></FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
-                    android:layout_height="15dp"
-                    android:layout_weight="0" />
+                    android:layout_height="15dp" />
 
                 <FrameLayout
                     android:id="@+id/monthWeeklyLineGraphHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0">
-                </FrameLayout>
+                    android:layout_height="wrap_content"></FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
-                    android:layout_height="15dp"
-                    android:layout_weight="0" />
+                    android:layout_height="15dp" />
 
                 <FrameLayout
                     android:id="@+id/monthBudgetHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0">
-                </FrameLayout>
+                    android:layout_height="wrap_content"></FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
-                    android:layout_height="15dp"
-                    android:layout_weight="0" />
+                    android:layout_height="15dp" />
 
                 <Button
                     android:id="@+id/exportMonthButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0"
                     android:onClick="exportMonth"
                     android:text="@string/export_month" />
 
