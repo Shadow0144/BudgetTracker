@@ -42,7 +42,6 @@ import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.tables.ExpandableBudgetTable;
 import cc.corbin.budgettracker.tables.ExtrasTable;
 import cc.corbin.budgettracker.edit.ExpenditureEditActivity;
-import cc.corbin.budgettracker.tables.BudgetTable;
 import cc.corbin.budgettracker.tables.CategorySummaryTable;
 import cc.corbin.budgettracker.tables.TimeSummaryTable;
 import cc.corbin.budgettracker.total.TotalViewActivity;
