@@ -88,6 +88,9 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
             // Create the buttons to use to add adjustments
             Button addAdjustmentButton = new Button(_context);
             addAdjustmentButton.setText(R.string.add_adjustment);
+            addAdjustmentButton.setMinHeight(0);
+            addAdjustmentButton.setMinimumHeight(0);
+            addAdjustmentButton.setIncludeFontPadding(false);
             _addAdjustmentButtons.add(addAdjustmentButton);
         }
 
@@ -187,7 +190,7 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
         }
         else
         {
-            convertView = _addAdjustmentButtons.get(childPosition);
+            convertView = _addAdjustmentButtons.get(groupPosition);
         }
         return convertView;
     }

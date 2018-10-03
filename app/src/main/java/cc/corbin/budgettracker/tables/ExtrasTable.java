@@ -87,6 +87,9 @@ public class ExtrasTable extends TableLayout
                 createExtraExpenditure(v);
             }
         });
+        extrasTableAddButton.setMinHeight(0);
+        extrasTableAddButton.setMinimumHeight(0);
+        extrasTableAddButton.setIncludeFontPadding(false);
 
         TableRow extrasTableRow = new TableRow(_context);
         extrasTableRow.addView(extrasTableAddButton);
