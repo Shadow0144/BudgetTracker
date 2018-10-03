@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +25,8 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
     private Map<String, List<BudgetEntity>> _adjustments; // Adjustments to the budgets
     private int _groupSize;
     private List<BudgetTableRow> _budgetCells;
-    private Map<String, List<BudgetTableRow>> _adjustmentCells;
+    private Map<String, List<AdjustmentTableCell>> _adjustmentCells;
+    private List<Button> _addAdjustmentButtons;
     private int _year;
     private int _month;
     private ExpandableBudgetTable.timeframe _timeframe;
@@ -44,6 +46,8 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
     private void setupTable()
     {
         _budgetCells = new ArrayList<BudgetTableRow>();
+        _adjustmentCells = new HashMap<String, List<AdjustmentTableCell>>();
+        _addAdjustmentButtons = new ArrayList<Button>();
         String[] categories = Categories.getCategories();
         for (int i = 0; i < _groupSize; i++)
         {
@@ -80,6 +84,11 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
                 mostRecentMonth = entity.getMonth();
             }
             else { }
+
+            // Create the buttons to use to add adjustments
+            Button addAdjustmentButton = new Button(_context);
+            addAdjustmentButton.setText(R.string.add_adjustment);
+            _addAdjustmentButtons.add(addAdjustmentButton);
         }
 
         // Grab the adjustments
@@ -87,14 +96,18 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
         for (int j = 0; j < catCount; j++)
         {
             List<BudgetEntity> adjs = new ArrayList<BudgetEntity>();
-            while (i < len && _budgetEntities.get(i).getCategoryName().equals(categories[j]))
+            ArrayList<AdjustmentTableCell> adjustmentTableCells = new ArrayList<AdjustmentTableCell>();
+            while (i < len &&  _budgetEntities.get(i).equals(categories[j]))
             {
                 BudgetEntity entity = _budgetEntities.get(i);
                 adjs.add(entity);
+                AdjustmentTableCell adjustmentTableCell = new AdjustmentTableCell(_context, entity);
+                adjustmentTableCells.add(adjustmentTableCell);
                 totalAmount += entity.getAmount();
                 i++;
             }
             _adjustments.put(categories[j], adjs);
+            _adjustmentCells.put(categories[j], adjustmentTableCells);
         }
 
         // Setup the total
@@ -116,7 +129,7 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
     @Override
     public int getChildrenCount(int groupPosition)
     {
-        return _adjustments.get(Categories.getCategories()[groupPosition]).size();
+        return _adjustments.get(Categories.getCategories()[groupPosition]).size()+1; // +1 for the add button
     }
 
     @Override
@@ -128,7 +141,15 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
     @Override
     public Object getChild(int groupPosition, int childPosition)
     {
-        return _adjustments.get(Categories.getCategories()[groupPosition]).get(childPosition);
+        Object child = null;
+        List<BudgetEntity> adjustments = _adjustments.get(Categories.getCategories()[groupPosition]);
+        if (adjustments != null && childPosition < adjustments.size())
+        {
+            child = adjustments.get(childPosition);
+        }
+        else { }
+
+        return child;
     }
 
     @Override
@@ -159,7 +180,15 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent)
     {
-        convertView = new AdjustmentTableCell(_context, ((BudgetEntity) getChild(groupPosition, childPosition)));
+        List<AdjustmentTableCell> adjustmentTableCells = _adjustmentCells.get(Categories.getCategories()[groupPosition]);
+        if (childPosition < adjustmentTableCells.size())
+        {
+            convertView = adjustmentTableCells.get(childPosition);
+        }
+        else
+        {
+            convertView = _addAdjustmentButtons.get(childPosition);
+        }
         return convertView;
     }
 

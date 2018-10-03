@@ -37,7 +37,6 @@ import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
 import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.settings.SettingsActivity;
-import cc.corbin.budgettracker.tables.BudgetTable;
 import cc.corbin.budgettracker.tables.CategorySummaryTable;
 import cc.corbin.budgettracker.tables.TimeSummaryTable;
 import cc.corbin.budgettracker.total.TotalViewActivity;
