@@ -1,7 +1,6 @@
 package cc.corbin.budgettracker.tables;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
@@ -11,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 
@@ -19,48 +19,98 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
     private final String TAG = "BudgetExpandableListAdapter";
 
     private Context _context;
-    private List<BudgetEntity> _budgetEntities;
-    private List<BudgetEntity> _budgets;
-    private Map<String, List<BudgetEntity>> _adjustments;
+    private List<BudgetEntity> _budgetEntities; // Complete list
+    private List<BudgetEntity> _budgets; // Per category budgets
+    private Map<String, List<BudgetEntity>> _adjustments; // Adjustments to the budgets
+    private int _groupSize;
+    private List<BudgetTableRow> _budgetCells;
+    private Map<String, List<BudgetTableRow>> _adjustmentCells;
+    private int _year;
+    private int _month;
+    private ExpandableBudgetTable.timeframe _timeframe;
 
-    public BudgetExpandableListAdapter(Context context)
+    public BudgetExpandableListAdapter(Context context, int year, int month, ExpandableBudgetTable.timeframe timeframe)
     {
         _context = context;
         _budgets = new ArrayList<BudgetEntity>();
         _adjustments = new HashMap<String, List<BudgetEntity>>();
+        _groupSize = Categories.getCategories().length;
+        _year = year;
+        _month = month;
+        _timeframe = timeframe;
+        setupTable();
     }
 
-    public void setBudgets(List<BudgetEntity> budgetEntities)
+    private void setupTable()
+    {
+        _budgetCells = new ArrayList<BudgetTableRow>();
+        String[] categories = Categories.getCategories();
+        for (int i = 0; i < _groupSize; i++)
+        {
+            _budgetCells.add(new BudgetTableRow(_context, categories[i], i, _year, _month, _timeframe));
+        }
+    }
+
+    public BudgetEntity setBudgets(List<BudgetEntity> budgetEntities)
     {
         _budgetEntities = budgetEntities;
+
+        BudgetEntity totalEntity = new BudgetEntity();
         String[] categories = Categories.getCategories();
         int catCount = categories.length;
 
-        int i = 0;
+        // Values for use in the total row
+        int mostRecentMonth = 0;
+        int mostRecentYear = 0;
+        float totalAmount = 0.0f;
+
+        int i = 0; // Grab the categorical budgets
         for (; i < catCount; i++)
         {
-            _budgets.add(_budgetEntities.get(i));
+            BudgetEntity entity = _budgetEntities.get(i);
+            _budgetCells.get(i).setBudgetEntity(entity);
+            totalAmount += entity.getAmount();
+            if (entity.getYear() > mostRecentYear)
+            {
+                mostRecentYear = entity.getYear();
+                mostRecentMonth = entity.getMonth();
+            }
+            else if ((entity.getYear() == mostRecentYear) && (entity.getMonth() > mostRecentMonth))
+            {
+                mostRecentMonth = entity.getMonth();
+            }
+            else { }
         }
 
+        // Grab the adjustments
         int len = _budgetEntities.size();
         for (int j = 0; j < catCount; j++)
         {
             List<BudgetEntity> adjs = new ArrayList<BudgetEntity>();
             while (i < len && _budgetEntities.get(i).getCategoryName().equals(categories[j]))
             {
-                adjs.add(_budgetEntities.get(i));
+                BudgetEntity entity = _budgetEntities.get(i);
+                adjs.add(entity);
+                totalAmount += entity.getAmount();
                 i++;
             }
             _adjustments.put(categories[j], adjs);
         }
 
+        // Setup the total
+        totalEntity.setAmount(totalAmount);
+        totalEntity.setYear(mostRecentYear);
+        totalEntity.setMonth(mostRecentMonth);
+
         notifyDataSetInvalidated();
+
+        return totalEntity;
     }
 
     @Override
     public int getGroupCount()
     {
-        return _budgets.size();
+        return _groupSize;
     }
 
     @Override
@@ -102,16 +152,14 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent)
     {
-        convertView = new BudgetTableCell(_context, ((BudgetEntity) getGroup(groupPosition)));
-
-        return convertView;
+        convertView = _budgetCells.get(groupPosition);
+        return  convertView;
     }
 
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent)
     {
         convertView = new AdjustmentTableCell(_context, ((BudgetEntity) getChild(groupPosition, childPosition)));
-
         return convertView;
     }
 

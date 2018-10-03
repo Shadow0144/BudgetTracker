@@ -24,7 +24,6 @@ import cc.corbin.budgettracker.year.YearViewActivity;
 
 public class BudgetTable extends TableLayout implements View.OnClickListener
 {
-
     private final String TAG = "BudgetTable";
 
     private Context _context;

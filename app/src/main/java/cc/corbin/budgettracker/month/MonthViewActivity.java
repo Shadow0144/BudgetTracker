@@ -39,6 +39,7 @@ import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
 import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
 import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.settings.SettingsActivity;
+import cc.corbin.budgettracker.tables.ExpandableBudgetTable;
 import cc.corbin.budgettracker.tables.ExtrasTable;
 import cc.corbin.budgettracker.edit.ExpenditureEditActivity;
 import cc.corbin.budgettracker.tables.BudgetTable;
@@ -67,9 +68,6 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
     public final static int CREATE_EXT_EXPENDITURE = 0;
     public final static int EDIT_EXT_EXPENDITURE = 1;
 
-    public final static int CREATE_BUD_EXPENDITURE = 0;
-    public final static int EDIT_BUD_EXPENDITURE = 1;
-
     public final static int SUCCEED = 0;
     public final static int CANCEL = 1;
     public final static int DELETE = 2;
@@ -82,9 +80,8 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
 
     private TimeSummaryTable _weeklyTable;
     private CategorySummaryTable _categoryTable;
-    private BudgetTable _budgetTable;
+    private ExpandableBudgetTable _expandableBudgetTable;
     private ExtrasTable _extrasTable;
-    //private ExtrasTable _adjustmentsTable;
 
     private PieChart _weeklyPieChart;
     private PieChart _categoryPieChart;
@@ -223,9 +220,9 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         _categoryTable = new CategorySummaryTable(this);
         monthsCategoryContainer.addView(_categoryTable);
 
-        FrameLayout budgetContainer = findViewById(R.id.monthBudgetHolder);
-        _budgetTable = new BudgetTable(this, _month, _year);
-        budgetContainer.addView(_budgetTable);
+        FrameLayout expandableBudgetContainer = findViewById(R.id.monthExpandableBudgetHolder);
+        _expandableBudgetTable = new ExpandableBudgetTable(this, _month, _year);
+        expandableBudgetContainer.addView(_expandableBudgetTable);
 
         FrameLayout weeklyPieContainer = findViewById(R.id.monthWeeklyPieHolder);
         _weeklyPieChart = new PieChart(this);
@@ -259,7 +256,7 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         {
             _weeklyTable.resetTable();
             _categoryTable.resetTable();
-            _budgetTable.resetTable();
+            _expandableBudgetTable.resetTable();
             _weeklyPieChart.clearData();
             _categoryPieChart.clearData();
             _weeklyLineGraph.clearData();
@@ -352,7 +349,7 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
     {
         _weeklyTable.updateBudgets(entities);
         _categoryTable.updateBudgets(entities);
-        _budgetTable.refreshTable(entities);
+        _expandableBudgetTable.refreshTable(entities);
     }
 
     public void onRequestPermissionsResult(int requestCode,
@@ -469,9 +466,6 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
             _viewModel.insertBudgetEntity(_budgets, entity);
         }
 
-        // Lock the BudgetTable
-        //_budgetTable.lockTable();
-
         _popupWindow.dismiss();
     }
 
@@ -487,24 +481,16 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         _budgets.getValue().remove(_budgetId);
         _viewModel.removeBudgetEntity(_budgets, entity);
 
-        // Lock the BudgetTable
-        //_budgetTable.lockTable();
-
         _popupWindow.dismiss();
     }
 
     private void createExtrasAndAdjustmentsTables()
     {
         FrameLayout extrasContainer = findViewById(R.id.monthExtraHolder);
-        FrameLayout adjustmentsContainer = findViewById(R.id.monthAdjustmentHolder);
 
         // Create the extras table
         _extrasTable = new ExtrasTable(this, _year, _month);
         extrasContainer.addView(_extrasTable);
-
-        // Create the adjustments table
-        //_adjustmentsTable = new ExtrasTable(this, ExtrasTable.tableType.adjustments, _year, _month);
-        //adjustmentsContainer.addView(_adjustmentsTable);
     }
 
     public void createExtraExpenditure()
@@ -560,7 +546,6 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         }
         else
         {
-            //lock();
             if (requestCode == CREATE_EXT_EXPENDITURE)
             {
                 if (resultCode == SUCCEED)
@@ -588,7 +573,7 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
 
             if (resultCode == CANCEL)
             {
-                //unlockAll();
+                // Do nothing
             }
             else { }
         }
