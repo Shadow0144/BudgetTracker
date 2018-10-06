@@ -4,16 +4,20 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+
+import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 
 /**
  * Created by Corbin on 4/15/2018.
  */
 
 @Entity
-public class BudgetEntity
+public class BudgetEntity implements Parcelable
 {
     @PrimaryKey(autoGenerate = true)
     private long id;
@@ -195,5 +199,51 @@ public class BudgetEntity
     public void setNote(String note)
     {
         this.note = note;
+    }
+
+    public static final Parcelable.Creator<BudgetEntity> CREATOR = new Parcelable.Creator<BudgetEntity>()
+    {
+        public BudgetEntity createFromParcel(Parcel in)
+        {
+            return new BudgetEntity(in);
+        }
+
+        public BudgetEntity[] newArray(int size)
+        {
+            return new BudgetEntity[size];
+        }
+    };
+
+    @Override
+    public void writeToParcel(Parcel out, int flags)
+    {
+        out.writeLong(id);
+        out.writeInt(month);
+        out.writeInt(year);
+        out.writeFloat(amount);
+        out.writeInt(category);
+        out.writeString(categoryName);
+        out.writeInt(adjustment);
+        out.writeLong(sisterAdjustment);
+        out.writeString(note);
+    }
+
+    private BudgetEntity(Parcel in)
+    {
+        id = in.readLong();
+        month = in.readInt();
+        year = in.readInt();
+        amount = in.readFloat();
+        category = in.readInt();
+        categoryName = in.readString();
+        adjustment = in.readInt();
+        sisterAdjustment = in.readLong();
+        note = in.readString();
+    }
+
+    @Override
+    public int describeContents()
+    {
+        return 0;
     }
 }

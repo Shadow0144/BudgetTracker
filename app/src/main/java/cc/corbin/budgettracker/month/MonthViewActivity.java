@@ -33,6 +33,7 @@ import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.ExcelExporter;
 import cc.corbin.budgettracker.auxilliary.LineGraph;
+import cc.corbin.budgettracker.edit.AdjustmentEditActivity;
 import cc.corbin.budgettracker.numericalformatting.MoneyValueFilter;
 import cc.corbin.budgettracker.auxilliary.PieChart;
 import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
@@ -66,10 +67,13 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
 
     public final static int CREATE_EXT_EXPENDITURE = 0;
     public final static int EDIT_EXT_EXPENDITURE = 1;
+    public final static int CREATE_ADJUSTMENT = 2;
+    public final static int EDIT_ADJUSTMENT = 3;
 
     public final static int SUCCEED = 0;
     public final static int CANCEL = 1;
     public final static int DELETE = 2;
+    public final static int SUCCEED_TRANSFER = 3;
     public final static int FAILURE = -1;
 
     private int _month;
@@ -514,25 +518,26 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         startActivityForResult(intent, EDIT_EXT_EXPENDITURE);
     }
 
-    public void createAdjustmentExpenditure()
+    public void createAdjustmentExpenditure(int category)
     {
-        Intent intent = new Intent(getApplicationContext(), ExpenditureEditActivity.class);
-        intent.putExtra(ExpenditureEditActivity.YEAR_INTENT, _year);
-        intent.putExtra(ExpenditureEditActivity.MONTH_INTENT, _month);
-        intent.putExtra(ExpenditureEditActivity.DAY_INTENT, 32);
-        intent.putExtra(ExpenditureEditActivity.TYPE_INTENT, CREATE_EXT_EXPENDITURE);
-        startActivityForResult(intent, CREATE_EXT_EXPENDITURE);
+        Intent intent = new Intent(getApplicationContext(), AdjustmentEditActivity.class);
+        intent.putExtra(AdjustmentEditActivity.YEAR_INTENT, _year);
+        intent.putExtra(AdjustmentEditActivity.MONTH_INTENT, _month);
+        intent.putExtra(AdjustmentEditActivity.CATEGORY_INTENT, category);
+        intent.putExtra(AdjustmentEditActivity.TYPE_INTENT, CREATE_ADJUSTMENT);
+        startActivityForResult(intent, CREATE_ADJUSTMENT);
     }
 
-    public void editAdjustmentExpenditure(ExpenditureEntity entity)
+    public void editAdjustmentExpenditure(BudgetEntity entity, int groupIndex, int childIndex)
     {
-        Intent intent = new Intent(getApplicationContext(), ExpenditureEditActivity.class);
-        intent.putExtra(ExpenditureEditActivity.YEAR_INTENT, _year);
-        intent.putExtra(ExpenditureEditActivity.MONTH_INTENT, _month);
-        intent.putExtra(ExpenditureEditActivity.DAY_INTENT, 0);
-        intent.putExtra(ExpenditureEditActivity.EXPENDITURE_INTENT, entity);
-        intent.putExtra(ExpenditureEditActivity.TYPE_INTENT, EDIT_EXT_EXPENDITURE);
-        startActivityForResult(intent, EDIT_EXT_EXPENDITURE);
+        Intent intent = new Intent(getApplicationContext(), AdjustmentEditActivity.class);
+        intent.putExtra(AdjustmentEditActivity.YEAR_INTENT, _year);
+        intent.putExtra(AdjustmentEditActivity.MONTH_INTENT, _month);
+        intent.putExtra(AdjustmentEditActivity.BUDGET_INTENT, entity);
+        intent.putExtra(AdjustmentEditActivity.GROUP_INDEX_INTENT, groupIndex);
+        intent.putExtra(AdjustmentEditActivity.CHILD_INDEX_INTENT, childIndex);
+        intent.putExtra(AdjustmentEditActivity.TYPE_INTENT, EDIT_ADJUSTMENT);
+        startActivityForResult(intent, EDIT_ADJUSTMENT);
     }
 
     @Override
@@ -565,6 +570,36 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
                 {
                     ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
                     _viewModel.removeExpEntity(_monthExps, expenditureEntity);
+                }
+                else { }
+            }
+            else if (requestCode == CREATE_ADJUSTMENT)
+            {
+                if (resultCode == SUCCEED)
+                {
+                    BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
+                    _viewModel.insertBudgetEntity(_budgets, budgetEntity);
+                }
+                else if (resultCode == SUCCEED_TRANSFER)
+                {
+                    BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
+                    BudgetEntity linkedBudgetEntity = data.getParcelableExtra(AdjustmentEditActivity.LINKED_BUDGET_INTENT);
+                    _viewModel.insertBudgetEntity(_budgets, budgetEntity);
+                    _viewModel.insertBudgetEntity(_budgets, linkedBudgetEntity);
+                }
+                else { }
+            }
+            else if (requestCode == EDIT_ADJUSTMENT)
+            {
+                if (resultCode == SUCCEED)
+                {
+                    BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
+                    _viewModel.updateBudgetEntity(_budgets, budgetEntity);
+                }
+                else if (resultCode == DELETE) // Delete can only occur from an edit
+                {
+                    BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
+                    _viewModel.removeBudgetEntity(_budgets, budgetEntity);
                 }
                 else { }
             }

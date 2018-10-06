@@ -92,7 +92,7 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_expenditure_edit_activity);
+        setContentView(R.layout.activity_expenditure_edit);
 
         Intent intent = getIntent();
         int type = intent.getIntExtra(TYPE_INTENT, -1);

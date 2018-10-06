@@ -162,13 +162,23 @@ public class NumericalFormattedEditText extends AppCompatEditText
                         }
                     }
 
-                    if ((len > 0) && (s.charAt(0) == ',')) // Ensure that the first character is not a comma
+                    // Ensure that the first character is not a comma
+                    len = s.length(); // Update the length
+                    if ((len > 0) && (s.charAt(0) == ','))
                     {
                         text.replace(0, 1, "");
+                        len--;
                         commasAdded--;
-                        _flag = true;
                     }
                     else { }
+
+                    // Remove any leading zeros
+                    while ((len > 1) && (s.charAt(0) == '0'))
+                    {
+                        text.replace(0, 1, "");
+                        len--;
+                        _flag = true;
+                    }
 
                     String textString = text.toString();
 

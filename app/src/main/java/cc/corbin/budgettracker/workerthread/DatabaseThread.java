@@ -216,6 +216,7 @@ public class DatabaseThread
                         {
                             entities.add(getMonthCategoryBudget(month, year, i));
                         }
+                        entities.addAll(_dbB.budgetDao().getMonthAdjustments(year, month));
                         break;
                     case months:
                         entities = new ArrayList<BudgetEntity>();
@@ -226,6 +227,7 @@ public class DatabaseThread
                             for (int j = 1; j <= 12; j++)
                             {
                                 entities.add(getMonthCategoryBudget(j, year, i));
+                                // TODO Add adjustments
                             }
                         }
                         break;
@@ -236,6 +238,7 @@ public class DatabaseThread
                         {
                             entities.add(getYearCategoryBudget(year, i));
                         }
+                        // TODO Add adjustments
                         break;
                     case total:
                         entities = new ArrayList<BudgetEntity>();
@@ -248,6 +251,7 @@ public class DatabaseThread
                                 entities.add(getYearCategoryBudget(i, j));
                             }
                         }
+                        // TODO Add adjustments
                         break;
                 }
                 event.setEntities(entities);

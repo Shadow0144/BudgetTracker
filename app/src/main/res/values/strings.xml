@@ -13,6 +13,7 @@
     <string name="total_colon">Total:</string>
     <string name="x">X</string>
     <string name="negative">-</string>
+    <string name="positive">+</string>
     <string name="expenses">Expenses for:&#160;</string>
     <string name="failure_expense">Failed to create/update/delete expenditure</string>
     <string name="failure_create_expense">Failed to create expenditure</string>
@@ -89,6 +90,10 @@
     <string name="one_with_two_digits">1.00</string>
     <string name="zero_with_zero_digits">0</string>
     <string name="zero_with_two_digits">0.00</string>
+
+    <string name="bonus">Bonus</string>
+    <string name="reduction">Reduction</string>
+    <string name="transfer">Transfer</string>
 
     <string name="export_month">Export Month</string>
     <string name="export_year">Export Year</string>

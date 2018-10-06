@@ -202,6 +202,7 @@
             android:scrollbars="vertical" />
 
         <LinearLayout
+            android:id="@+id/buttonLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
@@ -212,7 +213,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="onCancel"
-                android:text="Cancel" />
+                android:text="@string/cancel" />
 
             <Button
                 android:id="@+id/deleteButton"
@@ -221,7 +222,7 @@
                 android:layout_weight="1"
                 android:enabled="false"
                 android:onClick="onDelete"
-                android:text="Delete"
+                android:text="@string/delete"
                 android:visibility="visible" />
 
             <Button
@@ -230,7 +231,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="onAccept"
-                android:text="Accept" />
+                android:text="@string/accept" />
         </LinearLayout>
 
     </LinearLayout>

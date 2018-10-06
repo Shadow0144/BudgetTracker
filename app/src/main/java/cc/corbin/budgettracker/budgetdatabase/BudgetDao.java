@@ -19,6 +19,11 @@ public interface BudgetDao
     List<BudgetEntity> getAll();
 
     @Query("SELECT * FROM budgetentity " +
+            "WHERE year = (:year) AND month = (:month) AND adjustment = 1 " +
+            "ORDER BY category ASC")
+    List<BudgetEntity> getMonthAdjustments(int year, int month);
+
+    @Query("SELECT * FROM budgetentity " +
             "WHERE year < (:year) OR (year = (:year) AND month <= (:month))") /// TODO Fix
     List<BudgetEntity> getMonth(int year, int month);
 

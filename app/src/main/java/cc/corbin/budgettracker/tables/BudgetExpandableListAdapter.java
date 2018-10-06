@@ -14,6 +14,7 @@ import java.util.Map;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
+import cc.corbin.budgettracker.month.MonthViewActivity;
 
 public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
 {
@@ -87,10 +88,26 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
 
             // Create the buttons to use to add adjustments
             Button addAdjustmentButton = new Button(_context);
+            addAdjustmentButton.setId(i);
             addAdjustmentButton.setText(R.string.add_adjustment);
             addAdjustmentButton.setMinHeight(0);
             addAdjustmentButton.setMinimumHeight(0);
             addAdjustmentButton.setIncludeFontPadding(false);
+            addAdjustmentButton.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    if (_timeframe == ExpandableBudgetTable.timeframe.monthly)
+                    {
+                        ((MonthViewActivity)_context).createAdjustmentExpenditure(v.getId());
+                    }
+                    else
+                    {
+                        //((YearViewActivity)_context).createAdjustmentExpenditure(v.getId()); // TODO
+                    }
+                }
+            });
             _addAdjustmentButtons.add(addAdjustmentButton);
         }
 
@@ -100,14 +117,36 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
         {
             List<BudgetEntity> adjs = new ArrayList<BudgetEntity>();
             ArrayList<AdjustmentTableCell> adjustmentTableCells = new ArrayList<AdjustmentTableCell>();
-            while (i < len &&  _budgetEntities.get(i).equals(categories[j]))
+            int k = 0;
+            while ((i < len) && (_budgetEntities.get(i).getCategory() == j))
             {
-                BudgetEntity entity = _budgetEntities.get(i);
+                final BudgetEntity entity = _budgetEntities.get(i);
                 adjs.add(entity);
                 AdjustmentTableCell adjustmentTableCell = new AdjustmentTableCell(_context, entity);
+                adjustmentTableCell.setIndices(j, k);
+                adjustmentTableCell.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        AdjustmentTableCell cell = ((AdjustmentTableCell)v);
+                        BudgetEntity entity = cell.getBudgetEntity();
+                        int groupIndex = cell.getGroupIndex();
+                        int childIndex = cell.getChildIndex();
+                        if (_timeframe == ExpandableBudgetTable.timeframe.monthly)
+                        {
+                            ((MonthViewActivity)_context).editAdjustmentExpenditure(entity, groupIndex, childIndex);
+                        }
+                        else
+                        {
+                            //((YearViewActivity)_context).editAdjustmentExpenditure(entity, group, child); // TODO
+                        }
+                    }
+                });
                 adjustmentTableCells.add(adjustmentTableCell);
                 totalAmount += entity.getAmount();
                 i++;
+                k++;
             }
             _adjustments.put(categories[j], adjs);
             _adjustmentCells.put(categories[j], adjustmentTableCells);
