@@ -118,6 +118,8 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
             List<BudgetEntity> adjs = new ArrayList<BudgetEntity>();
             ArrayList<AdjustmentTableCell> adjustmentTableCells = new ArrayList<AdjustmentTableCell>();
             int k = 0;
+            float additionalValue = 0.0f;
+            BudgetTableRow row = _budgetCells.get(j);
             while ((i < len) && (_budgetEntities.get(i).getCategory() == j))
             {
                 final BudgetEntity entity = _budgetEntities.get(i);
@@ -143,11 +145,19 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
                         }
                     }
                 });
+                if (k == 0) // If adding an adjustment, don't hide it
+                {
+                    row.addEllipsis();
+                }
+                else { }
                 adjustmentTableCells.add(adjustmentTableCell);
-                totalAmount += entity.getAmount();
+                float amount = entity.getAmount();
+                additionalValue += amount;
+                totalAmount += amount;
                 i++;
                 k++;
             }
+            row.addAmount(additionalValue);
             _adjustments.put(categories[j], adjs);
             _adjustmentCells.put(categories[j], adjustmentTableCells);
         }

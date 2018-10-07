@@ -32,6 +32,9 @@ public class BudgetTableRow extends LinearLayout
     private TableCell _contentCell;
     private TableCell _dateCell;
 
+    private float _amount;
+    private float _additionalAmount;
+
     public BudgetTableRow(Context context)
     {
         super(context);
@@ -154,6 +157,7 @@ public class BudgetTableRow extends LinearLayout
 
     public void setAmountAndDate(float amount, int year, int month)
     {
+        _amount = amount;
         _contentCell.setText(Currencies.formatCurrency(Currencies.default_currency, amount));
         if (year != 0 && month != 0)
         {
@@ -203,5 +207,21 @@ public class BudgetTableRow extends LinearLayout
     {
         _contentCell.setType(TableCell.BOLD_CELL);
         _dateCell.setType(TableCell.BOLD_CELL);
+    }
+
+    public void addEllipsis()
+    {
+        _contentCell.addEllipsis();
+    }
+
+    public void removeEllipsis()
+    {
+        _contentCell.removeEllipsis();
+    }
+
+    public void addAmount(float additionalAmount)
+    {
+        _additionalAmount = additionalAmount;
+        _contentCell.setText(Currencies.formatCurrency(Currencies.default_currency, (_amount+_additionalAmount)));
     }
 }

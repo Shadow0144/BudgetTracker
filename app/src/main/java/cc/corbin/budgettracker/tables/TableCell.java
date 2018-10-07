@@ -12,10 +12,12 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
@@ -31,6 +33,7 @@ public class TableCell extends RelativeLayout
 
     //private ProgressBar _progressBar;
     private AppCompatTextView _textView;
+    private AppCompatTextView _ellipsisTextView;
 
     public final static int DEFAULT_CELL = 0;
     public final static int HEADER_CELL = 1;
@@ -44,6 +47,8 @@ public class TableCell extends RelativeLayout
     private Context _context;
 
     private final int BUFFER = 20;
+
+    private boolean _ellipsisAdded;
 
     public TableCell(Context context)
     {
@@ -108,6 +113,8 @@ public class TableCell extends RelativeLayout
     private void setup(Context context, int cellType)
     {
         _context = context;
+
+        _ellipsisAdded = false;
 
         //_progressBar = new ProgressBar(context);
         _textView = new AppCompatTextView(context);
@@ -216,6 +223,33 @@ public class TableCell extends RelativeLayout
         {
             //_progressBar.setVisibility(INVISIBLE);
             _textView.setVisibility(VISIBLE);
+        }
+    }
+
+    public void addEllipsis()
+    {
+        if (!_ellipsisAdded)
+        {
+            _ellipsisTextView = new AppCompatTextView(_context);
+            _ellipsisTextView.setText(R.string.additional_items);
+            ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+            _ellipsisTextView.setLayoutParams(params);
+            _ellipsisTextView.setGravity(Gravity.END | Gravity.BOTTOM);
+            _ellipsisTextView.setTextAlignment(View.TEXT_ALIGNMENT_GRAVITY);
+            addView(_ellipsisTextView);
+            _ellipsisAdded = true;
+        }
+        else { }
+    }
+
+    public void removeEllipsis()
+    {
+        if (_ellipsisAdded)
+        {
+            removeView(_ellipsisTextView);
+            _ellipsisAdded = false;
         }
     }
 }
