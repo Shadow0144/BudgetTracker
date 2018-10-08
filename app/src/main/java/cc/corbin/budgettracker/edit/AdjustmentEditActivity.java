@@ -64,6 +64,7 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
     public final static String LINKED_BUDGET_INTENT = "LinkedBudget";
     public final static String GROUP_INDEX_INTENT = "GroupIndex";
     public final static String CHILD_INDEX_INTENT = "ChildIndex";
+    public final static String TRANSFER_INTENT = "Transfer";
 
     private int _month;
     private int _year;
@@ -89,11 +90,22 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
 
     private float _amount;
 
+    private boolean _transferTo;
+    private LinearLayout _transferLayout;
+    private TextView _transferHeaderTextView;
+    private Spinner _transferCategorySpinner;
+    private Button _transferDirectionButton;
+    private TextView _currentDetailsTextView;
+    private TextView _sisterDetailsTextView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_adjustment_edit);
+
+        _typeTabLayout = findViewById(R.id.typeTabLayout);
+        _typeTabLayout.addOnTabSelectedListener(this);
 
         Intent intent = getIntent();
         int type = intent.getIntExtra(TYPE_INTENT, -1);
@@ -118,6 +130,8 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
                 _groupIndex = intent.getIntExtra(GROUP_INDEX_INTENT, -1);
                 _childIndex = intent.getIntExtra(CHILD_INDEX_INTENT, -1);
 
+                // TODO : Disable third tab
+
                 findViewById(R.id.deleteButton).setEnabled(true); // Enable deleting
 
                 if (_adjustment == null || _groupIndex == -1 || _childIndex == -1)
@@ -141,28 +155,63 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
                 break;
         }
 
-        _typeTabLayout = findViewById(R.id.typeTabLayout);
-        _typeTabLayout.addOnTabSelectedListener(this);
+        _transferTo = true;
+        _transferLayout = findViewById(R.id.transferLayout);
+        _transferHeaderTextView = findViewById(R.id.transferHeaderTextView);
+        _transferDirectionButton = findViewById(R.id.transferDirectionButton);
+        _currentDetailsTextView = findViewById(R.id.currentDetailsTextView);
+        _sisterDetailsTextView = findViewById(R.id.sisterDetailsTextView);
 
         setupAmount();
         setupCategories();
         setupNote();
+
+        _yearTextView = findViewById(R.id.yearTextView);
+        _yearTextView.setText("" + _transferYear);
+
+        _monthTextView = findViewById(R.id.monthTextView);
+        _monthTextView.setText(String.format("%02d", _transferMonth)); // TODO
+
+        updateTransferInformation();
     }
 
     public void onAccept(View v)
     {
-        if (_typeTabLayout.getSelectedTabPosition() == 1)
-        {
-            _amount = -_amount;
-        }
-        else { }
-        _adjustment.setAmount(_amount);
-        _adjustment.setNote(_noteEditText.getText().toString());
-
         Intent intent = new Intent();
-        intent.putExtra(BUDGET_INTENT, _adjustment);
         intent.putExtra(GROUP_INDEX_INTENT, _groupIndex);
         intent.putExtra(CHILD_INDEX_INTENT, _childIndex);
+
+        String note = _noteEditText.getText().toString();
+
+        int tabPosition = _typeTabLayout.getSelectedTabPosition();
+        switch (tabPosition)
+        {
+            case 0:
+                // Do nothing
+                break;
+            case 1:
+                _amount = -_amount;
+                break;
+            case 2:
+                if (!_transferTo) // Flip the amount if transferring into this category and month
+                {
+                    _amount = -_amount;
+                }
+                else { }
+                BudgetEntity sisterAdjustment = new BudgetEntity
+                        (_transferMonth, _transferYear, _amount,
+                                _transferCategory, Categories.getCategories()[_transferCategory]);
+                sisterAdjustment.setNote(note); // Set the note
+                sisterAdjustment.setAdjustment(1); // Make sure to set it as an adjustment
+                intent.putExtra(LINKED_BUDGET_INTENT, sisterAdjustment);
+                _amount = -_amount;
+                break;
+        }
+        _adjustment.setAmount(_amount);
+        _adjustment.setNote(note);
+
+        intent.putExtra(BUDGET_INTENT, _adjustment);
+        intent.putExtra(TRANSFER_INTENT, (tabPosition == 2));
 
         setResult(MonthViewActivity.SUCCEED, intent);
 
@@ -216,6 +265,12 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
 
     private void setupAmount()
     {
+        TextView categoryTextView = findViewById(R.id.categoryTextView);
+        categoryTextView.setText(_adjustment.getCategoryName());
+
+        TextView dateTextView = findViewById(R.id.dateTextView);
+        dateTextView.setText(String.format("%02d", _month) + " / " + String.format("%04d", _year)); // TODO
+
         _signTextView = findViewById(R.id.signTextView);
         _amountEditText = findViewById(R.id.amountEditText);
 
@@ -235,50 +290,27 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
 
     private void setupCategories()
     {
-        TextView categoryTextView = findViewById(R.id.categoryTextView);
-        categoryTextView.setText(_adjustment.getCategoryName());
-
-        TextView dateTextView = findViewById(R.id.dateTextView);
-        dateTextView.setText(_adjustment.getMonth() + "/" + _adjustment.getYear()); // TODO
-
         // Setup the categories
-        final RadioGroup categoriesHolder = findViewById(R.id.categoriesHolder);
-        categoriesHolder.removeAllViews();
-        categoriesHolder.clearCheck();
-        final String[] categories = Categories.getCategories();
-        int count = categories.length;
-        for (int i = 0; i < count; i++)
+        _transferCategorySpinner = findViewById(R.id.categorySpinner);
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
+                this, android.R.layout.simple_spinner_item, Categories.getCategories());
+        _transferCategorySpinner.setAdapter(spinnerArrayAdapter);
+        _transferCategorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
-            final RadioButton button = new RadioButton(this);
-            button.setId(i);
-            button.setText(categories[i]);
-            categoriesHolder.addView(button);
-            categoriesHolder.check(button.getId());
-        }
-
-        // Setup the values if they already exist
-        if (_adjustment != null)
-        {
-            String categoryName = _adjustment.getCategoryName();
-            for (int i = 0; i < count; i++)
-            { // TODO - Check if this is the best way to compare this
-                RadioButton button = ((RadioButton) (categoriesHolder.getChildAt(i)));
-                String category = button.getText().toString();
-                if (categoryName.equals(category))
-                {
-                    categoriesHolder.check(button.getId());
-                    break;
-                }
-                else { }
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+            {
+                _transferCategory = position;
+                updateTransferInformation();
             }
-        }
-        else { }
 
-        _yearTextView = findViewById(R.id.yearTextView);
-        _yearTextView.setText("" + _transferYear);
-
-        _monthTextView = findViewById(R.id.monthTextView);
-        _monthTextView.setText("" + _transferMonth); // TODO
+            @Override
+            public void onNothingSelected(AdapterView<?> parent)
+            {
+                // Do nothing
+            }
+        });
+        _transferCategorySpinner.setSelection(Categories.getCategories().length-1);
     }
 
     private void setupNote()
@@ -312,13 +344,15 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
         {
             case 0:
                text = getString(R.string.positive);
+               _transferLayout.setVisibility(View.GONE);
                 break;
             case 1:
                 text = getString(R.string.negative);
+                _transferLayout.setVisibility(View.GONE);
                 break;
             case 2:
-                // Ambiguous TODO
-                text = getString(R.string.positive);
+                text = "";
+                _transferLayout.setVisibility(View.VISIBLE);
                 break;
         }
         text += Currencies.symbols[Currencies.default_currency];
@@ -339,8 +373,8 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
             _transferMonth = 12;
         }
         else { }
-        String text = String.format("%02d", _transferMonth);
-        _monthTextView.setText(text);
+        _monthTextView.setText(String.format("%02d", _transferMonth));
+        updateTransferInformation();
     }
 
     public void nextMonth(View v)
@@ -351,21 +385,42 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
             _transferMonth = 1;
         }
         else { }
-        String text = String.format("%02d", _transferMonth);
-        _monthTextView.setText(text);
+        _monthTextView.setText(String.format("%02d", _transferMonth));
+        updateTransferInformation();
     }
 
     public void previousYear(View v)
     {
         _transferYear--;
-        String text = String.format("%02d", _transferYear);
-        _yearTextView.setText(text);
+        _yearTextView.setText(String.format("%04d", _transferYear));
+        updateTransferInformation();
     }
 
     public void nextYear(View v)
     {
         _transferYear++;
-        String text = String.format("%02d", _transferYear);
-        _yearTextView.setText(text);
+        _yearTextView.setText(String.format("%04d", _transferYear));
+        updateTransferInformation();
+    }
+
+    public void changeTransferDirection(View v)
+    {
+        _transferTo = !_transferTo;
+        if (_transferTo)
+        {
+            _transferHeaderTextView.setText(R.string.transfer_to);
+            _transferDirectionButton.setText(R.string.rightarrow);
+        }
+        else
+        {
+            _transferHeaderTextView.setText(R.string.transfer_from);
+            _transferDirectionButton.setText(R.string.leftarrow);
+        }
+    }
+
+    private void updateTransferInformation()
+    {
+        _currentDetailsTextView.setText(String.format("%02d", _month) + " / " + String.format("%04d", _year) + " : " + Categories.getCategories()[_category]);
+        _sisterDetailsTextView.setText(String.format("%02d", _transferMonth) + " / " + String.format("%04d", _transferYear) + " : " + Categories.getCategories()[_transferCategory]);
     }
 }

@@ -263,6 +263,20 @@ public class DatabaseThread
                 updateYearBudget(event.getYear(), event.getCategory());
                 break;
 
+            case insertTransfer:
+                // Insert the entities to get IDs, then update them with their new links
+                entities = new ArrayList<BudgetEntity>();
+                entities.add(event.getEntity());
+                entities.add(event.getLinkedEntity());
+                long[] ids = _dbB.budgetDao().insertAll(entities);
+                // Need to set the IDs first to update the linkage
+                entities.get(0).setId(ids[0]);
+                entities.get(0).setSisterAdjustment(ids[1]);
+                entities.get(1).setId(ids[1]);
+                entities.get(1).setSisterAdjustment(ids[0]);
+                _dbB.budgetDao().update(entities);
+                break;
+
             case update:
                 _dbB.budgetDao().update(event.getEntity());
                 updateYearBudget(event.getYear(), event.getCategory());
@@ -271,6 +285,12 @@ public class DatabaseThread
             case remove:
                 _dbB.budgetDao().delete(event.getEntity());
                 updateYearBudget(event.getYear(), event.getCategory());
+                break;
+
+            case removeTransfer:
+                // Delete the adjustment and the linked adjustment
+                _dbB.budgetDao().delete(event.getEntity());
+                _dbB.budgetDao().delete(event.getEntity().getSisterAdjustment());
                 break;
 
             case renameCategory:

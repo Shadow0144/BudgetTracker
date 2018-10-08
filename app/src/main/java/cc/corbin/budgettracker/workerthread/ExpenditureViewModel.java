@@ -7,6 +7,8 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -232,6 +234,13 @@ public class ExpenditureViewModel extends ViewModel
     public void insertBudgetEntity(MutableLiveData<List<BudgetEntity>> mutableLiveData, BudgetEntity budgetEntity)
     {
         BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.insert, _year, _month, budgetEntity);
+        _budEvents.add(event);
+        processQueue();
+    }
+
+    public void insertLinkedBudgetEntities(MutableLiveData<List<BudgetEntity>> mutableLiveData, BudgetEntity budgetEntity, BudgetEntity linkedBudgetEntity)
+    {
+        BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.insertTransfer, _year, _month, budgetEntity, linkedBudgetEntity);
         _budEvents.add(event);
         processQueue();
     }

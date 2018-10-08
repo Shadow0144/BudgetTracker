@@ -15,8 +15,10 @@ public class BudgetDatabaseEvent
     {
         query,
         insert,
+        insertTransfer,
         update,
         remove,
+        removeTransfer,
         renameCategory,
         mergeCategory,
         addCategory,
@@ -44,6 +46,7 @@ public class BudgetDatabaseEvent
     private EventType _eventType;
     private QueryType _queryType;
     private BudgetEntity _entity;
+    private BudgetEntity _linkedEntity;
     private List<BudgetEntity> _entities;
 
     public BudgetDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
@@ -57,6 +60,18 @@ public class BudgetDatabaseEvent
         _category = entity.getCategory(); // Set this in case of updating
         _id = id++;
         _entities = null;
+    }
+
+    public BudgetDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
+                               int year, int month, BudgetEntity entity, BudgetEntity linkedEntity)
+    {
+        _mutableLiveData = mutableLiveData;
+        _eventType = eventType;
+        _year = year;
+        _month = month;
+        _entity = entity;
+        _linkedEntity = linkedEntity;
+        _id = id++;
     }
 
     public BudgetDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
@@ -136,6 +151,11 @@ public class BudgetDatabaseEvent
     public BudgetEntity getEntity()
     {
         return _entity;
+    }
+
+    public BudgetEntity getLinkedEntity()
+    {
+        return _linkedEntity;
     }
 
     public EventType getEventType()

@@ -95,6 +95,14 @@
     <string name="reduction">Reduction</string>
     <string name="transfer">Transfer</string>
 
+    <string name="convert_currency">Convert Currency</string>
+
+    <string name="transfer_direction">Transfer Direction:</string>
+    <string name="transfer_from">Transfer From:</string>
+    <string name="transfer_to">Transfer To:</string>
+    <string name="transfer_date">Transfer Date:</string>
+    <string name="transfer_category">Transfer Category:</string>
+
     <string name="additional_items">+&#8230;</string>
 
     <string name="export_month">Export Month</string>

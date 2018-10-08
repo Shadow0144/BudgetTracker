@@ -64,8 +64,9 @@ public interface BudgetDao
             " )")
     List<BudgetEntity> getTimeSpan(int year, int sMonth, int eMonth, int category);
 
+    // Query for finding the budgets for month view
     @Query("SELECT * FROM budgetentity WHERE ( " +
-            "category = (:category) " +
+            "category = (:category)  AND adjustment = 0 " +
             "AND (year < (:year) OR (year = (:year) AND month <= (:month))) AND month != 0" +
             " )")
     List<BudgetEntity> getCategoryBeforeMonth(int year, int month, int category);
@@ -107,6 +108,9 @@ public interface BudgetDao
 
     @Delete
     void delete(BudgetEntity budget);
+
+    @Query("DELETE FROM budgetentity WHERE id = (:id)")
+    void delete(long id);
 
     @Update
     void update(BudgetEntity... budgets);

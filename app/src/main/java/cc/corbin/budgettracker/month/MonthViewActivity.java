@@ -73,7 +73,6 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
     public final static int SUCCEED = 0;
     public final static int CANCEL = 1;
     public final static int DELETE = 2;
-    public final static int SUCCEED_TRANSFER = 3;
     public final static int FAILURE = -1;
 
     private int _month;
@@ -577,15 +576,18 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
             {
                 if (resultCode == SUCCEED)
                 {
-                    BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
-                    _viewModel.insertBudgetEntity(_budgets, budgetEntity);
-                }
-                else if (resultCode == SUCCEED_TRANSFER)
-                {
-                    BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
-                    BudgetEntity linkedBudgetEntity = data.getParcelableExtra(AdjustmentEditActivity.LINKED_BUDGET_INTENT);
-                    _viewModel.insertBudgetEntity(_budgets, budgetEntity);
-                    _viewModel.insertBudgetEntity(_budgets, linkedBudgetEntity);
+                    boolean transfer = data.getBooleanExtra(AdjustmentEditActivity.TRANSFER_INTENT, false);
+                    if (!transfer)
+                    {
+                        BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
+                        _viewModel.insertBudgetEntity(_budgets, budgetEntity);
+                    }
+                    else
+                    {
+                        BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
+                        BudgetEntity linkedBudgetEntity = data.getParcelableExtra(AdjustmentEditActivity.LINKED_BUDGET_INTENT);
+                        _viewModel.insertLinkedBudgetEntities(_budgets, budgetEntity, linkedBudgetEntity);
+                    }
                 }
                 else { }
             }
