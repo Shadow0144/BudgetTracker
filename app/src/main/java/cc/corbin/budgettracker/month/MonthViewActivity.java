@@ -596,12 +596,32 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
                 if (resultCode == SUCCEED)
                 {
                     BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
-                    _viewModel.updateBudgetEntity(_budgets, budgetEntity);
+                    boolean transfer = data.getBooleanExtra(AdjustmentEditActivity.TRANSFER_INTENT, false);
+
+                    if (!transfer)
+                    {
+                        _viewModel.updateBudgetEntity(_budgets, budgetEntity);
+                    }
+                    else
+                    {
+                        BudgetEntity linkedBudgetEntity = data.getParcelableExtra(AdjustmentEditActivity.LINKED_BUDGET_INTENT);
+                        _viewModel.updateLinkedBudgetEntities(_budgets, budgetEntity, linkedBudgetEntity);
+                    }
                 }
                 else if (resultCode == DELETE) // Delete can only occur from an edit
                 {
                     BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
-                    _viewModel.removeBudgetEntity(_budgets, budgetEntity);
+                    boolean transfer = data.getBooleanExtra(AdjustmentEditActivity.TRANSFER_INTENT, false);
+
+                    if (!transfer)
+                    {
+                        _viewModel.removeBudgetEntity(_budgets, budgetEntity);
+                    }
+                    else
+                    {
+                        BudgetEntity linkedBudgetEntity = data.getParcelableExtra(AdjustmentEditActivity.LINKED_BUDGET_INTENT);
+                        _viewModel.removeLinkedBudgetEntities(_budgets, budgetEntity, linkedBudgetEntity);
+                    }
                 }
                 else { }
             }

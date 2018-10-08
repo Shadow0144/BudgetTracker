@@ -1,30 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.widget.LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/adjustmentLayout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="10dp"
-    android:paddingStart="5dp"
-    android:paddingEnd="5dp">
+    android:layout_height="wrap_content">
 
     <TextView
         android:id="@+id/amountTextView"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:paddingStart="15dp"
         android:paddingEnd="15dp"
         android:text=""
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/noteTextView"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:visibility="gone" />
+        android:layout_marginStart="8dp"
+        android:paddingStart="30dp"
+        android:paddingEnd="5dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/amountTextView" />
 
-</android.widget.LinearLayout>
+    <TextView
+        android:id="@+id/linkedTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="8dp"
+        android:gravity="center_vertical|end"
+        android:text="@string/linked"
+        android:textAlignment="gravity"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/amountTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/amountTextView"
+        app:layout_constraintVertical_bias="0.0" />
+
+</android.support.constraint.ConstraintLayout>

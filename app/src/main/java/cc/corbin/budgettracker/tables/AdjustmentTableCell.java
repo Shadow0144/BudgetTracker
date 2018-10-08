@@ -4,6 +4,8 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -11,7 +13,7 @@ import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 
-public class AdjustmentTableCell extends LinearLayout
+public class AdjustmentTableCell extends FrameLayout
 {
     private final String TAG = "AdjustmentTableCell";
 
@@ -23,6 +25,7 @@ public class AdjustmentTableCell extends LinearLayout
 
     private TextView _amountTextView;
     private TextView _noteTextView;
+    private TextView _linkedTextView;
 
     public AdjustmentTableCell(Context context)
     {
@@ -69,16 +72,28 @@ public class AdjustmentTableCell extends LinearLayout
             _noteTextView.setVisibility(VISIBLE);
         }
         else { }
+        if (_budgetEntity.getSisterAdjustment() > -1)
+        {
+            _linkedTextView.setVisibility(VISIBLE);
+        }
+        else { }
     }
 
     private void setup()
     {
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        setLayoutParams(params);
+
         LayoutInflater inflater = LayoutInflater.from(_context);
         final View view = inflater.inflate(R.layout.adjustment, null);
         addView(view);
 
         _amountTextView = findViewById(R.id.amountTextView);
         _noteTextView = findViewById(R.id.noteTextView);
+        _linkedTextView = findViewById(R.id.linkedTextView);
     }
 
     public void setIndices(int groupIndex, int childIndex)

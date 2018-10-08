@@ -70,6 +70,8 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
     private int _year;
     private int _category;
 
+    private boolean _editing;
+
     private int _transferMonth;
     private int _transferYear;
     private int _transferCategory;
@@ -80,6 +82,7 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
 
     private TabLayout _typeTabLayout;
     private TextView _signTextView;
+    private TextView _currencyTextView;
     private NumericalFormattedEditText _amountEditText;
     private EditText _noteEditText;
 
@@ -98,6 +101,9 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
     private TextView _currentDetailsTextView;
     private TextView _sisterDetailsTextView;
 
+    private Button _signSwitchButton;
+    private boolean _negative;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -107,12 +113,16 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
         _typeTabLayout = findViewById(R.id.typeTabLayout);
         _typeTabLayout.addOnTabSelectedListener(this);
 
+        _signTextView = findViewById(R.id.signTextView);
+
         Intent intent = getIntent();
         int type = intent.getIntExtra(TYPE_INTENT, -1);
         setResult(MonthViewActivity.CANCEL); // In case of backing out
         switch (type)
         {
             case MonthViewActivity.CREATE_ADJUSTMENT:
+                _editing = false;
+
                 _month = intent.getIntExtra(MONTH_INTENT, 0);
                 _year = intent.getIntExtra(YEAR_INTENT, 0);
                 _transferMonth = _month;
@@ -126,13 +136,30 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
                 break;
 
             case MonthViewActivity.EDIT_ADJUSTMENT:
+                _editing = true;
+
                 _adjustment = intent.getParcelableExtra(BUDGET_INTENT);
                 _groupIndex = intent.getIntExtra(GROUP_INDEX_INTENT, -1);
                 _childIndex = intent.getIntExtra(CHILD_INDEX_INTENT, -1);
 
-                // TODO : Disable third tab
-
+                _typeTabLayout.setVisibility(View.GONE); // Disable the tabs
                 findViewById(R.id.deleteButton).setEnabled(true); // Enable deleting
+                _signSwitchButton = findViewById(R.id.signSwitchButton);
+                _signSwitchButton.setVisibility(View.VISIBLE);
+                _signTextView.setVisibility(View.GONE);
+
+                float amount = _adjustment.getAmount();
+                if (amount > 0.0f)
+                {
+                    _negative = false;
+                    _signSwitchButton.setText(R.string.positive);
+                }
+                else
+                {
+                    _negative = true;
+                    _signSwitchButton.setText(R.string.negative);
+                    _adjustment.setAmount(-amount);
+                }
 
                 if (_adjustment == null || _groupIndex == -1 || _childIndex == -1)
                 {
@@ -177,6 +204,18 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
 
     public void onAccept(View v)
     {
+        if (!_editing)
+        {
+            acceptCreate();
+        }
+        else
+        {
+            acceptEdit();
+        }
+    }
+
+    private void acceptCreate()
+    {
         Intent intent = new Intent();
         intent.putExtra(GROUP_INDEX_INTENT, _groupIndex);
         intent.putExtra(CHILD_INDEX_INTENT, _childIndex);
@@ -212,6 +251,45 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
 
         intent.putExtra(BUDGET_INTENT, _adjustment);
         intent.putExtra(TRANSFER_INTENT, (tabPosition == 2));
+
+        setResult(MonthViewActivity.SUCCEED, intent);
+
+        DayViewActivity.dataInvalid = true;
+        MonthViewActivity.dataInvalid = true;
+        YearViewActivity.dataInvalid = true;
+        TotalViewActivity.dataInvalid = true;
+
+        finish();
+    }
+
+    private void acceptEdit()
+    {
+        Intent intent = new Intent();
+        intent.putExtra(GROUP_INDEX_INTENT, _groupIndex);
+        intent.putExtra(CHILD_INDEX_INTENT, _childIndex);
+
+        String note = _noteEditText.getText().toString();
+
+        if (_negative)
+        {
+            _amount *= -1;
+        }
+        else { }
+        _adjustment.setAmount(_amount);
+        _adjustment.setNote(note);
+
+        intent.putExtra(BUDGET_INTENT, _adjustment);
+
+        long linkedAdjustmentID = _adjustment.getSisterAdjustment();
+        intent.putExtra(TRANSFER_INTENT, (linkedAdjustmentID > -1));
+        if (linkedAdjustmentID > -1)
+        {
+            BudgetEntity sisterAdjustment = new BudgetEntity(-1, -1, -_amount,
+                    -1, ""); // Only the amount and note values will be updated
+            sisterAdjustment.setNote(note);
+            intent.putExtra(LINKED_BUDGET_INTENT, sisterAdjustment);
+        }
+        else { }
 
         setResult(MonthViewActivity.SUCCEED, intent);
 
@@ -271,11 +349,10 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
         TextView dateTextView = findViewById(R.id.dateTextView);
         dateTextView.setText(String.format("%02d", _month) + " / " + String.format("%04d", _year)); // TODO
 
-        _signTextView = findViewById(R.id.signTextView);
+        _currencyTextView = findViewById(R.id.currencyTextView);
+        _currencyTextView.setText(Currencies.symbols[Currencies.default_currency]);
+
         _amountEditText = findViewById(R.id.amountEditText);
-
-        onTabSelected(null);
-
         _amount = 0.0f;
         if (_adjustment != null)
         {
@@ -339,24 +416,21 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
     @Override
     public void onTabSelected(TabLayout.Tab tab)
     {
-        String text = "";
         switch (_typeTabLayout.getSelectedTabPosition())
         {
             case 0:
-               text = getString(R.string.positive);
+               _signTextView.setText(R.string.positive);
                _transferLayout.setVisibility(View.GONE);
                 break;
             case 1:
-                text = getString(R.string.negative);
+                _signTextView.setText(R.string.negative);
                 _transferLayout.setVisibility(View.GONE);
                 break;
             case 2:
-                text = "";
+                _signTextView.setText("");
                 _transferLayout.setVisibility(View.VISIBLE);
                 break;
         }
-        text += Currencies.symbols[Currencies.default_currency];
-        _signTextView.setText(text);
     }
 
     @Override
@@ -422,5 +496,18 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
     {
         _currentDetailsTextView.setText(String.format("%02d", _month) + " / " + String.format("%04d", _year) + " : " + Categories.getCategories()[_category]);
         _sisterDetailsTextView.setText(String.format("%02d", _transferMonth) + " / " + String.format("%04d", _transferYear) + " : " + Categories.getCategories()[_transferCategory]);
+    }
+
+    public void switchSign(View v)
+    {
+        _negative = !_negative;
+        if (_negative)
+        {
+            _signSwitchButton.setText(R.string.negative);
+        }
+        else
+        {
+            _signSwitchButton.setText(R.string.positive);
+        }
     }
 }

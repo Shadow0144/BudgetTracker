@@ -282,15 +282,25 @@ public class DatabaseThread
                 updateYearBudget(event.getYear(), event.getCategory());
                 break;
 
+            case updateTransfer:
+                BudgetEntity entity = event.getEntity();
+                BudgetEntity linkedEntity = event.getLinkedEntity();
+                _dbB.budgetDao().updateAmountAndNote(entity.getId(), entity.getAmount(), entity.getNote());
+                _dbB.budgetDao().updateAmountAndNote(linkedEntity.getId(), linkedEntity.getAmount(), linkedEntity.getNote());
+                updateYearBudget(event.getYear(), event.getCategory());
+                break;
+
             case remove:
                 _dbB.budgetDao().delete(event.getEntity());
                 updateYearBudget(event.getYear(), event.getCategory());
                 break;
 
             case removeTransfer:
-                // Delete the adjustment and the linked adjustment
-                _dbB.budgetDao().delete(event.getEntity());
-                _dbB.budgetDao().delete(event.getEntity().getSisterAdjustment());
+                entities = new ArrayList<BudgetEntity>();
+                entities.add(event.getEntity());
+                entities.add(event.getLinkedEntity());
+                _dbB.budgetDao().delete(entities);
+                updateYearBudget(event.getYear(), event.getCategory());
                 break;
 
             case renameCategory:

@@ -109,6 +109,9 @@ public interface BudgetDao
     @Delete
     void delete(BudgetEntity budget);
 
+    @Delete
+    void delete(List<BudgetEntity> budgets);
+
     @Query("DELETE FROM budgetentity WHERE id = (:id)")
     void delete(long id);
 
@@ -117,4 +120,7 @@ public interface BudgetDao
 
     @Update
     void update(List<BudgetEntity> budgets);
+
+    @Query("UPDATE budgetentity SET amount = (:amount) AND note = (:note) WHERE id = (:id)")
+    void updateAmountAndNote(long id, float amount, String note);
 }

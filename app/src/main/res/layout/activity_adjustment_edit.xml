@@ -73,9 +73,26 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
+                <Button
+                    android:id="@+id/signSwitchButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="35dp"
+                    android:layout_weight="1"
+                    android:onClick="switchSign"
+                    android:visibility="gone" />
+
                 <TextView
                     android:id="@+id/signTextView"
-                    android:layout_width="50dp"
+                    android:layout_width="10dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/positive"
+                    android:textAlignment="textEnd"
+                    android:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/currencyTextView"
+                    android:layout_width="30dp"
                     android:layout_height="wrap_content"
                     android:textAlignment="textEnd"
                     android:textSize="24sp" />
@@ -103,7 +120,7 @@
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
                 android:orientation="vertical"
-                android:visibility="visible">
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/transferHeaderTextView"

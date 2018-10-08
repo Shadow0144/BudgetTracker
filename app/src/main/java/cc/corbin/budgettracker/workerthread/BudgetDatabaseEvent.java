@@ -17,6 +17,7 @@ public class BudgetDatabaseEvent
         insert,
         insertTransfer,
         update,
+        updateTransfer,
         remove,
         removeTransfer,
         renameCategory,

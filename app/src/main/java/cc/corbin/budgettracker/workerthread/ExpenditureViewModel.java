@@ -252,9 +252,23 @@ public class ExpenditureViewModel extends ViewModel
         processQueue();
     }
 
+    public void updateLinkedBudgetEntities(MutableLiveData<List<BudgetEntity>> mutableLiveData, BudgetEntity budgetEntity, BudgetEntity linkedBudgetEntity)
+    {
+        BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.updateTransfer, _year, _month, budgetEntity, linkedBudgetEntity);
+        _budEvents.add(event);
+        processQueue();
+    }
+
     public void removeBudgetEntity(MutableLiveData<List<BudgetEntity>> mutableLiveData, BudgetEntity budgetEntity)
     {
         BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.remove, _year, _month, budgetEntity);
+        _budEvents.add(event);
+        processQueue();
+    }
+
+    public void removeLinkedBudgetEntities(MutableLiveData<List<BudgetEntity>> mutableLiveData, BudgetEntity budgetEntity, BudgetEntity linkedBudgetEntity)
+    {
+        BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.removeTransfer, _year, _month, budgetEntity, linkedBudgetEntity);
         _budEvents.add(event);
         processQueue();
     }
