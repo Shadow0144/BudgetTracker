@@ -130,7 +130,7 @@ public class TotalViewActivity extends AppCompatActivity implements NavigationVi
             @Override
             public void onChanged(@Nullable float[] amounts)
             {
-                _yearlyTable.updateExpenditures(_startYear, amounts);
+                _yearlyTable.updateTotalExpenditures(_startYear, amounts);
 
                 String[] yearLabels = new String[amounts.length];
                 for (int i = 0; i < amounts.length; i++)

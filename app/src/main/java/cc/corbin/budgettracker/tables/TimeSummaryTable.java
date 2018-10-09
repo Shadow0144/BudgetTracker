@@ -38,6 +38,7 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
         total,
         custom
     }
+
     private timeframe _timeframe;
 
     private int _day;
@@ -45,7 +46,7 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
     private int _year;
 
     private int _startDay;
-    private  int _startMonth;
+    private int _startMonth;
     private int _startYear;
     private int _endDay;
     private int _endMonth;
@@ -195,7 +196,7 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
                 intent.putExtra(MonthViewActivity.YEAR_INTENT, _year);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 _context.startActivity(intent);
-                ((YearViewActivity)_context).finish();
+                ((YearViewActivity) _context).finish();
                 break;
 
             case total:
@@ -330,7 +331,7 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
     {
         // Add the option to jump to the start of a week
         Calendar c = Calendar.getInstance();
-        c.set(_year, _month-1, 1);
+        c.set(_year, _month - 1, 1);
         int maxDays = c.getActualMaximum(Calendar.DATE);
         _rows = 4 + (maxDays > 28 ? 1 : 0);
 
@@ -340,20 +341,22 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
         String week = getResources().getString(R.string.week) + " ";
         for (int i = 0; i < _rows; i++) // Add a row for each week
         {
-            addContentRow((week + (i+1)), (i+1));
+            addContentRow((week + (i + 1)), (i + 1));
         }
 
         if (_rows == 4)
         {
             addContentRow((week + 5), 5);
         }
-        else { }
+        else
+        {
+        }
     }
 
     private void setupMonthly()
     {
-        // Add the extras row
-        addExtrasRow();
+        // Do not add the extras row
+        //addExtrasRow();
 
         DateFormatSymbols dfs = new DateFormatSymbols();
         String[] months = dfs.getMonths();
@@ -361,7 +364,7 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
         _rows = 12;
         for (int i = 0; i < 12; i++) // Add a row for each month
         {
-            addContentRow(months[i], (i+1));
+            addContentRow(months[i], (i + 1));
         }
     }
 
@@ -420,9 +423,9 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
         setupTable();
     }
 
-    public void updateExpenditures(float[] amounts)
+    public void updateWeeklyExpenditures(float[] amounts)
     {
-        if (_timeframe != timeframe.total)
+        if (_timeframe == timeframe.month)
         {
             float total = 0.0f;
             for (int i = 0; i < amounts.length; i++)
@@ -446,42 +449,86 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
         }
     }
 
-    // For use in the total table
-    public void updateExpenditures(int startYear, float[] amounts)
+    public void updateMonthlyExpenditures(float[] amounts)
     {
-        removeAllViews();
-
-        setupTitle();
-
-        setupHeaders();
-
-        _expenses = new ArrayList<Float>();
-        _budgetCells = new ArrayList<TableCell>();
-        _remainingCells = new ArrayList<TableCell>();
-
-        float total = 0.0f;
-        _startYear = startYear;
-        if (amounts.length == 0)
+        int rowsToInclude = _rows; // Do not include months in the future in the budget
+        if (_year == Calendar.getInstance().get(Calendar.YEAR))
         {
-            _endYear = _startYear;
-            addContentRow("" + _endYear, 0.0f, startYear);
+            rowsToInclude = Calendar.getInstance().get(Calendar.MONTH)+1;
+        }
+        else { }
+        TableCell expenseCell;
+        if (_timeframe == timeframe.year)
+        {
+            float total = 0.0f;
+            for (int i = 0; i < amounts.length; i++)
+            {
+                _expenses.set(i, amounts[i]);
+                expenseCell = _expenseCells.get(i);
+                expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, amounts[i]));
+                expenseCell.setLoading(false);
+                if (i < rowsToInclude) // Ignore future purchases
+                {
+                    total += amounts[i];
+                }
+                else
+                {
+                    expenseCell.setTextGray();
+                }
+            }
+            _totalExpenses = total;
+            _totalExpenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+            _totalExpenseCell.setLoading(false);
         }
         else
         {
-            _endYear = startYear + amounts.length - 1;
-            for (int i = 0; i < amounts.length; i++)
-            {
-                // One row per year
-                addContentRow(("" + (i + startYear)), amounts[i], (i + startYear));
-
-                total += amounts[i];
-            }
+            Log.e(TAG, "Do not use this function with this table type");
         }
+    }
 
-        setupTotalRow();
-        _totalExpenses = total;
-        _totalExpenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
-        _totalExpenseCell.setLoading(false);
+    // For use in the total table
+    public void updateTotalExpenditures(int startYear, float[] amounts)
+    {
+        if (_timeframe == timeframe.total)
+        {
+            removeAllViews();
+
+            setupTitle();
+
+            setupHeaders();
+
+            _expenses = new ArrayList<Float>();
+            _budgetCells = new ArrayList<TableCell>();
+            _remainingCells = new ArrayList<TableCell>();
+
+            float total = 0.0f;
+            _startYear = startYear;
+            if (amounts.length == 0)
+            {
+                _endYear = _startYear;
+                addContentRow("" + _endYear, 0.0f, startYear);
+            }
+            else
+            {
+                _endYear = startYear + amounts.length - 1;
+                for (int i = 0; i < amounts.length; i++)
+                {
+                    // One row per year
+                    addContentRow(("" + (i + startYear)), amounts[i], (i + startYear));
+
+                    total += amounts[i];
+                }
+            }
+
+            setupTotalRow();
+            _totalExpenses = total;
+            _totalExpenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
+            _totalExpenseCell.setLoading(false);
+        }
+        else
+        {
+            Log.e(TAG, "Do not use this function with this table type");
+        }
     }
 
     private void addExtrasRow()
@@ -604,7 +651,7 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
         {
             _budgetCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, budget));
             _budgetCells.get(i).setLoading(false);
-            float remaining = budget - _expenses.get(i+1); // + 1 for extras
+            float remaining = budget - _expenses.get(i+1); // +1 for extras
             _remainingCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
             _remainingCells.get(i).setLoading(false);
         }
@@ -619,22 +666,49 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
     {
         int catSize = Categories.getCategories().length;
         float total = 0.0f;
+
+        int rowsToInclude = _rows; // Do not include months in the future in the budget
+        if (_year == Calendar.getInstance().get(Calendar.YEAR))
+        {
+            rowsToInclude = Calendar.getInstance().get(Calendar.MONTH)+1;
+        }
+        else { }
+
+        // Loop over the months
         for (int i = 0; i < _rows; i++)
         {
             float budget = 0.0f;
+            TableCell budgetTableCell = _budgetCells.get(i);
+            TableCell remainingTableCell = _remainingCells.get(i);
+
             // Sum up across categories
             for (int j = 0; j < catSize; j++)
             {
                 BudgetEntity entity = budgetEntities.get(i + (j * 13) + 1); // Skip the first item
                 budget += entity.getAmount();
             }
-            _budgetCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, budget));
-            _budgetCells.get(i).setLoading(false);
-            float remaining = budget - _expenses.get(i + 1); // + 1 for extras
-            _remainingCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
-            _remainingCells.get(i).setLoading(false);
-            total += budget;
+
+            budgetTableCell.setText(Currencies.formatCurrency(Currencies.default_currency, budget));
+            budgetTableCell.setLoading(false);
+
+            float remaining = budget - _expenses.get(i); // No extras in monthly
+            remainingTableCell.setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
+            remainingTableCell.setLoading(false);
+
+            // Do not include rows occurring in the future
+            if (i < rowsToInclude)
+            {
+                total += budget;
+            }
+            else
+            {
+                // Expense cell is set to gray elsewhere
+                budgetTableCell.setTextGray();
+                remainingTableCell.setTextGray();
+            }
         }
+
+        // Update the totals
         _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
         _totalBudgetCell.setLoading(false);
         float totalRemaining = total - _totalExpenses;

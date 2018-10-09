@@ -3,6 +3,7 @@ package cc.corbin.budgettracker.tables;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
@@ -251,5 +252,15 @@ public class TableCell extends RelativeLayout
             removeView(_ellipsisTextView);
             _ellipsisAdded = false;
         }
+    }
+
+    public void setTextGray()
+    {
+        _textView.setTextColor(Color.GRAY);
+    }
+
+    public void setTextBlack()
+    {
+        _textView.setTextColor(Color.BLACK);
     }
 }

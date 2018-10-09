@@ -96,7 +96,7 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Void,
                 break;
 
             case monthly:
-                sums = new float[13]; // + 1 for extras
+                sums = new float[12];
                 getMonthlySummations(sums, catSums, entities);
                 break;
 

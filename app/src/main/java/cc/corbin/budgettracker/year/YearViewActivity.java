@@ -139,7 +139,7 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
             @Override
             public void onChanged(@Nullable float[] amounts)
             {
-                _monthlyTable.updateExpenditures(amounts);
+                _monthlyTable.updateMonthlyExpenditures(amounts);
 
                 String[] monthLabels = new String[13];
                 monthLabels[0] = getString(R.string.extras);

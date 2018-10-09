@@ -164,7 +164,7 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
             @Override
             public void onChanged(@Nullable float[] amounts)
             {
-                _weeklyTable.updateExpenditures(amounts);
+                _weeklyTable.updateWeeklyExpenditures(amounts);
 
                 String[] weekLabels = new String[7];
                 weekLabels[0] = getString(R.string.extras);
