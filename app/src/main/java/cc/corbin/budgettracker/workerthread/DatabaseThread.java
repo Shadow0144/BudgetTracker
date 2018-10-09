@@ -285,6 +285,8 @@ public class DatabaseThread
             case updateTransfer:
                 BudgetEntity entity = event.getEntity();
                 BudgetEntity linkedEntity = event.getLinkedEntity();
+                Log.e(TAG, "Entity: ID: " + entity.getId() + " Amount: " + entity.getAmount() + " Note: " + entity.getNote());
+                Log.e(TAG, "LinkedEntity: ID: " + linkedEntity.getId() + " Amount: " + linkedEntity.getAmount() + " Note: " + linkedEntity.getNote());
                 _dbB.budgetDao().updateAmountAndNote(entity.getId(), entity.getAmount(), entity.getNote());
                 _dbB.budgetDao().updateAmountAndNote(linkedEntity.getId(), linkedEntity.getAmount(), linkedEntity.getNote());
                 updateYearBudget(event.getYear(), event.getCategory());

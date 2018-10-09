@@ -1,16 +1,9 @@
 package cc.corbin.budgettracker.edit;
 
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.Observer;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.InputFilter;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -18,39 +11,22 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.ProgressBar;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.math.RoundingMode;
-import java.text.NumberFormat;
-import java.time.Month;
-import java.util.Calendar;
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
-import cc.corbin.budgettracker.auxilliary.ConversionRateAsyncTask;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
-import cc.corbin.budgettracker.numericalformatting.MoneyValueFilter;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText;
 import cc.corbin.budgettracker.numericalformatting.NumericalFormattedCallback;
 import cc.corbin.budgettracker.day.DayViewActivity;
-import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.month.MonthViewActivity;
 import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.year.YearViewActivity;
-
-import static android.Manifest.permission.INTERNET;
 
 public class AdjustmentEditActivity extends AppCompatActivity implements NumericalFormattedCallback, TabLayout.OnTabSelectedListener
 {
@@ -147,6 +123,13 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
                 _signSwitchButton = findViewById(R.id.signSwitchButton);
                 _signSwitchButton.setVisibility(View.VISIBLE);
                 _signTextView.setVisibility(View.GONE);
+
+                // Show the linked editing text if this adjustment is linked to another one
+                if (_adjustment.getSisterAdjustment() > -1)
+                {
+                    findViewById(R.id.linkedTextView).setVisibility(View.VISIBLE);
+                }
+                else { }
 
                 float amount = _adjustment.getAmount();
                 if (amount > 0.0f)
@@ -286,6 +269,7 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
         {
             BudgetEntity sisterAdjustment = new BudgetEntity(-1, -1, -_amount,
                     -1, ""); // Only the amount and note values will be updated
+            sisterAdjustment.setId(linkedAdjustmentID); // Remember to set the ID
             sisterAdjustment.setNote(note);
             intent.putExtra(LINKED_BUDGET_INTENT, sisterAdjustment);
         }
@@ -309,7 +293,15 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
 
     public void onDelete(View v) // TODO - ask about linked budgets
     {
-        final View deleteView = getLayoutInflater().inflate(R.layout.popup_confirm_delete, null);
+        final View deleteView = getLayoutInflater().inflate(R.layout.popup_confirm_delete_adjustment, null);
+        if (_adjustment.getSisterAdjustment() > -1)
+        {
+            deleteView.findViewById(R.id.linkedTextView).setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            deleteView.findViewById(R.id.linkedTextView).setVisibility(View.GONE);
+        }
 
         _popupWindow = new PopupWindow(deleteView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         _popupWindow.setFocusable(true);
@@ -330,6 +322,16 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
         intent.putExtra(BUDGET_INTENT, _adjustment);
         intent.putExtra(GROUP_INDEX_INTENT, _groupIndex);
         intent.putExtra(CHILD_INDEX_INTENT, _childIndex);
+
+        long linkedAdjustmentID = _adjustment.getSisterAdjustment();
+        intent.putExtra(TRANSFER_INTENT, (linkedAdjustmentID > -1));
+        if (linkedAdjustmentID > -1)
+        {
+            BudgetEntity sisterAdjustment = new BudgetEntity(); // Only the ID is required
+            sisterAdjustment.setId(linkedAdjustmentID);
+            intent.putExtra(LINKED_BUDGET_INTENT, sisterAdjustment);
+        }
+        else { }
 
         setResult(MonthViewActivity.DELETE, intent);
 

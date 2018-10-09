@@ -244,7 +244,7 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
 
     public void onDelete(View v)
     {
-        final View deleteView = getLayoutInflater().inflate(R.layout.popup_confirm_delete, null);
+        final View deleteView = getLayoutInflater().inflate(R.layout.popup_confirm_delete_expenditure, null);
 
         _popupWindow = new PopupWindow(deleteView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         _popupWindow.setFocusable(true);

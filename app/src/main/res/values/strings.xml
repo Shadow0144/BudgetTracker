@@ -37,8 +37,12 @@
     <string name="editing_warning">Editing a category will take some time. Proceed?</string>
     <string name="proceed">Proceed</string>
 
-    <string name="delete_message">Delete this expenditure?</string>
+    <string name="delete_expenditure">Delete this expenditure?</string>
+    <string name="delete_adjustment">Delete this adjustment?</string>
+    <string name="delete_linked">The linked adjustment will also be deleted.</string>
     <string name="delete">Delete</string>
+
+    <string name="edit_linked">The linked adjustment will also be edited.</string>
 
     <string name="remove_category_warning">Remove this category? Doing so is permanent and cannot be reversed.</string>
     <string name="recategorization_warning">All expenditures of this category will be recategorized as follows:</string>

@@ -121,6 +121,6 @@ public interface BudgetDao
     @Update
     void update(List<BudgetEntity> budgets);
 
-    @Query("UPDATE budgetentity SET amount = (:amount) AND note = (:note) WHERE id = (:id)")
+    @Query("UPDATE budgetentity SET amount = (:amount), note = (:note) WHERE id = (:id)")
     void updateAmountAndNote(long id, float amount, String note);
 }
