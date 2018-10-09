@@ -25,14 +25,6 @@ public class ExpandableBudgetTable extends ExpandableListView
     private int _month;
     private int _year;
 
-    public enum timeframe
-    {
-        monthly,
-        yearly,
-        total
-    };
-    private timeframe _timeframe;
-
     private TableCell _titleCell;
     private BudgetTableRow _totalCell;
 
@@ -45,7 +37,6 @@ public class ExpandableBudgetTable extends ExpandableListView
 
         _month = 1;
         _year = 2018;
-        _timeframe = timeframe.monthly;
 
         setupTable();
     }
@@ -64,13 +55,11 @@ public class ExpandableBudgetTable extends ExpandableListView
         {
             _month = a.getInteger(R.styleable.Table_month, 1);
             _year = a.getInteger(R.styleable.Table_year, 2018);
-            _timeframe = timeframe.values()[a.getInteger(R.styleable.Table_timeframe, timeframe.monthly.ordinal())];
         }
         catch (Exception e)
         {
             _month = 1;
             _year = 2018;
-            _timeframe = timeframe.monthly;
         }
         finally
         {
@@ -87,7 +76,6 @@ public class ExpandableBudgetTable extends ExpandableListView
 
         _month = month;
         _year = year;
-        _timeframe = timeframe.monthly;
 
         setupTable();
     }
@@ -99,7 +87,6 @@ public class ExpandableBudgetTable extends ExpandableListView
 
         _month = 0;
         _year = year;
-        _timeframe = timeframe.yearly;
 
         setupTable();
     }
@@ -110,20 +97,13 @@ public class ExpandableBudgetTable extends ExpandableListView
 
         // Setup header
         _titleCell = new TableCell(_context, TableCell.TITLE_CELL);
-        if (_timeframe == ExpandableBudgetTable.timeframe.monthly)
-        {
-            _titleCell.setText(R.string.monthly_budget_title);
-        }
-        else
-        {
-            _titleCell.setText(R.string.yearly_budget_title);
-        }
+        _titleCell.setText(R.string.monthly_budget_title);
         addHeaderView(_titleCell);
 
-        _budgetsListAdapter = new BudgetExpandableListAdapter(_context, _year, _month, _timeframe);
+        _budgetsListAdapter = new BudgetExpandableListAdapter(_context, _year, _month);
         setAdapter(_budgetsListAdapter);
 
-        _totalCell = new BudgetTableRow(_context, _context.getString(R.string.total), -1, _year, _month, _timeframe);
+        _totalCell = new BudgetTableRow(_context, _context.getString(R.string.total), -1, _year, _month);
         _totalCell.setBold();
         addFooterView(_totalCell);
     }

@@ -26,7 +26,6 @@ public class BudgetTableRow extends LinearLayout
     private int _categoryNumber;
     private int _year;
     private int _month;
-    private ExpandableBudgetTable.timeframe _timeframe;
 
     private BudgetEntity _budgetEntity;
 
@@ -44,11 +43,10 @@ public class BudgetTableRow extends LinearLayout
         _categoryNumber = 0;
         _year = 0;
         _month = 0;
-        _timeframe = ExpandableBudgetTable.timeframe.monthly;
         setup();
     }
 
-    public BudgetTableRow(Context context, String category, int categoryNumber, int year, int month, ExpandableBudgetTable.timeframe timeframe)
+    public BudgetTableRow(Context context, String category, int categoryNumber, int year, int month)
     {
         super(context);
         _context = context;
@@ -56,11 +54,10 @@ public class BudgetTableRow extends LinearLayout
         _categoryNumber = categoryNumber;
         _year = year;
         _month = month;
-        _timeframe = timeframe;
         setup();
     }
 
-    public BudgetTableRow(Context context, String category, int categoryNumber, int year, int month, ExpandableBudgetTable.timeframe timeframe, BudgetEntity budgetEntity)
+    public BudgetTableRow(Context context, String category, int categoryNumber, int year, int month, BudgetEntity budgetEntity)
     {
         super(context);
         _context = context;
@@ -68,7 +65,6 @@ public class BudgetTableRow extends LinearLayout
         _categoryNumber = categoryNumber;
         _year = year;
         _month = month;
-        _timeframe = timeframe;
         setup();
         setBudgetEntity(budgetEntity);
     }
@@ -81,7 +77,6 @@ public class BudgetTableRow extends LinearLayout
         _categoryNumber = 0;
         _year = 0;
         _month = 0;
-        _timeframe = ExpandableBudgetTable.timeframe.monthly;
         setup();
     }
 
@@ -93,7 +88,6 @@ public class BudgetTableRow extends LinearLayout
         _categoryNumber = 0;
         _year = 0;
         _month = 0;
-        _timeframe = ExpandableBudgetTable.timeframe.monthly;
         setup();
     }
 
@@ -136,7 +130,7 @@ public class BudgetTableRow extends LinearLayout
         _budgetEntity = budgetEntity;
         _contentCell.setType(TableCell.DEFAULT_CELL);
 
-        if (_budgetEntity.getId() != 0)
+        if (_budgetEntity.getId() > -1)
         {
             setAmountAndDate(_budgetEntity.getAmount(), _budgetEntity.getYear(), _budgetEntity.getMonth());
         }
@@ -162,25 +156,13 @@ public class BudgetTableRow extends LinearLayout
         _contentCell.setText(Currencies.formatCurrency(Currencies.default_currency, amount));
         if (year != 0 && month != 0)
         {
-            if (_timeframe == ExpandableBudgetTable.timeframe.monthly)
+            String monthString = String.format("%02d", month);
+            _dateCell.setText(_context.getString(R.string.budget_as_of) + monthString + "/" + year);
+            if ((year == _year) && (month == _month) && (_budgetEntity != null)) // Do not set the total cell to special
             {
-                String monthString = String.format("%02d", month);
-                _dateCell.setText(_context.getString(R.string.budget_as_of) + monthString + "/" + year);
-                if ((year == _year) && (month == _month) && (_budgetEntity != null)) // Do not set the total cell to special
-                {
-                    _contentCell.setType(TableCell.SPECIAL_CELL);
-                }
-                else { }
+                _contentCell.setType(TableCell.SPECIAL_CELL);
             }
-            else
-            {
-                _dateCell.setText(_context.getString(R.string.budget_as_of) + year);
-                if ((year == _year) && (month == _month) && (_budgetEntity != null)) // Do not set the total cell to special
-                {
-                    _contentCell.setType(TableCell.SPECIAL_CELL);
-                }
-                else { }
-            }
+            else { }
         }
         else
         {
@@ -193,15 +175,7 @@ public class BudgetTableRow extends LinearLayout
 
     private void editBudgetItem()
     {
-        if (_timeframe == ExpandableBudgetTable.timeframe.monthly)
-        {
-            ((MonthViewActivity) _context).editBudgetItem(_categoryNumber);
-        }
-        else if (_timeframe == ExpandableBudgetTable.timeframe.yearly)
-        {
-            ((YearViewActivity) _context).editBudgetItem(_categoryNumber);
-        }
-        else { }
+        ((MonthViewActivity) _context).editBudgetItem(_categoryNumber);
     }
 
     public void setBold()

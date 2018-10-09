@@ -31,9 +31,8 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
     private List<Button> _addAdjustmentButtons;
     private int _year;
     private int _month;
-    private ExpandableBudgetTable.timeframe _timeframe;
 
-    public BudgetExpandableListAdapter(Context context, int year, int month, ExpandableBudgetTable.timeframe timeframe)
+    public BudgetExpandableListAdapter(Context context, int year, int month)
     {
         _context = context;
         _budgets = new ArrayList<BudgetEntity>();
@@ -41,7 +40,6 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
         _groupSize = Categories.getCategories().length;
         _year = year;
         _month = month;
-        _timeframe = timeframe;
         setupTable();
     }
 
@@ -53,7 +51,7 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
         String[] categories = Categories.getCategories();
         for (int i = 0; i < _groupSize; i++)
         {
-            _budgetCells.add(new BudgetTableRow(_context, categories[i], i, _year, _month, _timeframe));
+            _budgetCells.add(new BudgetTableRow(_context, categories[i], i, _year, _month));
         }
     }
 
@@ -99,14 +97,7 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
                 @Override
                 public void onClick(View v)
                 {
-                    if (_timeframe == ExpandableBudgetTable.timeframe.monthly)
-                    {
-                        ((MonthViewActivity)_context).createAdjustmentExpenditure(v.getId());
-                    }
-                    else
-                    {
-                        //((YearViewActivity)_context).createAdjustmentExpenditure(v.getId()); // TODO
-                    }
+                    ((MonthViewActivity)_context).createAdjustmentExpenditure(v.getId());
                 }
             });
             _addAdjustmentButtons.add(addAdjustmentButton);
@@ -136,14 +127,7 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
                         BudgetEntity entity = cell.getBudgetEntity();
                         int groupIndex = cell.getGroupIndex();
                         int childIndex = cell.getChildIndex();
-                        if (_timeframe == ExpandableBudgetTable.timeframe.monthly)
-                        {
-                            ((MonthViewActivity)_context).editAdjustmentExpenditure(entity, groupIndex, childIndex);
-                        }
-                        else
-                        {
-                            //((YearViewActivity)_context).editAdjustmentExpenditure(entity, group, child); // TODO
-                        }
+                        ((MonthViewActivity)_context).editAdjustmentExpenditure(entity, groupIndex, childIndex);
                     }
                 });
                 if (k == 0) // If adding an adjustment, don't hide it
