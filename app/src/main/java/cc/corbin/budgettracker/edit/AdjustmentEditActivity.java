@@ -132,7 +132,7 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
                 else { }
 
                 float amount = _adjustment.getAmount();
-                if (amount > 0.0f)
+                if (amount >= 0.0f)
                 {
                     _negative = false;
                     _signSwitchButton.setText(R.string.positive);
@@ -355,14 +355,14 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
         _currencyTextView.setText(Currencies.symbols[Currencies.default_currency]);
 
         _amountEditText = findViewById(R.id.amountEditText);
-        _amount = 0.0f;
-        if (_adjustment != null)
+        if (_adjustment.getId() != 0)
         {
             _amount = _adjustment.getAmount();
             _amountEditText.setup(this, Currencies.default_currency, _amount);
         }
         else
         {
+            _amount = 0.0f;
             _amountEditText.setup(this);
         }
     }
