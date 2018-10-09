@@ -39,6 +39,8 @@ import cc.corbin.budgettracker.auxilliary.PieChart;
 import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
 import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
 import cc.corbin.budgettracker.day.DayViewActivity;
+import cc.corbin.budgettracker.numericalformatting.NumericalFormattedCallback;
+import cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText;
 import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.tables.ExpandableBudgetTable;
 import cc.corbin.budgettracker.tables.ExtrasTable;
@@ -99,6 +101,7 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
 
     private int _budgetId; // ID of the budget entity being edited
     private PopupWindow _popupWindow; // For editing budgets
+    private NumericalFormattedEditText _amountEditText;
 
     public static boolean dataInvalid;
 
@@ -275,7 +278,6 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        Intent intent;
         switch (item.getItemId())
         {
             case android.R.id.home:
@@ -407,30 +409,21 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         final TextView currencyTextView = budgetEditView.findViewById(R.id.currencyTextView);
         currencyTextView.setText(Currencies.symbols[Currencies.default_currency]);
 
-        final EditText budgetEditText = budgetEditView.findViewById(R.id.amountEditText);
-        final MoneyValueFilter moneyValueFilter = new MoneyValueFilter();
-        moneyValueFilter.setDigits(Currencies.integer[Currencies.default_currency] ? 0 : 2);
-        budgetEditText.setFilters(new InputFilter[]{moneyValueFilter});
-        if (Currencies.integer[Currencies.default_currency])
+        _amountEditText = budgetEditView.findViewById(R.id.amountEditText);
+        if (entity.getId() != 0)
         {
-            budgetEditText.setHint("0");
+            _amountEditText.setup(null, Currencies.default_currency, entity.getAmount());
+            if (entity.getMonth() == _month && entity.getYear() == _year) // If the ID is not 0
+            {
+                final Button removeButton = budgetEditView.findViewById(R.id.removeButton);
+                removeButton.setEnabled(true);
+            }
+            else { }
         }
         else
         {
-            budgetEditText.setHint("0.00");
+            _amountEditText.setup(null);
         }
-        if (entity.getId() != 0)
-        {
-            budgetEditText.setText(Currencies.formatCurrency(Currencies.integer[Currencies.default_currency], entity.getAmount()));
-        }
-        else { }
-
-        if (entity.getMonth() == _month && entity.getYear() == _year) // If the ID is not 0
-        {
-            final Button removeButton = budgetEditView.findViewById(R.id.removeButton);
-            removeButton.setEnabled(true);
-        }
-        else { }
 
         _popupWindow = new PopupWindow(budgetEditView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         _popupWindow.setFocusable(true);
@@ -441,17 +434,7 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
     public void confirmBudgetItemEdit(View v)
     {
         BudgetEntity entity = _budgets.getValue().get(_budgetId);
-
-        final EditText amountTextEdit = _popupWindow.getContentView().findViewById(R.id.amountEditText);
-        float amount = 0.0f;
-        try
-        {
-            amount = Float.parseFloat(amountTextEdit.getText().toString());
-        }
-        catch (Exception e)
-        {
-            Log.e(TAG, "Empty amount");
-        }
+        float amount = _amountEditText.getAmount();
         entity.setAmount(amount);
 
         if (entity.getMonth() == _month && entity.getYear() == _year) // Edit

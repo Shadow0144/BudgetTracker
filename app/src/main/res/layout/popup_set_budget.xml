@@ -28,7 +28,7 @@
                 android:id="@+id/categoryTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="2"
                 android:paddingBottom="5dp"
                 android:textAlignment="center"
                 android:textColor="@color/black"
@@ -38,13 +38,12 @@
                 android:id="@+id/currencyTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="0"
                 android:paddingBottom="5dp"
-                android:textAlignment="center"
+                android:textAlignment="viewEnd"
                 android:textColor="@color/black"
                 android:textSize="18sp" />
 
-            <EditText
+            <cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText
                 android:id="@+id/amountEditText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

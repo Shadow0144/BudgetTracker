@@ -29,6 +29,8 @@ public class NumericalFormattedEditText extends AppCompatEditText
 
     private int _digits;
 
+    private float _amount;
+
     public NumericalFormattedEditText(Context context)
     {
         super(context);
@@ -50,6 +52,8 @@ public class NumericalFormattedEditText extends AppCompatEditText
     private void init(Context context)
     {
         _context = context;
+
+        _amount = 0.0f;
 
         //android:digits='"1234567890,."'
         setKeyListener(DigitsKeyListener.getInstance(false, true));
@@ -182,16 +186,16 @@ public class NumericalFormattedEditText extends AppCompatEditText
 
                     String textString = text.toString();
 
-                    float amount = 0.0f;
+                    _amount = 0.0f;
                     if (textString.length() > 0)
                     {
                         try
                         {
                             DecimalFormat formatter = new DecimalFormat();
-                            amount = formatter.parse(textString).floatValue();
+                            _amount = formatter.parse(textString).floatValue();
 
                             // If the amount is zero, set the text to just "0"
-                            if (amount == 0.0f)
+                            if (_amount == 0.0f)
                             {
                                 textString = "0";
                             }
@@ -207,7 +211,7 @@ public class NumericalFormattedEditText extends AppCompatEditText
 
                     if (_callback != null)
                     {
-                        _callback.valueChanged(getId(), amount);
+                        _callback.valueChanged(getId(), _amount);
                     }
                     else { }
 
@@ -241,5 +245,15 @@ public class NumericalFormattedEditText extends AppCompatEditText
             setHint("0.00");
         }
         _moneyValueFilter.setDigits(_digits);
+    }
+
+    public float getAmount()
+    {
+        return _amount;
+    }
+
+    public void setAmount(float amount)
+    {
+        setText("" + _amount);
     }
 }
