@@ -55,6 +55,15 @@
                 android:text="@string/edit_linked"
                 android:visibility="gone" />
 
+            <TextView
+                android:id="@+id/linkedDetailsTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/linked"
+                android:visibility="gone" />
+
             <LinearLayout
                 android:id="@+id/detailsLinearLayout"
                 android:layout_width="match_parent"

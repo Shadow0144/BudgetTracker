@@ -7,11 +7,6 @@ import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
-import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
-
 /**
  * Created by Corbin on 4/15/2018.
  */
@@ -38,10 +33,19 @@ public class BudgetEntity implements Parcelable
     private String categoryName;
 
     @ColumnInfo
-    private int adjustment; // SQLLite does not support booleans
+    private int isAdjustment; // SQLLite does not support booleans
 
     @ColumnInfo
-    private long sisterAdjustment;
+    private long linkedID;
+
+    @ColumnInfo
+    private int linkedMonth;
+
+    @ColumnInfo
+    private int linkedYear;
+
+    @ColumnInfo
+    private int linkedCategory;
 
     @ColumnInfo
     private String note;
@@ -55,8 +59,11 @@ public class BudgetEntity implements Parcelable
         this.amount = 0.0f;
         this.category = 0;
         this.categoryName = "";
-        this.adjustment = 0;
-        this.sisterAdjustment = -1;
+        this.isAdjustment = 0;
+        this.linkedID = -1;
+        this.linkedMonth = -1;
+        this.linkedYear = -1;
+        this.linkedCategory = -1;
         this.note = "";
     }
 
@@ -69,13 +76,17 @@ public class BudgetEntity implements Parcelable
         this.amount = amount;
         this.category = category;
         this.categoryName = categoryName;
-        this.adjustment = 0;
-        this.sisterAdjustment = -1;
+        this.isAdjustment = 0;
+        this.linkedID = -1;
+        this.linkedMonth = -1;
+        this.linkedYear = -1;
+        this.linkedCategory = -1;
         this.note = "";
     }
 
     @Ignore
-    public BudgetEntity(int month, int year, float amount, int category, String categoryName, int adjustment, long sisterAdjustment, String note)
+    public BudgetEntity(int month, int year, float amount, int category, String categoryName, int isAdjustment,
+                        long linkedID, int linkedMonth, int linkedYear, int linkedCategory, String note)
     {
         this.id = 0;
         this.month = month;
@@ -83,8 +94,11 @@ public class BudgetEntity implements Parcelable
         this.amount = amount;
         this.category = category;
         this.categoryName = categoryName;
-        this.adjustment = adjustment;
-        this.sisterAdjustment = sisterAdjustment;
+        this.isAdjustment = isAdjustment;
+        this.linkedID = linkedID;
+        this.linkedMonth = linkedMonth;
+        this.linkedYear = linkedYear;
+        this.linkedCategory = linkedCategory;
         this.note = note;
     }
 
@@ -97,12 +111,18 @@ public class BudgetEntity implements Parcelable
         this.amount = amount;
         this.category = category;
         this.categoryName = categoryName;
-        this.adjustment = 0;
-        this.sisterAdjustment = -1;
+        this.isAdjustment = 0;
+        this.linkedID = -1;
+        this.linkedMonth = -1;
+        this.linkedYear = -1;
+        this.linkedCategory = -1;
         this.note = "";
     }
 
-    public BudgetEntity(long id, int month, int year, float amount, int category, String categoryName, int adjustment, long sisterAdjustment, String note)
+    // Constructor for updating the database
+    @Ignore
+    public BudgetEntity(long id, int month, int year, float amount, int category, String categoryName, int isAdjustment,
+                        long linkedID, String note)
     {
         this.id = id;
         this.month = month;
@@ -110,8 +130,28 @@ public class BudgetEntity implements Parcelable
         this.amount = amount;
         this.category = category;
         this.categoryName = categoryName;
-        this.adjustment = adjustment;
-        this.sisterAdjustment = sisterAdjustment;
+        this.isAdjustment = isAdjustment;
+        this.linkedID = linkedID;
+        this.linkedMonth = -1;
+        this.linkedYear = -1;
+        this.linkedCategory = -1;
+        this.note = note;
+    }
+
+    public BudgetEntity(long id, int month, int year, float amount, int category, String categoryName, int isAdjustment,
+                        long linkedID, int linkedMonth, int linkedYear, int linkedCategory, String note)
+    {
+        this.id = id;
+        this.month = month;
+        this.year = year;
+        this.amount = amount;
+        this.category = category;
+        this.categoryName = categoryName;
+        this.isAdjustment = isAdjustment;
+        this.linkedID = linkedID;
+        this.linkedMonth = linkedMonth;
+        this.linkedYear = linkedYear;
+        this.linkedCategory = linkedCategory;
         this.note = note;
     }
 
@@ -171,24 +211,62 @@ public class BudgetEntity implements Parcelable
         this.categoryName = categoryName;
     }
 
-    public int getAdjustment()
+    public int getIsAdjustment()
     {
-        return adjustment;
+        return isAdjustment;
     }
 
-    public void setAdjustment(int adjustment)
+    public void setIsAdjustment(int isAdjustment)
     {
-        this.adjustment = adjustment;
+        this.isAdjustment = isAdjustment;
     }
 
-    public long getSisterAdjustment()
+    public long getLinkedID()
     {
-        return sisterAdjustment;
+        return linkedID;
     }
 
-    public void setSisterAdjustment(long sisterAdjustment)
+    public void setLinkedID(long linkedID)
     {
-        this.sisterAdjustment = sisterAdjustment;
+        this.linkedID = linkedID;
+    }
+
+    public int getLinkedMonth()
+    {
+        return linkedMonth;
+    }
+
+    public void setLinkedMonth(int linkedMonth)
+    {
+        this.linkedMonth = linkedMonth;
+    }
+
+    public int getLinkedYear()
+    {
+        return linkedYear;
+    }
+
+    public void setLinkedYear(int linkedYear)
+    {
+        this.linkedYear = linkedYear;
+    }
+
+    public int getLinkedCategory()
+    {
+        return linkedCategory;
+    }
+
+    public void setLinkedCategory(int linkedCategory)
+    {
+        this.linkedCategory = linkedCategory;
+    }
+
+    public void setLinkedAdjustment(long linkedID, int linkedMonth, int linkedYear, int linkedCategory)
+    {
+        this.linkedID = linkedID;
+        this.linkedMonth = linkedMonth;
+        this.linkedYear = linkedYear;
+        this.linkedCategory = linkedCategory;
     }
 
     public String getNote()
@@ -223,8 +301,11 @@ public class BudgetEntity implements Parcelable
         out.writeFloat(amount);
         out.writeInt(category);
         out.writeString(categoryName);
-        out.writeInt(adjustment);
-        out.writeLong(sisterAdjustment);
+        out.writeInt(isAdjustment);
+        out.writeLong(linkedID);
+        out.writeInt(linkedMonth);
+        out.writeInt(linkedYear);
+        out.writeInt(linkedCategory);
         out.writeString(note);
     }
 
@@ -236,8 +317,11 @@ public class BudgetEntity implements Parcelable
         amount = in.readFloat();
         category = in.readInt();
         categoryName = in.readString();
-        adjustment = in.readInt();
-        sisterAdjustment = in.readLong();
+        isAdjustment = in.readInt();
+        linkedID = in.readLong();
+        linkedMonth = in.readInt();
+        linkedYear = in.readInt();
+        linkedCategory = in.readInt();
         note = in.readString();
     }
 

@@ -175,13 +175,28 @@ public class DatabaseThread
         return budgetEntity;
     }
 
+    // Called by insert, update, delete
+    private void updateYearBudget(BudgetEntity entity)
+    {
+        int year = entity.getYear();
+        int category = entity.getCategory();
+        updateYearBudget(year, category);
+    }
+
+    // Called by merging
     private void updateYearBudget(int year, int category)
     {
         float total = 0.0f;
         for (int i = 1; i <= 12; i++)
         {
-            BudgetEntity entity = getMonthCategoryBudget(i, year, category);
-            total += entity.getAmount();
+            BudgetEntity monthEntity = getMonthCategoryBudget(i, year, category);
+            total += monthEntity.getAmount();
+            List<BudgetEntity> entities = _dbB.budgetDao().getMonthAdjustments(year, i);
+            int length = entities.size();
+            for (int j = 0; j < length; j++)
+            {
+                total += entities.get(j).getAmount();
+            }
         }
         BudgetEntity yearBudget = _dbB.budgetDao().getYear(year, category);
         if (yearBudget == null)
@@ -196,13 +211,29 @@ public class DatabaseThread
         }
     }
 
+    private void updateLinkedYearBudget(BudgetEntity entity, BudgetEntity linkedEntity)
+    {
+        int year = entity.getYear();
+        int category = entity.getCategory();
+        int linkedYear = linkedEntity.getYear();
+        int linkedCategory = linkedEntity.getCategory();
+        updateYearBudget(entity);
+        if ((year != linkedYear) || (category != linkedCategory))
+        {
+            updateYearBudget(linkedEntity);
+        }
+        else { }
+    }
+
     private void processBudEvent(BudgetDatabaseEvent event)
     {
+        BudgetEntity entity = null;
+        BudgetEntity linkedEntity = null;
+        List<BudgetEntity> entities = null;
+        String[] categories = Categories.getCategories();
         switch (event.getEventType())
         {
             case query:
-                List<BudgetEntity> entities = null;
-                String[] categories = Categories.getCategories();
                 int month;
                 int year;
                 int endYear;
@@ -238,7 +269,6 @@ public class DatabaseThread
                         {
                             entities.add(getYearCategoryBudget(year, i));
                         }
-                        // TODO Add adjustments
                         break;
                     case total:
                         entities = new ArrayList<BudgetEntity>();
@@ -258,49 +288,59 @@ public class DatabaseThread
                 break;
 
             case insert:
-                long id = _dbB.budgetDao().insert(event.getEntity());
-                event.getEntity().setId(id);
-                updateYearBudget(event.getYear(), event.getCategory());
+                entity = event.getEntity();
+                long id = _dbB.budgetDao().insert(entity);
+                entity.setId(id);
+                updateYearBudget(entity);
                 break;
 
             case insertTransfer:
                 // Insert the entities to get IDs, then update them with their new links
                 entities = new ArrayList<BudgetEntity>();
-                entities.add(event.getEntity());
-                entities.add(event.getLinkedEntity());
+                entity = event.getEntity();
+                linkedEntity = event.getLinkedEntity();
+                entities.add(entity);
+                entities.add(linkedEntity);
                 long[] ids = _dbB.budgetDao().insertAll(entities);
-                // Need to set the IDs first to update the linkage
-                entities.get(0).setId(ids[0]);
-                entities.get(0).setSisterAdjustment(ids[1]);
-                entities.get(1).setId(ids[1]);
-                entities.get(1).setSisterAdjustment(ids[0]);
+
+                // Need to set the IDs and link data to update the linkage
+                entity.setId(ids[0]);
+                linkedEntity.setId(ids[1]);
+                entity.setLinkedAdjustment(ids[1], linkedEntity.getMonth(), linkedEntity.getYear(), linkedEntity.getCategory());
+                linkedEntity.setLinkedAdjustment(ids[0], entity.getMonth(), entity.getYear(), entity.getCategory());
+
                 _dbB.budgetDao().update(entities);
+                updateLinkedYearBudget(entity, linkedEntity);
                 break;
 
             case update:
-                _dbB.budgetDao().update(event.getEntity());
-                updateYearBudget(event.getYear(), event.getCategory());
+                entity = event.getEntity();
+                _dbB.budgetDao().update(entity);
+                updateYearBudget(entity);
                 break;
 
             case updateTransfer:
-                BudgetEntity entity = event.getEntity();
-                BudgetEntity linkedEntity = event.getLinkedEntity();
+                entity = event.getEntity();
+                linkedEntity = event.getLinkedEntity();
                 _dbB.budgetDao().updateAmountAndNote(entity.getId(), entity.getAmount(), entity.getNote());
                 _dbB.budgetDao().updateAmountAndNote(linkedEntity.getId(), linkedEntity.getAmount(), linkedEntity.getNote());
-                updateYearBudget(event.getYear(), event.getCategory());
+                updateLinkedYearBudget(entity, linkedEntity);
                 break;
 
             case remove:
-                _dbB.budgetDao().delete(event.getEntity());
-                updateYearBudget(event.getYear(), event.getCategory());
+                entity = event.getEntity();
+                _dbB.budgetDao().delete(entity);
+                updateYearBudget(entity);
                 break;
 
             case removeTransfer:
                 entities = new ArrayList<BudgetEntity>();
-                entities.add(event.getEntity());
-                entities.add(event.getLinkedEntity());
+                entity = event.getEntity();
+                linkedEntity = event.getLinkedEntity();
+                entities.add(entity);
+                entities.add(linkedEntity);
                 _dbB.budgetDao().delete(entities);
-                updateYearBudget(event.getYear(), event.getCategory());
+                updateLinkedYearBudget(entity, linkedEntity);
                 break;
 
             case renameCategory:

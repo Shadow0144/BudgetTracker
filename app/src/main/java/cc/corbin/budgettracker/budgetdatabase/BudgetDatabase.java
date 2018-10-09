@@ -18,7 +18,7 @@ import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
  * Created by Corbin on 4/15/2018.
  */
 
-@Database(entities = {BudgetEntity.class}, version = 4)
+@Database(entities = {BudgetEntity.class}, version = 5)
 public abstract class BudgetDatabase extends RoomDatabase
 {
     public abstract BudgetDao budgetDao();
@@ -143,6 +143,82 @@ public abstract class BudgetDatabase extends RoomDatabase
         }
     };
 
+    static final Migration MIGRATION_4_5 = new Migration(4, 5)
+    {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database)
+        {
+            // Get the entities
+            Cursor cursor = database.query("SELECT * From BudgetEntity");
+
+            // Store them as objects
+            int i = 0;
+            BudgetEntity[] entities = new BudgetEntity[cursor.getColumnCount()];
+            cursor.moveToFirst();
+            for (i = 0; i < entities.length; i++)
+            {
+                BudgetEntity entity = new BudgetEntity(
+                        cursor.getLong(0), // ID
+                        cursor.getInt(1), // month
+                        cursor.getInt(2), // year
+                        cursor.getFloat(3), // amount
+                        cursor.getInt(4), // category
+                        cursor.getString(5), // categoryName
+                        cursor.getInt(6), // adjustment
+                        cursor.getLong(7), // sisterID
+                        cursor.getString(8) // note
+                );
+                entities[i] = entity;
+                cursor.moveToNext();
+            }
+
+            // Create the new table
+            database.execSQL(
+                    "CREATE TABLE NewBudgetEntity " +
+                            "( " +
+                            "id INTEGER NOT NULL UNIQUE PRIMARY KEY, " +
+                            "month INTEGER NOT NULL, " +
+                            "year INTEGER NOT NULL, " +
+                            "amount REAL NOT NULL, " +
+                            "category INTEGER NOT NULL, " +
+                            "categoryName TEXT, " +
+                            "isAdjustment INTEGER NOT NULL DEFAULT 0, " +
+                            "linkedID INTEGER NOT NULL DEFAULT -1, " +
+                            "linkedMonth INTEGER NOT NULL DEFAULT -1, " +
+                            "linkedYear INTEGER NOT NULL DEFAULT -1, " +
+                            "linkedCategory INTEGER NOT NULL DEFAULT -1, " +
+                            "note TEXT " +
+                            ");"
+            );
+
+            // Fill the new table
+            for (i = 0; i < entities.length; i++)
+            {
+                ContentValues values = new ContentValues();
+                values.put("id", i);
+                values.put("month", entities[i].getMonth());
+                values.put("year", entities[i].getYear());
+                values.put("amount", entities[i].getAmount());
+                values.put("category", entities[i].getCategory());
+                values.put("categoryName", entities[i].getCategoryName());
+                values.put("isAdjustment", entities[i].getIsAdjustment());
+                values.put("linkedID", entities[i].getLinkedID());
+                values.put("linkedMonth", entities[i].getLinkedMonth());
+                values.put("linkedYear", entities[i].getLinkedYear());
+                values.put("linkedCategory", entities[i].getLinkedCategory());
+                values.put("note", entities[i].getNote());
+                database.insert("NewBudgetEntity", SQLiteDatabase.CONFLICT_ABORT, values);
+            }
+
+            // Delete the old table
+            database.execSQL("DROP TABLE BudgetEntity;");
+
+            // Rename the table
+            database.execSQL("ALTER TABLE NewBudgetEntity " +
+                    "RENAME TO BudgetEntity;");
+        }
+    };
+
     public static BudgetDatabase getBudgetDatabase(Context context)
     {
         BudgetDatabase r;
@@ -154,6 +230,7 @@ public abstract class BudgetDatabase extends RoomDatabase
                             .addMigrations(MIGRATION_1_2)
                             .addMigrations(MIGRATION_2_3)
                             .addMigrations(MIGRATION_3_4)
+                            .addMigrations(MIGRATION_4_5)
                             //.allowMainThreadQueries()
                             .build();
         }

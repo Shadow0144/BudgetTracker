@@ -25,6 +25,7 @@ import cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText;
 import cc.corbin.budgettracker.numericalformatting.NumericalFormattedCallback;
 import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.month.MonthViewActivity;
+import cc.corbin.budgettracker.tables.AdjustmentTableCell;
 import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.year.YearViewActivity;
 
@@ -106,7 +107,7 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
                 String[] categories = Categories.getCategories();
                 _category = intent.getIntExtra(CATEGORY_INTENT, (categories.length-1));
                 _adjustment = new BudgetEntity(_month, _year, 0, _category, categories[_category]);
-                _adjustment.setAdjustment(1); // All budgets created here are adjustments
+                _adjustment.setIsAdjustment(1); // All budgets created here are adjustments
                 _groupIndex = 0;
                 _childIndex = 0;
                 break;
@@ -125,9 +126,18 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
                 _signTextView.setVisibility(View.GONE);
 
                 // Show the linked editing text if this adjustment is linked to another one
-                if (_adjustment.getSisterAdjustment() > -1)
+                if (_adjustment.getLinkedID() > -1)
                 {
                     findViewById(R.id.linkedTextView).setVisibility(View.VISIBLE);
+                    TextView linkedDetailsTextView = findViewById(R.id.linkedDetailsTextView);
+                    String linkedText = AdjustmentTableCell.formatLinkedDetails(
+                            this,
+                            _adjustment.getLinkedMonth(),
+                            _adjustment.getLinkedYear(),
+                            _adjustment.getLinkedCategory()
+                    );
+                    linkedDetailsTextView.setText(linkedText);
+                    linkedDetailsTextView.setVisibility(View.VISIBLE);
                 }
                 else { }
 
@@ -224,7 +234,7 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
                         (_transferMonth, _transferYear, _amount,
                                 _transferCategory, Categories.getCategories()[_transferCategory]);
                 sisterAdjustment.setNote(note); // Set the note
-                sisterAdjustment.setAdjustment(1); // Make sure to set it as an adjustment
+                sisterAdjustment.setIsAdjustment(1); // Make sure to set it as an adjustment
                 intent.putExtra(LINKED_BUDGET_INTENT, sisterAdjustment);
                 _amount = -_amount;
                 break;
@@ -263,14 +273,19 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
 
         intent.putExtra(BUDGET_INTENT, _adjustment);
 
-        long linkedAdjustmentID = _adjustment.getSisterAdjustment();
+        long linkedAdjustmentID = _adjustment.getLinkedID();
         intent.putExtra(TRANSFER_INTENT, (linkedAdjustmentID > -1));
         if (linkedAdjustmentID > -1)
         {
-            BudgetEntity sisterAdjustment = new BudgetEntity(-1, -1, -_amount,
-                    -1, ""); // Only the amount and note values will be updated
+            BudgetEntity sisterAdjustment = new BudgetEntity(
+                    _adjustment.getLinkedMonth(),
+                    _adjustment.getLinkedYear(),
+                    -_amount,
+                    _adjustment.getLinkedCategory(),
+                    Categories.getCategories()[_adjustment.getLinkedCategory()]);
             sisterAdjustment.setId(linkedAdjustmentID); // Remember to set the ID
             sisterAdjustment.setNote(note);
+            // Other linkage is set after insertion on the other thread after getting the IDs
             intent.putExtra(LINKED_BUDGET_INTENT, sisterAdjustment);
         }
         else { }
@@ -294,7 +309,7 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
     public void onDelete(View v) // TODO - ask about linked budgets
     {
         final View deleteView = getLayoutInflater().inflate(R.layout.popup_confirm_delete_adjustment, null);
-        if (_adjustment.getSisterAdjustment() > -1)
+        if (_adjustment.getLinkedID() > -1)
         {
             deleteView.findViewById(R.id.linkedTextView).setVisibility(View.VISIBLE);
         }
@@ -323,7 +338,7 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
         intent.putExtra(GROUP_INDEX_INTENT, _groupIndex);
         intent.putExtra(CHILD_INDEX_INTENT, _childIndex);
 
-        long linkedAdjustmentID = _adjustment.getSisterAdjustment();
+        long linkedAdjustmentID = _adjustment.getLinkedID();
         intent.putExtra(TRANSFER_INTENT, (linkedAdjustmentID > -1));
         if (linkedAdjustmentID > -1)
         {

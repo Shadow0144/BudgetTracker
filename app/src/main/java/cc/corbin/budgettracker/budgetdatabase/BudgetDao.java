@@ -19,7 +19,7 @@ public interface BudgetDao
     List<BudgetEntity> getAll();
 
     @Query("SELECT * FROM budgetentity " +
-            "WHERE year = (:year) AND month = (:month) AND adjustment = 1 " +
+            "WHERE year = (:year) AND month = (:month) AND isAdjustment = 1 " +
             "ORDER BY category ASC")
     List<BudgetEntity> getMonthAdjustments(int year, int month);
 
@@ -66,7 +66,7 @@ public interface BudgetDao
 
     // Query for finding the budgets for month view
     @Query("SELECT * FROM budgetentity WHERE ( " +
-            "category = (:category)  AND adjustment = 0 " +
+            "category = (:category)  AND isAdjustment = 0 " +
             "AND (year < (:year) OR (year = (:year) AND month <= (:month))) AND month != 0" +
             " )")
     List<BudgetEntity> getCategoryBeforeMonth(int year, int month, int category);

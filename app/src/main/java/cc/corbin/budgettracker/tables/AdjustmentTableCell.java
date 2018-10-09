@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import cc.corbin.budgettracker.R;
+import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 
@@ -72,9 +73,11 @@ public class AdjustmentTableCell extends FrameLayout
             _noteTextView.setVisibility(VISIBLE);
         }
         else { }
-        if (_budgetEntity.getSisterAdjustment() > -1)
+        if (_budgetEntity.getLinkedID() > -1)
         {
             _linkedTextView.setVisibility(VISIBLE);
+            String linkedText = formatLinkedDetails(_context, _budgetEntity.getLinkedMonth(), _budgetEntity.getLinkedYear(), _budgetEntity.getLinkedCategory());
+            _linkedTextView.setText(linkedText);
         }
         else { }
     }
@@ -110,5 +113,12 @@ public class AdjustmentTableCell extends FrameLayout
     public int getChildIndex()
     {
         return _childIndex;
+    }
+
+    public static String formatLinkedDetails(Context context, int linkedMonth, int linkedYear, int linkedCategory)
+    {
+        String dateString = String.format("%02d", linkedMonth) + " / " + String.format("%04d", linkedYear);
+        String linkedText = context.getString(R.string.linked) + " " + dateString + " : " + Categories.getCategories()[linkedCategory];
+        return linkedText;
     }
 }
