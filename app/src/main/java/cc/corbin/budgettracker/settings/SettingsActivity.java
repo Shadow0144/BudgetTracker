@@ -42,6 +42,7 @@ import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.SortableItem;
 import cc.corbin.budgettracker.auxilliary.SortableLinearLayout;
 import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
+import cc.corbin.budgettracker.search.CreateSearchActivity;
 import cc.corbin.budgettracker.tables.TableCell;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
@@ -235,6 +236,11 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
         boolean handled = false;
         switch (item.getItemId())
         {
+            case R.id.searchMenuItem:
+                intent = new Intent(getApplicationContext(), CreateSearchActivity.class);
+                startActivity(intent);
+                handled = true;
+                break;
             case R.id.dayMenuItem:
                 intent = new Intent(getApplicationContext(), DayViewActivity.class);
                 date = Calendar.getInstance();

@@ -4,5 +4,5 @@ import android.support.v7.app.AppCompatActivity;
 
 public class CustomViewActivity extends AppCompatActivity
 {
-
+    private final String TAG = "CustomViewActivity";
 }

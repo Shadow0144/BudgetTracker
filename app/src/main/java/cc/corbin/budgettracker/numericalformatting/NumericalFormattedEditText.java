@@ -20,15 +20,12 @@ import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 public class NumericalFormattedEditText extends AppCompatEditText
 {
     private final String TAG = "NumericalFormattedEditText";
-
-    private Context _context;
-
     private MoneyValueFilter _moneyValueFilter;
 
     private NumericalFormattedCallback _callback;
 
     private int _digits;
-
+    private float _baseAmount;
     private float _amount;
 
     public NumericalFormattedEditText(Context context)
@@ -51,8 +48,6 @@ public class NumericalFormattedEditText extends AppCompatEditText
 
     private void init(Context context)
     {
-        _context = context;
-
         _amount = 0.0f;
 
         //android:digits='"1234567890,."'
@@ -76,11 +71,13 @@ public class NumericalFormattedEditText extends AppCompatEditText
         String text = Currencies.formatCurrency(Currencies.integer[currency], amount);
         setText(text);
         setSelection(text.length()); // Place the cursor at the end for convenience
+
         continueSetup((Currencies.integer[currency] ? 0 : 2));
     }
 
     private void continueSetup(int digits)
     {
+        _baseAmount = 0.0f;
         _moneyValueFilter = new MoneyValueFilter();
         setFilters(new InputFilter[]{_moneyValueFilter});
         setDigits(digits);
@@ -167,7 +164,7 @@ public class NumericalFormattedEditText extends AppCompatEditText
                     }
 
                     // Ensure that the first character is not a comma
-                    len = s.length(); // Update the length
+                    len = text.length(); // Update the length
                     if ((len > 0) && (s.charAt(0) == ','))
                     {
                         text.replace(0, 1, "");
@@ -233,18 +230,41 @@ public class NumericalFormattedEditText extends AppCompatEditText
         });
     }
 
+    public int getDigits()
+    {
+        return _digits;
+    }
+
     public void setDigits(int digits)
     {
         _digits = digits;
+        DecimalFormat formatter;
         if (_digits == 0)
         {
-            setHint("0");
+            formatter = new DecimalFormat("");
         }
         else
         {
-            setHint("0.00");
+            formatter = new DecimalFormat(".##");
         }
+        setHint(formatter.format(_baseAmount));
         _moneyValueFilter.setDigits(_digits);
+    }
+
+    public float getBaseAmount()
+    {
+        return _baseAmount;
+    }
+
+    public void setBaseAmount(float amount)
+    {
+        if (_amount == _baseAmount)
+        {
+            _amount = amount;
+        }
+        else { }
+        _baseAmount = amount;
+        setDigits(_digits);
     }
 
     public float getAmount()
@@ -254,6 +274,11 @@ public class NumericalFormattedEditText extends AppCompatEditText
 
     public void setAmount(float amount)
     {
-        setText("" + _amount);
+        setText("" + amount);
+    }
+
+    public void clearAmount()
+    {
+        setText("");
     }
 }

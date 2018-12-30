@@ -1,7 +1,11 @@
 package cc.corbin.budgettracker.edit;
 
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -14,10 +18,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.math.RoundingMode;
+import java.text.NumberFormat;
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
+import cc.corbin.budgettracker.auxilliary.ConversionRateAsyncTask;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.R;
@@ -28,6 +41,8 @@ import cc.corbin.budgettracker.month.MonthViewActivity;
 import cc.corbin.budgettracker.tables.AdjustmentTableCell;
 import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.year.YearViewActivity;
+
+import static android.Manifest.permission.INTERNET;
 
 public class AdjustmentEditActivity extends AppCompatActivity implements NumericalFormattedCallback, TabLayout.OnTabSelectedListener
 {
@@ -43,9 +58,20 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
     public final static String CHILD_INDEX_INTENT = "ChildIndex";
     public final static String TRANSFER_INTENT = "Transfer";
 
+    private static final int CONNECT_TO_INTERNET_CODE = 0;
+    private static boolean _connectToInternet = false;
+
+    private MutableLiveData<String> _conversionRateStringMLD;
+    private NumericalFormattedEditText _conversionRateEditText;
+    private Spinner _currencySpinner;
+
+    private int _day; // For conversion rates
     private int _month;
     private int _year;
     private int _category;
+
+    private final int BASE_AMOUNT_EDIT_TEXT = 1;
+    private final int CONVERSION_RATE_EDIT_TEXT = 2;
 
     private boolean _editing;
 
@@ -77,6 +103,9 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
     private Button _transferDirectionButton;
     private TextView _currentDetailsTextView;
     private TextView _sisterDetailsTextView;
+
+    private Button _conversionRateButton;
+    private ProgressBar _conversionRateProgressBar;
 
     private Button _signSwitchButton;
     private boolean _negative;
@@ -380,6 +409,7 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
             _amount = 0.0f;
             _amountEditText.setup(this);
         }
+        _amountEditText.setId(BASE_AMOUNT_EDIT_TEXT);
     }
 
     private void setupCategories()
@@ -387,7 +417,7 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
         // Setup the categories
         _transferCategorySpinner = findViewById(R.id.categorySpinner);
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
-                this, android.R.layout.simple_spinner_item, Categories.getCategories());
+            this, android.R.layout.simple_spinner_item, Categories.getCategories());
         _transferCategorySpinner.setAdapter(spinnerArrayAdapter);
         _transferCategorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
@@ -421,7 +451,15 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
     @Override
     public void valueChanged(int id, float value)
     {
-        _amount = value;
+        switch (id)
+        {
+            case BASE_AMOUNT_EDIT_TEXT:
+                _amount = value;
+                break;
+            case CONVERSION_RATE_EDIT_TEXT:
+                // Do nothing
+                break;
+        }
     }
 
     @Override
@@ -525,6 +563,222 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
         else
         {
             _signSwitchButton.setText(R.string.positive);
+        }
+    }
+
+    public void getConversion(View v)
+    {
+        final View conversionView = getLayoutInflater().inflate(R.layout.popup_convert_currency, null);
+
+        _conversionRateEditText = conversionView.findViewById(R.id.conversionRateEditText);
+        _conversionRateEditText.setup(this);
+        _conversionRateEditText.setDigits(2);
+        _conversionRateEditText.setBaseAmount(1.0f);
+        _conversionRateEditText.setId(CONVERSION_RATE_EDIT_TEXT);
+
+        final TextView yearTextView = conversionView.findViewById(R.id.yearTextView);
+        yearTextView.setText(String.format("%04d", _year));
+
+        final TextView monthTextView = conversionView.findViewById(R.id.monthTextView);
+        monthTextView.setText(String.format("%02d", _month));
+
+        // Setup the days
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(_year, _month-1, _day);
+        final int days = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        String[] daysArray = new String[days];
+        for (int i = 0; i < days; i++)
+        {
+            daysArray[i] = String.format("%02d", (i+1));
+        }
+
+        // Setup the spinner
+        final Spinner daySpinner = conversionView.findViewById(R.id.daySpinner);
+        ArrayAdapter<String> daySpinnerArrayAdapter = new ArrayAdapter<String>(
+                this, android.R.layout.simple_spinner_item, daysArray);
+        daySpinner.setAdapter(daySpinnerArrayAdapter);
+        daySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+            {
+                _day = position+1;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent)
+            {
+                // Do nothing
+            }
+        });
+        daySpinner.setSelection(0);
+
+        final TextView convertedCurrencyTextView = conversionView.findViewById(R.id.convertedCurrencyTextView);
+        convertedCurrencyTextView.setText(Currencies.symbols[Currencies.default_currency]);
+        final TextView totalCurrencyTextView = conversionView.findViewById(R.id.totalCurrencyTextView);
+        totalCurrencyTextView.setText(Currencies.symbols[Currencies.default_currency]);
+
+        _currencySpinner = conversionView.findViewById(R.id.currencySpinner);
+        ArrayAdapter<String> currencySpinnerArrayAdapter = new ArrayAdapter<String>(
+                this, android.R.layout.simple_spinner_item, Currencies.symbols);
+        _currencySpinner.setAdapter(currencySpinnerArrayAdapter);
+
+        _conversionRateButton = conversionView.findViewById(R.id.conversionRateButton);
+        _conversionRateProgressBar = conversionView.findViewById(R.id.conversionRateProgressBar);
+
+        _conversionRateButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                getConversionRate();
+            }
+        });
+
+        _popupWindow = new PopupWindow(conversionView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        _popupWindow.setFocusable(true);
+        _popupWindow.update();
+        _popupWindow.showAtLocation(findViewById(R.id.rootLayout), Gravity.CENTER, 0, 0);
+    }
+
+    public void cancelConversion(View v)
+    {
+        _popupWindow.dismiss();
+    }
+
+    public void acceptConversion(View v)
+    {
+
+
+        _popupWindow.dismiss();
+    }
+
+    private void getConversionRate()
+    {
+        Calendar currentDate = Calendar.getInstance();
+        Calendar editDate = Calendar.getInstance();
+        editDate.set(_year, _month-1, _day);
+
+        long end = currentDate.getTimeInMillis();
+        long start = editDate.getTimeInMillis();
+
+        if (end >= start)
+        {
+            long time = TimeUnit.MILLISECONDS.toDays(Math.abs(end - start));
+
+            if (time <= 365)
+            {
+                _conversionRateButton.setVisibility(View.INVISIBLE);
+                _conversionRateProgressBar.setVisibility(View.VISIBLE);
+                if (!_connectToInternet)
+                {
+                    checkPermissions();
+                }
+                else
+                {
+                    connectForConversionRate();
+                }
+            }
+            else
+            {
+                Toast.makeText(this, "Dates more than a year old will need to have the conversion rate manually specified", Toast.LENGTH_LONG);
+            }
+        }
+        else
+        {
+            Toast.makeText(this, "Future dates will need to have the conversion rate manually specified", Toast.LENGTH_LONG);
+        }
+    }
+
+    private void checkPermissions()
+    {
+        if (checkSelfPermission(INTERNET) != PackageManager.PERMISSION_GRANTED)
+        {
+            requestPermissions(new String[] {INTERNET}, CONNECT_TO_INTERNET_CODE);
+        }
+        else
+        {
+            _connectToInternet = true;
+            getConversionRate();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
+    {
+        Log.e(TAG, "Results");
+        // If request is cancelled, the result arrays are empty
+        if (grantResults.length > 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+        {
+            _connectToInternet = true;
+            switch (requestCode)
+            {
+                case CONNECT_TO_INTERNET_CODE:
+                    connectForConversionRate();
+                    break;
+            }
+        }
+        else
+        {
+            _connectToInternet = false;
+            Toast.makeText(this, "Failed to acquire permissions", Toast.LENGTH_SHORT).show();
+            _conversionRateButton.setVisibility(View.VISIBLE);
+            _conversionRateProgressBar.setVisibility(View.INVISIBLE);
+            _conversionRateButton.setEnabled(false);
+        }
+    }
+
+    private void connectForConversionRate()
+    {
+        _conversionRateStringMLD = new MutableLiveData<String>();
+        final Observer<String> conversionObserver = new Observer<String>()
+        {
+            @Override
+            public void onChanged(@Nullable String conversionRateString)
+            {
+                // Null check in the method
+                onConversionRateReceived(conversionRateString);
+            }
+        };
+        _conversionRateStringMLD.observe(this, conversionObserver);
+        new ConversionRateAsyncTask(
+                _conversionRateStringMLD,
+                _currencySpinner.getSelectedItemPosition(),
+                _year, _month, _day).execute();
+    }
+
+    private void onConversionRateReceived(String conversionRateString)
+    {
+        _conversionRateButton.setVisibility(View.VISIBLE);
+        _conversionRateProgressBar.setVisibility(View.INVISIBLE);
+
+        try
+        {
+            String rate = conversionRateString.split(":")[2];
+            rate = rate.substring(0, rate.length() - 2);
+
+            float rateNumber = Float.parseFloat(rate);
+            NumberFormat formatter = NumberFormat.getInstance(Locale.getDefault());
+            formatter.setMaximumFractionDigits(2);
+            formatter.setMinimumFractionDigits(2);
+            formatter.setRoundingMode(RoundingMode.HALF_UP);
+
+            rate = formatter.format(rateNumber);
+            rateNumber = formatter.parse(rate).floatValue();
+            _conversionRateEditText.setAmount(rateNumber);
+
+            Log.e(TAG, "Received: " + rateNumber);
+
+            // updateConversionViews(); // TODO
+        }
+        catch (Exception e)
+        {
+            Log.e(TAG, "Failed to parse number");
+
+            _conversionRateEditText.clearAmount();
+
+            // updateConversionViews(); // TODO
         }
     }
 }

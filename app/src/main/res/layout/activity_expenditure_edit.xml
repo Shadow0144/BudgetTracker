@@ -35,7 +35,7 @@
                 android:spinnerMode="dialog" />
 
             <cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText
-                android:id="@+id/valueEditText"
+                android:id="@+id/amountEditText"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
@@ -93,8 +93,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0" />
 
-                <EditText
-                    android:id="@+id/convertedAmountEditText"
+                <cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText
+                    android:id="@+id/conversionRateEditText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"

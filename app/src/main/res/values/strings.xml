@@ -56,6 +56,7 @@
 
     <string name="category_title">Expenditures by Category</string>
 
+    <string name="search">Search</string>
     <string name="day">Day</string>
     <string name="week">Week</string>
     <string name="month">Month</string>
@@ -66,10 +67,18 @@
     <string name="spent">Spent</string>
     <string name="budget">Budget</string>
     <string name="remaining">Remaining</string>
+    <string name="percent">Percent</string>
 
     <string name="empty">---</string>
 
     <string name="at">\@</string>
+    <string name="conversion_currency">Conversion Currency:</string>
+    <string name="conversion_rate">Conversion Rate:</string>
+    <string name="conversion_date">Conversion Rate Date:</string>
+
+    <string name="year_colon">Year:</string>
+    <string name="month_colon">Month:</string>
+    <string name="day_colon">Day:</string>
 
     <string name="daily_spending">Daily Spending</string>
     <string name="weekly_spending">Weekly Spending</string>

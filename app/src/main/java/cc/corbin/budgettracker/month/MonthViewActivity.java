@@ -41,6 +41,7 @@ import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
 import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.numericalformatting.NumericalFormattedCallback;
 import cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText;
+import cc.corbin.budgettracker.search.CreateSearchActivity;
 import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.tables.ExpandableBudgetTable;
 import cc.corbin.budgettracker.tables.ExtrasTable;
@@ -294,6 +295,11 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         boolean handled = false;
         switch (item.getItemId())
         {
+            case R.id.searchMenuItem:
+                intent = new Intent(getApplicationContext(), CreateSearchActivity.class);
+                startActivity(intent);
+                handled = true;
+                break;
             case R.id.dayMenuItem:
                 intent = new Intent(getApplicationContext(), DayViewActivity.class);
                 Calendar date = Calendar.getInstance();

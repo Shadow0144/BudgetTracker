@@ -54,6 +54,10 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
 
     private List<Float> _expenses;
     private float _totalExpenses;
+    private List<String> _expenseStrings;
+    private List<String> _expensePercentStrings;
+    private List<String> _remainingStrings;
+    private List<String> _remainingPercentStrings;
 
     private List<TableCell> _expenseCells;
     private TableCell _totalExpenseCell;

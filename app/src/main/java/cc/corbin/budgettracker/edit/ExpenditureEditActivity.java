@@ -7,9 +7,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.InputFilter;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -36,7 +33,6 @@ import java.util.concurrent.TimeUnit;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.ConversionRateAsyncTask;
 import cc.corbin.budgettracker.auxilliary.Currencies;
-import cc.corbin.budgettracker.numericalformatting.MoneyValueFilter;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText;
 import cc.corbin.budgettracker.numericalformatting.NumericalFormattedCallback;
@@ -62,6 +58,9 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
     private static final int CONNECT_TO_INTERNET_CODE = 0;
     private static boolean _connectToInternet = false;
 
+    private final int BASE_AMOUNT_EDIT_TEXT = 1;
+    private final int CONVERSION_RATE_EDIT_TEXT = 2;
+
     private int _day;
     private int _month;
     private int _year;
@@ -78,7 +77,7 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
 
     private NumericalFormattedEditText _amountEditText;
     private LinearLayout _conversionLayout;
-    private EditText _convertedAmountEditText;
+    private NumericalFormattedEditText _conversionRateEditText;
     private TextView _totalConvertedAmountTextView;
 
     private float _amount;
@@ -157,8 +156,6 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
     public void onAccept(View v)
     {
         final TextView totalConvertedAmountTextView = findViewById(R.id.totalConvertedAmountTextView);
-        final EditText valueEditText = findViewById(R.id.valueEditText);
-        final EditText conversionRateEditText = findViewById(R.id.convertedAmountEditText);
         final RadioGroup categoriesHolder = findViewById(R.id.categoriesHolder);
         final EditText noteEditText = findViewById(R.id.noteEditText);
 
@@ -186,7 +183,7 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
 
         _expenditure.setCategory(category, Categories.getCategories()[category]);
         _expenditure.setBaseCurrency(_baseCurrency);
-        String baseAmount = valueEditText.getText().toString();
+        String baseAmount = _amountEditText.getText().toString();
         if (baseAmount.length() > 0)
         {
             try
@@ -203,7 +200,7 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
         {
             _expenditure.setBaseAmount(0.0f);
         }
-        String conversionRate = conversionRateEditText.getText().toString();
+        String conversionRate = _conversionRateEditText.getText().toString();
         if (conversionRate.length() > 0)
         {
             try
@@ -295,7 +292,8 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
         else { }
 
         // Setup the amount edit
-        _amountEditText = findViewById(R.id.valueEditText);
+        _amountEditText = findViewById(R.id.amountEditText);
+        _amountEditText.setId(BASE_AMOUNT_EDIT_TEXT);
         if (_expenditure != null)
         {
             _amountEditText.setup(this, _expenditure.getBaseCurrency(), _expenditure.getAmount());
@@ -312,47 +310,18 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
 
         // Converted currency, which will match the default currency
         final TextView convertedCurrencyTextView = findViewById(R.id.convertedCurrencyTextView);
-        _convertedAmountEditText = findViewById(R.id.convertedAmountEditText);
         convertedCurrencyTextView.setText(Currencies.symbols[Currencies.default_currency]);
-        final MoneyValueFilter convertedMoneyValueFilter = new MoneyValueFilter();
-        convertedMoneyValueFilter.setDigits(2);
-        _convertedAmountEditText.setFilters(new InputFilter[]{convertedMoneyValueFilter});
+        _conversionRateEditText = findViewById(R.id.conversionRateEditText);
+        _conversionRateEditText.setup(this);
+        _conversionRateEditText.setDigits(2);
+        _conversionRateEditText.setBaseAmount(1.0f);
+        _conversionRateEditText.setId(CONVERSION_RATE_EDIT_TEXT);
 
         if (_expenditure != null)
         {
-            _convertedAmountEditText.setText("" + _expenditure.getConversionRate());
+            _conversionRateEditText.setAmount(_expenditure.getConversionRate());
         }
         else { } // Else keep the hint
-
-        _convertedAmountEditText.addTextChangedListener(new TextWatcher()
-        {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after)
-            {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count)
-            {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s)
-            {
-                if (s.length() > 0)
-                {
-                    _rateNumber = Float.parseFloat(s.toString());
-                }
-                else
-                {
-                    _rateNumber = 1.00f;
-                }
-
-                updateConversionViews();
-            }
-        });
 
         // Setup the currency type spinner
         _symbolSpinner = findViewById(R.id.currencySelector);
@@ -515,8 +484,7 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                                  String permissions[], int[] grantResults)
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
     {
         // If request is cancelled, the result arrays are empty
         if (grantResults.length > 0
@@ -542,14 +510,10 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
 
     private void connectForConversionRate()
     {
-        ConversionRateAsyncTask conversionRateAsyncTask = new ConversionRateAsyncTask(_conversionRateStringMLD);
-
-        String request = "https://free.currencyconverterapi.com/api/v5/convert?q=";
-        request += Currencies.currencies.values()[_symbolSpinner.getSelectedItemPosition()];
-        request += "_"+Currencies.currencies.values()[Currencies.default_currency];
-        request += "&compact=ultra&date=" + _year + "-" + _month + "-" + _day;
-
-        conversionRateAsyncTask.execute(request);
+        new ConversionRateAsyncTask(
+                _conversionRateStringMLD,
+                _symbolSpinner.getSelectedItemPosition(),
+                _year, _month, _day).execute();
     }
 
     private void onConversionRateReceived(String conversionRateString)
@@ -570,20 +534,16 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
 
             rate = formatter.format(_rateNumber);
             _rateNumber = formatter.parse(rate).floatValue();
-
-            _convertedAmountEditText.setText(Currencies.formatCurrency(Currencies.default_currency, _rateNumber));
-
-            updateConversionViews();
         }
         catch (Exception e)
         {
             Log.e(TAG, "Failed to parse number");
             _rateNumber = 1.00f;
-
-            _convertedAmountEditText.setText("");
-
-            updateConversionViews();
         }
+
+        _conversionRateEditText.setAmount(_rateNumber);
+
+        updateConversionViews();
     }
 
     private void updateConversionViews()
@@ -595,7 +555,16 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
     @Override
     public void valueChanged(int id, float value)
     {
-        _amount = value;
-        updateConversionViews();
+        switch (id)
+        {
+            case BASE_AMOUNT_EDIT_TEXT:
+                _amount = value;
+                updateConversionViews();
+                break;
+            case CONVERSION_RATE_EDIT_TEXT:
+                _rateNumber = value;
+                updateConversionViews();
+                break;
+        }
     }
 }

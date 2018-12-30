@@ -28,6 +28,8 @@
         <activity android:name=".settings.SettingsActivity"></activity>
         <activity android:name=".custom.CreateCustomViewActivity"></activity>
         <activity android:name=".custom.CustomViewActivity"></activity>
+        <activity android:name=".search.CreateSearchActivity"></activity>
+        <activity android:name=".search.SearchResultsActivity"></activity>
     </application>
 
 </manifest>

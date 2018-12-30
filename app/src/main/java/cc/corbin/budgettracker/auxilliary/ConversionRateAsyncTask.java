@@ -21,11 +21,22 @@ public class ConversionRateAsyncTask extends AsyncTask<String, Void, String>
     private final String TAG = "ConversionRateAsyncTask";
 
     private MutableLiveData<String> _conversionRateMLD;
+    private String _request;
 
     // This is a constructor that allows you to pass in the JSON body
-    public ConversionRateAsyncTask(MutableLiveData<String> conversionRateMLD)
+    public ConversionRateAsyncTask(MutableLiveData<String> conversionRateMLD, int baseCurrency, int year, int month, int day)
     {
         _conversionRateMLD = conversionRateMLD;
+
+        _request = "https://free.currencyconverterapi.com/api/v5/convert?q=";
+        _request += Currencies.currencies.values()[baseCurrency];
+        _request += "_"+Currencies.currencies.values()[Currencies.default_currency];
+        _request += "&compact=ultra&date=" + year + "-" + month + "-" + day;
+    }
+
+    public void execute()
+    {
+        execute(_request);
     }
 
     // This is a function that we are overriding from AsyncTask. It takes Strings as parameters because that is what we defined for the parameters of our async task

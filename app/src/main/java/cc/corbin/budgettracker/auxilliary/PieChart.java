@@ -57,6 +57,11 @@ public class PieChart extends RelativeLayout
 
     private final int MAX_CHARACTERS = 10;
 
+    private final double TWO_PI = 2.0 * Math.PI;
+    private final double RED = Math.atan2(Math.sin(TWO_PI * 0.0 / 3.0), Math.cos(TWO_PI * 0.0 / 3.0));
+    private final double GREEN = Math.atan2(Math.sin(TWO_PI * 1.0 / 3.0), Math.cos(TWO_PI * 1.0 / 3.0));
+    private final double BLUE = Math.atan2(Math.sin(TWO_PI * 2.0 / 3.0), Math.cos(TWO_PI * 2.0 / 3.0));
+
     private ProgressBar _progressBar;
 
     private float[] _amounts;
@@ -306,7 +311,47 @@ public class PieChart extends RelativeLayout
         _dataAvailable = false;
     }
 
+    // Use roots of unity
     private void setupColors(int colors)
+    {
+        double TWO_THIRD_PI = TWO_PI / 3.0;
+        int mod = (colors > 1) ? (colors - ((colors % 2 == 0) ? 0 : 1)) : 1; // Subtract off 1 from odd numbers
+        int div = colors / 2;
+        _piecePaints = new Paint[colors];
+        for (int i = 0; i < colors; i++)
+        {
+            double k = i;
+            double n = colors;
+            double colorReal = Math.cos(TWO_PI * k / n);
+            double colorImaginary = Math.sin(TWO_PI * k / n);
+
+            double angle = Math.atan2(colorImaginary, colorReal);
+
+            double C = 255.0 / TWO_THIRD_PI;
+            int red = (int)(C * (Math.max(TWO_THIRD_PI - Math.abs(RED - angle), 0.0)));
+            int green = (int)(C * (Math.max(TWO_THIRD_PI - Math.abs(GREEN - angle), 0.0)));
+            int blue = (int)(C * (Math.max(TWO_THIRD_PI - Math.abs(BLUE - angle), 0.0)));
+
+            // Move odd colors to the opposite side
+            int index = ((i % 2 == 0) ? i : ((i + div) % colors + ((i > div) ? 1 : 0)));
+            _piecePaints[index] = new Paint(Paint.ANTI_ALIAS_FLAG);
+            _piecePaints[index].setStyle(Paint.Style.FILL);
+            _piecePaints[index].setColor(Color.argb(255, red, green, blue));
+        }
+
+        for (int j = 1; j <= 10; j++)
+        {
+            Log.e(TAG, "Colors: " + j);
+            div = j / 2;
+            for (int i = 0; i < j; i++)
+            {
+                int index = ((i % 2 == 0) ? i : ((i + div) % j + ((i > div) ? 1 : 0)));
+                Log.e(TAG, "Index: " + index);
+            }
+        }
+    }
+
+    /*private void setupColors(int colors)
     {
         if (colors == 7) // Do not want to repeat if the last and first piece are the same color
         {
@@ -339,5 +384,5 @@ public class PieChart extends RelativeLayout
             _piecePaints[4].setColor(Color.BLUE);
             _piecePaints[5].setColor(Color.argb(255, 128, 0, 128));
         }
-    }
+    }*/
 }

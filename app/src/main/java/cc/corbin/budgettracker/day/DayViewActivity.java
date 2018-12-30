@@ -33,6 +33,7 @@ import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
 import cc.corbin.budgettracker.edit.ExpenditureEditActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
+import cc.corbin.budgettracker.search.CreateSearchActivity;
 import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
@@ -224,6 +225,11 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
         boolean handled = false;
         switch (item.getItemId())
         {
+            case R.id.searchMenuItem:
+                intent = new Intent(getApplicationContext(), CreateSearchActivity.class);
+                startActivity(intent);
+                handled = true;
+                break;
             case R.id.dayMenuItem:
                 intent = new Intent(getApplicationContext(), DayViewActivity.class);
                 Calendar date = Calendar.getInstance();
