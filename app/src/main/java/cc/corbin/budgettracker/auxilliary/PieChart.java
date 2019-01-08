@@ -339,7 +339,16 @@ public class PieChart extends RelativeLayout
             _piecePaints[index].setColor(Color.argb(255, red, green, blue));
         }
 
-        for (int j = 1; j <= 10; j++)
+        // TODO FIX!
+        Paint defaultPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        defaultPaint.setStyle(Paint.Style.FILL);
+        defaultPaint.setColor(Color.BLACK);
+        for (int i = 0; i < colors; i++)
+        {
+            _piecePaints[i] = (_piecePaints[i] == null) ? defaultPaint : _piecePaints[i];
+        }
+
+        /*for (int j = 1; j <= 10; j++)
         {
             Log.e(TAG, "Colors: " + j);
             div = j / 2;
@@ -348,7 +357,7 @@ public class PieChart extends RelativeLayout
                 int index = ((i % 2 == 0) ? i : ((i + div) % j + ((i > div) ? 1 : 0)));
                 Log.e(TAG, "Index: " + index);
             }
-        }
+        }*/
     }
 
     /*private void setupColors(int colors)
