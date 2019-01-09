@@ -142,20 +142,19 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
             {
                 _monthlyTable.updateMonthlyExpenditures(amounts);
 
-                String[] monthLabels = new String[13];
-                monthLabels[0] = getString(R.string.extras);
-                monthLabels[1] = "January";
-                monthLabels[2] = "February";
-                monthLabels[3] = "March";
-                monthLabels[4] = "April";
-                monthLabels[5] = "May";
-                monthLabels[6] = "June";
-                monthLabels[7] = "July";
-                monthLabels[8] = "August";
-                monthLabels[9] = "September";
-                monthLabels[10] = "October";
-                monthLabels[11] = "November";
-                monthLabels[12] = "December";
+                String[] monthLabels = new String[12];
+                monthLabels[0] = "January";
+                monthLabels[1] = "February";
+                monthLabels[2] = "March";
+                monthLabels[3] = "April";
+                monthLabels[4] = "May";
+                monthLabels[5] = "June";
+                monthLabels[6] = "July";
+                monthLabels[7] = "August";
+                monthLabels[8] = "September";
+                monthLabels[9] = "October";
+                monthLabels[10] = "November";
+                monthLabels[11] = "December";
 
                 _monthlyPieChart.setData(amounts, monthLabels);
                 _monthlyLineGraph.setData(amounts, monthLabels);
@@ -340,8 +339,8 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
 
     public void previousYear(View v)
     {
-        Intent intent = new Intent(getApplicationContext(), MonthViewActivity.class);
-        intent.putExtra(MonthViewActivity.YEAR_INTENT, _year-1);
+        Intent intent = new Intent(getApplicationContext(), YearViewActivity.class);
+        intent.putExtra(YearViewActivity.YEAR_INTENT, _year - 1);
         startActivity(intent);
         finish();
     }
@@ -349,7 +348,7 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
     public void nextYear(View v)
     {
         Intent intent = new Intent(getApplicationContext(), YearViewActivity.class);
-        intent.putExtra(MonthViewActivity.YEAR_INTENT, _year + 1);
+        intent.putExtra(YearViewActivity.YEAR_INTENT, _year + 1);
         startActivity(intent);
         finish();
     }

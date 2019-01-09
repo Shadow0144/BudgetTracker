@@ -249,7 +249,7 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Void,
         {
             ExpenditureEntity entity = entities.get(i);
             int month = entity.getMonth();
-            months[month] += entity.getAmount();
+            months[month-1] += entity.getAmount();
             if (_dualAmounts)
             {
                 int category = entity.getCategory();
