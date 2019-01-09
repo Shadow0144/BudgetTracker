@@ -248,25 +248,25 @@ public class CategorySummaryTable extends TableLayout
         if (_budgetCells != null)
         {
             float totalBudget = 0.0f;
+            int size = budgetEntities.size();
             int catSize = Categories.getCategories().length;
-            int size = budgetEntities.size() / catSize; // Only non-one when total view
-            for (int k = 0; k < catSize; k++) // Loop through each of the categories
+            float[] categoryBudgets = new float[catSize]; // Initialized to zero
+            for (int i = 0; i < size; i++) // Loop through each of the entities to get all the budgets and adjustments
             {
-                float catBudget = 0.0f;
-                for (int i = 0; i < size; i++) // Sum up the totals for each time segment
-                {
-                    int index = (i * catSize) + k;
-                    BudgetEntity budgetEntity = budgetEntities.get(index);
-                    catBudget += budgetEntity.getAmount();
-                }
-                TableCell budgetCell = _budgetCells.get(k);
-                budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, catBudget));
+                BudgetEntity budgetEntity = budgetEntities.get(i);
+                categoryBudgets[budgetEntity.getCategory()] += budgetEntity.getAmount();
+            }
+
+            for (int i = 0; i < catSize; i++)
+            {
+                TableCell budgetCell = _budgetCells.get(i);
+                budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, categoryBudgets[i]));
                 budgetCell.setLoading(false);
-                float remaining = catBudget - _expenses.get(k);
-                TableCell remainingCell = _remainingCells.get(k);
+                float remaining = categoryBudgets[i] - _expenses.get(i);
+                TableCell remainingCell = _remainingCells.get(i);
                 remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
                 remainingCell.setLoading(false);
-                totalBudget += catBudget;
+                totalBudget += categoryBudgets[i];
             }
 
             _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalBudget));
