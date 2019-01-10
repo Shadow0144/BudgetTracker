@@ -151,6 +151,17 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
                 if (budgetEntities != null) // returning from a query
                 {
                     refreshTables(budgetEntities);
+
+                    // Create a budget line for the line graph
+                    float budget = 0;
+                    int size = budgetEntities.size();
+                    for (int i = 0; i < size; i++)
+                    {
+                        budget += budgetEntities.get(i).getAmount();
+                    }
+                    float[] guidelineAmounts = new float[] {budget / 5}; // TODO
+                    String[] guidelineLabels = new String[] { getString(R.string.budget) };
+                    _weeklyLineGraph.addGuildelines(guidelineAmounts, guidelineLabels);
                 }
                 else // else - returning from an add / edit / remove
                 {

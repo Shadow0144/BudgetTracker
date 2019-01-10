@@ -126,6 +126,17 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
                 if (budgetEntities != null) // Returning from a query
                 {
                     refreshTables(budgetEntities);
+
+                    // Create a budget line for the line graph
+                    float budget = 0;
+                    int size = budgetEntities.size();
+                    for (int i = 0; i < size; i++)
+                    {
+                        budget += budgetEntities.get(i).getAmount();
+                    }
+                    float[] guidelineAmounts = new float[] {budget / 12}; // TODO
+                    String[] guidelineLabels = new String[] { getString(R.string.budget) };
+                    _monthlyLineGraph.addGuildelines(guidelineAmounts, guidelineLabels);
                 }
                 else // else - returning from an add / edit / remove
                 {

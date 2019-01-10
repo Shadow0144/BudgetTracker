@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
@@ -18,11 +19,11 @@ public class LineGraph extends RelativeLayout
     private Context _context;
 
     private Paint _borderPaint;
-    private Paint _emptyPiePaint;
     private Paint _linePaint;
     private Paint _markerPaint;
     private Paint _pointPaint;
     private Paint _pointLinePaint;
+    private Paint _guidelinePaint;
 
     private String _title;
     private Paint _titlePaint;
@@ -57,6 +58,8 @@ public class LineGraph extends RelativeLayout
 
     private final float POINT_PADDING_Y = 0.03f;
 
+    private final float GUIDELINE_LABEL_OFFSET = 0.01f;
+
     private final int BORDER_STROKE = 3;
     private final int MARKER_STROKE = 3;
     private final int POINT_STROKE = 20;
@@ -70,6 +73,9 @@ public class LineGraph extends RelativeLayout
     private String[] _labels;
     private float[] _points;
     private String[] _scale;
+    private float[] _guidelineAmounts;
+    private String[] _guidelineLabels;
+    private float[] _guidelines;
 
     private boolean _dataAvailable;
 
@@ -143,10 +149,6 @@ public class LineGraph extends RelativeLayout
         _borderPaint.setColor(Color.BLACK);
         _borderPaint.setStrokeWidth(BORDER_STROKE);
 
-        _emptyPiePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        _emptyPiePaint.setColor(Color.WHITE);
-        _emptyPiePaint.setStyle(Paint.Style.FILL);
-
         _linePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         _linePaint.setColor(Color.DKGRAY);
         _linePaint.setStyle(Paint.Style.STROKE);
@@ -162,6 +164,11 @@ public class LineGraph extends RelativeLayout
         _pointLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         _pointLinePaint.setColor(Color.BLACK);
         _pointLinePaint.setStrokeWidth(POINT_LINE_STROKE);
+
+        _guidelinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        _guidelinePaint.setColor(Color.BLACK);
+        _guidelinePaint.setStrokeWidth(POINT_LINE_STROKE);
+        _guidelinePaint.setStyle(Paint.Style.STROKE);
     }
 
     public void setTitle(String title)
@@ -242,7 +249,8 @@ public class LineGraph extends RelativeLayout
             int paddingY = (int)(h * POINT_PADDING_Y);
             int boxH = boxB - boxT - paddingY;
             int labelY = (int)(h * LABEL_OFFSET_Y);
-            int scaleOffetY = (int)(h * SCALE_OFFSET_Y);
+            int scaleOffsetY = (int)(h * SCALE_OFFSET_Y);
+            int guideLabelOffsetY = (int)(h * GUIDELINE_LABEL_OFFSET);
 
             for (int i = 0; i < _amounts.length; i++)
             {
@@ -259,11 +267,21 @@ public class LineGraph extends RelativeLayout
                 currentX += spacing;
             }
 
+            if (_guidelines != null)
+            {
+                for (int i = 0; i < _guidelines.length; i++)
+                {
+                    canvas.drawLine(boxL, boxB - (boxH * _guidelines[i]), boxR, boxB - (boxH * _guidelines[i]), _guidelinePaint);
+                    canvas.drawText(_guidelineLabels[i], boxL, boxB - (boxH * _guidelines[i]) + guideLabelOffsetY, _labelPaint);
+                }
+            }
+            else { }
+
             line = boxB;
             int textX = (int)(w * SCALE_OFFSET_R);
             for (int i = 0; i <= NUM_LINES; i++)
             {
-                canvas.drawText(_scale[i], textX, line + scaleOffetY, _scalePaint);
+                canvas.drawText(_scale[i], textX, line + scaleOffsetY, _scalePaint);
                 line -= lineSpacing;
             }
         }
@@ -277,7 +295,7 @@ public class LineGraph extends RelativeLayout
         _points = new float[_amounts.length];
         _scale = new String[NUM_LINES+1];
 
-        float minValue = 0.0f;//Float.MAX_VALUE;
+        float minValue = 0.0f; //Float.MAX_VALUE;
         float maxValue = 0.0f;
         for (int i = 0; i < _amounts.length; i++)
         {
@@ -295,6 +313,7 @@ public class LineGraph extends RelativeLayout
         }
 
         float span = maxValue - minValue;
+        span = (span == 0.0f) ? 1.0f : span; // Make sure it does not equal zero
         for (int i = 0; i < _amounts.length; i++)
         {
             _points[i] = (_amounts[i] / span);
@@ -313,6 +332,17 @@ public class LineGraph extends RelativeLayout
             amount += scaling;
         }
 
+        // Check if the guidelines were set, but had no scaling information
+        if (_guidelineAmounts != null && _guidelines == null)
+        {
+            _guidelines = new float[_guidelineAmounts.length];
+            for (int i = 0; i < _guidelineAmounts.length; i++)
+            {
+                _guidelines[i] = (_guidelineAmounts[i] / span);
+            }
+        }
+        else { }
+
         // ProgressBar cannot be set to GONE or the canvas disappears
         _progressBar.setVisibility(INVISIBLE);
 
@@ -323,9 +353,49 @@ public class LineGraph extends RelativeLayout
     {
         _amounts = null;
         _labels = null;
+        _guidelines = null;
+        _guidelineLabels = null;
 
         _progressBar.setVisibility(VISIBLE);
 
         _dataAvailable = false;
+    }
+
+    public void addGuildelines(float[] amounts, String[] labels)
+    {
+        _guidelineAmounts = amounts;
+        _guidelineLabels = labels;
+
+        if (_dataAvailable) // Scale if you can
+        {
+            // The guidelines need to be scaled
+            float minValue = 0.0f; //Float.MAX_VALUE;
+            float maxValue = 0.0f;
+            for (int i = 0; i < _amounts.length; i++)
+            {
+                _amounts[i] = _amounts[i] >= 0.0f ? _amounts[i] : 0.0f;
+                if (_amounts[i] > maxValue)
+                {
+                    maxValue = _amounts[i];
+                }
+                else
+                {
+                }
+                /*if (_amounts[i] < minValue)
+                {
+                    minValue = _amounts[i];
+                }
+                else { }*/
+            }
+
+            _guidelines = new float[_guidelineAmounts.length];
+            float span = maxValue - minValue;
+            span = (span == 0.0f) ? 1.0f : span; // Make sure it does not equal zero
+            for (int i = 0; i < _guidelineAmounts.length; i++)
+            {
+                _guidelines[i] = (_guidelineAmounts[i] / span);
+            }
+        }
+        else { }
     }
 }

@@ -117,6 +117,19 @@ public class TotalViewActivity extends AppCompatActivity implements NavigationVi
                 if (budgetEntities != null) // returning from a query
                 {
                     refreshTables(budgetEntities);
+
+                    // Create a budget line for the line graph
+                    float budget = 0;
+                    int size = budgetEntities.size();
+                    for (int i = 0; i < size; i++)
+                    {
+                        budget += budgetEntities.get(i).getAmount();
+                    }
+                    int span = (_endYear - _startYear);
+                    span = (span == 0) ? 1 : span; // Make sure it's not zero // TODO Race condition
+                    float[] guidelineAmounts = new float[] {budget / span};
+                    String[] guidelineLabels = new String[] { getString(R.string.budget) };
+                    _yearlyLineGraph.addGuildelines(guidelineAmounts, guidelineLabels);
                 }
                 else // else - returning from an add / edit / remove
                 {
