@@ -324,7 +324,7 @@ public class LineGraph extends RelativeLayout
             else { }
         }
 
-        float scaling = span / NUM_LINES;
+        float scaling = maxValue / NUM_LINES;
         float amount = 0.0f;
         for (int i = 0; i <= NUM_LINES; i++)
         {
