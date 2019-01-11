@@ -57,6 +57,13 @@ public class NumericalFormattedEditText extends AppCompatEditText
         setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
     }
 
+    public void setup()
+    {
+        _callback = null;
+
+        continueSetup((Currencies.integer[Currencies.default_currency] ? 0 : 2));
+    }
+
     public void setup(final NumericalFormattedCallback callback)
     {
         _callback = callback;
