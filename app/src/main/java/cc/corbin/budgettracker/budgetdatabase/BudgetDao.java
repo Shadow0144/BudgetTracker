@@ -1,12 +1,16 @@
 package cc.corbin.budgettracker.budgetdatabase;
 
+import android.arch.persistence.db.SupportSQLiteQuery;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.RawQuery;
 import android.arch.persistence.room.Update;
 
 import java.util.List;
+
+import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 
 /**
  * Created by Corbin on 4/15/2018.
@@ -123,4 +127,7 @@ public interface BudgetDao
 
     @Query("UPDATE budgetentity SET amount = (:amount), note = (:note) WHERE id = (:id)")
     void updateAmountAndNote(long id, float amount, String note);
+
+    @RawQuery
+    List<BudgetEntity> customQuery(SupportSQLiteQuery query);
 }

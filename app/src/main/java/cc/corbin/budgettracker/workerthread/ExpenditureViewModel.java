@@ -307,4 +307,18 @@ public class ExpenditureViewModel extends ViewModel
         _budEvents.add(event);
         processQueue();
     }
+
+    public void customExpenditureQuery(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, String query)
+    {
+        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.customQuery, query);
+        _expEvents.add(event);
+        processQueue();
+    }
+
+    public void customBudgetQuery(MutableLiveData<List<BudgetEntity>> mutableLiveData, String query)
+    {
+        BudgetDatabaseEvent event = new BudgetDatabaseEvent(mutableLiveData, BudgetDatabaseEvent.EventType.customQuery, query);
+        _budEvents.add(event);
+        processQueue();
+    }
 }

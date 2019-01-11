@@ -34,17 +34,17 @@ public class CreateSearchActivity extends AppCompatActivity
 {
     private final String TAG = "CreateSearchActivity";
 
-    private final String EXACT_DATE_INTENT = "Exact_Date";
-    private final String START_DATE_INTENT = "Start_Date";
-    private final String END_DATE_INTENT = "End_Date";
-    private final String EXACT_AMOUNT_CURRENCY_INTENT = "Exact_Amount_Currency";
-    private final String EXACT_AMOUNT_INTENT = "Exact_Amount";
-    private final String AMOUNT_RANGE_CURRENCY_INTENT = "Amount_Range_Currency";
-    private final String AMOUNT_RANGE_LOWER_INTENT = "Amount_Range_Lower";
-    private final String AMOUNT_RANGE_UPPER_INTENT = "Amount_Range_Upper";
-    private final String CATEGORIES_INTENT = "Categories";
-    private final String CONTAINS_TEXT_INTENT = "Contains_Text";
-    private final String EXACT_TEXT_INTENT = "Exact_Text";
+    public static final String EXACT_DATE_INTENT = "Exact_Date";
+    public static final String START_DATE_INTENT = "Start_Date";
+    public static final String END_DATE_INTENT = "End_Date";
+    public static final String EXACT_AMOUNT_CURRENCY_INTENT = "Exact_Amount_Currency";
+    public static final String EXACT_AMOUNT_INTENT = "Exact_Amount";
+    public static final String AMOUNT_RANGE_CURRENCY_INTENT = "Amount_Range_Currency";
+    public static final String AMOUNT_RANGE_LOWER_INTENT = "Amount_Range_Lower";
+    public static final String AMOUNT_RANGE_UPPER_INTENT = "Amount_Range_Upper";
+    public static final String CATEGORIES_INTENT = "Categories";
+    public static final String CONTAINS_TEXT_INTENT = "Contains_Text";
+    public static final String EXACT_TEXT_INTENT = "Exact_Text";
 
     private CheckBox[] _categoryCheckBoxes;
 
@@ -392,12 +392,12 @@ public class CreateSearchActivity extends AppCompatActivity
         }
         else if (_exactDateRadioButton.isChecked())
         {
-            intent.putExtra(EXACT_DATE_INTENT, _exactDate);
+            intent.putExtra(EXACT_DATE_INTENT, _exactDate.getTime());
         }
         else if (_dateRangeRadioButton.isChecked())
         {
-            intent.putExtra(START_DATE_INTENT, _startDate);
-            intent.putExtra(END_DATE_INTENT, _endDate);
+            intent.putExtra(START_DATE_INTENT, _startDate.getTime());
+            intent.putExtra(END_DATE_INTENT, _endDate.getTime());
         }
         else { }
 
@@ -434,11 +434,11 @@ public class CreateSearchActivity extends AppCompatActivity
         }
         else if (_containsTextRadioButton.isChecked())
         {
-            intent.putExtra(CONTAINS_TEXT_INTENT, _containsTextEditText.getText());
+            intent.putExtra(CONTAINS_TEXT_INTENT, _containsTextEditText.getText().toString());
         }
         else if (_exactTextRadioButton.isChecked())
         {
-            intent.putExtra(EXACT_TEXT_INTENT, _exactTextEditText.getText());
+            intent.putExtra(EXACT_TEXT_INTENT, _exactTextEditText.getText().toString());
         }
         else { }
 

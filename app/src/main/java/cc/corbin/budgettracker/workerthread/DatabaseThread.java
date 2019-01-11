@@ -1,5 +1,6 @@
 package cc.corbin.budgettracker.workerthread;
 
+import android.arch.persistence.db.SimpleSQLiteQuery;
 import android.os.Handler;
 import android.util.Log;
 
@@ -115,6 +116,12 @@ public class DatabaseThread
                 {
                     _dbE.expenditureDao().updateCategoryNumber(newCategoryNames[i], i);
                 }
+                break;
+
+            case customQuery:
+                String query = event.getQuery();
+                entities = _dbE.expenditureDao().customQuery(new SimpleSQLiteQuery(query));
+                event.setEntities(entities);
                 break;
         }
         _completedExpEvents.add(event);
@@ -366,6 +373,12 @@ public class DatabaseThread
                 {
                     _dbB.budgetDao().updateCategoryNumber(newCategoryNames[i], i);
                 }
+                break;
+
+            case customQuery:
+                String query = event.getQuery();
+                entities = _dbB.budgetDao().customQuery(new SimpleSQLiteQuery(query));
+                event.setEntities(entities);
                 break;
         }
         _completedBudEvents.add(event);

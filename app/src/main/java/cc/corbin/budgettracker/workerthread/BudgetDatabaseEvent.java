@@ -24,7 +24,8 @@ public class BudgetDatabaseEvent
         mergeCategory,
         addCategory,
         removeCategory,
-        resortCategories
+        resortCategories,
+        customQuery
     };
 
     public enum QueryType
@@ -44,6 +45,7 @@ public class BudgetDatabaseEvent
     private int _newCategory;
     private String _newCategoryName;
     private String[] _newCategoryNames;
+    private String _query;
     private EventType _eventType;
     private QueryType _queryType;
     private BudgetEntity _entity;
@@ -134,6 +136,16 @@ public class BudgetDatabaseEvent
         _entities = null;
     }
 
+    public BudgetDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
+                               String query)
+    {
+        _mutableLiveData = mutableLiveData;
+        _eventType = eventType;
+        _query = query;
+        _id++;
+        _entities = null;
+    }
+
     public MutableLiveData<List<BudgetEntity>> getMutableLiveData()
     {
         return _mutableLiveData;
@@ -202,5 +214,10 @@ public class BudgetDatabaseEvent
     public String[] getNewCategoryNames()
     {
         return _newCategoryNames;
+    }
+
+    public String getQuery()
+    {
+        return _query;
     }
 }
