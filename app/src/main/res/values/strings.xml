@@ -120,6 +120,12 @@
 
     <string name="additional_items">+&#8230;</string>
 
+    <string name="create_search">Create Search</string>
+
+    <string name="missing_data">Missing Data</string>
+
+    <string name="search_results">Search Results</string>
+
     <string name="export_month">Export Month</string>
     <string name="export_year">Export Year</string>
     <string name="export_total">Export Total</string>

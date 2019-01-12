@@ -9,13 +9,17 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.MutableLong;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -105,6 +109,7 @@ public class CreateSearchActivity extends AppCompatActivity
         {
             _categoryCheckBoxes[i] = new CheckBox(this);
             _categoryCheckBoxes[i].setText(categories[i]);
+            _categoryCheckBoxes[i].setChecked(true);
             categoriesLayout.addView(_categoryCheckBoxes[i]);
         }
 
@@ -274,20 +279,29 @@ public class CreateSearchActivity extends AppCompatActivity
         if (_anyDateRadioButton.isChecked())
         {
             _exactDateButton.setEnabled(false);
+            _exactDateButton.setAlpha(0.3f);
             _startDateButton.setEnabled(false);
+            _startDateButton.setAlpha(0.3f);
             _endDateButton.setEnabled(false);
+            _endDateButton.setAlpha(0.3f);
         }
         else if (_exactDateRadioButton.isChecked())
         {
             _exactDateButton.setEnabled(true);
+            _exactDateButton.setAlpha(1.0f);
             _startDateButton.setEnabled(false);
+            _startDateButton.setAlpha(0.3f);
             _endDateButton.setEnabled(false);
+            _endDateButton.setAlpha(0.3f);
         }
         else if (_dateRangeRadioButton.isChecked())
         {
             _exactDateButton.setEnabled(false);
+            _exactDateButton.setAlpha(0.3f);
             _startDateButton.setEnabled(true);
+            _startDateButton.setAlpha(1.0f);
             _endDateButton.setEnabled(true);
+            _endDateButton.setAlpha(1.0f);
         }
         else { }
     }
@@ -380,68 +394,201 @@ public class CreateSearchActivity extends AppCompatActivity
 
     public void search(View v)
     {
-        // Check for missing data // TODO
+        // Check for missing data
+        boolean dataComplete = isDataComplete();
 
-        // Create the intent
-        Intent intent = new Intent(getApplicationContext(), SearchResultsActivity.class);
-
-        // First get the date information
-        if (_anyDateRadioButton.isChecked())
+        if (dataComplete)
         {
-            // Do nothing
+            // Create the intent
+            Intent intent = new Intent(getApplicationContext(), SearchResultsActivity.class);
+
+            // First get the date information
+            if (_anyDateRadioButton.isChecked())
+            {
+                // Do nothing
+            }
+            else if (_exactDateRadioButton.isChecked())
+            {
+                intent.putExtra(EXACT_DATE_INTENT, _exactDate.getTime());
+            }
+            else if (_dateRangeRadioButton.isChecked())
+            {
+                intent.putExtra(START_DATE_INTENT, _startDate.getTime());
+                intent.putExtra(END_DATE_INTENT, _endDate.getTime());
+            }
+            else { }
+
+            // Next get the amount information
+            if (_anyAmountRadioButton.isChecked())
+            {
+                // Do nothing
+            }
+            else if (_exactAmountRadioButton.isChecked())
+            {
+                intent.putExtra(EXACT_AMOUNT_CURRENCY_INTENT, _exactAmountCurrency);
+                intent.putExtra(EXACT_AMOUNT_INTENT, _exactAmountEditText.getAmount());
+            }
+            else if (_amountRangeRadioButton.isChecked())
+            {
+                intent.putExtra(AMOUNT_RANGE_CURRENCY_INTENT, _amountRangeCurrency);
+                intent.putExtra(AMOUNT_RANGE_LOWER_INTENT, _amountRangeLowerEditText.getAmount());
+                intent.putExtra(AMOUNT_RANGE_UPPER_INTENT, _amountRangeUpperEditText.getAmount());
+            }
+            else {  }
+
+            // Next get the category information
+            boolean[] categories = new boolean[_categoryCheckBoxes.length];
+            for (int i = 0; i < _categoryCheckBoxes.length; i++)
+            {
+                categories[i] = _categoryCheckBoxes[i].isChecked();
+            }
+            intent.putExtra(CATEGORIES_INTENT, categories);
+
+            // Finally get the note information
+            if (_anyTextRadioButton.isChecked())
+            {
+                // Do nothing
+            }
+            else if (_containsTextRadioButton.isChecked())
+            {
+                intent.putExtra(CONTAINS_TEXT_INTENT, _containsTextEditText.getText().toString());
+            }
+            else if (_exactTextRadioButton.isChecked())
+            {
+                intent.putExtra(EXACT_TEXT_INTENT, _exactTextEditText.getText().toString());
+            }
+            else { }
+
+            startActivity(intent);
         }
-        else if (_exactDateRadioButton.isChecked())
+        else { }
+    }
+
+    // Also launches a popup
+    private boolean isDataComplete()
+    {
+        boolean dataComplete = true;
+        String missingDataString = "";
+
+        // Date check
+        if (_exactDateRadioButton.isChecked())
         {
-            intent.putExtra(EXACT_DATE_INTENT, _exactDate.getTime());
+            if (_exactDate == null)
+            {
+                dataComplete = false;
+                missingDataString = "Missing exact date";
+            }
+            else { }
         }
         else if (_dateRangeRadioButton.isChecked())
         {
-            intent.putExtra(START_DATE_INTENT, _startDate.getTime());
-            intent.putExtra(END_DATE_INTENT, _endDate.getTime());
+            if (_startDate == null)
+            {
+                dataComplete = false;
+                if (_endDate == null) // Check if both are missing
+                {
+                    missingDataString = "Missing start and end date";
+                }
+                else
+                {
+                    missingDataString = "Missing start date";
+                }
+            }
+            else if (_endDate == null) // Check if only the end date is missing
+            {
+                dataComplete = false;
+                missingDataString = "Missing end date";
+            }
+            else if (_startDate.after(_endDate))
+            {
+                dataComplete = false;
+                missingDataString = "Start date must occur before end date";
+            }
+            else { }
         }
         else { }
 
-        // Next get the amount information
-        if (_anyAmountRadioButton.isChecked())
+        // Amount check
+        if (_exactAmountRadioButton.isChecked())
         {
-            // Do nothing
-        }
-        else if (_exactAmountRadioButton.isChecked())
-        {
-            intent.putExtra(EXACT_AMOUNT_CURRENCY_INTENT, _exactAmountCurrency);
-            intent.putExtra(EXACT_AMOUNT_INTENT, _exactAmountEditText.getAmount());
+            if (_exactAmountEditText.getText().length() == 0)
+            {
+                dataComplete = false;
+                missingDataString = "Exact amount is missing a value";
+            }
+            else { }
         }
         else if (_amountRangeRadioButton.isChecked())
         {
-            intent.putExtra(AMOUNT_RANGE_CURRENCY_INTENT, _amountRangeCurrency);
-            intent.putExtra(AMOUNT_RANGE_LOWER_INTENT, _amountRangeLowerEditText.getAmount());
-            intent.putExtra(AMOUNT_RANGE_UPPER_INTENT, _amountRangeUpperEditText.getAmount());
+            if (_amountRangeLowerEditText.getText().length() == 0)
+            {
+                dataComplete = false;
+                if (_amountRangeUpperEditText.getText().length() == 0)
+                {
+                    missingDataString = "Amount upper and lower bounds are missing values";
+                }
+                else
+                {
+                    missingDataString = "Amount lower bound is missing a value";
+                }
+            }
+            else if (_amountRangeUpperEditText.getText().length() == 0)
+            {
+                dataComplete = false;
+                missingDataString = "Amount upper bound is missing a value";
+            }
+            else if (_amountRangeLowerEditText.getAmount() > _amountRangeUpperEditText.getAmount())
+            {
+                dataComplete = false;
+                missingDataString = "Amount lower bound should be not be greater than the upper bound";
+            }
+            else { }
         }
         else { }
 
-        // Next get the category information
-        boolean[] categories = new boolean[_categoryCheckBoxes.length];
+        // Category check
+        boolean categoryChecked = false;
         for (int i = 0; i < _categoryCheckBoxes.length; i++)
         {
-            categories[i] = _categoryCheckBoxes[i].isChecked();
+            if (_categoryCheckBoxes[i].isChecked())
+            {
+                categoryChecked = true;
+                break;
+            }
+            else { }
         }
-        intent.putExtra(CATEGORIES_INTENT, categories);
-
-        // Finally get the note information
-        if (_anyTextRadioButton.isChecked())
+        if (!categoryChecked)
         {
-            // Do nothing
-        }
-        else if (_containsTextRadioButton.isChecked())
-        {
-            intent.putExtra(CONTAINS_TEXT_INTENT, _containsTextEditText.getText().toString());
-        }
-        else if (_exactTextRadioButton.isChecked())
-        {
-            intent.putExtra(EXACT_TEXT_INTENT, _exactTextEditText.getText().toString());
+            dataComplete = false;
+            missingDataString = "Select at least one category";
         }
         else { }
 
-        startActivity(intent);
+        // No checks necessary for the notes
+
+        if (!dataComplete)
+        {
+            View missingDataView = View.inflate(this, R.layout.popup_missing_search_data, null);
+            final PopupWindow popupWindow = new PopupWindow(missingDataView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+
+            TextView messageTextView = missingDataView.findViewById(R.id.messageTextView);
+            messageTextView.setText(missingDataString);
+
+            Button okButton = missingDataView.findViewById(R.id.okButton);
+            okButton.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View view)
+                {
+                    popupWindow.dismiss();
+                }
+            });
+
+            popupWindow.setFocusable(true);
+            popupWindow.update();
+            popupWindow.showAtLocation(findViewById(R.id.rootLayout), Gravity.CENTER, 0, 0);
+        }
+
+        return dataComplete;
     }
 }

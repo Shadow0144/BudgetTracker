@@ -1,402 +1,423 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/containerLinearLayout"
+    <TextView
+        android:id="@+id/headerTextView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="10dp"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:padding="7dp"
+        android:text="@string/create_search"
+        android:textColor="@color/white"
+        android:textSize="24sp" />
 
-        <TextView
-            android:id="@+id/dateTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Select Date:" />
-
-        <cc.corbin.budgettracker.auxilliary.EnhancedRadioGroup
-            android:id="@+id/dateRadioGroup"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <RadioButton
-                android:id="@+id/anyDateRadioButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:checked="true"
-                android:text="Any Date" />
-
-            <RadioButton
-                android:id="@+id/exactDateRadioButton"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Exact Date" />
-
-            <LinearLayout
-                android:id="@+id/exactDateLinearLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <ImageButton
-                    android:id="@+id/exactDateButton"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginEnd="15dp"
-                    android:onClick="selectExactDate"
-                    app:srcCompat="@android:drawable/ic_menu_my_calendar" />
-
-                <TextView
-                    android:id="@+id/exactYearLabelTextView"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/year_colon" />
-
-                <TextView
-                    android:id="@+id/exactYearTextView"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-
-                <TextView
-                    android:id="@+id/exactMonthLabelTextView"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/month_colon" />
-
-                <TextView
-                    android:id="@+id/exactMonthTextView"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-
-                <TextView
-                    android:id="@+id/exactDayLabelTextView"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/day_colon" />
-
-                <TextView
-                    android:id="@+id/exactDayTextView"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-
-            </LinearLayout>
-
-            <RadioButton
-                android:id="@+id/dateRangeRadioButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Date Range" />
-
-            <LinearLayout
-                android:id="@+id/startDateLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <ImageButton
-                    android:id="@+id/startDateButton"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginEnd="15dp"
-                    android:onClick="selectStartDate"
-                    app:srcCompat="@android:drawable/ic_menu_my_calendar" />
-
-                <TextView
-                    android:id="@+id/startYearLabelTextView"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/year_colon" />
-
-                <TextView
-                    android:id="@+id/startYearTextView"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-
-                <TextView
-                    android:id="@+id/startMonthLabelTextView"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/month_colon" />
-
-                <TextView
-                    android:id="@+id/startMonthTextView"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-
-                <TextView
-                    android:id="@+id/startDayLabelTextView"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/day_colon" />
-
-                <TextView
-                    android:id="@+id/startDayTextView"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/endDateLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <ImageButton
-                    android:id="@+id/endDateButton"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginEnd="15dp"
-                    android:onClick="selectEndDate"
-                    app:srcCompat="@android:drawable/ic_menu_my_calendar" />
-
-                <TextView
-                    android:id="@+id/endYearLabelTextView"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/year_colon" />
-
-                <TextView
-                    android:id="@+id/endYearTextView"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-
-                <TextView
-                    android:id="@+id/endMonthLabelTextView"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/month_colon" />
-
-                <TextView
-                    android:id="@+id/endMonthTextView"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-
-                <TextView
-                    android:id="@+id/endDayLabelTextView"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/day_colon" />
-
-                <TextView
-                    android:id="@+id/endDayTextView"
-                    android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-
-            </LinearLayout>
-
-        </cc.corbin.budgettracker.auxilliary.EnhancedRadioGroup>
-
-        <TextView
-            android:id="@+id/amountTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Select Amount:" />
-
-        <cc.corbin.budgettracker.auxilliary.EnhancedRadioGroup
-            android:id="@+id/amountRadioGroup"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <RadioButton
-                android:id="@+id/anyAmountRadioButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:checked="true"
-                android:text="Any Amount" />
-
-            <RadioButton
-                android:id="@+id/exactAmountRadioButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Exact Amount:" />
-
-            <LinearLayout
-                android:id="@+id/exactAmountLinearLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="horizontal">
-
-                <Spinner
-                    android:id="@+id/exactAmountCurrencySpinner"
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content" />
-
-                <cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText
-                    android:id="@+id/exactAmountEditText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
-
-            <RadioButton
-                android:id="@+id/amountRangeRadioButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Amount Range:" />
-
-            <LinearLayout
-                android:id="@+id/amountRangeLinearLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="horizontal">
-
-                <Spinner
-                    android:id="@+id/amountRangeCurrencySpinner"
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content" />
-
-                <cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText
-                    android:id="@+id/amountRangeLowerEditText"
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content" />
-
-                <TextView
-                    android:id="@+id/toTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="to " />
-
-                <TextView
-                    android:id="@+id/amountRangeCurrencyTextView"
-                    android:layout_width="25dp"
-                    android:layout_height="wrap_content" />
-
-                <cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText
-                    android:id="@+id/amountRangeUpperEditText"
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
-
-        </cc.corbin.budgettracker.auxilliary.EnhancedRadioGroup>
-
-        <TextView
-            android:id="@+id/categoryTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Select Categories:" />
+    <ScrollView
+        android:id="@+id/containerScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/categoriesLinearLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:id="@+id/categoriesButtonsLinearLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/checkAllCategoriesButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="checkAllCategories"
-                    android:text="Check All" />
-
-                <Button
-                    android:id="@+id/clearAllCategoriesButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="clearAllCategories"
-                    android:text="Clear All" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/noteTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Select Note:" />
-
-        <cc.corbin.budgettracker.auxilliary.EnhancedRadioGroup
-            android:id="@+id/noteRadioGroup"
+            android:id="@+id/containerLinearLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_margin="10dp"
             android:orientation="vertical">
 
-            <RadioButton
-                android:id="@+id/anyTextRadioButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:checked="true"
-                android:text="Any Text" />
-
-            <RadioButton
-                android:id="@+id/containsTextRadioButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Contains:" />
-
-            <EditText
-                android:id="@+id/containsTextEditText"
+            <TextView
+                android:id="@+id/dateTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ems="10"
-                android:inputType="textMultiLine" />
+                android:text="Select Date:" />
 
-            <RadioButton
-                android:id="@+id/exactTextRadioButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Exact Text:" />
-
-            <EditText
-                android:id="@+id/exactTextEditText"
+            <cc.corbin.budgettracker.auxilliary.EnhancedRadioGroup
+                android:id="@+id/dateRadioGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ems="10"
-                android:inputType="textMultiLine" />
+                android:orientation="vertical">
 
-        </cc.corbin.budgettracker.auxilliary.EnhancedRadioGroup>
+                <RadioButton
+                    android:id="@+id/anyDateRadioButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:text="Any Date" />
 
-        <Button
-            android:id="@+id/searchButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_margin="15dp"
-            android:onClick="search"
-            android:text="Search" />
+                <RadioButton
+                    android:id="@+id/exactDateRadioButton"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Exact Date" />
 
-    </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/exactDateLinearLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal">
 
-</ScrollView>
+                    <ImageButton
+                        android:id="@+id/exactDateButton"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginEnd="15dp"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:onClick="selectExactDate"
+                        app:srcCompat="@android:drawable/ic_menu_my_calendar" />
+
+                    <TextView
+                        android:id="@+id/exactYearLabelTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/year_colon" />
+
+                    <TextView
+                        android:id="@+id/exactYearTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                    <TextView
+                        android:id="@+id/exactMonthLabelTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/month_colon" />
+
+                    <TextView
+                        android:id="@+id/exactMonthTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                    <TextView
+                        android:id="@+id/exactDayLabelTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/day_colon" />
+
+                    <TextView
+                        android:id="@+id/exactDayTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                </LinearLayout>
+
+                <RadioButton
+                    android:id="@+id/dateRangeRadioButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Date Range" />
+
+                <LinearLayout
+                    android:id="@+id/startDateLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageButton
+                        android:id="@+id/startDateButton"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginEnd="15dp"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:onClick="selectStartDate"
+                        app:srcCompat="@android:drawable/ic_menu_my_calendar" />
+
+                    <TextView
+                        android:id="@+id/startYearLabelTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/year_colon" />
+
+                    <TextView
+                        android:id="@+id/startYearTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                    <TextView
+                        android:id="@+id/startMonthLabelTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/month_colon" />
+
+                    <TextView
+                        android:id="@+id/startMonthTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                    <TextView
+                        android:id="@+id/startDayLabelTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/day_colon" />
+
+                    <TextView
+                        android:id="@+id/startDayTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/endDateLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageButton
+                        android:id="@+id/endDateButton"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginEnd="15dp"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:onClick="selectEndDate"
+                        app:srcCompat="@android:drawable/ic_menu_my_calendar" />
+
+                    <TextView
+                        android:id="@+id/endYearLabelTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/year_colon" />
+
+                    <TextView
+                        android:id="@+id/endYearTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                    <TextView
+                        android:id="@+id/endMonthLabelTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/month_colon" />
+
+                    <TextView
+                        android:id="@+id/endMonthTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                    <TextView
+                        android:id="@+id/endDayLabelTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/day_colon" />
+
+                    <TextView
+                        android:id="@+id/endDayTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                </LinearLayout>
+
+            </cc.corbin.budgettracker.auxilliary.EnhancedRadioGroup>
+
+            <TextView
+                android:id="@+id/amountTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select Amount:" />
+
+            <cc.corbin.budgettracker.auxilliary.EnhancedRadioGroup
+                android:id="@+id/amountRadioGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/anyAmountRadioButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:text="Any Amount" />
+
+                <RadioButton
+                    android:id="@+id/exactAmountRadioButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Exact Amount:" />
+
+                <LinearLayout
+                    android:id="@+id/exactAmountLinearLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <Spinner
+                        android:id="@+id/exactAmountCurrencySpinner"
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content" />
+
+                    <cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText
+                        android:id="@+id/exactAmountEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+                <RadioButton
+                    android:id="@+id/amountRangeRadioButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Amount Range:" />
+
+                <LinearLayout
+                    android:id="@+id/amountRangeLinearLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <Spinner
+                        android:id="@+id/amountRangeCurrencySpinner"
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content" />
+
+                    <cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText
+                        android:id="@+id/amountRangeLowerEditText"
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:id="@+id/toTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="to " />
+
+                    <TextView
+                        android:id="@+id/amountRangeCurrencyTextView"
+                        android:layout_width="25dp"
+                        android:layout_height="wrap_content" />
+
+                    <cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText
+                        android:id="@+id/amountRangeUpperEditText"
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+            </cc.corbin.budgettracker.auxilliary.EnhancedRadioGroup>
+
+            <TextView
+                android:id="@+id/categoryTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Select Categories:" />
+
+            <LinearLayout
+                android:id="@+id/categoriesLinearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/categoriesButtonsLinearLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/checkAllCategoriesButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:onClick="checkAllCategories"
+                        android:text="Check All" />
+
+                    <Button
+                        android:id="@+id/clearAllCategoriesButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:onClick="clearAllCategories"
+                        android:text="Clear All" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/noteTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select Note:" />
+
+            <cc.corbin.budgettracker.auxilliary.EnhancedRadioGroup
+                android:id="@+id/noteRadioGroup"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/anyTextRadioButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:text="Any Text" />
+
+                <RadioButton
+                    android:id="@+id/containsTextRadioButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Contains:" />
+
+                <EditText
+                    android:id="@+id/containsTextEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:inputType="textMultiLine" />
+
+                <RadioButton
+                    android:id="@+id/exactTextRadioButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Exact Text:" />
+
+                <EditText
+                    android:id="@+id/exactTextEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:inputType="textMultiLine" />
+
+            </cc.corbin.budgettracker.auxilliary.EnhancedRadioGroup>
+
+            <Button
+                android:id="@+id/searchButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_margin="15dp"
+                android:onClick="search"
+                android:text="Search" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

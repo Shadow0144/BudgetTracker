@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -26,6 +27,7 @@ import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.day.ExpenditureItem;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
+import cc.corbin.budgettracker.month.MonthViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 
 public class SearchResultsActivity extends AppCompatActivity
@@ -33,6 +35,8 @@ public class SearchResultsActivity extends AppCompatActivity
     private final String TAG = "SearchResultsActivity";
 
     private LinearLayout _resultsContainer;
+
+    private ProgressBar _progressBar;
 
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _expeditures;
@@ -51,7 +55,10 @@ public class SearchResultsActivity extends AppCompatActivity
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
         _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
 
+        _progressBar = findViewById(R.id.searchProgressBar);
         _resultsContainer = findViewById(R.id.resultsLinearLayout);
+
+        _progressBar.setVisibility(View.VISIBLE);
 
         String query = "SELECT * from expenditureentity";
 
@@ -154,42 +161,59 @@ public class SearchResultsActivity extends AppCompatActivity
         {
             boolean categoryAdded = false; // For adding a final parenthesis
             boolean[] categories = intent.getBooleanArrayExtra(CreateSearchActivity.CATEGORIES_INTENT);
+            // If all categories, just leave it off
+            boolean allCategories = true;
             for (int i = 0; i < categories.length; i++)
             {
-                if (categories[i])
+                if (!categories[i])
                 {
-                    if (whereAdded)
-                    {
-                        if (i == 0)
-                        {
-                            query += " AND (";
-                        }
-                        else
-                        {
-                            query += " OR ";
-                        }
-                    }
-                    else
-                    {
-                        query += " WHERE (";
-                        whereAdded = true;
-                    }
-                    query += "category = " + i;
-                    categoryAdded = true;
+                    allCategories = false;
+                    break;
                 }
                 else { }
             }
-            if (categoryAdded)
+            if (!allCategories) // Only add a categories part if not all categories are considered
             {
-                query += ")";
+                for (int i = 0; i < categories.length; i++)
+                {
+                    if (categories[i])
+                    {
+                        if (whereAdded)
+                        {
+                            if (i == 0)
+                            {
+                                query += " AND (";
+                            }
+                            else
+                            {
+                                query += " OR ";
+                            }
+                        }
+                        else
+                        {
+                            query += " WHERE (";
+                            whereAdded = true;
+                        }
+                        query += "category = " + i;
+                        categoryAdded = true;
+                    }
+                    else
+                    {
+                    }
+                }
+                if (categoryAdded)
+                {
+                    query += ")";
+                }
             }
+            else { }
         }
         else { }
 
         // Note info
         if (intent.hasExtra(CreateSearchActivity.CONTAINS_TEXT_INTENT))
         {
-            if (whereAdded)
+            if (!whereAdded)
             {
                 query += " WHERE ";
             }
@@ -199,11 +223,11 @@ public class SearchResultsActivity extends AppCompatActivity
             }
 
             String note = intent.getStringExtra(CreateSearchActivity.CONTAINS_TEXT_INTENT);
-            query += "(note = %" + note + "%)";
+            query += "(note LIKE '%" + note + "%')";
         }
         else if (intent.hasExtra(CreateSearchActivity.EXACT_TEXT_INTENT))
         {
-            if (whereAdded)
+            if (!whereAdded)
             {
                 query += " WHERE ";
             }
@@ -213,7 +237,7 @@ public class SearchResultsActivity extends AppCompatActivity
             }
 
             String note = intent.getStringExtra(CreateSearchActivity.EXACT_TEXT_INTENT);
-            query += "(note = " + note + ")";
+            query += "(note = '" + note + "')";
         }
         else { }
 
@@ -235,8 +259,8 @@ public class SearchResultsActivity extends AppCompatActivity
 
     private void displayExpenditures(List<ExpenditureEntity> expenditureEntities)
     {
+        _progressBar.setVisibility(View.GONE);
         _resultsContainer.removeAllViews();
-        // TODO Add banner
         if (expenditureEntities != null)
         {
             _expenditureEntities = expenditureEntities;
@@ -245,9 +269,33 @@ public class SearchResultsActivity extends AppCompatActivity
             {
                 ExpenditureEntity exp = _expenditureEntities.get(i);
                 final ExpenditureItem view = new ExpenditureItem(this, exp);
+                // Add an listener to jump to the date of the item
+                view.setTag(exp);
+                view.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View view)
+                    {
+                        jumpToExpDate((ExpenditureEntity)view.getTag());
+                    }
+                });
                 _resultsContainer.addView(view);
             }
         }
         else { }
+    }
+
+    private void jumpToExpDate(ExpenditureEntity exp)
+    {
+        Intent intent = new Intent(this, DayViewActivity.class);
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(exp.getYear(), exp.getMonth()-1, exp.getDay());
+        intent.putExtra(DayViewActivity.DATE_INTENT, calendar.getTimeInMillis());
+        startActivity(intent);
+    }
+
+    private void jumpToBudDate(BudgetEntity bud)
+    {
+
     }
 }
