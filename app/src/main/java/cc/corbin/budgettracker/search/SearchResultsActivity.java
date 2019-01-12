@@ -65,6 +65,7 @@ public class SearchResultsActivity extends AppCompatActivity
         boolean whereAdded = false;
 
         // Date info
+        boolean extrasIncluded = intent.getBooleanExtra(CreateSearchActivity.INCLUDE_EXTRAS_INTENT, true);
         if (intent.hasExtra(CreateSearchActivity.EXACT_DATE_INTENT))
         {
             Date date = new Date();
@@ -73,12 +74,13 @@ public class SearchResultsActivity extends AppCompatActivity
             calendar.setTime(date);
 
             query += " WHERE ";
+            whereAdded = true;
             query += "(" +
                     "year = " + calendar.get(Calendar.YEAR) +
                     " AND month = " + (calendar.get(Calendar.MONTH)+1) +
                     " AND day = " + (calendar.get(Calendar.DATE)) +
                     ")";
-            whereAdded = true;
+            // Do not need to worry about extras here
         }
         else if (intent.hasExtra(CreateSearchActivity.START_DATE_INTENT) /* && intent.hasExtra(CreateSearchActivity.END_DATE_INTENT) */)
         {
@@ -98,20 +100,47 @@ public class SearchResultsActivity extends AppCompatActivity
             int eDay = calendar.get(Calendar.DATE);
 
             query += " WHERE ";
+            whereAdded = true;
             query += "(" +
                     "(year > " + (sYear) + " AND year < " + (eYear) + ") OR " +
                     "(year = " + (sYear) + " AND year < " + (eYear) + " AND month > " + (sMonth) + ") OR " +
                     "(year = " + (sYear) + " AND year < " + (eYear) + " AND month = " + (sMonth) + " AND day >= " + (sDay) + ") OR " +
-                    "(year > " + (sYear) + " AND year = " + (eYear) + " AND month < " + (eMonth) + " OR " +
+                    "(year > " + (sYear) + " AND year = " + (eYear) + " AND month < " + (eMonth) + ") OR " +
                     "(year > " + (sYear) + " AND year = " + (eYear) + " AND month = " + (eMonth) + " AND day <= " + (eDay) + ") OR " +
                     "(year = " + (sYear) + " AND year = " + (eYear) + " AND month > " + (sMonth) + " AND month < " + (eMonth) + ") OR " +
                     "(year = " + (sYear) + " AND year = " + (eYear) + " AND month = " + (sMonth) + " AND month < " + (eMonth) + " AND day >= " + (sDay) + ") OR " +
                     "(year = " + (sYear) + " AND year = " + (eYear) + " AND month > " + (sMonth) + " AND month = " + (eMonth) + " AND day <= " + (eDay) + ") OR " +
-                    "(year = " + (sYear) + " AND year = " + (eYear) + " AND month = " + (sMonth) + " AND month = " + (eMonth) + " AND day >= " + (sDay) + "AND day <= " + (eDay) + ")" +
+                    "(year = " + (sYear) + " AND year = " + (eYear) + " AND month = " + (sMonth) + " AND month = " + (eMonth) + " AND day >= " + (sDay) + " AND day <= " + (eDay) + ")" +
                     ")";
-            whereAdded = true;
+
+            // Check the status of the extras
+            if (extrasIncluded)
+            {
+                query += " OR ";
+                query += "(" +
+                        "(day = 0) AND (" +
+                        "(year > " + (sYear) + " AND year < " + (eYear) + ") OR " +
+                        "(year = " + (sYear) + " AND month >= " + (sMonth) + ") OR " +
+                        "(year = " + (eYear) + " AND month <= " + (eMonth) + ")" +
+                        ")" +
+                        ")";
+            }
+            else
+            {
+                query += "(day != 0)";
+            }
         }
-        else { }
+        else // Any date
+        {
+            // Check the status of the extras
+            if (!extrasIncluded)
+            {
+                query += " WHERE ";
+                whereAdded = true;
+                query += "(day != 0)";
+            }
+            else { }
+        }
 
         // Amount info
         if (intent.hasExtra(CreateSearchActivity.EXACT_AMOUNT_INTENT))
@@ -287,11 +316,22 @@ public class SearchResultsActivity extends AppCompatActivity
 
     private void jumpToExpDate(ExpenditureEntity exp)
     {
-        Intent intent = new Intent(this, DayViewActivity.class);
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(exp.getYear(), exp.getMonth()-1, exp.getDay());
-        intent.putExtra(DayViewActivity.DATE_INTENT, calendar.getTimeInMillis());
-        startActivity(intent);
+        if (exp.getDay() != 0)
+        {
+            Intent intent = new Intent(this, DayViewActivity.class);
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(exp.getYear(), exp.getMonth() - 1, exp.getDay());
+            intent.putExtra(DayViewActivity.DATE_INTENT, calendar.getTimeInMillis());
+            startActivity(intent);
+        }
+        else
+        {
+            Intent intent = new Intent(this, MonthViewActivity.class);
+            intent = new Intent(getApplicationContext(), MonthViewActivity.class);
+            intent.putExtra(MonthViewActivity.YEAR_INTENT, exp.getYear());
+            intent.putExtra(MonthViewActivity.MONTH_INTENT, exp.getMonth());
+            startActivity(intent);
+        }
     }
 
     private void jumpToBudDate(BudgetEntity bud)

@@ -41,6 +41,7 @@ public class CreateSearchActivity extends AppCompatActivity
     public static final String EXACT_DATE_INTENT = "Exact_Date";
     public static final String START_DATE_INTENT = "Start_Date";
     public static final String END_DATE_INTENT = "End_Date";
+    public static final String INCLUDE_EXTRAS_INTENT = "Include_Extras";
     public static final String EXACT_AMOUNT_CURRENCY_INTENT = "Exact_Amount_Currency";
     public static final String EXACT_AMOUNT_INTENT = "Exact_Amount";
     public static final String AMOUNT_RANGE_CURRENCY_INTENT = "Amount_Range_Currency";
@@ -50,6 +51,7 @@ public class CreateSearchActivity extends AppCompatActivity
     public static final String CONTAINS_TEXT_INTENT = "Contains_Text";
     public static final String EXACT_TEXT_INTENT = "Exact_Text";
 
+    private CheckBox _includeExtrasCheckBox;
     private CheckBox[] _categoryCheckBoxes;
 
     private RadioButton _anyDateRadioButton;
@@ -101,6 +103,8 @@ public class CreateSearchActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_search);
+
+        _includeExtrasCheckBox = findViewById(R.id.includeExtrasCheckBox);
 
         LinearLayout categoriesLayout = findViewById(R.id.categoriesLinearLayout);
         String[] categories = Categories.getCategories();
@@ -417,6 +421,8 @@ public class CreateSearchActivity extends AppCompatActivity
                 intent.putExtra(END_DATE_INTENT, _endDate.getTime());
             }
             else { }
+
+            intent.putExtra(INCLUDE_EXTRAS_INTENT, _includeExtrasCheckBox.isChecked());
 
             // Next get the amount information
             if (_anyAmountRadioButton.isChecked())

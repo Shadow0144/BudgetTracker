@@ -229,6 +229,13 @@
 
             </cc.corbin.budgettracker.auxilliary.EnhancedRadioGroup>
 
+            <CheckBox
+                android:id="@+id/includeExtrasCheckBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/include_extras" />
+
             <TextView
                 android:id="@+id/amountTextView"
                 android:layout_width="match_parent"

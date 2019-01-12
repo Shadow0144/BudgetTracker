@@ -122,6 +122,7 @@
 
     <string name="create_search">Create Search</string>
 
+    <string name="include_extras">Include Extras</string>
     <string name="missing_data">Missing Data</string>
 
     <string name="search_results">Search Results</string>

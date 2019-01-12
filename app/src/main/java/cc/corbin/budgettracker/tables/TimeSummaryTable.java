@@ -421,10 +421,10 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
         addView(totalRow);
     }
 
-    public void resetTable()
+    public void resetTable() // TODO
     {
-        removeAllViews();
-        setupTable();
+        //removeAllViews();
+        //setupTable();
     }
 
     public void updateWeeklyExpenditures(float[] amounts)

@@ -175,10 +175,10 @@ public class CategorySummaryTable extends TableLayout
         addView(totalRow);
     }
 
-    public void resetTable()
+    public void resetTable() // TODO
     {
-        removeAllViews();
-        setupTable();
+        //removeAllViews();
+        //setupTable();
     }
 
     private float getCategoryTotal(List<ExpenditureEntity> expenditureEntities, String category)
