@@ -496,9 +496,9 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                     exportSucceeded = false;
                 }
 
-                try (InputStream in = new FileInputStream(srcExp))
+                try (InputStream in = new FileInputStream(srcBud))
                 {
-                    try (OutputStream out = new FileOutputStream(dstExp))
+                    try (OutputStream out = new FileOutputStream(dstBud))
                     {
                         // Transfer bytes from in to out
                         byte[] buf = new byte[1024];
