@@ -15,9 +15,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -63,9 +69,12 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     private DrawerLayout _drawerLayout;
 
     private final int CHECK_CODE = 0; // Just check and request and return
-    private final int EXPORT_MONTH_CODE = 1;
+    private final int EXPORT_ALL_CODE = 1;
+    private final int EXPORT_YEAR_CODE = 2;
+    private final int EXPORT_MONTH_CODE = 3;
+    private final int EXPORT_DAY_CODE = 4;
 
-    private boolean _externalStorage = false;
+    private boolean _publicStorage = false;
 
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _expenditures;
@@ -182,7 +191,8 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         }
         else
         {
-            _externalStorage = true;
+            _publicStorage = true;
+            respondToRequestCode(code);
         }
     }
 
@@ -193,19 +203,27 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         if (grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
         {
-            _externalStorage = true;
-            switch (requestCode)
-            {
-                case EXPORT_MONTH_CODE:
-                    exportMonth(0, 0); // TODO
-                    break;
-            }
+            _publicStorage = true;
+            respondToRequestCode(requestCode);
         }
         else
         {
-            _externalStorage = false;
+            _publicStorage = false;
             Toast.makeText(this, "Failed to acquire permissions", Toast.LENGTH_SHORT).show();
             _expenditures = null;
+        }
+    }
+
+    private void respondToRequestCode(int requestCode)
+    {
+        switch (requestCode)
+        {
+            case EXPORT_ALL_CODE:
+                exportAll(null);
+                break;
+            case EXPORT_MONTH_CODE:
+                exportMonth(0, 0); // TODO
+                break;
         }
     }
 
@@ -215,7 +233,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         //_year = year;
         //_expenditures = expenditures;
 
-        if (!_externalStorage)
+        if (!_publicStorage)
         {
             checkPermissions(this, EXPORT_MONTH_CODE);
         }
@@ -409,6 +427,68 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
             }
 
             _expenditures = null;
+        }
+    }
+
+    public void exportAll(View v)
+    {
+        if (!_publicStorage)
+        {
+            checkPermissions(this, EXPORT_ALL_CODE);
+        }
+        else
+        {
+            String path = getDatabasePath("expenditures").getAbsolutePath();
+
+            Calendar calendar = Calendar.getInstance();
+            String fileName = "ExpenditureDatabase-" + calendar.get(Calendar.YEAR) + "-" +
+                    (calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DATE) + ".db";
+
+            String folder = Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOCUMENTS).getAbsolutePath();
+            folder = folder.substring(0, folder.lastIndexOf("/"));
+            folder += "/BudgetTracker/";
+            Log.e(TAG, folder);
+
+            File src = new File(path);
+            File dstFolder = new File(folder);
+            File dst = new File(folder, fileName);
+
+            if (!dstFolder.exists())
+            {
+                if (!dstFolder.mkdir())
+                {
+                    Log.e(TAG, "Failed to make directory");
+                }
+                else { }
+            }
+            else { }
+
+            if (!dstFolder.exists())
+            {
+                Log.e(TAG, "Failed to export");
+            }
+            else
+            {
+                try (InputStream in = new FileInputStream(src))
+                {
+                    try (OutputStream out = new FileOutputStream(dst))
+                    {
+                        // Transfer bytes from in to out
+                        byte[] buf = new byte[1024];
+                        int len;
+                        while ((len = in.read(buf)) > 0)
+                        {
+                            out.write(buf, 0, len);
+                        }
+                        Toast.makeText(this, "Export complete", Toast.LENGTH_LONG).show();
+                    }
+                }
+                catch (IOException e)
+                {
+                    Log.e(TAG, e.getLocalizedMessage());
+                }
+            }
         }
     }
 }
