@@ -6,7 +6,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Environment;
 import android.support.annotation.Nullable;
-import android.support.design.internal.NavigationMenu;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
@@ -15,8 +14,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -33,6 +30,7 @@ import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
 import cc.corbin.budgettracker.edit.ExpenditureEditActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
+import cc.corbin.budgettracker.importexport.ImportExportActivity;
 import cc.corbin.budgettracker.search.CreateSearchActivity;
 import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.total.TotalViewActivity;
@@ -263,6 +261,11 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
                 break;
             case R.id.settingsMenuItem:
                 intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                startActivity(intent);
+                handled = true;
+                break;
+            case R.id.importExportMenuItem:
+                intent = new Intent(getApplicationContext(), ImportExportActivity.class);
                 startActivity(intent);
                 handled = true;
                 break;

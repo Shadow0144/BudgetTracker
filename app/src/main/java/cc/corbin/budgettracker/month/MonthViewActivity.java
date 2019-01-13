@@ -12,14 +12,11 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.InputFilter;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -31,15 +28,13 @@ import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
-import cc.corbin.budgettracker.auxilliary.ExcelExporter;
+import cc.corbin.budgettracker.importexport.ImportExportActivity;
 import cc.corbin.budgettracker.auxilliary.LineGraph;
 import cc.corbin.budgettracker.edit.AdjustmentEditActivity;
-import cc.corbin.budgettracker.numericalformatting.MoneyValueFilter;
 import cc.corbin.budgettracker.auxilliary.PieChart;
 import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
 import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
 import cc.corbin.budgettracker.day.DayViewActivity;
-import cc.corbin.budgettracker.numericalformatting.NumericalFormattedCallback;
 import cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText;
 import cc.corbin.budgettracker.search.CreateSearchActivity;
 import cc.corbin.budgettracker.settings.SettingsActivity;
@@ -262,8 +257,6 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         _budgets.observe(this, budgetObserver);
 
         createExtrasAndAdjustmentsTables();
-
-        ExcelExporter.checkPermissions(this);
     }
 
     @Override
@@ -347,6 +340,11 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
                 startActivity(intent);
                 handled = true;
                 break;
+            case R.id.importExportMenuItem:
+                intent = new Intent(getApplicationContext(), ImportExportActivity.class);
+                startActivity(intent);
+                handled = true;
+                break;
         }
 
         if (handled)
@@ -371,12 +369,6 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         _weeklyTable.updateBudgets(entities);
         _categoryTable.updateBudgets(entities);
         _expandableBudgetTable.refreshTable(entities);
-    }
-
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults)
-    {
-        ExcelExporter.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     public void previousMonth(View v)
@@ -633,11 +625,5 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
             }
             else { }
         }
-    }
-
-    public void exportMonth(View v)
-    {
-        //List<ExpenditureEntity> monthExp = db.expenditureDao().getTimeSpan(_year, _month, 1, maxDays);
-        //ExcelExporter.exportMonth(this, _month, _year, monthExp);
     }
 }

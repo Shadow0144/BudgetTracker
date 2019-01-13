@@ -18,7 +18,6 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,6 +41,7 @@ import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.SortableItem;
 import cc.corbin.budgettracker.auxilliary.SortableLinearLayout;
 import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
+import cc.corbin.budgettracker.importexport.ImportExportActivity;
 import cc.corbin.budgettracker.search.CreateSearchActivity;
 import cc.corbin.budgettracker.tables.TableCell;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
@@ -275,6 +275,11 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
                 break;
             case R.id.settingsMenuItem:
                 intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                startActivity(intent);
+                handled = true;
+                break;
+            case R.id.importExportMenuItem:
+                intent = new Intent(getApplicationContext(), ImportExportActivity.class);
                 startActivity(intent);
                 handled = true;
                 break;

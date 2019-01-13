@@ -12,21 +12,16 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import java.text.DateFormatSymbols;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Set;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
-import cc.corbin.budgettracker.auxilliary.Currencies;
-import cc.corbin.budgettracker.auxilliary.ExcelExporter;
+import cc.corbin.budgettracker.importexport.ImportExportActivity;
 import cc.corbin.budgettracker.auxilliary.LineGraph;
 import cc.corbin.budgettracker.auxilliary.PieChart;
 import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
@@ -221,8 +216,6 @@ public class TotalViewActivity extends AppCompatActivity implements NavigationVi
         _totalExps.observe(this, entityObserver);
         _budgets = new MutableLiveData<List<BudgetEntity>>();
         _budgets.observe(this, budgetObserver);
-
-        ExcelExporter.checkPermissions(this);
     }
 
     @Override
@@ -304,6 +297,11 @@ public class TotalViewActivity extends AppCompatActivity implements NavigationVi
                 startActivity(intent);
                 handled = true;
                 break;
+            case R.id.importExportMenuItem:
+                intent = new Intent(getApplicationContext(), ImportExportActivity.class);
+                startActivity(intent);
+                handled = true;
+                break;
         }
 
         if (handled)
@@ -337,17 +335,5 @@ public class TotalViewActivity extends AppCompatActivity implements NavigationVi
     {
         _yearlyTable.updateBudgets(budgetEntities);
         _categoryTable.updateBudgets(budgetEntities);
-    }
-
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults)
-    {
-        ExcelExporter.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
-    public void exportTotal(View v)
-    {
-        //List<ExpenditureEntity> monthExp = db.expenditureDao().getTimeSpan(_year, _month, 1, maxDays);
-        //ExcelExporter.exportMonth(this, _month, _year, monthExp);
     }
 }

@@ -36,4 +36,8 @@
         android:icon="@android:drawable/btn_star"
         android:title="@string/settings" />
 
+    <item
+        android:id="@+id/importExportMenuItem"
+        android:icon="@android:drawable/btn_star"
+        android:title="@string/import_slash_export" />
 </menu>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -23,7 +22,7 @@
             app:titleTextColor="@color/white" />
 
         <LinearLayout
-            android:id="@+id/dateLayout"
+            android:id="@+id/headerLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/colorPrimaryDark"
@@ -39,12 +38,13 @@
                 android:visibility="invisible" />
 
             <TextView
-                android:id="@+id/customView"
+                android:id="@+id/headerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
                 android:layout_weight="2"
                 android:gravity="center"
+                android:text="@string/custom_view"
                 android:textAlignment="center"
                 android:textColor="@android:color/background_light"
                 android:textSize="24sp"

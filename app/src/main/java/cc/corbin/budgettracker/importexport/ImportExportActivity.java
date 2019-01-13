@@ -1,10 +1,20 @@
-package cc.corbin.budgettracker.auxilliary;
+package cc.corbin.budgettracker.importexport;
 
 import android.app.Activity;
-import android.content.Context;
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.Environment;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import java.io.File;
@@ -15,7 +25,19 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
+import cc.corbin.budgettracker.R;
+import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
+import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
+import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
+import cc.corbin.budgettracker.day.DayViewActivity;
+import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
+import cc.corbin.budgettracker.month.MonthViewActivity;
+import cc.corbin.budgettracker.search.CreateSearchActivity;
+import cc.corbin.budgettracker.settings.SettingsActivity;
+import cc.corbin.budgettracker.total.TotalViewActivity;
+import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
+import cc.corbin.budgettracker.year.YearViewActivity;
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.format.ScriptStyle;
@@ -34,26 +56,125 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
  * Created by Corbin on 2/27/2018.
  */
 
-public class ExcelExporter
+public class ImportExportActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
 {
-    private static final String TAG = "ExcelExporter";
+    private final String TAG = "ImportExportActivity";
 
-    private static final int CHECK_CODE = 0; // Just check and request and return
-    private static final int EXPORT_MONTH_CODE = 1;
+    private DrawerLayout _drawerLayout;
 
-    private static boolean _externalStorage = false;
+    private final int CHECK_CODE = 0; // Just check and request and return
+    private final int EXPORT_MONTH_CODE = 1;
 
-    private static Context _context;
-    private static int _month;
-    private static int _year;
-    private static List<ExpenditureEntity> _expenditures;
+    private boolean _externalStorage = false;
 
-    public static void checkPermissions(Activity activity)
+    private ExpenditureViewModel _viewModel;
+    private MutableLiveData<List<ExpenditureEntity>> _expenditures;
+    private MutableLiveData<List<BudgetEntity>> _budgets;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_import_export);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionbar = getSupportActionBar();
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        _drawerLayout = findViewById(R.id.rootLayout);
+        NavigationView navigationView = findViewById(R.id.navView);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        Calendar calendar = Calendar.getInstance();
+        _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
+        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
+        _viewModel.setDate(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DATE));
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case android.R.id.home:
+                _drawerLayout.openDrawer(GravityCompat.START);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item)
+    {
+        Intent intent;
+        boolean handled = false;
+        Calendar calendar = Calendar.getInstance();
+        switch (item.getItemId())
+        {
+            case R.id.searchMenuItem:
+                intent = new Intent(getApplicationContext(), CreateSearchActivity.class);
+                startActivity(intent);
+                handled = true;
+                break;
+            case R.id.dayMenuItem:
+                intent = new Intent(getApplicationContext(), DayViewActivity.class);
+                Calendar date = Calendar.getInstance();
+                date.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DATE));
+                intent.putExtra(DayViewActivity.DATE_INTENT, date.getTimeInMillis());
+                startActivity(intent);
+                handled = true;
+                break;
+            case R.id.monthMenuItem:
+                intent = new Intent(getApplicationContext(), MonthViewActivity.class);
+                intent.putExtra(MonthViewActivity.YEAR_INTENT, calendar.get(Calendar.YEAR));
+                intent.putExtra(MonthViewActivity.MONTH_INTENT, calendar.get(Calendar.MONTH)+1);
+                startActivity(intent);
+                handled = true;
+                break;
+            case R.id.yearMenuItem:
+                intent = new Intent(getApplicationContext(), YearViewActivity.class);
+                intent.putExtra(YearViewActivity.YEAR_INTENT, calendar.get(Calendar.YEAR));
+                startActivity(intent);
+                handled = true;
+                break;
+            case R.id.totalMenuItem:
+                intent = new Intent(getApplicationContext(), TotalViewActivity.class);
+                startActivity(intent);
+                handled = true;
+                break;
+            case R.id.customMenuItem:
+                intent = new Intent(getApplicationContext(), CreateCustomViewActivity.class);
+                startActivity(intent);
+                handled = true;
+                break;
+            case R.id.settingsMenuItem:
+                intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                startActivity(intent);
+                handled = true;
+                break;
+            case R.id.importExportMenuItem:
+                intent = new Intent(getApplicationContext(), ImportExportActivity.class);
+                startActivity(intent);
+                handled = true;
+                break;
+        }
+
+        if (handled)
+        {
+            _drawerLayout.closeDrawer(GravityCompat.START);
+        }
+        else { }
+
+        return handled;
+    }
+
+    public void checkPermissions(Activity activity)
     {
         checkPermissions(activity, CHECK_CODE);
     }
 
-    private static void checkPermissions(Activity activity, int code)
+    private void checkPermissions(Activity activity, int code)
     {
         if (activity.checkSelfPermission(WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
         {
@@ -65,7 +186,7 @@ public class ExcelExporter
         }
     }
 
-    public static void onRequestPermissionsResult(int requestCode,
+    public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults)
     {
         // If request is cancelled, the result arrays are empty
@@ -76,29 +197,27 @@ public class ExcelExporter
             switch (requestCode)
             {
                 case EXPORT_MONTH_CODE:
-                    exportMonth(_context, _month, _year, _expenditures);
+                    exportMonth(0, 0); // TODO
                     break;
             }
         }
         else
         {
             _externalStorage = false;
-            Toast.makeText(_context, "Failed to acquire permissions", Toast.LENGTH_SHORT).show();
-            _context = null;
+            Toast.makeText(this, "Failed to acquire permissions", Toast.LENGTH_SHORT).show();
             _expenditures = null;
         }
     }
 
-    public static void exportMonth(Context context, int month, int year, List<ExpenditureEntity> expenditures)
+    public void exportMonth(int month, int year)
     {
-        _context = context;
-        _month = month;
-        _year = year;
-        _expenditures = expenditures;
+        //_month = month;
+        //_year = year;
+        //_expenditures = expenditures;
 
         if (!_externalStorage)
         {
-            checkPermissions(((Activity)context), EXPORT_MONTH_CODE);
+            checkPermissions(this, EXPORT_MONTH_CODE);
         }
         else
         {
@@ -177,7 +296,7 @@ public class ExcelExporter
                 Calendar date = Calendar.getInstance();
                 Calendar expDate = Calendar.getInstance();
                 SimpleDateFormat simpleDate = new SimpleDateFormat("dd/MM/yyyy");
-                int expCount = expenditures.size();
+                int expCount = _expenditures.getValue().size();
                 int currExp = 0;
                 int note = 1;
                 ArrayList<String> notes = new ArrayList<String>();
@@ -202,7 +321,7 @@ public class ExcelExporter
                     {
                         if (currExp < expCount)
                         {
-                            ExpenditureEntity exp = expenditures.get(currExp);
+                            ExpenditureEntity exp = _expenditures.getValue().get(currExp);
                             expDate.set(exp.getYear(), exp.getMonth(), exp.getDay());
                             expDate.set(Calendar.MILLISECOND, 0);
                             if (date.compareTo(expDate) == 0)
@@ -281,15 +400,14 @@ public class ExcelExporter
                 workbook.write();
                 workbook.close();
 
-                Toast.makeText(context, "Successfully exported month", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Successfully exported month", Toast.LENGTH_SHORT).show();
             }
             catch (Exception e)
             {
                 e.printStackTrace();
-                Toast.makeText(context, "Failed to export", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Failed to export", Toast.LENGTH_SHORT).show();
             }
 
-            _context = null;
             _expenditures = null;
         }
     }

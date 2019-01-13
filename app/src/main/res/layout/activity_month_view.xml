@@ -145,17 +145,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"></FrameLayout>
 
-                <Space
-                    android:layout_width="match_parent"
-                    android:layout_height="15dp" />
-
-                <Button
-                    android:id="@+id/exportMonthButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:onClick="exportMonth"
-                    android:text="@string/export_month" />
-
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

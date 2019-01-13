@@ -5,13 +5,15 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.arch.lifecycle.Observer;
-import android.util.Log;
-import android.view.LayoutInflater;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
@@ -23,14 +25,19 @@ import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
+import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
 import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.day.ExpenditureItem;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
+import cc.corbin.budgettracker.importexport.ImportExportActivity;
 import cc.corbin.budgettracker.month.MonthViewActivity;
+import cc.corbin.budgettracker.settings.SettingsActivity;
+import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
+import cc.corbin.budgettracker.year.YearViewActivity;
 
-public class SearchResultsActivity extends AppCompatActivity
+public class SearchResultsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
 {
     private final String TAG = "SearchResultsActivity";
 
@@ -44,11 +51,22 @@ public class SearchResultsActivity extends AppCompatActivity
     private MutableLiveData<List<BudgetEntity>> _budgets;
     private List<BudgetEntity> _budgetEntities;
 
+    private DrawerLayout _drawerLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_results);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionbar = getSupportActionBar();
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        _drawerLayout = findViewById(R.id.rootLayout);
+        NavigationView navigationView = findViewById(R.id.navView);
+        navigationView.setNavigationItemSelectedListener(this);
 
         Intent intent = getIntent();
 
@@ -284,6 +302,81 @@ public class SearchResultsActivity extends AppCompatActivity
         };
         _expeditures.observe(this, expenditureEntitiesObserver);
         _viewModel.customExpenditureQuery(_expeditures, query);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case android.R.id.home:
+                _drawerLayout.openDrawer(GravityCompat.START);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item)
+    {
+        Intent intent;
+        boolean handled = false;
+        Calendar date = Calendar.getInstance();
+        switch (item.getItemId())
+        {
+            case R.id.searchMenuItem:
+                intent = new Intent(getApplicationContext(), CreateSearchActivity.class);
+                startActivity(intent);
+                handled = true;
+                break;
+            case R.id.dayMenuItem:
+                intent = new Intent(getApplicationContext(), DayViewActivity.class);
+                intent.putExtra(DayViewActivity.DATE_INTENT, date.getTimeInMillis());
+                startActivity(intent);
+                handled = true;
+                break;
+            case R.id.monthMenuItem:
+                intent = new Intent(getApplicationContext(), MonthViewActivity.class);
+                intent.putExtra(MonthViewActivity.YEAR_INTENT, date.get(Calendar.YEAR));
+                intent.putExtra(MonthViewActivity.MONTH_INTENT, date.get(Calendar.MONTH)+1);
+                startActivity(intent);
+                handled = true;
+                break;
+            case R.id.yearMenuItem:
+                intent = new Intent(getApplicationContext(), YearViewActivity.class);
+                intent.putExtra(YearViewActivity.YEAR_INTENT, date.get(Calendar.YEAR));
+                startActivity(intent);
+                handled = true;
+                break;
+            case R.id.totalMenuItem:
+                intent = new Intent(getApplicationContext(), TotalViewActivity.class);
+                startActivity(intent);
+                handled = true;
+                break;
+            case R.id.customMenuItem:
+                intent = new Intent(getApplicationContext(), CreateCustomViewActivity.class);
+                startActivity(intent);
+                handled = true;
+                break;
+            case R.id.settingsMenuItem:
+                intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                startActivity(intent);
+                handled = true;
+                break;
+            case R.id.importExportMenuItem:
+                intent = new Intent(getApplicationContext(), ImportExportActivity.class);
+                startActivity(intent);
+                handled = true;
+                break;
+        }
+
+        if (handled)
+        {
+            _drawerLayout.closeDrawer(GravityCompat.START);
+        }
+        else { }
+
+        return handled;
     }
 
     private void displayExpenditures(List<ExpenditureEntity> expenditureEntities)

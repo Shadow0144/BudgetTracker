@@ -23,13 +23,12 @@ import android.widget.FrameLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
-import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
-import cc.corbin.budgettracker.auxilliary.ExcelExporter;
+import cc.corbin.budgettracker.importexport.ImportExportActivity;
 import cc.corbin.budgettracker.auxilliary.LineGraph;
 import cc.corbin.budgettracker.auxilliary.PieChart;
 import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
@@ -234,8 +233,6 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
         _yearExps.observe(this, entityObserver);
         _budgets = new MutableLiveData<List<BudgetEntity>>();
         _budgets.observe(this, budgetObserver);
-
-        ExcelExporter.checkPermissions(this);
     }
 
     @Override
@@ -319,6 +316,11 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
                 startActivity(intent);
                 handled = true;
                 break;
+            case R.id.importExportMenuItem:
+                intent = new Intent(getApplicationContext(), ImportExportActivity.class);
+                startActivity(intent);
+                handled = true;
+                break;
         }
 
         if (handled)
@@ -340,12 +342,6 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
     {
         _monthlyTable.updateBudgets(entities);
         _categoryTable.updateBudgetsTrim(entities);
-    }
-
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults)
-    {
-        ExcelExporter.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     public void previousYear(View v)
@@ -447,11 +443,5 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
         _viewModel.removeBudgetEntity(_budgets, entity);
 
         _popupWindow.dismiss();
-    }
-
-    public void exportYear(View v)
-    {
-        //List<ExpenditureEntity> monthExp = db.expenditureDao().getTimeSpan(_year, _month, 1, maxDays);
-        //ExcelExporter.exportMonth(this, _month, _year, monthExp);
     }
 }

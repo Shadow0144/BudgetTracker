@@ -120,12 +120,18 @@
 
     <string name="additional_items">+&#8230;</string>
 
+    <string name="create_custom_view">Create Custom View</string>
+
+    <string name="custom_view">Custom View</string>
+
     <string name="create_search">Create Search</string>
 
     <string name="include_extras">Include Extras</string>
     <string name="missing_data">Missing Data</string>
 
     <string name="search_results">Search Results</string>
+
+    <string name="import_slash_export">Import / Export</string>
 
     <string name="export_month">Export Month</string>
     <string name="export_year">Export Year</string>
