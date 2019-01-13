@@ -438,10 +438,13 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         }
         else
         {
-            String path = getDatabasePath("expenditures").getAbsolutePath();
+            String expPath = getDatabasePath("expenditures").getAbsolutePath();
+            String budPath = getDatabasePath("budgets").getAbsolutePath();
 
             Calendar calendar = Calendar.getInstance();
-            String fileName = "ExpenditureDatabase-" + calendar.get(Calendar.YEAR) + "-" +
+            String expFileName = "ExpenditureDatabase-" + calendar.get(Calendar.YEAR) + "-" +
+                    (calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DATE) + ".db";
+            String budFileName = "BudgetDatabase-" + calendar.get(Calendar.YEAR) + "-" +
                     (calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DATE) + ".db";
 
             String folder = Environment.getExternalStoragePublicDirectory(
@@ -450,9 +453,11 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
             folder += "/BudgetTracker/";
             Log.e(TAG, folder);
 
-            File src = new File(path);
+            File srcExp = new File(expPath);
+            File srcBud = new File(budPath);
             File dstFolder = new File(folder);
-            File dst = new File(folder, fileName);
+            File dstExp = new File(folder, expFileName);
+            File dstBud = new File(folder, budFileName);
 
             if (!dstFolder.exists())
             {
@@ -470,9 +475,11 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
             }
             else
             {
-                try (InputStream in = new FileInputStream(src))
+                boolean exportSucceeded = true;
+
+                try (InputStream in = new FileInputStream(srcExp))
                 {
-                    try (OutputStream out = new FileOutputStream(dst))
+                    try (OutputStream out = new FileOutputStream(dstExp))
                     {
                         // Transfer bytes from in to out
                         byte[] buf = new byte[1024];
@@ -481,12 +488,40 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                         {
                             out.write(buf, 0, len);
                         }
-                        Toast.makeText(this, "Export complete", Toast.LENGTH_LONG).show();
                     }
                 }
                 catch (IOException e)
                 {
                     Log.e(TAG, e.getLocalizedMessage());
+                    exportSucceeded = false;
+                }
+
+                try (InputStream in = new FileInputStream(srcExp))
+                {
+                    try (OutputStream out = new FileOutputStream(dstExp))
+                    {
+                        // Transfer bytes from in to out
+                        byte[] buf = new byte[1024];
+                        int len;
+                        while ((len = in.read(buf)) > 0)
+                        {
+                            out.write(buf, 0, len);
+                        }
+                    }
+                }
+                catch (IOException e)
+                {
+                    Log.e(TAG, e.getLocalizedMessage());
+                    exportSucceeded = false;
+                }
+
+                if (exportSucceeded)
+                {
+                    Toast.makeText(this, "Export succeeded", Toast.LENGTH_LONG).show();
+                }
+                else
+                {
+                    Toast.makeText(this, "Export failed", Toast.LENGTH_LONG).show();
                 }
             }
         }
