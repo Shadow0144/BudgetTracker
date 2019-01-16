@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.NavigationView;
@@ -57,6 +58,7 @@ import jxl.write.WritableWorkbook;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.provider.CalendarContract.CalendarCache.URI;
 
 /**
  * Created by Corbin on 2/27/2018.
@@ -73,6 +75,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     private final int EXPORT_YEAR_CODE = 2;
     private final int EXPORT_MONTH_CODE = 3;
     private final int EXPORT_DAY_CODE = 4;
+    private final int IMPORT_BEGIN_CODE = 5;
 
     private boolean _publicStorage = false;
 
@@ -428,6 +431,27 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
 
             _expenditures = null;
         }
+    }
+
+    public void beginImport(View v)
+    {
+        Intent intent = new Intent()
+                .setType("*/*")
+                .setAction(Intent.ACTION_GET_CONTENT);
+
+        startActivityForResult(Intent.createChooser(intent, "Select a file"), IMPORT_BEGIN_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == IMPORT_BEGIN_CODE && resultCode == RESULT_OK)
+        {
+            Uri selectedFile = data.getData(); //The URI with the location of the file
+            Log.e(TAG, "Import: " + selectedFile.getPath());
+        }
+        else { }
     }
 
     public void exportAll(View v)
