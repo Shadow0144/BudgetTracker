@@ -1,0 +1,645 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TableLayout
+        android:id="@+id/calendarTableLayout"
+        android:layout_width="248dp"
+        android:layout_height="wrap_content"
+        android:background="@color/silver"
+        android:padding="8dp"
+        android:stretchColumns="*"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TableRow
+            android:id="@+id/headerRow"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/white">
+
+            <LinearLayout
+                android:id="@+id/headerLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_span="7"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/monthTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:layout_weight="2"
+                    android:onClick="onMoveToYearView"
+                    android:textSize="18sp" />
+
+                <ImageButton
+                    android:id="@+id/upButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    android:onClick="onMonthUp"
+                    app:srcCompat="@android:drawable/arrow_up_float" />
+
+                <ImageButton
+                    android:id="@+id/downButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    android:onClick="onMonthDown"
+                    app:srcCompat="@android:drawable/arrow_down_float" />
+
+            </LinearLayout>
+
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/weekNameRow"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:textAlignment="center">
+
+            <TextView
+                android:id="@+id/sundayTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/sun"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/mondayTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/mon"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/tuesdayTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/tue"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/wednesdayTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/wed"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/thursdayTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/thu"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/fridayTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/fri"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/saturdayTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/sat"
+                android:textAlignment="center" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/week1Row"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textAlignment="center">
+
+            <TextView
+                android:id="@+id/day1TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="1"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day2TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="2"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day3TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="3"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day4TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="4"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day5TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="5"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day6TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="6"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day7TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="7"
+                android:textAlignment="center" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/week2Row"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textAlignment="center">
+
+            <TextView
+                android:id="@+id/day8TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="8"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day9TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="9"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day10TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="10"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day11TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="11"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day12TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="12"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day13TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="13"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day14TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="14"
+                android:textAlignment="center" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/week3Row"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textAlignment="center">
+
+            <TextView
+                android:id="@+id/day15TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="15"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day16TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="16"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day17TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="17"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day18TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="18"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day19TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="19"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day20TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="20"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day21TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="21"
+                android:textAlignment="center" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/week4Row"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textAlignment="center">
+
+            <TextView
+                android:id="@+id/day22TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="22"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day23TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="23"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day24TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="24"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day25TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="25"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day26TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="26"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day27TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="27"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day28TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="28"
+                android:textAlignment="center" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/week5Row"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textAlignment="center">
+
+            <TextView
+                android:id="@+id/day29TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="29"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day30TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="30"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day31TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="31"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day32TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="32"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day33TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="33"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day34TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="34"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day35TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="35"
+                android:textAlignment="center" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/week6Row"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textAlignment="center">
+
+            <TextView
+                android:id="@+id/day36TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="36"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day37TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="37"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day38TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="38"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day39TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="39"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day40TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="40"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day41TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="41"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/day42TextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="1dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:onClick="onDaySelect"
+                android:tag="42"
+                android:textAlignment="center" />
+        </TableRow>
+
+    </TableLayout>
+</android.support.constraint.ConstraintLayout>

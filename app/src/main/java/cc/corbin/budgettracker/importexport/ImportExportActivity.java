@@ -1,14 +1,18 @@
 package cc.corbin.budgettracker.importexport;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -17,6 +21,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.DatePicker;
 import android.widget.Toast;
 
 import java.io.File;
@@ -27,12 +32,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import cc.corbin.budgettracker.R;
+import cc.corbin.budgettracker.auxilliary.DatePickerFragment;
+import cc.corbin.budgettracker.auxilliary.MonthPickerFragment;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
@@ -58,7 +67,6 @@ import jxl.write.WritableWorkbook;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static android.provider.CalendarContract.CalendarCache.URI;
 
 /**
  * Created by Corbin on 2/27/2018.
@@ -71,11 +79,8 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     private DrawerLayout _drawerLayout;
 
     private final int CHECK_CODE = 0; // Just check and request and return
-    private final int EXPORT_ALL_CODE = 1;
-    private final int EXPORT_YEAR_CODE = 2;
-    private final int EXPORT_MONTH_CODE = 3;
-    private final int EXPORT_DAY_CODE = 4;
-    private final int IMPORT_BEGIN_CODE = 5;
+    private final int EXPORT_CODE = 1;
+    private final int IMPORT_CODE = 2;
 
     private boolean _publicStorage = false;
 
@@ -221,12 +226,12 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     {
         switch (requestCode)
         {
-            case EXPORT_ALL_CODE:
-                exportAll(null);
+            case EXPORT_CODE:
+                onExport(null);
                 break;
-            case EXPORT_MONTH_CODE:
-                exportMonth(0, 0); // TODO
-                break;
+            //case EXPORT_MONTH_CODE:
+            //    exportMonth(0, 0); // TODO
+            //    break;
         }
     }
 
@@ -238,7 +243,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
 
         if (!_publicStorage)
         {
-            checkPermissions(this, EXPORT_MONTH_CODE);
+            //checkPermissions(this, EXPORT_MONTH_CODE);
         }
         else
         {
@@ -433,55 +438,46 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         }
     }
 
-    public void beginImport(View v)
+    public void onImport(View v)
     {
         Intent intent = new Intent()
                 .setType("*/*")
+                .addCategory(Intent.CATEGORY_OPENABLE)
                 .setAction(Intent.ACTION_GET_CONTENT);
 
-        startActivityForResult(Intent.createChooser(intent, "Select a file"), IMPORT_BEGIN_CODE);
+        startActivityForResult(Intent.createChooser(intent, "Select a file"), IMPORT_CODE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == IMPORT_BEGIN_CODE && resultCode == RESULT_OK)
+        if (requestCode == IMPORT_CODE && resultCode == RESULT_OK)
         {
-            Uri selectedFile = data.getData(); //The URI with the location of the file
-            Log.e(TAG, "Import: " + selectedFile.getPath());
+            continueImport(data.getData()); //The URI with the location of the file
         }
         else { }
     }
 
-    public void exportAll(View v)
+    private void continueImport(Uri selectedFile)
+    {
+        Log.e(TAG, "Import: " + selectedFile.getPath());
+    }
+
+    public void onExport(View v)
     {
         if (!_publicStorage)
         {
-            checkPermissions(this, EXPORT_ALL_CODE);
+            checkPermissions(this, EXPORT_CODE);
         }
         else
         {
-            String expPath = getDatabasePath("expenditures").getAbsolutePath();
-            String budPath = getDatabasePath("budgets").getAbsolutePath();
-
-            Calendar calendar = Calendar.getInstance();
-            String expFileName = "ExpenditureDatabase-" + calendar.get(Calendar.YEAR) + "-" +
-                    (calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DATE) + ".db";
-            String budFileName = "BudgetDatabase-" + calendar.get(Calendar.YEAR) + "-" +
-                    (calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DATE) + ".db";
-
             String folder = Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_DOCUMENTS).getAbsolutePath();
             folder = folder.substring(0, folder.lastIndexOf("/"));
             folder += "/BudgetTracker/";
-            Log.e(TAG, folder);
 
-            File srcExp = new File(expPath);
-            File srcBud = new File(budPath);
             File dstFolder = new File(folder);
-            File dstExp = new File(folder, expFileName);
-            File dstBud = new File(folder, budFileName);
 
             if (!dstFolder.exists())
             {
@@ -495,59 +491,100 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
 
             if (!dstFolder.exists())
             {
-                Log.e(TAG, "Failed to export");
+                Log.e(TAG, "Destination folder does not exist");
             }
             else
             {
-                boolean exportSucceeded = true;
+                Calendar calendar = Calendar.getInstance();
+                String expFileName = "ExpenditureDatabase-" + calendar.get(Calendar.YEAR) + "-" +
+                        (calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DATE) + ".db";
+                String budFileName = "BudgetDatabase-" + calendar.get(Calendar.YEAR) + "-" +
+                        (calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DATE) + ".db";
 
-                try (InputStream in = new FileInputStream(srcExp))
-                {
-                    try (OutputStream out = new FileOutputStream(dstExp))
-                    {
-                        // Transfer bytes from in to out
-                        byte[] buf = new byte[1024];
-                        int len;
-                        while ((len = in.read(buf)) > 0)
-                        {
-                            out.write(buf, 0, len);
-                        }
-                    }
-                }
-                catch (IOException e)
-                {
-                    Log.e(TAG, e.getLocalizedMessage());
-                    exportSucceeded = false;
-                }
+                exportAll(folder, expFileName, budFileName);
+            }
+        }
+    }
 
-                try (InputStream in = new FileInputStream(srcBud))
-                {
-                    try (OutputStream out = new FileOutputStream(dstBud))
-                    {
-                        // Transfer bytes from in to out
-                        byte[] buf = new byte[1024];
-                        int len;
-                        while ((len = in.read(buf)) > 0)
-                        {
-                            out.write(buf, 0, len);
-                        }
-                    }
-                }
-                catch (IOException e)
-                {
-                    Log.e(TAG, e.getLocalizedMessage());
-                    exportSucceeded = false;
-                }
+    public void exportAll(String folder, String expFileName, String budFileName)
+    {
+        String expPath = getDatabasePath("expenditures").getAbsolutePath();
+        String budPath = getDatabasePath("budgets").getAbsolutePath();
 
-                if (exportSucceeded)
+        File srcExp = new File(expPath);
+        File srcBud = new File(budPath);
+        File dstExp = new File(folder, expFileName);
+        File dstBud = new File(folder, budFileName);
+
+        boolean exportSucceeded = true;
+
+        // Export the expenditures
+        try (InputStream in = new FileInputStream(srcExp))
+        {
+            try (OutputStream out = new FileOutputStream(dstExp))
+            {
+                // Transfer bytes from in to out
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = in.read(buf)) > 0)
                 {
-                    Toast.makeText(this, "Export succeeded", Toast.LENGTH_LONG).show();
-                }
-                else
-                {
-                    Toast.makeText(this, "Export failed", Toast.LENGTH_LONG).show();
+                    out.write(buf, 0, len);
                 }
             }
         }
+        catch (IOException e)
+        {
+            Log.e(TAG, e.getLocalizedMessage());
+            exportSucceeded = false;
+        }
+
+        // Export the budgets
+        try (InputStream in = new FileInputStream(srcBud))
+        {
+            try (OutputStream out = new FileOutputStream(dstBud))
+            {
+                // Transfer bytes from in to out
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = in.read(buf)) > 0)
+                {
+                    out.write(buf, 0, len);
+                }
+            }
+        }
+        catch (IOException e)
+        {
+            Log.e(TAG, e.getLocalizedMessage());
+            exportSucceeded = false;
+        }
+
+        // Report the success or failure
+        if (exportSucceeded)
+        {
+            Toast.makeText(this, "Successfully exported to BudgetTracker/", Toast.LENGTH_LONG).show();
+        }
+        else
+        {
+            Toast.makeText(this, "Export failed", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void test(View v)
+    {
+        MutableLiveData<Date> _monthDateLive = new MutableLiveData<Date>();
+
+        final Observer<Date> monthDateObserver = new Observer<Date>()
+        {
+            @Override
+            public void onChanged(@Nullable Date date)
+            {
+                Log.e(TAG, date.toString());
+            }
+        };
+        _monthDateLive.observe(this, monthDateObserver);
+
+        DialogFragment fragment = new MonthPickerFragment();
+        ((MonthPickerFragment) fragment).setLiveData(_monthDateLive);
+        fragment.show(getSupportFragmentManager(), "monthPicker");
     }
 }

@@ -1,13 +1,13 @@
-package cc.corbin.budgettracker.workerthread;
+package cc.corbin.budgettracker.workerthread.budgetevent;
 
 import android.arch.lifecycle.MutableLiveData;
 import java.util.List;
 
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 
-public class BudgetDatabaseEvent
+public class BudDatabaseEvent
 {
-    private final String TAG = "BudgetDatabaseEvent";
+    private final String TAG = "BudDatabaseEvent";
 
     private static int id = 0;
 
@@ -52,7 +52,7 @@ public class BudgetDatabaseEvent
     private BudgetEntity _linkedEntity;
     private List<BudgetEntity> _entities;
 
-    public BudgetDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
+    public BudDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
                             int year, int month, BudgetEntity entity)
     {
         _mutableLiveData = mutableLiveData;
@@ -65,8 +65,8 @@ public class BudgetDatabaseEvent
         _entities = null;
     }
 
-    public BudgetDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
-                               int year, int month, BudgetEntity entity, BudgetEntity linkedEntity)
+    public BudDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
+                            int year, int month, BudgetEntity entity, BudgetEntity linkedEntity)
     {
         _mutableLiveData = mutableLiveData;
         _eventType = eventType;
@@ -77,7 +77,7 @@ public class BudgetDatabaseEvent
         _id = id++;
     }
 
-    public BudgetDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
+    public BudDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
                             int year, int month, QueryType queryType)
     {
         _mutableLiveData = mutableLiveData;
@@ -90,8 +90,8 @@ public class BudgetDatabaseEvent
     }
 
     // Rename
-    public BudgetDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
-                               int category, String newCategoryName)
+    public BudDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
+                            int category, String newCategoryName)
     {
         _mutableLiveData = mutableLiveData;
         _eventType = eventType;
@@ -102,8 +102,8 @@ public class BudgetDatabaseEvent
     }
 
     // Add or remove
-    public BudgetDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
-                               int category)
+    public BudDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
+                            int category)
     {
         _mutableLiveData = mutableLiveData;
         _eventType = eventType;
@@ -113,8 +113,8 @@ public class BudgetDatabaseEvent
     }
 
     // Merge
-    public BudgetDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
-                               int category, int newCategory, String newCategoryName)
+    public BudDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
+                            int category, int newCategory, String newCategoryName)
     {
         _mutableLiveData = mutableLiveData;
         _eventType = eventType;
@@ -126,8 +126,8 @@ public class BudgetDatabaseEvent
     }
 
     // Categories resorted
-    public BudgetDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
-                               String[] newCategoryNames)
+    public BudDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
+                            String[] newCategoryNames)
     {
         _mutableLiveData = mutableLiveData;
         _eventType = eventType;
@@ -136,8 +136,8 @@ public class BudgetDatabaseEvent
         _entities = null;
     }
 
-    public BudgetDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
-                               String query)
+    public BudDatabaseEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, EventType eventType,
+                            String query)
     {
         _mutableLiveData = mutableLiveData;
         _eventType = eventType;

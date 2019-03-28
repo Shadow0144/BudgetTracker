@@ -1,4 +1,4 @@
-package cc.corbin.budgettracker.workerthread;
+package cc.corbin.budgettracker.workerthread.expenditureevent;
 
 import android.arch.lifecycle.MutableLiveData;
 

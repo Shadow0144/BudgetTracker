@@ -132,8 +132,29 @@
     <string name="search_results">Search Results</string>
 
     <string name="import_slash_export">Import / Export</string>
+    <string name="_import">Import</string>
+    <string name="_export">Export</string>
 
+    <string name="merge">Merge</string>
+    <string name="merge_explain">Import all the items which do not have conflicting IDs</string>
+    <string name="merge_all">Merge All</string>
+    <string name="merge_all_explain">Import all the items, giving new IDs to imported items which conflict with existing items</string>
+    <string name="overwrite_conflicts">Overwrite Conflicts</string>
+    <string name="overwrite_conflicts_explain">Import all the items, overwriting any items which have conflicting IDs</string>
+    <string name="overwrite_all">Overwrite All</string>
+    <string name="overwrite_all_explain">Completely replaces the current database with the imported one</string>
+
+    <string name="export_day">Export Day</string>
     <string name="export_month">Export Month</string>
     <string name="export_year">Export Year</string>
     <string name="export_total">Export Total</string>
+    <string name="export_custom">Export Custom</string>
+
+    <string name="sun">Sun</string>
+    <string name="mon">Mon</string>
+    <string name="tue">Tue</string>
+    <string name="wed">Wed</string>
+    <string name="thu">Thu</string>
+    <string name="fri">Fri</string>
+    <string name="sat">Sat</string>
 </resources>

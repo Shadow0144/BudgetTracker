@@ -182,8 +182,8 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
                 weekLabels[5] = "Week 5";
                 weekLabels[6] = "Adjustments";
 
-                _weeklyPieChart.setData(amounts, weekLabels);
-                _weeklyLineGraph.setData(amounts, weekLabels);
+                //_weeklyPieChart.setData(amounts, weekLabels);
+                //_weeklyLineGraph.setData(amounts, weekLabels);
             }
         };
 
@@ -195,7 +195,7 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
                 _categoryTable.updateExpenditures(amounts);
 
                 String[] categoryLabels = Categories.getCategories();
-                _categoryPieChart.setData(amounts, categoryLabels);
+                //_categoryPieChart.setData(amounts, categoryLabels);
 
                 MonthViewActivity.dataInvalid = false;
 

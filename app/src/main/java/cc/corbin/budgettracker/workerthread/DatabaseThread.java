@@ -1,40 +1,36 @@
 package cc.corbin.budgettracker.workerthread;
 
 import android.arch.persistence.db.SimpleSQLiteQuery;
-import android.os.Handler;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
-import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
-import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
-
-import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
+import cc.corbin.budgettracker.workerthread.budgetevent.BudDatabaseEvent;
+import cc.corbin.budgettracker.workerthread.expenditureevent.ExpDatabaseEvent;
 
 public class DatabaseThread
 {
     private final String TAG = "DatabaseThread";
 
     private ConcurrentLinkedQueue<ExpDatabaseEvent> _expEvents;
-    private ConcurrentLinkedQueue<BudgetDatabaseEvent> _budEvents;
+    private ConcurrentLinkedQueue<BudDatabaseEvent> _budEvents;
     private ConcurrentLinkedQueue<ExpDatabaseEvent> _completedExpEvents;
-    private ConcurrentLinkedQueue<BudgetDatabaseEvent> _completedBudEvents;
+    private ConcurrentLinkedQueue<BudDatabaseEvent> _completedBudEvents;
 
     private ExpenditureDatabase _dbE;
     private BudgetDatabase _dbB;
 
     public DatabaseThread(ExpenditureDatabase dbE, BudgetDatabase dbB,
                           ConcurrentLinkedQueue<ExpDatabaseEvent> eEvents,
-                          ConcurrentLinkedQueue<BudgetDatabaseEvent> bEvents,
+                          ConcurrentLinkedQueue<BudDatabaseEvent> bEvents,
                           ConcurrentLinkedQueue<ExpDatabaseEvent> completedExpEvents,
-                          ConcurrentLinkedQueue<BudgetDatabaseEvent> completedBudEvents)
+                          ConcurrentLinkedQueue<BudDatabaseEvent> completedBudEvents)
     {
         _dbE = dbE;
         _dbB = dbB;
@@ -232,7 +228,7 @@ public class DatabaseThread
         else { }
     }
 
-    private void processBudEvent(BudgetDatabaseEvent event)
+    private void processBudEvent(BudDatabaseEvent event)
     {
         BudgetEntity entity = null;
         BudgetEntity linkedEntity = null;

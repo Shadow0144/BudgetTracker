@@ -267,7 +267,7 @@ public class LineGraph extends RelativeLayout
                 currentX += spacing;
             }
 
-            if (_guidelines != null)
+            if (_guidelines != null && _guidelineLabels != null)
             {
                 for (int i = 0; i < _guidelines.length; i++)
                 {
