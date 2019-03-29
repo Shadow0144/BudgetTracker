@@ -11,8 +11,31 @@ import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
+import cc.corbin.budgettracker.workerthread.budgetevent.BudAddCategoryEvent;
+import cc.corbin.budgettracker.workerthread.budgetevent.BudCustomQueryEvent;
 import cc.corbin.budgettracker.workerthread.budgetevent.BudDatabaseEvent;
+import cc.corbin.budgettracker.workerthread.budgetevent.BudInsertEvent;
+import cc.corbin.budgettracker.workerthread.budgetevent.BudInsertTransferEvent;
+import cc.corbin.budgettracker.workerthread.budgetevent.BudMergeCategoryEvent;
+import cc.corbin.budgettracker.workerthread.budgetevent.BudQueryEvent;
+import cc.corbin.budgettracker.workerthread.budgetevent.BudRemoveCategoryEvent;
+import cc.corbin.budgettracker.workerthread.budgetevent.BudRemoveEvent;
+import cc.corbin.budgettracker.workerthread.budgetevent.BudRemoveTransferEvent;
+import cc.corbin.budgettracker.workerthread.budgetevent.BudRenameCategoryEvent;
+import cc.corbin.budgettracker.workerthread.budgetevent.BudResortCategoriesEvent;
+import cc.corbin.budgettracker.workerthread.budgetevent.BudUpdateEvent;
+import cc.corbin.budgettracker.workerthread.budgetevent.BudUpdateTransferEvent;
+import cc.corbin.budgettracker.workerthread.expenditureevent.ExpAddCategoryEvent;
+import cc.corbin.budgettracker.workerthread.expenditureevent.ExpCustomQueryEvent;
 import cc.corbin.budgettracker.workerthread.expenditureevent.ExpDatabaseEvent;
+import cc.corbin.budgettracker.workerthread.expenditureevent.ExpInsertEvent;
+import cc.corbin.budgettracker.workerthread.expenditureevent.ExpMergeCategoryEvent;
+import cc.corbin.budgettracker.workerthread.expenditureevent.ExpQueryEvent;
+import cc.corbin.budgettracker.workerthread.expenditureevent.ExpRemoveCategoryEvent;
+import cc.corbin.budgettracker.workerthread.expenditureevent.ExpRemoveEvent;
+import cc.corbin.budgettracker.workerthread.expenditureevent.ExpRenameCategoryEvent;
+import cc.corbin.budgettracker.workerthread.expenditureevent.ExpResortCategoriesEvent;
+import cc.corbin.budgettracker.workerthread.expenditureevent.ExpUpdateEvent;
 
 /**
  * Created by Corbin on 3/14/2018.
@@ -82,25 +105,7 @@ public class ExpenditureViewModel extends ViewModel
     // When a database event has finished
     public void checkQueue()
     {
-        while (!_completedExpEvents.isEmpty())
-        {
-            ExpDatabaseEvent expDatabaseEvent = _completedExpEvents.poll();
-            if (expDatabaseEvent.getMutableLiveData() != null)
-            {
-                expDatabaseEvent.getMutableLiveData().postValue(expDatabaseEvent.getEntities());
-            }
-            else { }
-        }
-
-        while (!_completedBudEvents.isEmpty())
-        {
-            BudDatabaseEvent budDatabaseEvent = _completedBudEvents.poll();
-            if (budDatabaseEvent.getMutableLiveData() != null)
-            {
-                budDatabaseEvent.getMutableLiveData().postValue(budDatabaseEvent.getEntities());
-            }
-            else { }
-        }
+        // TODO ?
     }
 
     public void processQueue()
@@ -116,204 +121,204 @@ public class ExpenditureViewModel extends ViewModel
 
     public void getDay(MutableLiveData<List<ExpenditureEntity>> mutableLiveData)
     {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.query, _year, _month, _day, ExpDatabaseEvent.QueryType.day);
+        ExpDatabaseEvent event = new ExpQueryEvent(mutableLiveData, _year, _month, _day);
         _expEvents.add(event);
         processQueue();
     }
 
     public void getMonth(MutableLiveData<List<ExpenditureEntity>> mutableLiveData)
     {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.query, _year, _month, _day, ExpDatabaseEvent.QueryType.month);
+        ExpDatabaseEvent event = new ExpQueryEvent(mutableLiveData, _year, _month);
         _expEvents.add(event);
         processQueue();
     }
 
     public void getYear(MutableLiveData<List<ExpenditureEntity>> mutableLiveData)
     {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.query, _year, _month, _day, ExpDatabaseEvent.QueryType.year);
+        ExpDatabaseEvent event = new ExpQueryEvent(mutableLiveData, _year);
         _expEvents.add(event);
         processQueue();
     }
 
     public void getTotal(MutableLiveData<List<ExpenditureEntity>> mutableLiveData)
     {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.query, _year, _month, _day, ExpDatabaseEvent.QueryType.total);
+        ExpDatabaseEvent event = new ExpQueryEvent(mutableLiveData);
         _expEvents.add(event);
         processQueue();
     }
 
-    public void insertExpEntity(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, ExpenditureEntity entity)
+    public void insertExpEntity(ExpenditureEntity entity)
     {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.insert, _year, _month, _day, entity);
+        ExpDatabaseEvent event = new ExpInsertEvent(entity);
         _expEvents.add(event);
         processQueue();
     }
 
-    public void updateExpEntity(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, ExpenditureEntity entity)
+    public void updateExpEntity(ExpenditureEntity entity)
     {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.update, _year, _month, _day, entity);
+        ExpDatabaseEvent event = new ExpUpdateEvent(entity);
         _expEvents.add(event);
         processQueue();
     }
 
-    public void removeExpEntity(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, ExpenditureEntity entity)
+    public void removeExpEntity(ExpenditureEntity entity)
     {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.remove, _year, _month, _day, entity);
+        ExpDatabaseEvent event = new ExpRemoveEvent(entity);
         _expEvents.add(event);
         processQueue();
     }
 
-    public void renameExpenditureCategory(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, int category, String newCategoryName)
+    public void renameExpenditureCategory(int category, String newCategoryName)
     {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.renameCategory, category, newCategoryName);
+        ExpDatabaseEvent event = new ExpRenameCategoryEvent(category, newCategoryName);
         _expEvents.add(event);
         processQueue();
     }
 
-    public void mergeExpenditureCategory(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, int category, int newCategory, String newCategoryName)
+    public void mergeExpenditureCategory(int category, int newCategory, String newCategoryName)
     {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.mergeCategory, category, newCategory, newCategoryName);
+        ExpDatabaseEvent event = new ExpMergeCategoryEvent(category, newCategory, newCategoryName);
         _expEvents.add(event);
         processQueue();
     }
 
-    public void addExpenditureCategory(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, int category)
+    public void addExpenditureCategory(int category)
     {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.addCategory, category);
+        ExpDatabaseEvent event = new ExpAddCategoryEvent(category);
         _expEvents.add(event);
         processQueue();
     }
 
-    public void removeExpenditureCategory(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, int category)
+    public void removeExpenditureCategory(int category)
     {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.removeCategory, category);
+        ExpDatabaseEvent event = new ExpRemoveCategoryEvent(category);
         _expEvents.add(event);
         processQueue();
     }
 
 
-    public void updateExpenditureCategories(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, String[] categoryNames)
+    public void updateExpenditureCategories(String[] categoryNames)
     {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.resortCategories, categoryNames);
+        ExpDatabaseEvent event = new ExpResortCategoriesEvent(categoryNames);
         _expEvents.add(event);
         processQueue();
     }
 
     public void getMonthBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData)
     {
-        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.query, _year, _month, BudDatabaseEvent.QueryType.month);
+        BudDatabaseEvent event = new BudQueryEvent(mutableLiveData, _year, _month, BudQueryEvent.QueryType.month);
         _budEvents.add(event);
         processQueue();
     }
 
     public void getMonthsBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData)
     {
-        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.query, _year, _month, BudDatabaseEvent.QueryType.months);
+        BudDatabaseEvent event = new BudQueryEvent(mutableLiveData, _year, _month, BudQueryEvent.QueryType.months);
         _budEvents.add(event);
         processQueue();
     }
 
     public void getYearBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData)
     {
-        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.query, _year, _month, BudDatabaseEvent.QueryType.year);
+        BudDatabaseEvent event = new BudQueryEvent(mutableLiveData, _year, _month, BudQueryEvent.QueryType.year);
         _budEvents.add(event);
         processQueue();
     }
 
     public void getTotalBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData, int startYear, int endYear)
     {
-        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.query, startYear, endYear, BudDatabaseEvent.QueryType.total);
+        BudDatabaseEvent event = new BudQueryEvent(mutableLiveData, _year, _month, startYear, endYear, BudQueryEvent.QueryType.total);
         _budEvents.add(event);
         processQueue();
     }
 
-    public void insertBudgetEntity(MutableLiveData<List<BudgetEntity>> mutableLiveData, BudgetEntity budgetEntity)
+    public void insertBudgetEntity(BudgetEntity budgetEntity)
     {
-        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.insert, _year, _month, budgetEntity);
+        BudDatabaseEvent event = new BudInsertEvent(_year, _month, budgetEntity);
         _budEvents.add(event);
         processQueue();
     }
 
-    public void insertLinkedBudgetEntities(MutableLiveData<List<BudgetEntity>> mutableLiveData, BudgetEntity budgetEntity, BudgetEntity linkedBudgetEntity)
+    public void insertLinkedBudgetEntities(BudgetEntity budgetEntity, BudgetEntity linkedBudgetEntity)
     {
-        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.insertTransfer, _year, _month, budgetEntity, linkedBudgetEntity);
+        BudDatabaseEvent event = new BudInsertTransferEvent(_year, _month, budgetEntity, linkedBudgetEntity);
         _budEvents.add(event);
         processQueue();
     }
 
-    public void updateBudgetEntity(MutableLiveData<List<BudgetEntity>> mutableLiveData, BudgetEntity budgetEntity)
+    public void updateBudgetEntity(BudgetEntity budgetEntity)
     {
-        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.update, _year, _month, budgetEntity);
+        BudDatabaseEvent event = new BudUpdateEvent(budgetEntity);
         _budEvents.add(event);
         processQueue();
     }
 
-    public void updateLinkedBudgetEntities(MutableLiveData<List<BudgetEntity>> mutableLiveData, BudgetEntity budgetEntity, BudgetEntity linkedBudgetEntity)
+    public void updateLinkedBudgetEntities(BudgetEntity budgetEntity, BudgetEntity linkedBudgetEntity)
     {
-        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.updateTransfer, _year, _month, budgetEntity, linkedBudgetEntity);
+        BudDatabaseEvent event = new BudUpdateTransferEvent(budgetEntity, linkedBudgetEntity);
         _budEvents.add(event);
         processQueue();
     }
 
-    public void removeBudgetEntity(MutableLiveData<List<BudgetEntity>> mutableLiveData, BudgetEntity budgetEntity)
+    public void removeBudgetEntity(BudgetEntity budgetEntity)
     {
-        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.remove, _year, _month, budgetEntity);
+        BudDatabaseEvent event = new BudRemoveEvent(budgetEntity);
         _budEvents.add(event);
         processQueue();
     }
 
-    public void removeLinkedBudgetEntities(MutableLiveData<List<BudgetEntity>> mutableLiveData, BudgetEntity budgetEntity, BudgetEntity linkedBudgetEntity)
+    public void removeLinkedBudgetEntities(BudgetEntity budgetEntity, BudgetEntity linkedBudgetEntity)
     {
-        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.removeTransfer, _year, _month, budgetEntity, linkedBudgetEntity);
+        BudDatabaseEvent event = new BudRemoveTransferEvent(budgetEntity, linkedBudgetEntity);
         _budEvents.add(event);
         processQueue();
     }
 
-    public void renameBudgetCategory(MutableLiveData<List<BudgetEntity>> mutableLiveData, int category, String newCategoryName)
+    public void renameBudgetCategory(int category, String newCategoryName)
     {
-        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.renameCategory, category, newCategoryName);
+        BudDatabaseEvent event = new BudRenameCategoryEvent(category, newCategoryName);
         _budEvents.add(event);
         processQueue();
     }
 
-    public void mergeBudgetCategory(MutableLiveData<List<BudgetEntity>> mutableLiveData, int category, int newCategory, String newCategoryName)
+    public void mergeBudgetCategory(int category, int newCategory, String newCategoryName)
     {
-        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.mergeCategory, category, newCategory, newCategoryName);
+        BudDatabaseEvent event = new BudMergeCategoryEvent(category, newCategory, newCategoryName);
         _budEvents.add(event);
         processQueue();
     }
 
-    public void addBudgetCategory(MutableLiveData<List<BudgetEntity>> mutableLiveData, int category)
+    public void addBudgetCategory(int category)
     {
-        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.addCategory, category);
+        BudDatabaseEvent event = new BudAddCategoryEvent(category);
         _budEvents.add(event);
         processQueue();
     }
 
-    public void removeBudgetCategory(MutableLiveData<List<BudgetEntity>> mutableLiveData, int category)
+    public void removeBudgetCategory(int category)
     {
-        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.removeCategory, category);
+        BudDatabaseEvent event = new BudRemoveCategoryEvent(category);
         _budEvents.add(event);
         processQueue();
     }
 
-    public void updateBudgetCategories(MutableLiveData<List<BudgetEntity>> mutableLiveData, String[] categoryNames)
+    public void updateBudgetCategories(String[] categoryNames)
     {
-        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.resortCategories, categoryNames);
+        BudDatabaseEvent event = new BudResortCategoriesEvent(categoryNames);
         _budEvents.add(event);
         processQueue();
     }
 
     public void customExpenditureQuery(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, String query)
     {
-        ExpDatabaseEvent event = new ExpDatabaseEvent(mutableLiveData, ExpDatabaseEvent.EventType.customQuery, query);
+        ExpDatabaseEvent event = new ExpCustomQueryEvent(mutableLiveData, query);
         _expEvents.add(event);
         processQueue();
     }
 
     public void customBudgetQuery(MutableLiveData<List<BudgetEntity>> mutableLiveData, String query)
     {
-        BudDatabaseEvent event = new BudDatabaseEvent(mutableLiveData, BudDatabaseEvent.EventType.customQuery, query);
+        BudDatabaseEvent event = new BudCustomQueryEvent(mutableLiveData, query);
         _budEvents.add(event);
         processQueue();
     }

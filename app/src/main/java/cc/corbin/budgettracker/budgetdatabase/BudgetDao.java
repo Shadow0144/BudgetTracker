@@ -130,4 +130,10 @@ public interface BudgetDao
 
     @RawQuery
     List<BudgetEntity> customQuery(SupportSQLiteQuery query);
+
+    @Query("SELECT MIN(year) FROM budgetentity WHERE category = (:category)")
+    int getMinYear(int category);
+
+    @Query("SELECT MAX(year) FROM budgetentity WHERE category = (:category)")
+    int getMaxYear(int category);
 }

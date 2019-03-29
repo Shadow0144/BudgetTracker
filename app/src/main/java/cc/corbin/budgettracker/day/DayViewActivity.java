@@ -390,7 +390,7 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
                 if (resultCode == SUCCEED)
                 {
                     ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
-                    _viewModel.insertExpEntity(_entities, expenditureEntity);
+                    _viewModel.insertExpEntity(expenditureEntity);
                 }
                 else { }
             }
@@ -399,12 +399,12 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
                 if (resultCode == SUCCEED)
                 {
                     ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
-                    _viewModel.updateExpEntity(_entities, expenditureEntity);
+                    _viewModel.updateExpEntity(expenditureEntity);
                 }
                 else if (resultCode == DELETE) // Delete can only occur from an edit
                 {
                     ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
-                    _viewModel.removeExpEntity(_entities, expenditureEntity);
+                    _viewModel.removeExpEntity(expenditureEntity);
                 }
                 else { }
             }

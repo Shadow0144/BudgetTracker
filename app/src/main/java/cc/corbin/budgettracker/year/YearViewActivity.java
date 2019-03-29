@@ -416,7 +416,7 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
         {
             _budgets.getValue().get(_budgetId).setAmount(amount);
             entity.setMonth(13);
-            _viewModel.updateBudgetEntity(_budgets, entity);
+            _viewModel.updateBudgetEntity(entity);
         }
         else // Add
         {
@@ -424,7 +424,7 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
             entity.setMonth(13);
             entity.setYear(_year);
             _budgets.getValue().add(entity);
-            _viewModel.insertBudgetEntity(_budgets, entity);
+            _viewModel.insertBudgetEntity(entity);
         }
 
         _popupWindow.dismiss();
@@ -440,7 +440,7 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
         BudgetEntity entity = _budgets.getValue().get(_budgetId);
 
         _budgets.getValue().remove(_budgetId);
-        _viewModel.removeBudgetEntity(_budgets, entity);
+        _viewModel.removeBudgetEntity(entity);
 
         _popupWindow.dismiss();
     }

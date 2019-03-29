@@ -398,8 +398,8 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
 
         String newCategoryName = categoryEditText.getText().toString();
 
-        _viewModel.renameExpenditureCategory(_exps, _categoryEditIndex, newCategoryName);
-        _viewModel.renameBudgetCategory(_budgets, _categoryEditIndex, newCategoryName);
+        _viewModel.renameExpenditureCategory(_categoryEditIndex, newCategoryName);
+        _viewModel.renameBudgetCategory(_categoryEditIndex, newCategoryName);
 
         _sortableCategoriesTable.updateItemText(_categoryEditIndex, newCategoryName);
 
@@ -475,10 +475,10 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
     public void confirmRemoveAndRecategorize(View v)
     {
         // Update all the expenditures and budgets
-        _viewModel.mergeExpenditureCategory(_exps, _categoryEditIndex, _newCategoryIndex, _newCategoryString);
-        _viewModel.mergeBudgetCategory(_budgets, _categoryEditIndex, _newCategoryIndex, _newCategoryString);
-        _viewModel.removeExpenditureCategory(_exps, _categoryEditIndex);
-        _viewModel.removeBudgetCategory(_budgets, _categoryEditIndex);
+        _viewModel.mergeExpenditureCategory(_categoryEditIndex, _newCategoryIndex, _newCategoryString);
+        _viewModel.mergeBudgetCategory(_categoryEditIndex, _newCategoryIndex, _newCategoryString);
+        _viewModel.removeExpenditureCategory(_categoryEditIndex);
+        _viewModel.removeBudgetCategory(_categoryEditIndex);
 
         // Remove from the list and commit the change
         String[] newCategories = new String[_categories.length-1];
@@ -591,8 +591,8 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
 
         _sortableCategoriesTable.insertSortableView(categoryCell);
 
-        _viewModel.addExpenditureCategory(_exps, end);
-        _viewModel.addBudgetCategory(_budgets, end);
+        _viewModel.addExpenditureCategory(end);
+        _viewModel.addBudgetCategory(end);
 
         _popupWindow.dismiss();
     }
@@ -616,8 +616,8 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
         }
         _categories[i] = other;
 
-        _viewModel.updateExpenditureCategories(_exps, _categories);
-        _viewModel.updateBudgetCategories(_budgets, _categories);
+        _viewModel.updateExpenditureCategories(_categories);
+        _viewModel.updateBudgetCategories(_categories);
 
         saveUpdatedCategories();
     }

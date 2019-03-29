@@ -449,7 +449,7 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         if (entity.getMonth() == _month && entity.getYear() == _year) // Edit
         {
             _budgets.getValue().get(_budgetId).setAmount(amount);
-            _viewModel.updateBudgetEntity(_budgets, entity);
+            _viewModel.updateBudgetEntity(entity);
         }
         else // Add
         {
@@ -457,7 +457,7 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
             entity.setMonth(_month);
             entity.setYear(_year);
             _budgets.getValue().add(entity);
-            _viewModel.insertBudgetEntity(_budgets, entity);
+            _viewModel.insertBudgetEntity(entity);
         }
 
         _popupWindow.dismiss();
@@ -473,7 +473,7 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         BudgetEntity entity = _budgets.getValue().get(_budgetId);
 
         _budgets.getValue().remove(_budgetId);
-        _viewModel.removeBudgetEntity(_budgets, entity);
+        _viewModel.removeBudgetEntity(entity);
 
         _popupWindow.dismiss();
     }
@@ -546,7 +546,7 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
                 if (resultCode == SUCCEED)
                 {
                     ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
-                    _viewModel.insertExpEntity(_monthExps, expenditureEntity);
+                    _viewModel.insertExpEntity(expenditureEntity);
                 }
                 else { }
             }
@@ -555,12 +555,12 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
                 if (resultCode == SUCCEED)
                 {
                     ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
-                    _viewModel.updateExpEntity(_monthExps, expenditureEntity);
+                    _viewModel.updateExpEntity(expenditureEntity);
                 }
                 else if (resultCode == DELETE) // Delete can only occur from an edit
                 {
                     ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
-                    _viewModel.removeExpEntity(_monthExps, expenditureEntity);
+                    _viewModel.removeExpEntity(expenditureEntity);
                 }
                 else { }
             }
@@ -572,13 +572,13 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
                     if (!transfer)
                     {
                         BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
-                        _viewModel.insertBudgetEntity(_budgets, budgetEntity);
+                        _viewModel.insertBudgetEntity(budgetEntity);
                     }
                     else
                     {
                         BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
                         BudgetEntity linkedBudgetEntity = data.getParcelableExtra(AdjustmentEditActivity.LINKED_BUDGET_INTENT);
-                        _viewModel.insertLinkedBudgetEntities(_budgets, budgetEntity, linkedBudgetEntity);
+                        _viewModel.insertLinkedBudgetEntities(budgetEntity, linkedBudgetEntity);
                     }
                 }
                 else { }
@@ -592,12 +592,12 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
 
                     if (!transfer)
                     {
-                        _viewModel.updateBudgetEntity(_budgets, budgetEntity);
+                        _viewModel.updateBudgetEntity(budgetEntity);
                     }
                     else
                     {
                         BudgetEntity linkedBudgetEntity = data.getParcelableExtra(AdjustmentEditActivity.LINKED_BUDGET_INTENT);
-                        _viewModel.updateLinkedBudgetEntities(_budgets, budgetEntity, linkedBudgetEntity);
+                        _viewModel.updateLinkedBudgetEntities(budgetEntity, linkedBudgetEntity);
                     }
                 }
                 else if (resultCode == DELETE) // Delete can only occur from an edit
@@ -607,12 +607,12 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
 
                     if (!transfer)
                     {
-                        _viewModel.removeBudgetEntity(_budgets, budgetEntity);
+                        _viewModel.removeBudgetEntity(budgetEntity);
                     }
                     else
                     {
                         BudgetEntity linkedBudgetEntity = data.getParcelableExtra(AdjustmentEditActivity.LINKED_BUDGET_INTENT);
-                        _viewModel.removeLinkedBudgetEntities(_budgets, budgetEntity, linkedBudgetEntity);
+                        _viewModel.removeLinkedBudgetEntities(budgetEntity, linkedBudgetEntity);
                     }
                 }
                 else { }
