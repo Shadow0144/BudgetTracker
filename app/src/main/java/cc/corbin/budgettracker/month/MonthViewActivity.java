@@ -12,6 +12,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -122,7 +123,7 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         _year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
 
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
-        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
+        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
         _viewModel.setDate(_year, _month, 0);
 
         final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
@@ -259,25 +260,18 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         createExtrasAndAdjustmentsTables();
     }
 
-    @Override
-    protected void onResume()
+    public void refreshView()
     {
-        if (MonthViewActivity.dataInvalid)
-        {
-            _weeklyTable.resetTable();
-            _categoryTable.resetTable();
-            _expandableBudgetTable.resetTable();
-            _weeklyPieChart.clearData();
-            _categoryPieChart.clearData();
-            _weeklyLineGraph.clearData();
+        _weeklyTable.resetTable();
+        _categoryTable.resetTable();
+        _expandableBudgetTable.resetTable();
+        _weeklyPieChart.clearData();
+        _categoryPieChart.clearData();
+        _weeklyLineGraph.clearData();
 
-            _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
-            _viewModel.setDate(_year, _month, 0);
-            _viewModel.getMonth(_monthExps);
-        }
-        else { }
-
-        super.onResume();
+        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
+        _viewModel.setDate(_year, _month, 0);
+        _viewModel.getMonth(_monthExps);
     }
 
     @Override
@@ -545,8 +539,9 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
             {
                 if (resultCode == SUCCEED)
                 {
-                    ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
-                    _viewModel.insertExpEntity(expenditureEntity);
+                    //ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
+                    //_viewModel.insertExpEntity(expenditureEntity);
+                    refreshView();
                 }
                 else { }
             }
@@ -554,13 +549,15 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
             {
                 if (resultCode == SUCCEED)
                 {
-                    ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
-                    _viewModel.updateExpEntity(expenditureEntity);
+                    //ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
+                    //_viewModel.updateExpEntity(expenditureEntity);
+                    refreshView();
                 }
                 else if (resultCode == DELETE) // Delete can only occur from an edit
                 {
-                    ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
-                    _viewModel.removeExpEntity(expenditureEntity);
+                    //ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
+                    //_viewModel.removeExpEntity(expenditureEntity);
+                    refreshView();
                 }
                 else { }
             }

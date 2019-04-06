@@ -62,6 +62,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
+                    android:paddingLeft="0dp"
                     android:paddingRight="5dp"
                     android:text="@string/at" />
 
@@ -118,6 +119,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
+                    android:paddingLeft="0dp"
                     android:paddingRight="3dp"
                     android:text="@string/negative"
                     android:textSize="24sp" />
@@ -134,36 +136,27 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1" />
 
-                <android.support.constraint.ConstraintLayout
+                <FrameLayout
                     android:id="@+id/conversionRateButtonHolder"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1">
-
-                    <ProgressBar
-                        android:id="@+id/conversionRateProgressBar"
-                        style="?android:attr/progressBarStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:visibility="invisible"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                    android:layout_weight="0">
 
                     <Button
                         android:id="@+id/conversionRateButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0"
-                        android:text="@string/get_conversion_rate"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/conversionRateProgressBar"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </android.support.constraint.ConstraintLayout>
+                        android:text="@string/get_conversion_rate" />
+
+                    <ProgressBar
+                        android:id="@+id/conversionRateProgressBar"
+                        style="?android:attr/progressBarStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:visibility="invisible" />
+
+                </FrameLayout>
 
             </LinearLayout>
 

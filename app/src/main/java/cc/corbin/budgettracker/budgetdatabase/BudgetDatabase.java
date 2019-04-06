@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 
+import cc.corbin.budgettracker.BudgetTrackerApplication;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 
@@ -219,13 +220,13 @@ public abstract class BudgetDatabase extends RoomDatabase
         }
     };
 
-    public static BudgetDatabase getBudgetDatabase(Context context)
+    public static BudgetDatabase getBudgetDatabase()
     {
         BudgetDatabase r;
         if (INSTANCE == null)
         {
             r = INSTANCE =
-                    Room.databaseBuilder(context.getApplicationContext(), BudgetDatabase.class, "budgets")
+                    Room.databaseBuilder(BudgetTrackerApplication.getInstance(), BudgetDatabase.class, "budgets")
                             //.fallbackToDestructiveMigration()
                             .addMigrations(MIGRATION_1_2)
                             .addMigrations(MIGRATION_2_3)

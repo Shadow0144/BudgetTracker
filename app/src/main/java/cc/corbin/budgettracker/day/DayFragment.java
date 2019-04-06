@@ -36,6 +36,9 @@ public class DayFragment extends Fragment
     private MutableLiveData<List<ExpenditureEntity>> _entities;
     private ExpenditureViewModel _viewModel;
 
+    private FrameLayout _progressFrame;
+    private FrameLayout _dayFragmentFrame;
+
     private DayFragmentPagerAdapter _parent;
     private View _view;
 
@@ -49,6 +52,9 @@ public class DayFragment extends Fragment
     {
         // Inflate the layout for this fragment
          _view = inflater.inflate(R.layout.fragment_day, container, false);
+
+         _progressFrame = _view.findViewById(R.id.progressFrame);
+         _dayFragmentFrame = _view.findViewById(R.id.dayFragmentFrame);
 
         _viewModel = ViewModelProviders.of(getActivity()).get(ExpenditureViewModel.class);
         _entities = new MutableLiveData<List<ExpenditureEntity>>();
@@ -78,11 +84,6 @@ public class DayFragment extends Fragment
     @Override
     public void onResume()
     {
-        if (DayViewActivity.dataInvalid)
-        {
-            refreshView();
-        }
-        else { }
         super.onResume();
     }
 
@@ -104,18 +105,8 @@ public class DayFragment extends Fragment
 
     public void refreshView()
     {
-        FrameLayout containerFrame = _view.findViewById(R.id.dayFrame);
-        if (containerFrame != null) // While refreshing, remove everything and replace it with a loading bar
-        {
-            ConstraintLayout rootLayout = ((ConstraintLayout) containerFrame.getParent());
-            rootLayout.removeView(containerFrame);
-
-            LayoutInflater inflater = getLayoutInflater();
-            View progressFrame = inflater.inflate(R.layout.progress_frame, rootLayout, false);
-            rootLayout.addView(progressFrame);
-        }
-        else { }
-
+        _dayFragmentFrame.removeAllViews();
+        _progressFrame.setVisibility(FrameLayout.VISIBLE);
         _viewModel.setDate(_year, _month, _day);
         _viewModel.getDay(_entities);
     }
@@ -126,21 +117,11 @@ public class DayFragment extends Fragment
         {
             _expenditureEntities = expenditureEntities;
 
-            ConstraintLayout rootLayout;
-
-            FrameLayout containerFrame = _view.findViewById(R.id.progressFrame);
-            if (containerFrame == null)
-            {
-                containerFrame = _view.findViewById(R.id.dayFrame);
-            }
-            else { }
-            rootLayout = ((ConstraintLayout) containerFrame.getParent());
-            rootLayout.removeView(containerFrame);
+            _progressFrame.setVisibility(FrameLayout.INVISIBLE);
 
             LayoutInflater inflater = getLayoutInflater();
-            View dayView = inflater.inflate(R.layout.day, rootLayout, false);
-            rootLayout.addView(dayView);
-
+            View dayView = inflater.inflate(R.layout.day, _dayFragmentFrame, false);
+            _dayFragmentFrame.addView(dayView);
             _itemsContainer = dayView.findViewById(R.id.itemsContainer);
 
             setUpExpenditures();
@@ -172,14 +153,13 @@ public class DayFragment extends Fragment
     private void addExpenditureView(ExpenditureEntity exp, final int index)
     {
         final ExpenditureItem view = new ExpenditureItem(getContext(), exp);
-        view.setId(index);
-
+        view.setTag(index);
         view.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                ((DayViewActivity)getActivity()).editItem(v.getId(), ((ExpenditureItem)v).getExpenditure());
+                ((DayViewActivity)getActivity()).editItem((int)v.getTag(), ((ExpenditureItem)v).getExpenditure());
             }
         });
 

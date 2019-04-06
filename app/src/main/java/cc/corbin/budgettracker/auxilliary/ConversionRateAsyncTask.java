@@ -32,6 +32,7 @@ public class ConversionRateAsyncTask extends AsyncTask<String, Void, String>
         _request += Currencies.currencies.values()[baseCurrency];
         _request += "_"+Currencies.currencies.values()[Currencies.default_currency];
         _request += "&compact=ultra&date=" + year + "-" + month + "-" + day;
+        _request += "&apiKey=8b1425b3a5689edf7549"; // Requires an API key now
     }
 
     public void execute()

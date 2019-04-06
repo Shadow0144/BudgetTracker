@@ -16,6 +16,13 @@ public class BudgetTrackerApplication extends Application
 
     private final String SHARED_PREFERENCES = "CC.Corbin.BudgetTracker";
 
+    private static BudgetTrackerApplication _instance;
+
+    public BudgetTrackerApplication()
+    {
+        _instance = this;
+    }
+
     @Override
     public void onCreate()
     {
@@ -31,5 +38,10 @@ public class BudgetTrackerApplication extends Application
         ExpenditureViewModel.shutdown();
 
         super.onTerminate();
+    }
+
+    public static BudgetTrackerApplication getInstance()
+    {
+        return _instance;
     }
 }

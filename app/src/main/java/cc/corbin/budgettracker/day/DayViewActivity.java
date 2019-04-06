@@ -1,8 +1,8 @@
 package cc.corbin.budgettracker.day;
 
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.support.annotation.Nullable;
@@ -14,9 +14,11 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -60,7 +62,6 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
 
     private Button _previousDay;
     private Button _nextDay;
-    private Button _addButton;
 
     private DrawerLayout _drawerLayout;
 
@@ -73,9 +74,10 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
     private int _day;
 
     private ExpenditureViewModel _viewModel;
-    private MutableLiveData<List<ExpenditureEntity>> _entities;
 
     public static boolean dataInvalid;
+
+    private BroadcastReceiver _receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -85,9 +87,16 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        ActionBar actionbar = getSupportActionBar();
-        actionbar.setDisplayHomeAsUpEnabled(true);
-        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        try
+        {
+            ActionBar actionbar = getSupportActionBar();
+            actionbar.setDisplayHomeAsUpEnabled(true);
+            actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        }
+        catch (Exception e)
+        {
+            // Do nothing
+        }
         _drawerLayout = findViewById(R.id.rootLayout);
         NavigationView navigationView = findViewById(R.id.navView);
         navigationView.setNavigationItemSelectedListener(this);
@@ -99,10 +108,20 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
 
         _previousDay = findViewById(R.id.yesterdayButton);
         _nextDay = findViewById(R.id.tomorrowButton);
-        _addButton = findViewById(R.id.addItemButton);
+
+        _receiver = new BroadcastReceiver()
+        {
+            @Override
+            public void onReceive(Context context, Intent intent)
+            {
+                // Update the view when necessary
+                _adapter.getItem(_pagerView.getCurrentItem()).refreshView();
+            }
+        };
 
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
-        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
+        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
+        _viewModel.subscribeToUpdates(_receiver);
 
         if (!Categories.areCategoriesLoaded())
         {
@@ -125,19 +144,6 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
         _adapter = new DayFragmentPagerAdapter(this, getSupportFragmentManager(), _month, _year);
         _pagerView.setAdapter(_adapter);
         _pagerView.setCurrentItem(_day-1);
-
-        _entities = new MutableLiveData<List<ExpenditureEntity>>();
-        final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
-        {
-            @Override
-            public void onChanged(@Nullable List<ExpenditureEntity> expenditureEntities)
-            {
-                // This is only called from a return from add / edit / remove
-                _adapter.getItem(_pagerView.getCurrentItem()).refreshView();
-            }
-        };
-
-        _entities.observe(this, entityObserver);
 
         _pagerView.addOnPageChangeListener(new ViewPager.OnPageChangeListener()
         {
@@ -196,9 +202,17 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
     }
 
     @Override
+    protected void onPause()
+    {
+        _viewModel.unsubscribeToUpdates(_receiver);
+
+        super.onPause();
+    }
+
+    @Override
     protected void onResume()
     {
-        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
+        _viewModel.subscribeToUpdates(_receiver);
 
         super.onResume();
     }
@@ -206,7 +220,6 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        Intent intent;
         switch (item.getItemId())
         {
             case android.R.id.home:
@@ -217,65 +230,69 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
     }
 
     @Override
-    public boolean onNavigationItemSelected(MenuItem item)
+    public boolean onNavigationItemSelected(@Nullable MenuItem item)
     {
-        Intent intent;
         boolean handled = false;
-        switch (item.getItemId())
+        if (item != null)
         {
-            case R.id.searchMenuItem:
-                intent = new Intent(getApplicationContext(), CreateSearchActivity.class);
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.dayMenuItem:
-                intent = new Intent(getApplicationContext(), DayViewActivity.class);
-                Calendar date = Calendar.getInstance();
-                date.set(_year, _month, _day);
-                intent.putExtra(DayViewActivity.DATE_INTENT, date.getTimeInMillis());
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.monthMenuItem:
-                intent = new Intent(getApplicationContext(), MonthViewActivity.class);
-                intent.putExtra(MonthViewActivity.YEAR_INTENT, _year);
-                intent.putExtra(MonthViewActivity.MONTH_INTENT, _month);
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.yearMenuItem:
-                intent = new Intent(getApplicationContext(), YearViewActivity.class);
-                intent.putExtra(YearViewActivity.YEAR_INTENT, _year);
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.totalMenuItem:
-                intent = new Intent(getApplicationContext(), TotalViewActivity.class);
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.customMenuItem:
-                intent = new Intent(getApplicationContext(), CreateCustomViewActivity.class);
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.settingsMenuItem:
-                intent = new Intent(getApplicationContext(), SettingsActivity.class);
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.importExportMenuItem:
-                intent = new Intent(getApplicationContext(), ImportExportActivity.class);
-                startActivity(intent);
-                handled = true;
-                break;
-        }
+            Intent intent;
+            switch (item.getItemId())
+            {
+                case R.id.searchMenuItem:
+                    intent = new Intent(getApplicationContext(), CreateSearchActivity.class);
+                    startActivity(intent);
+                    handled = true;
+                    break;
+                case R.id.dayMenuItem:
+                    intent = new Intent(getApplicationContext(), DayViewActivity.class);
+                    Calendar date = Calendar.getInstance();
+                    date.set(_year, _month, _day);
+                    intent.putExtra(DayViewActivity.DATE_INTENT, date.getTimeInMillis());
+                    startActivity(intent);
+                    handled = true;
+                    break;
+                case R.id.monthMenuItem:
+                    intent = new Intent(getApplicationContext(), MonthViewActivity.class);
+                    intent.putExtra(MonthViewActivity.YEAR_INTENT, _year);
+                    intent.putExtra(MonthViewActivity.MONTH_INTENT, _month);
+                    startActivity(intent);
+                    handled = true;
+                    break;
+                case R.id.yearMenuItem:
+                    intent = new Intent(getApplicationContext(), YearViewActivity.class);
+                    intent.putExtra(YearViewActivity.YEAR_INTENT, _year);
+                    startActivity(intent);
+                    handled = true;
+                    break;
+                case R.id.totalMenuItem:
+                    intent = new Intent(getApplicationContext(), TotalViewActivity.class);
+                    startActivity(intent);
+                    handled = true;
+                    break;
+                case R.id.customMenuItem:
+                    intent = new Intent(getApplicationContext(), CreateCustomViewActivity.class);
+                    startActivity(intent);
+                    handled = true;
+                    break;
+                case R.id.settingsMenuItem:
+                    intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                    startActivity(intent);
+                    handled = true;
+                    break;
+                case R.id.importExportMenuItem:
+                    intent = new Intent(getApplicationContext(), ImportExportActivity.class);
+                    startActivity(intent);
+                    handled = true;
+                    break;
+            }
 
-        if (handled)
-        {
-            _drawerLayout.closeDrawer(GravityCompat.START);
+            if (handled)
+            {
+                _drawerLayout.closeDrawer(GravityCompat.START);
+            }
+            else { }
+
         }
-        else { }
 
         return handled;
     }
@@ -389,8 +406,9 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
             {
                 if (resultCode == SUCCEED)
                 {
-                    ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
-                    _viewModel.insertExpEntity(expenditureEntity);
+                    //ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
+                    //_viewModel.insertExpEntity(expenditureEntity);
+                    _adapter.updateDay(_pagerView.getCurrentItem());
                 }
                 else { }
             }
@@ -398,13 +416,15 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
             {
                 if (resultCode == SUCCEED)
                 {
-                    ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
-                    _viewModel.updateExpEntity(expenditureEntity);
+                    //ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
+                    //_viewModel.updateExpEntity(expenditureEntity);
+                    _adapter.updateDay(_pagerView.getCurrentItem());
                 }
                 else if (resultCode == DELETE) // Delete can only occur from an edit
                 {
-                    ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
-                    _viewModel.removeExpEntity(expenditureEntity);
+                    //ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
+                    //_viewModel.removeExpEntity(expenditureEntity);
+                    _adapter.updateDay(_pagerView.getCurrentItem());
                 }
                 else { }
             }
@@ -412,7 +432,7 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
 
             if (resultCode == CANCEL)
             {
-
+                // Do nothing
             }
             else { }
         }
@@ -443,21 +463,17 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
     }
 
     /* Checks if external storage is available for read and write */
-    public boolean isExternalStorageWritable() {
+    public boolean isExternalStorageWritable()
+    {
         String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
+        return (Environment.MEDIA_MOUNTED.equals(state));
     }
 
     /* Checks if external storage is available to at least read */
-    public boolean isExternalStorageReadable() {
+    public boolean isExternalStorageReadable()
+    {
         String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state) ||
-                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            return true;
-        }
-        return false;
+        return (Environment.MEDIA_MOUNTED.equals(state) ||
+                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state));
     }
 }

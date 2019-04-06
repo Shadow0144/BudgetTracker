@@ -2,11 +2,19 @@ package cc.corbin.budgettracker.workerthread;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
+import android.view.View;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import cc.corbin.budgettracker.BudgetTrackerApplication;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
@@ -45,6 +53,8 @@ public class ExpenditureViewModel extends ViewModel
 {
     private static final String TAG = "ExpenditureViewModel";
 
+    private static final String UPDATE_INTENT = "Update";
+
     private static ExpenditureDatabase _dbE;
     private static BudgetDatabase _dbB;
 
@@ -60,6 +70,8 @@ public class ExpenditureViewModel extends ViewModel
     private static AsyncTask<Void, Void, Void> _queuer;
     private static DatabaseThread _thread;
 
+    //private static LocalBroadcastManager _localBroadcastManager;
+
     public ExpenditureViewModel()
     {
         if (_expEvents == null || _budEvents == null)
@@ -70,6 +82,7 @@ public class ExpenditureViewModel extends ViewModel
             _completedBudEvents = new ConcurrentLinkedQueue<BudDatabaseEvent>();
             _dbE = null;
             _dbB = null;
+            //_localBroadcastManager = LocalBroadcastManager.getInstance(BudgetTrackerApplication.getInstance());
         }
         else { }
     }
@@ -102,10 +115,21 @@ public class ExpenditureViewModel extends ViewModel
         _dbB = null;
     }
 
+    public void subscribeToUpdates(BroadcastReceiver receiver)
+    {
+        //_localBroadcastManager.registerReceiver(receiver, new IntentFilter(UPDATE_INTENT));
+    }
+
+    public void unsubscribeToUpdates(BroadcastReceiver receiver)
+    {
+        //_localBroadcastManager.unregisterReceiver(receiver);
+    }
+
     // When a database event has finished
     public void checkQueue()
     {
-        // TODO ?
+        //Intent intent = new Intent(UPDATE_INTENT);
+        //_localBroadcastManager.sendBroadcast(intent);
     }
 
     public void processQueue()

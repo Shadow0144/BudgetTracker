@@ -74,4 +74,9 @@ public class DayFragmentPagerAdapter extends FragmentPagerAdapter
     {
         _parent.updateTotal(day, amount);
     }
+
+    public void updateDay(int day)
+    {
+        _fragments.get(day).refreshView();
+    }
 }

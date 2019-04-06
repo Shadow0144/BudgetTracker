@@ -101,7 +101,7 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
         _year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
 
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
-        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
+        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
         _viewModel.setDate(_year, 0, 0);
 
         final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
@@ -248,7 +248,7 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
             _monthlyPieChart.clearData();
             _categoryPieChart.clearData();
 
-            _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(this), BudgetDatabase.getBudgetDatabase(this));
+            _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
             _viewModel.setDate(_year, 0, 0);
             _viewModel.getYear(_yearExps);
         }

@@ -2,6 +2,7 @@ package cc.corbin.budgettracker.edit;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -34,12 +35,15 @@ import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.ConversionRateAsyncTask;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.R;
+import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
+import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText;
 import cc.corbin.budgettracker.numericalformatting.NumericalFormattedCallback;
 import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.month.MonthViewActivity;
 import cc.corbin.budgettracker.total.TotalViewActivity;
+import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.year.YearViewActivity;
 
 import static android.Manifest.permission.INTERNET;
@@ -85,7 +89,11 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
     private float _totalConvertedAmount;
     private int _baseCurrency;
 
+    private int _type; // Create or edit
+
     private MutableLiveData<String> _conversionRateStringMLD;
+
+    private ExpenditureViewModel _viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -94,9 +102,9 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
         setContentView(R.layout.activity_expenditure_edit);
 
         Intent intent = getIntent();
-        int type = intent.getIntExtra(TYPE_INTENT, -1);
+        _type = intent.getIntExtra(TYPE_INTENT, -1);
         setResult(DayViewActivity.CANCEL); // In case of backing out
-        switch (type)
+        switch (_type)
         {
             case DayViewActivity.CREATE_EXPENDITURE:
                 setupAmount();
@@ -151,6 +159,9 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
             }
         };
         _conversionRateStringMLD.observe(this, conversionObserver);
+
+        _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
+        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
     }
 
     public void onAccept(View v)
@@ -225,10 +236,16 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
 
         setResult(DayViewActivity.SUCCEED, intent);
 
-        DayViewActivity.dataInvalid = true;
-        MonthViewActivity.dataInvalid = true;
-        YearViewActivity.dataInvalid = true;
-        TotalViewActivity.dataInvalid = true;
+        // Handle the database change here
+        switch (_type)
+        {
+            case DayViewActivity.CREATE_EXPENDITURE:
+                _viewModel.insertExpEntity(_expenditure);
+                break;
+            case DayViewActivity.EDIT_EXPENDITURE:
+                _viewModel.updateExpEntity(_expenditure);
+                break;
+        }
 
         finish();
     }
@@ -264,10 +281,8 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
 
         setResult(DayViewActivity.DELETE, intent);
 
-        DayViewActivity.dataInvalid = true;
-        MonthViewActivity.dataInvalid = true;
-        YearViewActivity.dataInvalid = true;
-        TotalViewActivity.dataInvalid = true;
+        // Handle the database operation here
+        _viewModel.removeExpEntity(_expenditure);
 
         finish();
     }
@@ -437,7 +452,15 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
     {
         Calendar currentDate = Calendar.getInstance();
         Calendar editDate = Calendar.getInstance();
-        editDate.set(_year, _month-1, _day);
+
+        if (_day != 0) // For use in the Month Activity
+        {
+            editDate.set(_year, _month - 1, _day);
+        }
+        else
+        {
+            editDate.set(_year, _month - 1, 1);
+        }
 
         long end = currentDate.getTimeInMillis();
         long start = editDate.getTimeInMillis();
@@ -445,10 +468,9 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
         if (end >= start)
         {
             long time = TimeUnit.MILLISECONDS.toDays(Math.abs(end - start));
-
             if (time <= 365)
             {
-                _conversionRateButton.setVisibility(View.INVISIBLE);
+                _conversionRateButton.setEnabled(false);
                 _conversionRateProgressBar.setVisibility(View.VISIBLE);
                 if (!_connectToInternet)
                 {
@@ -459,12 +481,12 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
                     connectForConversionRate();
                 }
             }
-            else
+            else // Date older than a year
             {
                 Toast.makeText(this, "Dates more than a year old will need to have the conversion rate manually specified", Toast.LENGTH_LONG);
             }
         }
-        else
+        else // Date in the future
         {
             Toast.makeText(this, "Future dates will need to have the conversion rate manually specified", Toast.LENGTH_LONG);
         }
@@ -502,23 +524,23 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
         {
             _connectToInternet = false;
             Toast.makeText(this, "Failed to acquire permissions", Toast.LENGTH_SHORT).show();
-            _conversionRateButton.setVisibility(View.VISIBLE);
-            _conversionRateProgressBar.setVisibility(View.INVISIBLE);
             _conversionRateButton.setEnabled(false);
+            _conversionRateProgressBar.setVisibility(View.INVISIBLE);
         }
     }
 
     private void connectForConversionRate()
     {
+        int day = _day == 0 ? 1 : _day; // If in the Month Activity, use the first day
         new ConversionRateAsyncTask(
                 _conversionRateStringMLD,
                 _symbolSpinner.getSelectedItemPosition(),
-                _year, _month, _day).execute();
+                _year, _month, day).execute();
     }
 
     private void onConversionRateReceived(String conversionRateString)
     {
-        _conversionRateButton.setVisibility(View.VISIBLE);
+        _conversionRateButton.setEnabled(true);
         _conversionRateProgressBar.setVisibility(View.INVISIBLE);
 
         try
