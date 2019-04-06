@@ -75,8 +75,6 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
 
     private ExpenditureViewModel _viewModel;
 
-    public static boolean dataInvalid;
-
     private BroadcastReceiver _receiver;
 
     @Override
@@ -100,8 +98,6 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
         _drawerLayout = findViewById(R.id.rootLayout);
         NavigationView navigationView = findViewById(R.id.navView);
         navigationView.setNavigationItemSelectedListener(this);
-
-        DayViewActivity.dataInvalid = true;
 
         _dateView = findViewById(R.id.dateView);
         _pagerView = findViewById(R.id.itemsPager);
@@ -367,8 +363,6 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
         _currentDate.set(_year, _month - 1, _day);
         SimpleDateFormat simpleDate = new SimpleDateFormat("dd/MM/yyyy");
         _dateView.setText(simpleDate.format(_currentDate.getTime()));
-
-        _viewModel.setDate(_year, _month, _day);
 
         getUpdatedTotal(_day);
     }

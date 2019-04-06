@@ -100,8 +100,6 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
     private PopupWindow _popupWindow; // For editing budgets
     private NumericalFormattedEditText _amountEditText;
 
-    public static boolean dataInvalid;
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -117,14 +115,11 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         NavigationView navigationView = findViewById(R.id.navView);
         navigationView.setNavigationItemSelectedListener(this);
 
-        MonthViewActivity.dataInvalid = true;
-
         _month = getIntent().getIntExtra(MONTH_INTENT, Calendar.getInstance().get(Calendar.MONTH)+1);
         _year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
 
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
         _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
-        _viewModel.setDate(_year, _month, 0);
 
         final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
         {
@@ -162,7 +157,7 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
                 else // else - returning from an add / edit / remove
                 {
                     // Call for a refresh
-                    _viewModel.getMonthBudget(_budgets);
+                    _viewModel.getMonthBudget(_budgets, _year, _month);
                 }
             }
         };
@@ -183,8 +178,8 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
                 weekLabels[5] = "Week 5";
                 weekLabels[6] = "Adjustments";
 
-                //_weeklyPieChart.setData(amounts, weekLabels);
-                //_weeklyLineGraph.setData(amounts, weekLabels);
+                _weeklyPieChart.setData(amounts, weekLabels);
+                _weeklyLineGraph.setData(amounts, weekLabels);
             }
         };
 
@@ -196,12 +191,10 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
                 _categoryTable.updateExpenditures(amounts);
 
                 String[] categoryLabels = Categories.getCategories();
-                //_categoryPieChart.setData(amounts, categoryLabels);
-
-                MonthViewActivity.dataInvalid = false;
+                _categoryPieChart.setData(amounts, categoryLabels);
 
                 // Update the budgets
-                _viewModel.getMonthBudget(_budgets);
+                _viewModel.getMonthBudget(_budgets, _year, _month);
             }
         };
 
@@ -258,6 +251,10 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         _budgets.observe(this, budgetObserver);
 
         createExtrasAndAdjustmentsTables();
+
+        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
+        _viewModel.getMonth(_monthExps, _year, _month);
+        _viewModel.getMonthBudget(_budgets, _year, _month);
     }
 
     public void refreshView()
@@ -270,8 +267,8 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         _weeklyLineGraph.clearData();
 
         _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
-        _viewModel.setDate(_year, _month, 0);
-        _viewModel.getMonth(_monthExps);
+        _viewModel.getMonth(_monthExps, _year, _month);
+        _viewModel.getMonthBudget(_budgets, _year, _month);
     }
 
     @Override
@@ -443,7 +440,6 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         if (entity.getMonth() == _month && entity.getYear() == _year) // Edit
         {
             _budgets.getValue().get(_budgetId).setAmount(amount);
-            _viewModel.updateBudgetEntity(entity);
         }
         else // Add
         {
@@ -451,7 +447,6 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
             entity.setMonth(_month);
             entity.setYear(_year);
             _budgets.getValue().add(entity);
-            _viewModel.insertBudgetEntity(entity);
         }
 
         _popupWindow.dismiss();
@@ -568,14 +563,16 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
                     boolean transfer = data.getBooleanExtra(AdjustmentEditActivity.TRANSFER_INTENT, false);
                     if (!transfer)
                     {
-                        BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
-                        _viewModel.insertBudgetEntity(budgetEntity);
+                        //BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
+                        //_viewModel.insertBudgetEntity(budgetEntity);
+                        refreshView();
                     }
                     else
                     {
-                        BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
-                        BudgetEntity linkedBudgetEntity = data.getParcelableExtra(AdjustmentEditActivity.LINKED_BUDGET_INTENT);
-                        _viewModel.insertLinkedBudgetEntities(budgetEntity, linkedBudgetEntity);
+                        //BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
+                        //BudgetEntity linkedBudgetEntity = data.getParcelableExtra(AdjustmentEditActivity.LINKED_BUDGET_INTENT);
+                        //_viewModel.insertLinkedBudgetEntities(budgetEntity, linkedBudgetEntity);
+                        refreshView();
                     }
                 }
                 else { }
@@ -589,12 +586,14 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
 
                     if (!transfer)
                     {
-                        _viewModel.updateBudgetEntity(budgetEntity);
+                        //_viewModel.updateBudgetEntity(budgetEntity);
+                        refreshView();
                     }
                     else
                     {
-                        BudgetEntity linkedBudgetEntity = data.getParcelableExtra(AdjustmentEditActivity.LINKED_BUDGET_INTENT);
-                        _viewModel.updateLinkedBudgetEntities(budgetEntity, linkedBudgetEntity);
+                        //BudgetEntity linkedBudgetEntity = data.getParcelableExtra(AdjustmentEditActivity.LINKED_BUDGET_INTENT);
+                        //_viewModel.updateLinkedBudgetEntities(budgetEntity, linkedBudgetEntity);
+                        refreshView();
                     }
                 }
                 else if (resultCode == DELETE) // Delete can only occur from an edit
@@ -604,12 +603,14 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
 
                     if (!transfer)
                     {
-                        _viewModel.removeBudgetEntity(budgetEntity);
+                        //_viewModel.removeBudgetEntity(budgetEntity);
+                        refreshView();
                     }
                     else
                     {
-                        BudgetEntity linkedBudgetEntity = data.getParcelableExtra(AdjustmentEditActivity.LINKED_BUDGET_INTENT);
-                        _viewModel.removeLinkedBudgetEntities(budgetEntity, linkedBudgetEntity);
+                        //BudgetEntity linkedBudgetEntity = data.getParcelableExtra(AdjustmentEditActivity.LINKED_BUDGET_INTENT);
+                        //_viewModel.removeLinkedBudgetEntities(budgetEntity, linkedBudgetEntity);
+                        refreshView();
                     }
                 }
                 else { }

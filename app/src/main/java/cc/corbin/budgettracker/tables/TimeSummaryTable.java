@@ -730,7 +730,7 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
             // Sum up across categories
             for (int j = 0; j < catSize; j++)
             {
-                BudgetEntity entity = budgetEntities.get(i + (j * _rows));
+                BudgetEntity entity = budgetEntities.get(i + (j * _rows)); // TODO: Error returning from Settings passing index, also budget appears to be wrong
                 budget += entity.getAmount();
             }
             _budgetCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, budget));

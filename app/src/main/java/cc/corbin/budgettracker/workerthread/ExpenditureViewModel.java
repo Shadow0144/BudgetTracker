@@ -58,10 +58,6 @@ public class ExpenditureViewModel extends ViewModel
     private static ExpenditureDatabase _dbE;
     private static BudgetDatabase _dbB;
 
-    private static int _year;
-    private static int _month;
-    private static int _day;
-
     private static ConcurrentLinkedQueue<ExpDatabaseEvent> _expEvents;
     private static ConcurrentLinkedQueue<BudDatabaseEvent> _budEvents;
     private static ConcurrentLinkedQueue<ExpDatabaseEvent> _completedExpEvents;
@@ -94,13 +90,6 @@ public class ExpenditureViewModel extends ViewModel
         _thread = new DatabaseThread(_dbE, _dbB,
                 _expEvents, _budEvents,
                 _completedExpEvents, _completedBudEvents);
-    }
-
-    public void setDate(int year, int month, int day)
-    {
-        _year = year;
-        _month = month;
-        _day = day;
     }
 
     @Override
@@ -143,23 +132,23 @@ public class ExpenditureViewModel extends ViewModel
         else { }
     }
 
-    public void getDay(MutableLiveData<List<ExpenditureEntity>> mutableLiveData)
+    public void getDay(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, int year, int month, int day)
     {
-        ExpDatabaseEvent event = new ExpQueryEvent(mutableLiveData, _year, _month, _day);
+        ExpDatabaseEvent event = new ExpQueryEvent(mutableLiveData, year, month, day);
         _expEvents.add(event);
         processQueue();
     }
 
-    public void getMonth(MutableLiveData<List<ExpenditureEntity>> mutableLiveData)
+    public void getMonth(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, int year, int month)
     {
-        ExpDatabaseEvent event = new ExpQueryEvent(mutableLiveData, _year, _month);
+        ExpDatabaseEvent event = new ExpQueryEvent(mutableLiveData, year, month);
         _expEvents.add(event);
         processQueue();
     }
 
-    public void getYear(MutableLiveData<List<ExpenditureEntity>> mutableLiveData)
+    public void getYear(MutableLiveData<List<ExpenditureEntity>> mutableLiveData, int year)
     {
-        ExpDatabaseEvent event = new ExpQueryEvent(mutableLiveData, _year);
+        ExpDatabaseEvent event = new ExpQueryEvent(mutableLiveData, year);
         _expEvents.add(event);
         processQueue();
     }
@@ -228,44 +217,44 @@ public class ExpenditureViewModel extends ViewModel
         processQueue();
     }
 
-    public void getMonthBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData)
+    public void getMonthBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData, int year, int month)
     {
-        BudDatabaseEvent event = new BudQueryEvent(mutableLiveData, _year, _month, BudQueryEvent.QueryType.month);
+        BudDatabaseEvent event = new BudQueryEvent(mutableLiveData, year, month, BudQueryEvent.QueryType.month);
         _budEvents.add(event);
         processQueue();
     }
 
-    public void getMonthsBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData)
+    public void getMonthsBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData, int year)
     {
-        BudDatabaseEvent event = new BudQueryEvent(mutableLiveData, _year, _month, BudQueryEvent.QueryType.months);
+        BudDatabaseEvent event = new BudQueryEvent(mutableLiveData, year, BudQueryEvent.QueryType.months);
         _budEvents.add(event);
         processQueue();
     }
 
-    public void getYearBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData)
+    public void getYearBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData, int year)
     {
-        BudDatabaseEvent event = new BudQueryEvent(mutableLiveData, _year, _month, BudQueryEvent.QueryType.year);
+        BudDatabaseEvent event = new BudQueryEvent(mutableLiveData, year, BudQueryEvent.QueryType.year);
         _budEvents.add(event);
         processQueue();
     }
 
-    public void getTotalBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData, int startYear, int endYear)
+    public void getTotalBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData, int startYear, int startMonth, int endYear, int endMonth)
     {
-        BudDatabaseEvent event = new BudQueryEvent(mutableLiveData, _year, _month, startYear, endYear, BudQueryEvent.QueryType.total);
+        BudDatabaseEvent event = new BudQueryEvent(mutableLiveData, startYear, startMonth, endYear, endMonth, BudQueryEvent.QueryType.total);
         _budEvents.add(event);
         processQueue();
     }
 
-    public void insertBudgetEntity(BudgetEntity budgetEntity)
+    public void insertBudgetEntity(BudgetEntity budgetEntity, int year, int month)
     {
-        BudDatabaseEvent event = new BudInsertEvent(_year, _month, budgetEntity);
+        BudDatabaseEvent event = new BudInsertEvent(year, month, budgetEntity);
         _budEvents.add(event);
         processQueue();
     }
 
-    public void insertLinkedBudgetEntities(BudgetEntity budgetEntity, BudgetEntity linkedBudgetEntity)
+    public void insertLinkedBudgetEntities(BudgetEntity budgetEntity, BudgetEntity linkedBudgetEntity, int year, int month)
     {
-        BudDatabaseEvent event = new BudInsertTransferEvent(_year, _month, budgetEntity, linkedBudgetEntity);
+        BudDatabaseEvent event = new BudInsertTransferEvent(year, month, budgetEntity, linkedBudgetEntity);
         _budEvents.add(event);
         processQueue();
     }

@@ -102,7 +102,6 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
 
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
         _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
-        _viewModel.setDate(0, 0, 0);
 
         _exps = new MutableLiveData<List<ExpenditureEntity>>();
         _budgets = new MutableLiveData<List<BudgetEntity>>();
@@ -296,18 +295,12 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
 
     private void expendituresUpdated()
     {
-        TotalViewActivity.dataInvalid = true;
-        YearViewActivity.dataInvalid = true;
-        MonthViewActivity.dataInvalid = true;
-        DayViewActivity.dataInvalid = true;
+        // TODO
     }
 
     private void budgetsUpdated()
     {
-        TotalViewActivity.dataInvalid = true;
-        YearViewActivity.dataInvalid = true;
-        MonthViewActivity.dataInvalid = true;
-        DayViewActivity.dataInvalid = true;
+        // TODO
     }
 
     ///

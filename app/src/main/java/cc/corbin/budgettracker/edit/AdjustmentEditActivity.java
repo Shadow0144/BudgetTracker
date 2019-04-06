@@ -2,6 +2,7 @@ package cc.corbin.budgettracker.edit;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -32,14 +33,17 @@ import java.util.concurrent.TimeUnit;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.ConversionRateAsyncTask;
 import cc.corbin.budgettracker.auxilliary.Currencies;
+import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.R;
+import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText;
 import cc.corbin.budgettracker.numericalformatting.NumericalFormattedCallback;
 import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.month.MonthViewActivity;
 import cc.corbin.budgettracker.tables.AdjustmentTableCell;
 import cc.corbin.budgettracker.total.TotalViewActivity;
+import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.year.YearViewActivity;
 
 import static android.Manifest.permission.INTERNET;
@@ -109,6 +113,8 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
 
     private Button _signSwitchButton;
     private boolean _negative;
+
+    private ExpenditureViewModel _viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -222,6 +228,9 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
         _monthTextView.setText(String.format("%02d", _transferMonth)); // TODO
 
         updateTransferInformation();
+
+        _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
+        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
     }
 
     public void onAccept(View v)
@@ -245,6 +254,7 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
         String note = _noteEditText.getText().toString();
 
         int tabPosition = _typeTabLayout.getSelectedTabPosition();
+        BudgetEntity sisterAdjustment = null;
         switch (tabPosition)
         {
             case 0:
@@ -259,7 +269,7 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
                     _amount = -_amount;
                 }
                 else { }
-                BudgetEntity sisterAdjustment = new BudgetEntity
+                sisterAdjustment = new BudgetEntity
                         (_transferMonth, _transferYear, _amount,
                                 _transferCategory, Categories.getCategories()[_transferCategory]);
                 sisterAdjustment.setNote(note); // Set the note
@@ -276,10 +286,14 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
 
         setResult(MonthViewActivity.SUCCEED, intent);
 
-        DayViewActivity.dataInvalid = true;
-        MonthViewActivity.dataInvalid = true;
-        YearViewActivity.dataInvalid = true;
-        TotalViewActivity.dataInvalid = true;
+        if (tabPosition == 2)
+        {
+            _viewModel.insertLinkedBudgetEntities(_adjustment, sisterAdjustment, _year, _month);
+        }
+        else
+        {
+            _viewModel.insertBudgetEntity(_adjustment, _year, _month);
+        }
 
         finish();
     }
@@ -304,9 +318,10 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
 
         long linkedAdjustmentID = _adjustment.getLinkedID();
         intent.putExtra(TRANSFER_INTENT, (linkedAdjustmentID > -1));
+        BudgetEntity sisterAdjustment = null;
         if (linkedAdjustmentID > -1)
         {
-            BudgetEntity sisterAdjustment = new BudgetEntity(
+            sisterAdjustment = new BudgetEntity(
                     _adjustment.getLinkedMonth(),
                     _adjustment.getLinkedYear(),
                     -_amount,
@@ -321,10 +336,14 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
 
         setResult(MonthViewActivity.SUCCEED, intent);
 
-        DayViewActivity.dataInvalid = true;
-        MonthViewActivity.dataInvalid = true;
-        YearViewActivity.dataInvalid = true;
-        TotalViewActivity.dataInvalid = true;
+        if (linkedAdjustmentID > -1)
+        {
+            _viewModel.updateLinkedBudgetEntities(_adjustment, sisterAdjustment);
+        }
+        else
+        {
+            _viewModel.updateBudgetEntity(_adjustment);
+        }
 
         finish();
     }
@@ -369,9 +388,10 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
 
         long linkedAdjustmentID = _adjustment.getLinkedID();
         intent.putExtra(TRANSFER_INTENT, (linkedAdjustmentID > -1));
+        BudgetEntity sisterAdjustment = null;
         if (linkedAdjustmentID > -1)
         {
-            BudgetEntity sisterAdjustment = new BudgetEntity(); // Only the ID is required
+            sisterAdjustment = new BudgetEntity(); // Only the ID is required
             sisterAdjustment.setId(linkedAdjustmentID);
             intent.putExtra(LINKED_BUDGET_INTENT, sisterAdjustment);
         }
@@ -379,10 +399,14 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
 
         setResult(MonthViewActivity.DELETE, intent);
 
-        DayViewActivity.dataInvalid = true;
-        MonthViewActivity.dataInvalid = true;
-        YearViewActivity.dataInvalid = true;
-        TotalViewActivity.dataInvalid = true;
+        if (linkedAdjustmentID > -1)
+        {
+            _viewModel.removeLinkedBudgetEntities(_adjustment, sisterAdjustment);
+        }
+        else
+        {
+            _viewModel.removeBudgetEntity(_adjustment);
+        }
 
         finish();
     }
@@ -648,7 +672,7 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
 
     public void acceptConversion(View v)
     {
-
+        // TODO
 
         _popupWindow.dismiss();
     }
@@ -706,7 +730,6 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
     {
-        Log.e(TAG, "Results");
         // If request is cancelled, the result arrays are empty
         if (grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED)

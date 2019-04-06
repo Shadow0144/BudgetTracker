@@ -31,6 +31,7 @@ public class BudQueryEvent implements BudDatabaseEvent
     private QueryType _queryType;
     private MutableLiveData<List<BudgetEntity>> _mutableLiveData;
 
+    // Month
     public BudQueryEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData,
                          int year, int month, QueryType queryType)
     {
@@ -40,6 +41,15 @@ public class BudQueryEvent implements BudDatabaseEvent
         _queryType = queryType;
     }
 
+    // Year
+    public BudQueryEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData, int year, QueryType queryType)
+    {
+        _mutableLiveData = mutableLiveData;
+        _year = year;
+        _queryType = queryType;
+    }
+
+    // Total
     public BudQueryEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData,
                          int year, int month, int startYear, int endYear, QueryType queryType)
     {

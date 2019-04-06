@@ -52,6 +52,22 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
         for (int i = 0; i < _groupSize; i++)
         {
             _budgetCells.add(new BudgetTableRow(_context, categories[i], i, _year, _month));
+            // Create the buttons to use to add adjustments
+            Button addAdjustmentButton = new Button(_context);
+            addAdjustmentButton.setTag(i);
+            addAdjustmentButton.setText(R.string.add_adjustment);
+            addAdjustmentButton.setMinHeight(0);
+            addAdjustmentButton.setMinimumHeight(0);
+            addAdjustmentButton.setIncludeFontPadding(false);
+            addAdjustmentButton.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    ((MonthViewActivity)_context).createAdjustmentExpenditure(((int)v.getTag()));
+                }
+            });
+            _addAdjustmentButtons.add(addAdjustmentButton);
         }
     }
 
@@ -84,23 +100,6 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
                 mostRecentMonth = entity.getMonth();
             }
             else { }
-
-            // Create the buttons to use to add adjustments
-            Button addAdjustmentButton = new Button(_context);
-            addAdjustmentButton.setId(i);
-            addAdjustmentButton.setText(R.string.add_adjustment);
-            addAdjustmentButton.setMinHeight(0);
-            addAdjustmentButton.setMinimumHeight(0);
-            addAdjustmentButton.setIncludeFontPadding(false);
-            addAdjustmentButton.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View v)
-                {
-                    ((MonthViewActivity)_context).createAdjustmentExpenditure(v.getId());
-                }
-            });
-            _addAdjustmentButtons.add(addAdjustmentButton);
         }
 
         // Grab the adjustments
@@ -166,7 +165,9 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
     @Override
     public int getChildrenCount(int groupPosition)
     {
-        return _adjustments.get(Categories.getCategories()[groupPosition]).size()+1; // +1 for the add button
+        List<BudgetEntity> category = _adjustments.get(Categories.getCategories()[groupPosition]);
+        int count = category == null ? 1 : category.size()+1; // +1 for the add button
+        return count;
     }
 
     @Override
@@ -184,7 +185,10 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
         {
             child = adjustments.get(childPosition);
         }
-        else { }
+        else
+        {
+            child = _addAdjustmentButtons.get(groupPosition);
+        }
 
         return child;
     }
@@ -218,7 +222,7 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent)
     {
         List<AdjustmentTableCell> adjustmentTableCells = _adjustmentCells.get(Categories.getCategories()[groupPosition]);
-        if (childPosition < adjustmentTableCells.size())
+        if (adjustmentTableCells != null && childPosition < adjustmentTableCells.size())
         {
             convertView = adjustmentTableCells.get(childPosition);
         }

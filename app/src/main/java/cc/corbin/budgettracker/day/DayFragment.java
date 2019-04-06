@@ -73,8 +73,7 @@ public class DayFragment extends Fragment
         // Make the call to getDay here if this occurs last
         if (_parent != null)
         {
-            _viewModel.setDate(_year, _month, _day);
-            _viewModel.getDay(_entities);
+            _viewModel.getDay(_entities, _year, _month, _day);
         }
         else { }
 
@@ -97,8 +96,7 @@ public class DayFragment extends Fragment
         // Make the call to getDay here if this occurs last
         if (_entities != null)
         {
-            _viewModel.setDate(_year, _month, _day);
-            _viewModel.getDay(_entities);
+            _viewModel.getDay(_entities, _year, _month, _day);
         }
         else { }
     }
@@ -107,8 +105,7 @@ public class DayFragment extends Fragment
     {
         _dayFragmentFrame.removeAllViews();
         _progressFrame.setVisibility(FrameLayout.VISIBLE);
-        _viewModel.setDate(_year, _month, _day);
-        _viewModel.getDay(_entities);
+        _viewModel.getDay(_entities, _year, _month, _day);
     }
 
     private void onLoadExpenses(@Nullable List<ExpenditureEntity> expenditureEntities)
@@ -125,8 +122,6 @@ public class DayFragment extends Fragment
             _itemsContainer = dayView.findViewById(R.id.itemsContainer);
 
             setUpExpenditures();
-
-            DayViewActivity.dataInvalid = false;
         }
         else { }
     }

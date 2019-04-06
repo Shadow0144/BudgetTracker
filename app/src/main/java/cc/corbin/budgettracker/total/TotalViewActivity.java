@@ -68,8 +68,6 @@ public class TotalViewActivity extends AppCompatActivity implements NavigationVi
     private int _startYear;
     private int _endYear;
 
-    public static boolean dataInvalid;
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -85,11 +83,8 @@ public class TotalViewActivity extends AppCompatActivity implements NavigationVi
         NavigationView navigationView = findViewById(R.id.navView);
         navigationView.setNavigationItemSelectedListener(this);
 
-        TotalViewActivity.dataInvalid = true;
-
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
         _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
-        _viewModel.setDate(0, 0, 0);
 
         final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
         {
@@ -129,7 +124,7 @@ public class TotalViewActivity extends AppCompatActivity implements NavigationVi
                 else // else - returning from an add / edit / remove
                 {
                     // Call for a refresh
-                    _viewModel.getTotalBudget(_budgets, _startYear, _endYear);
+                    _viewModel.getTotalBudget(_budgets, _startYear, 1, _endYear, 12); // TODO Fix
                 }
             }
         };
@@ -162,10 +157,8 @@ public class TotalViewActivity extends AppCompatActivity implements NavigationVi
                 String[] categoryLabels = Categories.getCategories();
                 _categoryPieChart.setData(amounts, categoryLabels);
 
-                TotalViewActivity.dataInvalid = false;
-
                 // Update the budgets
-                _viewModel.getTotalBudget(_budgets, _startYear, _endYear);
+                _viewModel.getTotalBudget(_budgets, _startYear, 1, _endYear, 12); // TODO Fix
             }
         };
 
@@ -216,22 +209,6 @@ public class TotalViewActivity extends AppCompatActivity implements NavigationVi
         _totalExps.observe(this, entityObserver);
         _budgets = new MutableLiveData<List<BudgetEntity>>();
         _budgets.observe(this, budgetObserver);
-    }
-
-    @Override
-    protected void onResume()
-    {
-        if (TotalViewActivity.dataInvalid)
-        {
-            _yearlyTable.resetTable();
-            _categoryTable.resetTable();
-
-            _viewModel.setDate(0, 0, 0);
-            _viewModel.getTotal(_totalExps);
-        }
-        else { }
-
-        super.onResume();
     }
 
     @Override

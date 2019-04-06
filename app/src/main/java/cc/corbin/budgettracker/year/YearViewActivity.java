@@ -79,8 +79,6 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
     private int _budgetId; // ID of the budget entity being edited
     private PopupWindow _popupWindow; // For editing budgets
 
-    public static boolean dataInvalid;
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -96,13 +94,10 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
         NavigationView navigationView = findViewById(R.id.navView);
         navigationView.setNavigationItemSelectedListener(this);
 
-        YearViewActivity.dataInvalid = true;
-
         _year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
 
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
         _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
-        _viewModel.setDate(_year, 0, 0);
 
         final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
         {
@@ -140,7 +135,7 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
                 else // else - returning from an add / edit / remove
                 {
                     // Call for a refresh
-                    _viewModel.getMonthsBudget(_budgets);
+                    _viewModel.getMonthsBudget(_budgets, _year);
                 }
             }
         };
@@ -181,10 +176,8 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
                 String[] categoryLabels = Categories.getCategories();
                 _categoryPieChart.setData(amounts, categoryLabels);
 
-                YearViewActivity.dataInvalid = false;
-
                 // Update the budgets
-                _viewModel.getMonthsBudget(_budgets);
+                _viewModel.getMonthsBudget(_budgets, _year);
             }
         };
 
@@ -233,26 +226,6 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
         _yearExps.observe(this, entityObserver);
         _budgets = new MutableLiveData<List<BudgetEntity>>();
         _budgets.observe(this, budgetObserver);
-    }
-
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
-
-        if (YearViewActivity.dataInvalid)
-        {
-            _monthlyTable.resetTable();
-            _categoryTable.resetTable();
-
-            _monthlyPieChart.clearData();
-            _categoryPieChart.clearData();
-
-            _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
-            _viewModel.setDate(_year, 0, 0);
-            _viewModel.getYear(_yearExps);
-        }
-        else { }
     }
 
     @Override
@@ -424,7 +397,7 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
             entity.setMonth(13);
             entity.setYear(_year);
             _budgets.getValue().add(entity);
-            _viewModel.insertBudgetEntity(entity);
+            _viewModel.insertBudgetEntity(entity, _year, 0); // TODO ?
         }
 
         _popupWindow.dismiss();
