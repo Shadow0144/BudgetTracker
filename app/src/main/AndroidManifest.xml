@@ -31,6 +31,7 @@
         <activity android:name=".search.CreateSearchActivity"></activity>
         <activity android:name=".search.SearchResultsActivity"></activity>
         <activity android:name=".importexport.ImportExportActivity"></activity>
+        <activity android:name=".group.GroupActivity"></activity>
     </application>
 
 </manifest>

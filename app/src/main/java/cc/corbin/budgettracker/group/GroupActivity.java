@@ -1,4 +1,4 @@
-package cc.corbin.budgettracker.custom;
+package cc.corbin.budgettracker.group;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModelProviders;
@@ -10,15 +10,15 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
-
 import java.util.Calendar;
 import java.util.List;
 
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.NavigationDrawerHelper;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
-import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
+import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
 import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
@@ -30,21 +30,20 @@ import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.year.YearViewActivity;
 
-public class CreateCustomViewActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
+public class GroupActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
 {
-    private final String TAG = "CreateCustomViewActivity";
+    private final String TAG = "GroupActivity";
 
     private DrawerLayout _drawerLayout;
 
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _expenditures;
-    private MutableLiveData<List<BudgetEntity>> _budgets;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_custom_view);
+        setContentView(R.layout.activity_group);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -55,7 +54,6 @@ public class CreateCustomViewActivity extends AppCompatActivity implements Navig
         NavigationView navigationView = findViewById(R.id.navView);
         navigationView.setNavigationItemSelectedListener(this);
 
-        Calendar calendar = Calendar.getInstance();
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
         _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
     }

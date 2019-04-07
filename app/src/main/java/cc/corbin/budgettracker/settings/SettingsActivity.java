@@ -38,6 +38,7 @@ import java.util.List;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
+import cc.corbin.budgettracker.auxilliary.NavigationDrawerHelper;
 import cc.corbin.budgettracker.auxilliary.SortableItem;
 import cc.corbin.budgettracker.auxilliary.SortableLinearLayout;
 import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
@@ -230,62 +231,12 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
     @Override
     public boolean onNavigationItemSelected(MenuItem item)
     {
-        Intent intent;
-        Calendar date;
-        boolean handled = false;
-        switch (item.getItemId())
-        {
-            case R.id.searchMenuItem:
-                intent = new Intent(getApplicationContext(), CreateSearchActivity.class);
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.dayMenuItem:
-                intent = new Intent(getApplicationContext(), DayViewActivity.class);
-                date = Calendar.getInstance();
-                intent.putExtra(DayViewActivity.DATE_INTENT, date.getTimeInMillis());
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.monthMenuItem:
-                intent = new Intent(getApplicationContext(), MonthViewActivity.class);
-                date = Calendar.getInstance();
-                intent.putExtra(MonthViewActivity.YEAR_INTENT, date.get(Calendar.YEAR));
-                intent.putExtra(MonthViewActivity.MONTH_INTENT, date.get(Calendar.MONTH));
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.yearMenuItem:
-                intent = new Intent(getApplicationContext(), YearViewActivity.class);
-                date = Calendar.getInstance();
-                intent.putExtra(YearViewActivity.YEAR_INTENT, date.get(Calendar.YEAR));
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.totalMenuItem:
-                intent = new Intent(getApplicationContext(), TotalViewActivity.class);
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.customMenuItem:
-                intent = new Intent(getApplicationContext(), CreateCustomViewActivity.class);
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.settingsMenuItem:
-                intent = new Intent(getApplicationContext(), SettingsActivity.class);
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.importExportMenuItem:
-                intent = new Intent(getApplicationContext(), ImportExportActivity.class);
-                startActivity(intent);
-                handled = true;
-                break;
-        }
+        Intent intent = NavigationDrawerHelper.handleNavigation(item);
 
+        boolean handled = (intent != null);
         if (handled)
         {
+            startActivity(intent);
             _drawerLayout.closeDrawer(GravityCompat.START);
         }
         else { }

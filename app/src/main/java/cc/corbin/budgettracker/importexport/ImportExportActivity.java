@@ -42,6 +42,7 @@ import java.util.Locale;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.DatePickerFragment;
 import cc.corbin.budgettracker.auxilliary.MonthPickerFragment;
+import cc.corbin.budgettracker.auxilliary.NavigationDrawerHelper;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
@@ -94,6 +95,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_import_export);
 
+        // Setup the navigation toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionbar = getSupportActionBar();
@@ -103,7 +105,6 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         NavigationView navigationView = findViewById(R.id.navView);
         navigationView.setNavigationItemSelectedListener(this);
 
-        Calendar calendar = Calendar.getInstance();
         _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
         _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
     }
@@ -123,61 +124,12 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     @Override
     public boolean onNavigationItemSelected(MenuItem item)
     {
-        Intent intent;
-        boolean handled = false;
-        Calendar calendar = Calendar.getInstance();
-        switch (item.getItemId())
-        {
-            case R.id.searchMenuItem:
-                intent = new Intent(getApplicationContext(), CreateSearchActivity.class);
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.dayMenuItem:
-                intent = new Intent(getApplicationContext(), DayViewActivity.class);
-                Calendar date = Calendar.getInstance();
-                date.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DATE));
-                intent.putExtra(DayViewActivity.DATE_INTENT, date.getTimeInMillis());
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.monthMenuItem:
-                intent = new Intent(getApplicationContext(), MonthViewActivity.class);
-                intent.putExtra(MonthViewActivity.YEAR_INTENT, calendar.get(Calendar.YEAR));
-                intent.putExtra(MonthViewActivity.MONTH_INTENT, calendar.get(Calendar.MONTH)+1);
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.yearMenuItem:
-                intent = new Intent(getApplicationContext(), YearViewActivity.class);
-                intent.putExtra(YearViewActivity.YEAR_INTENT, calendar.get(Calendar.YEAR));
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.totalMenuItem:
-                intent = new Intent(getApplicationContext(), TotalViewActivity.class);
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.customMenuItem:
-                intent = new Intent(getApplicationContext(), CreateCustomViewActivity.class);
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.settingsMenuItem:
-                intent = new Intent(getApplicationContext(), SettingsActivity.class);
-                startActivity(intent);
-                handled = true;
-                break;
-            case R.id.importExportMenuItem:
-                intent = new Intent(getApplicationContext(), ImportExportActivity.class);
-                startActivity(intent);
-                handled = true;
-                break;
-        }
+        Intent intent = NavigationDrawerHelper.handleNavigation(item);
 
+        boolean handled = (intent != null);
         if (handled)
         {
+            startActivity(intent);
             _drawerLayout.closeDrawer(GravityCompat.START);
         }
         else { }
