@@ -28,6 +28,6 @@ public class DatabaseAsyncTask extends AsyncTask<Void, Void, Void>
     @Override
     protected void onPostExecute(Void result)
     {
-        _model.checkQueue();
+        //_model.checkQueue();
     }
 }

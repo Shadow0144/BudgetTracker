@@ -368,13 +368,14 @@ public class SearchResultsActivity extends AppCompatActivity implements Navigati
             Intent intent = new Intent(this, DayViewActivity.class);
             Calendar calendar = Calendar.getInstance();
             calendar.set(exp.getYear(), exp.getMonth() - 1, exp.getDay());
-            intent.putExtra(DayViewActivity.DATE_INTENT, calendar.getTimeInMillis());
+            intent.putExtra(DayViewActivity.YEAR_INTENT, exp.getYear());
+            intent.putExtra(DayViewActivity.MONTH_INTENT, exp.getMonth());
+            intent.putExtra(DayViewActivity.DAY_INTENT, exp.getDay());
             startActivity(intent);
         }
         else
         {
             Intent intent = new Intent(this, MonthViewActivity.class);
-            intent = new Intent(getApplicationContext(), MonthViewActivity.class);
             intent.putExtra(MonthViewActivity.YEAR_INTENT, exp.getYear());
             intent.putExtra(MonthViewActivity.MONTH_INTENT, exp.getMonth());
             startActivity(intent);

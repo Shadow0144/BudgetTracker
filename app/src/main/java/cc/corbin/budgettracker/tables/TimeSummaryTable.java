@@ -184,10 +184,11 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
 
             case month:
                 intent = new Intent(_context, DayViewActivity.class);
-                date = Calendar.getInstance();
                 int week = v.getId();
-                date.set(_year, _month - 1, ((week - 1) * 7) + 1);
-                intent.putExtra(DayViewActivity.DATE_INTENT, date.getTimeInMillis());
+                int day = ((week - 1) * 7) + 1;
+                intent.putExtra(DayViewActivity.YEAR_INTENT, _year);
+                intent.putExtra(DayViewActivity.MONTH_INTENT, _month);
+                intent.putExtra(DayViewActivity.DAY_INTENT, day);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 _context.startActivity(intent);
                 ((MonthViewActivity) _context).finish();

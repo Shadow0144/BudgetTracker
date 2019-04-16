@@ -31,9 +31,9 @@ public class NavigationDrawerHelper
                 break;
             case R.id.dayMenuItem:
                 intent = new Intent(BudgetTrackerApplication.getInstance(), DayViewActivity.class);
-                Calendar date = Calendar.getInstance();
-                date.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DATE));
-                intent.putExtra(DayViewActivity.DATE_INTENT, date.getTimeInMillis());
+                intent.putExtra(DayViewActivity.YEAR_INTENT, calendar.get(Calendar.YEAR));
+                intent.putExtra(DayViewActivity.MONTH_INTENT, calendar.get(Calendar.MONTH)+1);
+                intent.putExtra(DayViewActivity.DAY_INTENT, calendar.get(Calendar.DATE));
                 break;
             case R.id.monthMenuItem:
                 intent = new Intent(BudgetTrackerApplication.getInstance(), MonthViewActivity.class);

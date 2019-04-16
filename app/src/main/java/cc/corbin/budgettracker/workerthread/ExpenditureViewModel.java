@@ -66,8 +66,6 @@ public class ExpenditureViewModel extends ViewModel
     private static AsyncTask<Void, Void, Void> _queuer;
     private static DatabaseThread _thread;
 
-    //private static LocalBroadcastManager _localBroadcastManager;
-
     public ExpenditureViewModel()
     {
         if (_expEvents == null || _budEvents == null)
@@ -78,7 +76,6 @@ public class ExpenditureViewModel extends ViewModel
             _completedBudEvents = new ConcurrentLinkedQueue<BudDatabaseEvent>();
             _dbE = null;
             _dbB = null;
-            //_localBroadcastManager = LocalBroadcastManager.getInstance(BudgetTrackerApplication.getInstance());
         }
         else { }
     }
@@ -104,24 +101,7 @@ public class ExpenditureViewModel extends ViewModel
         _dbB = null;
     }
 
-    public void subscribeToUpdates(BroadcastReceiver receiver)
-    {
-        //_localBroadcastManager.registerReceiver(receiver, new IntentFilter(UPDATE_INTENT));
-    }
-
-    public void unsubscribeToUpdates(BroadcastReceiver receiver)
-    {
-        //_localBroadcastManager.unregisterReceiver(receiver);
-    }
-
-    // When a database event has finished
-    public void checkQueue()
-    {
-        //Intent intent = new Intent(UPDATE_INTENT);
-        //_localBroadcastManager.sendBroadcast(intent);
-    }
-
-    public void processQueue()
+    private void processQueue()
     {
         // Ensure the thread is setup with the databases and that the queuer is either null or not running
         if ((_thread != null) && ((_queuer == null) || (_queuer.getStatus() != AsyncTask.Status.RUNNING)))

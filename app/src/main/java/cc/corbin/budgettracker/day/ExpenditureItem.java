@@ -1,10 +1,13 @@
 package cc.corbin.budgettracker.day;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -15,7 +18,7 @@ import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 
-public class ExpenditureItem extends LinearLayout
+public class ExpenditureItem extends CardView
 {
     private final String TAG = "ExpenditureItem";
 
@@ -56,6 +59,13 @@ public class ExpenditureItem extends LinearLayout
         LayoutInflater inflater = LayoutInflater.from(context);
         final View view = inflater.inflate(R.layout.item, null);
 
+        LayoutParams params = new LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(12, 12, 12, 12);
+        setLayoutParams(params);
+
         refresh(view);
 
         addView(view);
@@ -63,28 +73,34 @@ public class ExpenditureItem extends LinearLayout
 
     private void refresh(View view)
     {
-        final TextView currencyView = view.findViewById(R.id.currencyView);
-        currencyView.setText(Currencies.symbols[Currencies.default_currency]);
-
-        if (_expenditure.getBaseCurrency() != Currencies.default_currency)
+        if (_expenditure != null)
         {
-            final TextView conversionTextView = view.findViewById(R.id.conversionTextView);
-            conversionTextView.setText("(" + Currencies.formatCurrency(_expenditure.getBaseCurrency(), _expenditure.getBaseAmount())
-                    + " @ " + _expenditure.getConversionRate() + ")");
+            final TextView currencyView = view.findViewById(R.id.currencyView);
+            currencyView.setText(Currencies.symbols[Currencies.default_currency]);
+
+            if (_expenditure.getBaseCurrency() != Currencies.default_currency)
+            {
+                final TextView conversionTextView = view.findViewById(R.id.conversionTextView);
+                conversionTextView.setText("(" + Currencies.formatCurrency(_expenditure.getBaseCurrency(), _expenditure.getBaseAmount())
+                        + " @ " + _expenditure.getConversionRate() + ")");
+            }
+            else
+            {
+            }
+
+            final TextView categoryView = view.findViewById(R.id.categoryView);
+            categoryView.setText(_expenditure.getCategoryName());
+
+            final TextView costView = view.findViewById(R.id.costView);
+            String cost = Currencies.formatCurrency(Currencies.integer[Currencies.default_currency], _expenditure.getAmount()); // TODO - Format better
+            costView.setText(cost);
+
+            final TextView noteTextView = view.findViewById(R.id.noteTextView);
+            final String note = _expenditure.getNote();
+            noteTextView.setVisibility((note.length() == 0) ? GONE : VISIBLE);
+            noteTextView.setText(note);
         }
         else { }
-
-        final TextView categoryView = view.findViewById(R.id.categoryView);
-        categoryView.setText(_expenditure.getCategoryName());
-
-        final TextView costView = view.findViewById(R.id.costView);
-        String cost = Currencies.formatCurrency(Currencies.integer[Currencies.default_currency], _expenditure.getAmount()); // TODO - Format better
-        costView.setText(cost);
-
-        final TextView noteTextView = view.findViewById(R.id.noteTextView);
-        final String note = _expenditure.getNote();
-        noteTextView.setVisibility((note.length() == 0) ? GONE : VISIBLE);
-        noteTextView.setText(note);
     }
 
     public ExpenditureEntity getExpenditure()
