@@ -112,13 +112,21 @@ public class DayList extends LinearLayout
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         params.setMargins(1, 1, 1, 0);
         _dateTextView.setLayoutParams(params);
-        _dateTextView.setPadding(0, 24, 0, 24);
+        _dateTextView.setPadding(0, 24, 0, 36);
         _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryDark));
         _dateTextView.setTextColor(Color.WHITE);
         _dateTextView.setTextSize(24);
         _dateTextView.setTextAlignment(TEXT_ALIGNMENT_CENTER);
         _dateTextView.setTypeface(_dateTextView.getTypeface(), Typeface.BOLD);
         addView(_dateTextView);
+        _dateTextView.setOnClickListener(new OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                ((DayViewActivity)_context).moveToMonthView(null);
+            }
+        });
     }
 
     private void setupTotalTextView()
