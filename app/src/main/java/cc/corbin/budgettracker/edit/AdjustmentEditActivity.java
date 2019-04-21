@@ -229,8 +229,7 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
 
         updateTransferInformation();
 
-        _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
-        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
+        _viewModel = ExpenditureViewModel.getInstance();
     }
 
     public void onAccept(View v)

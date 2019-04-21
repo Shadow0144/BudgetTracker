@@ -160,8 +160,7 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
         };
         _conversionRateStringMLD.observe(this, conversionObserver);
 
-        _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
-        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
+        _viewModel = ExpenditureViewModel.getInstance();
     }
 
     public void onAccept(View v)

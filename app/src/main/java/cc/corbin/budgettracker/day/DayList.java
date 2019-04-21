@@ -64,7 +64,7 @@ public class DayList extends LinearLayout
 
         setupDayListHolder();
 
-        _viewModel = ViewModelProviders.of((FragmentActivity)_context).get(ExpenditureViewModel.class);
+        _viewModel = ExpenditureViewModel.getInstance();
         _entities = new MutableLiveData<List<ExpenditureEntity>>();
 
         final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()

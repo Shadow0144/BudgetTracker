@@ -20,24 +20,17 @@ public class DatabaseThread
 
     private ConcurrentLinkedQueue<ExpDatabaseEvent> _expEvents;
     private ConcurrentLinkedQueue<BudDatabaseEvent> _budEvents;
-    private ConcurrentLinkedQueue<ExpDatabaseEvent> _completedExpEvents;
-    private ConcurrentLinkedQueue<BudDatabaseEvent> _completedBudEvents;
 
     private ExpenditureDatabase _dbE;
     private BudgetDatabase _dbB;
 
-    public DatabaseThread(ExpenditureDatabase dbE, BudgetDatabase dbB,
-                          ConcurrentLinkedQueue<ExpDatabaseEvent> eEvents,
-                          ConcurrentLinkedQueue<BudDatabaseEvent> bEvents,
-                          ConcurrentLinkedQueue<ExpDatabaseEvent> completedExpEvents,
-                          ConcurrentLinkedQueue<BudDatabaseEvent> completedBudEvents)
+    public DatabaseThread(ConcurrentLinkedQueue<ExpDatabaseEvent> eEvents,
+                          ConcurrentLinkedQueue<BudDatabaseEvent> bEvents)
     {
-        _dbE = dbE;
-        _dbB = dbB;
+        _dbE = ExpenditureDatabase.getExpenditureDatabase();
+        _dbB = BudgetDatabase.getBudgetDatabase();
         _expEvents = eEvents;
         _budEvents = bEvents;
-        _completedExpEvents = completedExpEvents;
-        _completedBudEvents = completedBudEvents;
     }
 
     public void run()
@@ -56,12 +49,12 @@ public class DatabaseThread
     private void processExpEvent(ExpDatabaseEvent event)
     {
         event.processEvent(_dbE);
-        _completedExpEvents.add(event);
+        //_completedExpEvents.add(event);
     }
 
     private void processBudEvent(BudDatabaseEvent event)
     {
         event.processEvent(_dbB);
-        _completedBudEvents.add(event);
+        //_completedBudEvents.add(event);
     }
 }

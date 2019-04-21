@@ -32,14 +32,6 @@ public class BudgetTrackerApplication extends Application
         Currencies.default_currency = sharedPreferences.getInt(Currencies.DEFAULT_CURRENCY_KEY, 3);
     }
 
-    @Override
-    public void onTerminate()
-    {
-        ExpenditureViewModel.shutdown();
-
-        super.onTerminate();
-    }
-
     public static BudgetTrackerApplication getInstance()
     {
         return _instance;

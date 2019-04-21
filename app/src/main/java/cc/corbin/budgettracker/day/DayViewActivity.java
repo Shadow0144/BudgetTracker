@@ -89,8 +89,7 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
 
         setupDayView();
 
-        _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
-        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
+        _viewModel = ExpenditureViewModel.getInstance();
 
         if (!Categories.areCategoriesLoaded())
         {

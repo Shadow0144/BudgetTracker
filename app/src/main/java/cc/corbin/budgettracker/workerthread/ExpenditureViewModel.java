@@ -49,56 +49,33 @@ import cc.corbin.budgettracker.workerthread.expenditureevent.ExpUpdateEvent;
  * Created by Corbin on 3/14/2018.
  */
 
-public class ExpenditureViewModel extends ViewModel
+public class ExpenditureViewModel
 {
     private static final String TAG = "ExpenditureViewModel";
 
-    private static final String UPDATE_INTENT = "Update";
-
-    private static ExpenditureDatabase _dbE;
-    private static BudgetDatabase _dbB;
+    private static ExpenditureViewModel _instance;
 
     private static ConcurrentLinkedQueue<ExpDatabaseEvent> _expEvents;
     private static ConcurrentLinkedQueue<BudDatabaseEvent> _budEvents;
-    private static ConcurrentLinkedQueue<ExpDatabaseEvent> _completedExpEvents;
-    private static ConcurrentLinkedQueue<BudDatabaseEvent> _completedBudEvents;
 
     private static AsyncTask<Void, Void, Void> _queuer;
     private static DatabaseThread _thread;
 
-    public ExpenditureViewModel()
+    private ExpenditureViewModel()
     {
-        if (_expEvents == null || _budEvents == null)
+        _expEvents = new ConcurrentLinkedQueue<ExpDatabaseEvent>();
+        _budEvents = new ConcurrentLinkedQueue<BudDatabaseEvent>();
+        _thread = new DatabaseThread(_expEvents, _budEvents);
+    }
+
+    public static ExpenditureViewModel getInstance()
+    {
+        if (_instance == null)
         {
-            _expEvents = new ConcurrentLinkedQueue<ExpDatabaseEvent>();
-            _budEvents = new ConcurrentLinkedQueue<BudDatabaseEvent>();
-            _completedExpEvents = new ConcurrentLinkedQueue<ExpDatabaseEvent>();
-            _completedBudEvents = new ConcurrentLinkedQueue<BudDatabaseEvent>();
-            _dbE = null;
-            _dbB = null;
+            _instance = new ExpenditureViewModel();
         }
         else { }
-    }
-
-    public void setDatabases(ExpenditureDatabase dbE, BudgetDatabase dbB)
-    {
-        _dbE = dbE;
-        _dbB = dbB;
-        _thread = new DatabaseThread(_dbE, _dbB,
-                _expEvents, _budEvents,
-                _completedExpEvents, _completedBudEvents);
-    }
-
-    @Override
-    public void onCleared()
-    {
-        super.onCleared();
-    }
-
-    public static void shutdown()
-    {
-        _dbE = null;
-        _dbB = null;
+        return _instance;
     }
 
     private void processQueue()

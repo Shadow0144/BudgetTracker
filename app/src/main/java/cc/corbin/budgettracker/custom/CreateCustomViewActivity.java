@@ -56,8 +56,7 @@ public class CreateCustomViewActivity extends AppCompatActivity implements Navig
         navigationView.setNavigationItemSelectedListener(this);
 
         Calendar calendar = Calendar.getInstance();
-        _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
-        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
+        _viewModel = ExpenditureViewModel.getInstance();
     }
 
     @Override

@@ -105,8 +105,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         NavigationView navigationView = findViewById(R.id.navView);
         navigationView.setNavigationItemSelectedListener(this);
 
-        _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
-        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
+        _viewModel = ExpenditureViewModel.getInstance();
     }
 
     @Override

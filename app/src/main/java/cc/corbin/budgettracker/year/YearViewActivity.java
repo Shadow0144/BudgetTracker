@@ -97,8 +97,7 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
 
         _year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
 
-        _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
-        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
+        _viewModel = ExpenditureViewModel.getInstance();
 
         final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
         {

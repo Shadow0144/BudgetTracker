@@ -119,8 +119,7 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         _month = getIntent().getIntExtra(MONTH_INTENT, Calendar.getInstance().get(Calendar.MONTH)+1);
         _year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
 
-        _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
-        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
+        _viewModel = ExpenditureViewModel.getInstance();
 
         final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
         {
@@ -253,7 +252,6 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
 
         createExtrasAndAdjustmentsTables();
 
-        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
         _viewModel.getMonth(_monthExps, _year, _month);
         _viewModel.getMonthBudget(_budgets, _year, _month);
     }
@@ -267,7 +265,6 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
         _categoryPieChart.clearData();
         _weeklyLineGraph.clearData();
 
-        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
         _viewModel.getMonth(_monthExps, _year, _month);
         _viewModel.getMonthBudget(_budgets, _year, _month);
     }

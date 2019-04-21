@@ -71,8 +71,7 @@ public class SearchResultsActivity extends AppCompatActivity implements Navigati
 
         Intent intent = getIntent();
 
-        _viewModel = ViewModelProviders.of(this).get(ExpenditureViewModel.class);
-        _viewModel.setDatabases(ExpenditureDatabase.getExpenditureDatabase(), BudgetDatabase.getBudgetDatabase());
+        _viewModel = ExpenditureViewModel.getInstance();
 
         _progressBar = findViewById(R.id.searchProgressBar);
         _resultsContainer = findViewById(R.id.resultsLinearLayout);
