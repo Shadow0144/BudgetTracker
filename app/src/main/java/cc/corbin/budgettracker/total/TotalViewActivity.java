@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
+import cc.corbin.budgettracker.auxilliary.NavigationActivity;
 import cc.corbin.budgettracker.auxilliary.NavigationDrawerHelper;
 import cc.corbin.budgettracker.importexport.ImportExportActivity;
 import cc.corbin.budgettracker.auxilliary.LineGraph;
@@ -45,11 +46,9 @@ import cc.corbin.budgettracker.year.YearViewActivity;
  * Created by Corbin on 4/15/2018.
  */
 
-public class TotalViewActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
+public class TotalViewActivity extends NavigationActivity
 {
     private final String TAG = "TotalViewActivity";
-
-    private DrawerLayout _drawerLayout;
 
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _totalExps;
@@ -72,17 +71,8 @@ public class TotalViewActivity extends AppCompatActivity implements NavigationVi
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_total_view);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        ActionBar actionbar = getSupportActionBar();
-        actionbar.setDisplayHomeAsUpEnabled(true);
-        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
-        _drawerLayout = findViewById(R.id.rootLayout);
-        NavigationView navigationView = findViewById(R.id.navView);
-        navigationView.setNavigationItemSelectedListener(this);
+        super.onCreate(savedInstanceState);
 
         _viewModel = ExpenditureViewModel.getInstance();
 
@@ -212,32 +202,17 @@ public class TotalViewActivity extends AppCompatActivity implements NavigationVi
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        Intent intent;
-        switch (item.getItemId())
+        if (resultCode == SettingsActivity.DATABASE_UPDATE_INTENT_FLAG)
         {
-            case android.R.id.home:
-                _drawerLayout.openDrawer(GravityCompat.START);
-                return true;
+            // TODO Update outdated elements
         }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item)
-    {
-        Intent intent = NavigationDrawerHelper.handleNavigation(item);
-
-        boolean handled = (intent != null);
-        if (handled)
+        else if (requestCode == SettingsActivity.DATABASE_NO_UPDATE_INTENT_FLAG)
         {
-            startActivity(intent);
-            _drawerLayout.closeDrawer(GravityCompat.START);
+            // Do nothing
         }
         else { }
-
-        return handled;
     }
 
     private void totalLoaded(List<ExpenditureEntity> expenditureEntities)

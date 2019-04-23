@@ -11,11 +11,13 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.util.Calendar;
 import java.util.List;
 
 import cc.corbin.budgettracker.R;
+import cc.corbin.budgettracker.auxilliary.NavigationActivity;
 import cc.corbin.budgettracker.auxilliary.NavigationDrawerHelper;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
@@ -30,11 +32,9 @@ import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.year.YearViewActivity;
 
-public class CreateCustomViewActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
+public class CreateCustomViewActivity extends NavigationActivity
 {
     private final String TAG = "CreateCustomViewActivity";
-
-    private DrawerLayout _drawerLayout;
 
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _expenditures;
@@ -43,47 +43,24 @@ public class CreateCustomViewActivity extends AppCompatActivity implements Navig
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_custom_view);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        ActionBar actionbar = getSupportActionBar();
-        actionbar.setDisplayHomeAsUpEnabled(true);
-        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
-        _drawerLayout = findViewById(R.id.rootLayout);
-        NavigationView navigationView = findViewById(R.id.navView);
-        navigationView.setNavigationItemSelectedListener(this);
+        super.onCreate(savedInstanceState);
 
         Calendar calendar = Calendar.getInstance();
         _viewModel = ExpenditureViewModel.getInstance();
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        switch (item.getItemId())
+        if (resultCode == SettingsActivity.DATABASE_UPDATE_INTENT_FLAG)
         {
-            case android.R.id.home:
-                _drawerLayout.openDrawer(GravityCompat.START);
-                return true;
+            // TODO Update outdated elements
         }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item)
-    {
-        Intent intent = NavigationDrawerHelper.handleNavigation(item);
-
-        boolean handled = (intent != null);
-        if (handled)
+        else if (requestCode == SettingsActivity.DATABASE_NO_UPDATE_INTENT_FLAG)
         {
-            startActivity(intent);
-            _drawerLayout.closeDrawer(GravityCompat.START);
+            // Do nothing
         }
         else { }
-
-        return handled;
     }
 }

@@ -29,6 +29,7 @@ import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
+import cc.corbin.budgettracker.auxilliary.NavigationActivity;
 import cc.corbin.budgettracker.auxilliary.NavigationDrawerHelper;
 import cc.corbin.budgettracker.importexport.ImportExportActivity;
 import cc.corbin.budgettracker.auxilliary.LineGraph;
@@ -58,7 +59,7 @@ import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
  * Created by Corbin on 1/28/2018.
  */
 
-public class MonthViewActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
+public class MonthViewActivity extends NavigationActivity
 {
     private final String TAG = "MonthViewActivity";
 
@@ -77,8 +78,6 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
 
     private int _month;
     private int _year;
-
-    private DrawerLayout _drawerLayout;
 
     private TimeSummaryTable _weeklyTable;
     private CategorySummaryTable _categoryTable;
@@ -104,17 +103,8 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_month_view);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        ActionBar actionbar = getSupportActionBar();
-        actionbar.setDisplayHomeAsUpEnabled(true);
-        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
-        _drawerLayout = findViewById(R.id.rootLayout);
-        NavigationView navigationView = findViewById(R.id.navView);
-        navigationView.setNavigationItemSelectedListener(this);
+        super.onCreate(savedInstanceState);
 
         _month = getIntent().getIntExtra(MONTH_INTENT, Calendar.getInstance().get(Calendar.MONTH)+1);
         _year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
@@ -267,34 +257,6 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
 
         _viewModel.getMonth(_monthExps, _year, _month);
         _viewModel.getMonthBudget(_budgets, _year, _month);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        switch (item.getItemId())
-        {
-            case android.R.id.home:
-                _drawerLayout.openDrawer(GravityCompat.START);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item)
-    {
-        Intent intent = NavigationDrawerHelper.handleNavigation(item);
-
-        boolean handled = (intent != null);
-        if (handled)
-        {
-            startActivity(intent);
-            _drawerLayout.closeDrawer(GravityCompat.START);
-        }
-        else { }
-
-        return handled;
     }
 
     private void monthLoaded(List<ExpenditureEntity> expenditureEntities)
@@ -473,6 +435,15 @@ public class MonthViewActivity extends AppCompatActivity implements NavigationVi
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+        if (resultCode == SettingsActivity.DATABASE_UPDATE_INTENT_FLAG)
+        {
+            refreshView();
+        }
+        else if (requestCode == SettingsActivity.DATABASE_NO_UPDATE_INTENT_FLAG)
+        {
+            // Do nothing
+        }
+        else
         if (resultCode == FAILURE)
         {
             Toast toast = Toast.makeText(this, getString(R.string.failure_expense), Toast.LENGTH_LONG);

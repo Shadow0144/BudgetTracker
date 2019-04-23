@@ -28,6 +28,7 @@ import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
+import cc.corbin.budgettracker.auxilliary.NavigationActivity;
 import cc.corbin.budgettracker.auxilliary.NavigationDrawerHelper;
 import cc.corbin.budgettracker.importexport.ImportExportActivity;
 import cc.corbin.budgettracker.auxilliary.LineGraph;
@@ -52,15 +53,13 @@ import cc.corbin.budgettracker.month.MonthViewActivity;
  * Created by Corbin on 4/15/2018.
  */
 
-public class YearViewActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
+public class YearViewActivity extends NavigationActivity
 {
     private final String TAG = "YearViewActivity";
 
     public final static String YEAR_INTENT = "Year";
 
     private int _year;
-
-    private DrawerLayout _drawerLayout;
 
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _yearExps;
@@ -83,17 +82,8 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_year_view);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        ActionBar actionbar = getSupportActionBar();
-        actionbar.setDisplayHomeAsUpEnabled(true);
-        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
-        _drawerLayout = findViewById(R.id.rootLayout);
-        NavigationView navigationView = findViewById(R.id.navView);
-        navigationView.setNavigationItemSelectedListener(this);
+        super.onCreate(savedInstanceState);
 
         _year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
 
@@ -229,32 +219,17 @@ public class YearViewActivity extends AppCompatActivity implements NavigationVie
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        Intent intent;
-        switch (item.getItemId())
+        if (resultCode == SettingsActivity.DATABASE_UPDATE_INTENT_FLAG)
         {
-            case android.R.id.home:
-                _drawerLayout.openDrawer(GravityCompat.START);
-                return true;
+            // TODO Update outdated elements
         }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item)
-    {
-        Intent intent = NavigationDrawerHelper.handleNavigation(item);
-
-        boolean handled = (intent != null);
-        if (handled)
+        else if (requestCode == SettingsActivity.DATABASE_NO_UPDATE_INTENT_FLAG)
         {
-            startActivity(intent);
-            _drawerLayout.closeDrawer(GravityCompat.START);
+            // Do nothing
         }
         else { }
-
-        return handled;
     }
 
     private void yearLoaded(List<ExpenditureEntity> expenditureEntities)

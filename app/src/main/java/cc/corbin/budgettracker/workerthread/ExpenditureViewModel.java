@@ -1,48 +1,33 @@
 package cc.corbin.budgettracker.workerthread;
 
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.ViewModel;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.AsyncTask;
-import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
-import android.view.View;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import cc.corbin.budgettracker.BudgetTrackerApplication;
-import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
-import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
-import cc.corbin.budgettracker.workerthread.budgetevent.BudAddCategoryEvent;
 import cc.corbin.budgettracker.workerthread.budgetevent.BudCustomQueryEvent;
 import cc.corbin.budgettracker.workerthread.budgetevent.BudDatabaseEvent;
 import cc.corbin.budgettracker.workerthread.budgetevent.BudInsertEvent;
 import cc.corbin.budgettracker.workerthread.budgetevent.BudInsertTransferEvent;
-import cc.corbin.budgettracker.workerthread.budgetevent.BudMergeCategoryEvent;
 import cc.corbin.budgettracker.workerthread.budgetevent.BudQueryEvent;
-import cc.corbin.budgettracker.workerthread.budgetevent.BudRemoveCategoryEvent;
 import cc.corbin.budgettracker.workerthread.budgetevent.BudRemoveEvent;
 import cc.corbin.budgettracker.workerthread.budgetevent.BudRemoveTransferEvent;
-import cc.corbin.budgettracker.workerthread.budgetevent.BudRenameCategoryEvent;
-import cc.corbin.budgettracker.workerthread.budgetevent.BudResortCategoriesEvent;
 import cc.corbin.budgettracker.workerthread.budgetevent.BudUpdateEvent;
 import cc.corbin.budgettracker.workerthread.budgetevent.BudUpdateTransferEvent;
-import cc.corbin.budgettracker.workerthread.expenditureevent.ExpAddCategoryEvent;
+import cc.corbin.budgettracker.workerthread.combinedevent.ComAddCategoryEvent;
+import cc.corbin.budgettracker.workerthread.combinedevent.ComDatabaseEvent;
+import cc.corbin.budgettracker.workerthread.combinedevent.ComMergeCategoryEvent;
+import cc.corbin.budgettracker.workerthread.combinedevent.ComRemoveCategoryEvent;
+import cc.corbin.budgettracker.workerthread.combinedevent.ComRenameCategoryEvent;
+import cc.corbin.budgettracker.workerthread.combinedevent.ComResortCategoriesEvent;
 import cc.corbin.budgettracker.workerthread.expenditureevent.ExpCustomQueryEvent;
 import cc.corbin.budgettracker.workerthread.expenditureevent.ExpDatabaseEvent;
 import cc.corbin.budgettracker.workerthread.expenditureevent.ExpInsertEvent;
-import cc.corbin.budgettracker.workerthread.expenditureevent.ExpMergeCategoryEvent;
 import cc.corbin.budgettracker.workerthread.expenditureevent.ExpQueryEvent;
-import cc.corbin.budgettracker.workerthread.expenditureevent.ExpRemoveCategoryEvent;
 import cc.corbin.budgettracker.workerthread.expenditureevent.ExpRemoveEvent;
-import cc.corbin.budgettracker.workerthread.expenditureevent.ExpRenameCategoryEvent;
-import cc.corbin.budgettracker.workerthread.expenditureevent.ExpResortCategoriesEvent;
 import cc.corbin.budgettracker.workerthread.expenditureevent.ExpUpdateEvent;
 
 /**
@@ -57,6 +42,7 @@ public class ExpenditureViewModel
 
     private static ConcurrentLinkedQueue<ExpDatabaseEvent> _expEvents;
     private static ConcurrentLinkedQueue<BudDatabaseEvent> _budEvents;
+    private static ConcurrentLinkedQueue<ComDatabaseEvent> _comEvents;
 
     private static AsyncTask<Void, Void, Void> _queuer;
     private static DatabaseThread _thread;
@@ -65,7 +51,8 @@ public class ExpenditureViewModel
     {
         _expEvents = new ConcurrentLinkedQueue<ExpDatabaseEvent>();
         _budEvents = new ConcurrentLinkedQueue<BudDatabaseEvent>();
-        _thread = new DatabaseThread(_expEvents, _budEvents);
+        _comEvents = new ConcurrentLinkedQueue<ComDatabaseEvent>();
+        _thread = new DatabaseThread(_expEvents, _budEvents, _comEvents);
     }
 
     public static ExpenditureViewModel getInstance()
@@ -134,42 +121,6 @@ public class ExpenditureViewModel
     public void removeExpEntity(ExpenditureEntity entity)
     {
         ExpDatabaseEvent event = new ExpRemoveEvent(entity);
-        _expEvents.add(event);
-        processQueue();
-    }
-
-    public void renameExpenditureCategory(int category, String newCategoryName)
-    {
-        ExpDatabaseEvent event = new ExpRenameCategoryEvent(category, newCategoryName);
-        _expEvents.add(event);
-        processQueue();
-    }
-
-    public void mergeExpenditureCategory(int category, int newCategory, String newCategoryName)
-    {
-        ExpDatabaseEvent event = new ExpMergeCategoryEvent(category, newCategory, newCategoryName);
-        _expEvents.add(event);
-        processQueue();
-    }
-
-    public void addExpenditureCategory(int category)
-    {
-        ExpDatabaseEvent event = new ExpAddCategoryEvent(category);
-        _expEvents.add(event);
-        processQueue();
-    }
-
-    public void removeExpenditureCategory(int category)
-    {
-        ExpDatabaseEvent event = new ExpRemoveCategoryEvent(category);
-        _expEvents.add(event);
-        processQueue();
-    }
-
-
-    public void updateExpenditureCategories(String[] categoryNames)
-    {
-        ExpDatabaseEvent event = new ExpResortCategoriesEvent(categoryNames);
         _expEvents.add(event);
         processQueue();
     }
@@ -244,38 +195,39 @@ public class ExpenditureViewModel
         processQueue();
     }
 
-    public void renameBudgetCategory(int category, String newCategoryName)
+    public void renameCategory(int category, String newCategoryName, MutableLiveData<Boolean> processing)
     {
-        BudDatabaseEvent event = new BudRenameCategoryEvent(category, newCategoryName);
-        _budEvents.add(event);
+        ComDatabaseEvent event = new ComRenameCategoryEvent(category, newCategoryName, processing);
+        _comEvents.add(event);
         processQueue();
     }
 
-    public void mergeBudgetCategory(int category, int newCategory, String newCategoryName)
+    public void mergeCategory(int category, int newCategory, String newCategoryName, MutableLiveData<Boolean> processing)
     {
-        BudDatabaseEvent event = new BudMergeCategoryEvent(category, newCategory, newCategoryName);
-        _budEvents.add(event);
+        ComDatabaseEvent event = new ComMergeCategoryEvent(category, newCategory, newCategoryName, processing);
+        _comEvents.add(event);
         processQueue();
     }
 
-    public void addBudgetCategory(int category)
+    public void addCategory(int category, MutableLiveData<Boolean> processing)
     {
-        BudDatabaseEvent event = new BudAddCategoryEvent(category);
-        _budEvents.add(event);
+        ComDatabaseEvent event = new ComAddCategoryEvent(category, processing);
+        _comEvents.add(event);
         processQueue();
     }
 
-    public void removeBudgetCategory(int category)
+    public void removeCategory(int category, MutableLiveData<Boolean> processing)
     {
-        BudDatabaseEvent event = new BudRemoveCategoryEvent(category);
-        _budEvents.add(event);
+        ComDatabaseEvent event = new ComRemoveCategoryEvent(category, processing);
+        _comEvents.add(event);
         processQueue();
     }
 
-    public void updateBudgetCategories(String[] categoryNames)
+
+    public void updateCategories(String[] categoryNames, MutableLiveData<Boolean> processing)
     {
-        BudDatabaseEvent event = new BudResortCategoriesEvent(categoryNames);
-        _budEvents.add(event);
+        ComDatabaseEvent event = new ComResortCategoriesEvent(categoryNames, processing);
+        _comEvents.add(event);
         processQueue();
     }
 

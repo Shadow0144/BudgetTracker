@@ -17,24 +17,22 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
 import java.util.Calendar;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
-import cc.corbin.budgettracker.auxilliary.Currencies;
+import cc.corbin.budgettracker.auxilliary.NavigationActivity;
 import cc.corbin.budgettracker.auxilliary.NavigationDrawerHelper;
 import cc.corbin.budgettracker.edit.ExpenditureEditActivity;
-import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
+import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.month.MonthViewActivity;
 import cc.corbin.budgettracker.R;
-import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 
-public class DayViewActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
+public class DayViewActivity extends NavigationActivity
 {
     private final String TAG = "DayViewActivity";
 
@@ -55,31 +53,13 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
 
     private Calendar _currentDate;
 
-    private DrawerLayout _drawerLayout;
-
     private ExpenditureViewModel _viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_day_view);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        try
-        {
-            ActionBar actionbar = getSupportActionBar();
-            actionbar.setDisplayHomeAsUpEnabled(true);
-            actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
-        }
-        catch (Exception e)
-        {
-            // Do nothing
-        }
-        _drawerLayout = findViewById(R.id.rootLayout);
-        NavigationView navigationView = findViewById(R.id.navView);
-        navigationView.setNavigationItemSelectedListener(this);
+        super.onCreate(savedInstanceState);
 
         int day = getIntent().getIntExtra(DAY_INTENT, Calendar.getInstance().get(Calendar.DATE));
         int month = getIntent().getIntExtra(MONTH_INTENT, Calendar.getInstance().get(Calendar.MONTH)+1); // Add 1 in case the intent is set or not
@@ -96,34 +76,6 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
             Categories.loadCategories(this);
         }
         else { }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        switch (item.getItemId())
-        {
-            case android.R.id.home:
-                _drawerLayout.openDrawer(GravityCompat.START);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(@Nullable MenuItem item)
-    {
-        Intent intent = NavigationDrawerHelper.handleNavigation(item);
-
-        boolean handled = (intent != null);
-        if (handled)
-        {
-            startActivity(intent);
-            _drawerLayout.closeDrawer(GravityCompat.START);
-        }
-        else { }
-
-        return handled;
     }
 
     private void setupDayView()
@@ -176,6 +128,15 @@ public class DayViewActivity extends AppCompatActivity implements NavigationView
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+        if (resultCode == SettingsActivity.DATABASE_UPDATE_INTENT_FLAG)
+        {
+            _recyclerView.getAdapter().notifyDataSetChanged();
+        }
+        else if (requestCode == SettingsActivity.DATABASE_NO_UPDATE_INTENT_FLAG)
+        {
+            // Do nothing
+        }
+        else
         if (resultCode == FAILURE)
         {
             Toast toast = Toast.makeText(this, getString(R.string.failure_expense), Toast.LENGTH_LONG);

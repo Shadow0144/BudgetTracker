@@ -1,6 +1,7 @@
 package cc.corbin.budgettracker.workerthread;
 
 import android.arch.persistence.db.SimpleSQLiteQuery;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.workerthread.budgetevent.BudDatabaseEvent;
+import cc.corbin.budgettracker.workerthread.combinedevent.ComDatabaseEvent;
 import cc.corbin.budgettracker.workerthread.expenditureevent.ExpDatabaseEvent;
 
 public class DatabaseThread
@@ -20,17 +22,20 @@ public class DatabaseThread
 
     private ConcurrentLinkedQueue<ExpDatabaseEvent> _expEvents;
     private ConcurrentLinkedQueue<BudDatabaseEvent> _budEvents;
+    private ConcurrentLinkedQueue<ComDatabaseEvent> _comEvents;
 
     private ExpenditureDatabase _dbE;
     private BudgetDatabase _dbB;
 
     public DatabaseThread(ConcurrentLinkedQueue<ExpDatabaseEvent> eEvents,
-                          ConcurrentLinkedQueue<BudDatabaseEvent> bEvents)
+                          ConcurrentLinkedQueue<BudDatabaseEvent> bEvents,
+                          ConcurrentLinkedQueue<ComDatabaseEvent> cEvents)
     {
         _dbE = ExpenditureDatabase.getExpenditureDatabase();
         _dbB = BudgetDatabase.getBudgetDatabase();
         _expEvents = eEvents;
         _budEvents = bEvents;
+        _comEvents = cEvents;
     }
 
     public void run()
@@ -44,6 +49,11 @@ public class DatabaseThread
         {
             processBudEvent(_budEvents.poll());
         }
+
+        while (!_comEvents.isEmpty())
+        {
+            processComEvent(_comEvents.poll());
+        }
     }
 
     private void processExpEvent(ExpDatabaseEvent event)
@@ -56,5 +66,11 @@ public class DatabaseThread
     {
         event.processEvent(_dbB);
         //_completedBudEvents.add(event);
+    }
+
+    private void processComEvent(ComDatabaseEvent event)
+    {
+        event.processEvent(_dbB, _dbE);
+        //_completedComEvents.add(event);
     }
 }

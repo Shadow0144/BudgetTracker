@@ -2,7 +2,6 @@ package cc.corbin.budgettracker.settings;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,6 +17,7 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,110 +31,139 @@ import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import java.util.Calendar;
 import java.util.List;
 
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
+import cc.corbin.budgettracker.auxilliary.NavigationActivity;
 import cc.corbin.budgettracker.auxilliary.NavigationDrawerHelper;
 import cc.corbin.budgettracker.auxilliary.SortableItem;
 import cc.corbin.budgettracker.auxilliary.SortableLinearLayout;
-import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
-import cc.corbin.budgettracker.importexport.ImportExportActivity;
-import cc.corbin.budgettracker.search.CreateSearchActivity;
 import cc.corbin.budgettracker.tables.TableCell;
-import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
-import cc.corbin.budgettracker.day.DayViewActivity;
-import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
-import cc.corbin.budgettracker.month.MonthViewActivity;
-import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
-import cc.corbin.budgettracker.year.YearViewActivity;
 
-public class SettingsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
+public class SettingsActivity extends NavigationActivity
 {
     private final String TAG = "SettingsActivity";
 
-    private DrawerLayout _drawerLayout;
+    public final static String SETTINGS_INTENT_FLAG = "SettingsIntent";
+    public final static int SETTINGS_REQUEST_CODE = 0;
+    public final static int DATABASE_NO_UPDATE_INTENT_FLAG = 254;
+    public final static int DATABASE_UPDATE_INTENT_FLAG = 255;
 
-    private MutableLiveData<String[]> _categoriesLiveData;
     private String[] _categories;
 
     private SortableLinearLayout _sortableCategoriesTable;
     private TableCell _otherCategoryCell;
-
-    private int _categoryEditIndex;
-    private int _newCategoryIndex;
-    private String _newCategoryString;
+    private TableCell _resortButton;
+    private TableCell _confirmResortButton;
+    private TableCell _cancelResortButton;
+    private SortableItem[] _originalCategoriesSortedList;
 
     private PopupWindow _popupWindow;
 
     private ExpenditureViewModel _viewModel;
-    private MutableLiveData<List<ExpenditureEntity>> _exps;
-    private MutableLiveData<List<BudgetEntity>> _budgets;
+
+    private SettingsEditCategoryHelper _editCategoryHelper;
+    private SettingsAddCategoryHelper _addCategoryHelper;
+
+    private MutableLiveData<Boolean> _processing;
+    private PopupWindow _processingPopup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+        super.onCreate(savedInstanceState);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        ActionBar actionbar = getSupportActionBar();
-        actionbar.setDisplayHomeAsUpEnabled(true);
-        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
-        _drawerLayout = findViewById(R.id.rootLayout);
-        NavigationView navigationView = findViewById(R.id.navView);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        _categoriesLiveData = new MutableLiveData<String[]>();
-        _categories = Categories.getCategories();
-        String[] withoutOther = new String[_categories.length-1];
-        for (int i = 0; i < withoutOther.length; i++)
-        {
-            withoutOther[i] = _categories[i];
-        }
-        _categoriesLiveData.setValue(withoutOther);
+        setResult(SettingsActivity.DATABASE_NO_UPDATE_INTENT_FLAG);
 
         _viewModel = ExpenditureViewModel.getInstance();
 
-        _exps = new MutableLiveData<List<ExpenditureEntity>>();
-        _budgets = new MutableLiveData<List<BudgetEntity>>();
+        // Setup the processing flag and popup
+        setupProcessing();
 
-        final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
+        // Setup the categories
+        setupCategoriesLayout();
+
+        // Setup the default currencies
+        setupDefaultCurrencies();
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        if (_processing.getValue())
+        {
+            Toast.makeText(this, getString(R.string.wait_for_processing), Toast.LENGTH_LONG).show();
+        }
+        else
+        {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (resultCode == SettingsActivity.DATABASE_UPDATE_INTENT_FLAG)
+        {
+            // TODO Update outdated elements
+        }
+        else if (requestCode == SettingsActivity.DATABASE_NO_UPDATE_INTENT_FLAG)
+        {
+            // Do nothing
+        }
+        else { }
+    }
+
+    public void onProcessingChanged(boolean processing)
+    {
+        if (processing)
+        {
+            _processingPopup.showAtLocation(findViewById(R.id.rootLayout), Gravity.CENTER, 0, 0);
+        }
+        else
+        {
+            _processingPopup.dismiss();
+        }
+    }
+
+    private void setupProcessing()
+    {
+        _processing = new MutableLiveData<Boolean>();
+        _processing.setValue(false);
+        final Observer<Boolean> processingObserver = new Observer<Boolean>()
         {
             @Override
-            public void onChanged(@Nullable List<ExpenditureEntity> expenditureEntities)
+            public void onChanged(@Nullable Boolean processing)
             {
-                expendituresUpdated();
+                onProcessingChanged(processing);
             }
         };
+        _processing.observe(this, processingObserver);
+        final View processingView = getLayoutInflater().inflate(R.layout.popup_processing_event, null);
+        _processingPopup = new PopupWindow(processingView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        _processingPopup.setFocusable(false);
+        _processingPopup.update();
+    }
 
-        final Observer<List<BudgetEntity>> budgetObserver = new Observer<List<BudgetEntity>>()
-        {
-            @Override
-            public void onChanged(@Nullable List<BudgetEntity> budgetEntities)
-            {
-                budgetsUpdated();
-            }
-        };
-
-        _exps.observe(this, entityObserver);
-        _budgets.observe(this, budgetObserver);
+    private void setupCategoriesLayout()
+    {
+        _categories = Categories.getCategories();
 
         final LinearLayout categoriesLayout = findViewById(R.id.categoriesLayout);
-
         TableCell categoryCell = new TableCell(this, TableCell.TITLE_CELL);
         categoryCell.setText(R.string.categories);
         categoriesLayout.addView(categoryCell);
 
         _sortableCategoriesTable = new SortableLinearLayout(this);
-        _sortableCategoriesTable.setItems(_categoriesLiveData);
+        _sortableCategoriesTable.setSortingEnabled(false);
         int size = _categories.length-1;
         for (int i = 0; i < size; i++)
         {
@@ -153,20 +182,6 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
         }
         categoriesLayout.addView(_sortableCategoriesTable);
 
-        final Observer<String[]> categoriesObserver = new Observer<String[]>()
-        {
-            @Override
-            public void onChanged(@Nullable String[] categories)
-            {
-                if (categories != null)
-                {
-                    categoriesResorted(categories);
-                }
-                else { }
-            }
-        };
-        _categoriesLiveData.observe(this, categoriesObserver);
-
         _otherCategoryCell = new TableCell(this, TableCell.SEMI_SPECIAL_CELL);
         _otherCategoryCell.setText(_categories[size]); // The last item
         categoriesLayout.addView(_otherCategoryCell);
@@ -184,8 +199,62 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
         });
         categoriesLayout.addView(categoryCell);
 
-        // Setup the default categories
+        // Add the resort button
+        _resortButton = new TableCell(this, TableCell.SPECIAL_CELL);
+        _resortButton.setText("<Resort>");
+        _resortButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                _originalCategoriesSortedList = _sortableCategoriesTable.getSortableItemList();
+                _sortableCategoriesTable.setSortingEnabled(true);
+                _resortButton.setVisibility(View.GONE);
+                _confirmResortButton.setVisibility(View.VISIBLE);
+                _cancelResortButton.setVisibility(View.VISIBLE);
+            }
+        });
+        categoriesLayout.addView(_resortButton);
 
+        // Add the confirm resort button and hide it
+        _confirmResortButton = new TableCell(this, TableCell.SPECIAL_CELL);
+        _confirmResortButton.setText("<Confirm Resort>");
+        _confirmResortButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                _sortableCategoriesTable.setSortingEnabled(false);
+                _resortButton.setVisibility(View.VISIBLE);
+                _confirmResortButton.setVisibility(View.GONE);
+                _cancelResortButton.setVisibility(View.GONE);
+                categoriesResorted();
+            }
+        });
+        _confirmResortButton.setVisibility(View.GONE);
+        categoriesLayout.addView(_confirmResortButton);
+
+        // Add the cancel resort button and hide it
+        _cancelResortButton = new TableCell(this, TableCell.SEMI_SPECIAL_CELL);
+        _cancelResortButton.setText("<Cancel Resort>");
+        _cancelResortButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                _sortableCategoriesTable.setSortingEnabled(false);
+                _resortButton.setVisibility(View.VISIBLE);
+                _confirmResortButton.setVisibility(View.GONE);
+                _cancelResortButton.setVisibility(View.GONE);
+                categoriesResortCancel();
+            }
+        });
+        _cancelResortButton.setVisibility(View.GONE);
+        categoriesLayout.addView(_cancelResortButton);
+    }
+
+    private void setupDefaultCurrencies()
+    {
         final TableLayout defaultCurrencyTable = findViewById(R.id.defaultCurrencyTable);
         defaultCurrencyTable.setColumnStretchable(0, true);
         defaultCurrencyTable.setColumnStretchable(1, true);
@@ -194,8 +263,8 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
         final TableCell defaultCurrencyTitle = new TableCell(this, TableCell.TITLE_CELL);
         defaultCurrencyTitle.setText("Default Currency");
         TableRow.LayoutParams params = new TableRow.LayoutParams(
-            TableRow.LayoutParams.MATCH_PARENT,
-            TableRow.LayoutParams.WRAP_CONTENT
+                TableRow.LayoutParams.MATCH_PARENT,
+                TableRow.LayoutParams.WRAP_CONTENT
         );
         params.span = 2;
         defaultCurrencyTitle.setLayoutParams(params);
@@ -214,365 +283,101 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
         defaultCurrencyTable.addView(defaultCurrencyContentRow);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        Intent intent;
-        switch (item.getItemId())
-        {
-            case android.R.id.home:
-                _drawerLayout.openDrawer(GravityCompat.START);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item)
-    {
-        Intent intent = NavigationDrawerHelper.handleNavigation(item);
-
-        boolean handled = (intent != null);
-        if (handled)
-        {
-            startActivity(intent);
-            _drawerLayout.closeDrawer(GravityCompat.START);
-        }
-        else { }
-
-        return handled;
-    }
-
-    private void expendituresUpdated()
-    {
-        // TODO
-    }
-
-    private void budgetsUpdated()
-    {
-        // TODO
-    }
-
-    ///
     /// Cancel
-    ///
 
     public void cancel(View v)
     {
-        _popupWindow.dismiss();
+        _popupWindow.dismiss(); // Should not be null
     }
 
-    ///
-    /// / Cancel
-    ///
+    /// /Cancel
 
-    ///
     /// Edit
-    ///
 
-    private void editCategory(View v)
+    public void editCategory(View v)
     {
-        _categoryEditIndex = v.getId();
-
-        final View categoryEditView = getLayoutInflater().inflate(R.layout.popup_edit_category, null);
-
-        final EditText categoryEditText = categoryEditView.findViewById(R.id.categoryEditText);
-        categoryEditText.setText(((SortableItem)v).getText());
-
-        final Button confirmButton = categoryEditView.findViewById(R.id.confirmButton);
-        categoryEditText.addTextChangedListener(new TextWatcher()
-        {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after)
-            {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count)
-            {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s)
-            {
-                String text = s.toString();
-                boolean unmatched = true;
-                for (int i = 0; i < _categories.length; i++)
-                {
-                    if (text.equals(_categories[i]))
-                    {
-                        unmatched = false;
-                        break;
-                    }
-                    else { }
-                }
-                confirmButton.setEnabled(unmatched && (text.length() > 0));
-            }
-        });
-        categoryEditText.setFilters(new InputFilter [] { new InputFilter()
-        {
-            private final String bannedCharacters = "|";
-
-            @Override
-            public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend)
-            {
-                if (source != null && bannedCharacters.contains(source))
-                {
-                    return "";
-                }
-                else
-                {
-                    return source;
-                }
-            }
-        } });
-
-        _popupWindow = new PopupWindow(categoryEditView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        _popupWindow.setFocusable(true);
-        _popupWindow.update();
-        _popupWindow.showAtLocation(findViewById(R.id.rootLayout), Gravity.CENTER, 0, 0);
+        _editCategoryHelper = new SettingsEditCategoryHelper(this, v);
+        _popupWindow = _editCategoryHelper.getPopupWindow();
     }
 
     public void confirmCategoryEdit(View v)
     {
-        final EditText categoryEditText = _popupWindow.getContentView().findViewById(R.id.categoryEditText);
-
-        String newCategoryName = categoryEditText.getText().toString();
-
-        _viewModel.renameExpenditureCategory(_categoryEditIndex, newCategoryName);
-        _viewModel.renameBudgetCategory(_categoryEditIndex, newCategoryName);
-
-        _sortableCategoriesTable.updateItemText(_categoryEditIndex, newCategoryName);
-
-        _popupWindow.dismiss();
+        _popupWindow = _editCategoryHelper.confirmCategoryEdit(_viewModel, _processing, _sortableCategoriesTable);
+        saveUpdatedCategories();
+        setResult(SettingsActivity.DATABASE_UPDATE_INTENT_FLAG);
     }
 
-    ///
-    /// / Edit
-    ///
+    /// /Edit
 
-    ///
     /// Remove
-    ///
 
     // Called from the Remove button
     public void recategorizeCategory(View v)
     {
-        _popupWindow.dismiss();
-
-        final View recategorizeView = getLayoutInflater().inflate(R.layout.popup_recategorize, null);
-
-        final TextView currentCategoryTextView = recategorizeView.findViewById(R.id.originalCategoryTextView);
-        currentCategoryTextView.setText(_categories[_categoryEditIndex]);
-
-        String[] updatedCategories = new String[_categories.length-1];
-        int j = 0;
-        for (int i = 0; i < _categories.length; i++)
-        {
-            if (!_categories[i].equals(_categories[_categoryEditIndex]))
-            {
-                updatedCategories[j] = _categories[i];
-                j++;
-            }
-            else { }
-        }
-
-        final Spinner newCategorySpinner = recategorizeView.findViewById(R.id.newCategorySpinner);
-        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
-                this, android.R.layout.simple_spinner_item, updatedCategories);
-        newCategorySpinner.setAdapter(spinnerArrayAdapter);
-        newCategorySpinner.setSelection(updatedCategories.length-1); // Set to Other
-
-        _popupWindow = new PopupWindow(recategorizeView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        _popupWindow.setFocusable(true);
-        _popupWindow.update();
-        _popupWindow.showAtLocation(findViewById(R.id.rootLayout), Gravity.CENTER, 0, 0);
+        _popupWindow = _editCategoryHelper.recategorizeCategory();
     }
 
     // Called from the Confirm button of the recategorization popup
     public void confirmRecategorize(View v)
     {
-        // Grab all the info before dismissing the popup
-        final Spinner newCategorySpinner = _popupWindow.getContentView().findViewById(R.id.newCategorySpinner);
-        _newCategoryIndex = newCategorySpinner.getSelectedItemPosition();
-        _newCategoryString = newCategorySpinner.getSelectedItem().toString();
-        _popupWindow.dismiss();
-
-        final View confirmRemoveCategoryLayout = getLayoutInflater().inflate(R.layout.popup_confirm_remove_category, null);
-
-        final TextView originalCategoryTextView = confirmRemoveCategoryLayout.findViewById(R.id.originalCategoryTextView);
-        final TextView newCategoryTextView = confirmRemoveCategoryLayout.findViewById(R.id.newCategoryTextView);
-
-        originalCategoryTextView.setText(_categories[_categoryEditIndex]);
-        newCategoryTextView.setText(_newCategoryString);
-
-        _popupWindow = new PopupWindow(confirmRemoveCategoryLayout, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        _popupWindow.setFocusable(true);
-        _popupWindow.update();
-        _popupWindow.showAtLocation(findViewById(R.id.rootLayout), Gravity.CENTER, 0, 0);
+        _popupWindow = _editCategoryHelper.confirmRecategorize();
     }
 
     // Called from the final warning screen
     public void confirmRemoveAndRecategorize(View v)
     {
-        // Update all the expenditures and budgets
-        _viewModel.mergeExpenditureCategory(_categoryEditIndex, _newCategoryIndex, _newCategoryString);
-        _viewModel.mergeBudgetCategory(_categoryEditIndex, _newCategoryIndex, _newCategoryString);
-        _viewModel.removeExpenditureCategory(_categoryEditIndex);
-        _viewModel.removeBudgetCategory(_categoryEditIndex);
-
-        // Remove from the list and commit the change
-        String[] newCategories = new String[_categories.length-1];
-        int j = 0;
-        for (int i = 0; i < _categories.length; i++)
-        {
-            if (i != _categoryEditIndex)
-            {
-                newCategories[j] = _categories[i];
-                j++;
-            }
-            else { }
-        }
-
-        // Remove the view
-        _sortableCategoriesTable.removeSortableView(_categoryEditIndex);
-
-        _popupWindow.dismiss();
+        _popupWindow = _editCategoryHelper.confirmRemoveAndRecategorize(_viewModel, _processing, _sortableCategoriesTable);
+        saveUpdatedCategories();
+        setResult(SettingsActivity.DATABASE_UPDATE_INTENT_FLAG);
     }
 
-    ///
-    /// / Remove
-    ///
+    /// /Remove
 
-    ///
     /// Add
-    ///
 
     private void addCategory(View v)
     {
-        final View categoryEditView = getLayoutInflater().inflate(R.layout.popup_edit_category, null);
-
-        final Button confirmButton = categoryEditView.findViewById(R.id.confirmButton);
-        confirmButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                confirmCategoryAdd(v);
-            }
-        });
-
-        final EditText categoryEditText = categoryEditView.findViewById(R.id.categoryEditText);
-        categoryEditText.addTextChangedListener(new TextWatcher()
-        {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after)
-            {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count)
-            {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s)
-            {
-                String text = s.toString();
-                boolean unmatched = true;
-                for (int i = 0; i < _categories.length; i++)
-                {
-                    if (text.equals(_categories[i]))
-                    {
-                        unmatched = false;
-                        break;
-                    }
-                    else { }
-                }
-                confirmButton.setEnabled(unmatched && (text.length() > 0));
-            }
-        });
-
-        final Button removeButton = categoryEditView.findViewById(R.id.removeButton);
-        removeButton.setVisibility(View.INVISIBLE);
-
-        _popupWindow = new PopupWindow(categoryEditView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        _popupWindow.setFocusable(true);
-        _popupWindow.update();
-        _popupWindow.showAtLocation(findViewById(R.id.rootLayout), Gravity.CENTER, 0, 0);
+        _addCategoryHelper = new SettingsAddCategoryHelper(this);
+        _popupWindow = _addCategoryHelper.getPopupWindow();
     }
 
     public void confirmCategoryAdd(View v)
     {
-        String[] categoriesNew = new String[_categories.length+1];
-
-        int i;
-        int end = _categories.length-1;
-        for (i = 0; i < end; i++)
-        {
-            categoriesNew[i] = _categories[i];
-        }
-
-        categoriesNew[i++] = ((EditText)(_popupWindow.getContentView().findViewById(R.id.categoryEditText))).getText().toString();
-        categoriesNew[i] = _categories[end];
-
-        SortableItem categoryCell = new SortableItem(this);
-        categoryCell.setText(categoriesNew[end]);
-        categoryCell.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                editCategory(v);
-            }
-        });
-        categoryCell.setId(end);
-
-        _sortableCategoriesTable.insertSortableView(categoryCell);
-
-        _viewModel.addExpenditureCategory(end);
-        _viewModel.addBudgetCategory(end);
-
-        _popupWindow.dismiss();
-    }
-
-    ///
-    /// / Add
-    ///
-
-    ///
-    /// Resort
-    ///
-
-    private void categoriesResorted(String[] categories)
-    {
-        String other = _categories[_categories.length-1];
-        _categories = new String[categories.length+1];
-        int i = 0;
-        for (; i < categories.length; i++)
-        {
-            _categories[i] = categories[i];
-        }
-        _categories[i] = other;
-
-        _viewModel.updateExpenditureCategories(_categories);
-        _viewModel.updateBudgetCategories(_categories);
-
+        _popupWindow = _addCategoryHelper.confirmCategoryAdd(_viewModel, _processing, _sortableCategoriesTable);
         saveUpdatedCategories();
+        setResult(SettingsActivity.DATABASE_UPDATE_INTENT_FLAG);
     }
 
-    ///
-    /// / Resort
-    ///
+    /// /Add
+
+    /// Resort
+
+    private void categoriesResortCancel()
+    {
+        _sortableCategoriesTable.setSortableItemList(_originalCategoriesSortedList);
+    }
+
+    private void categoriesResorted()
+    {
+        saveUpdatedCategories();
+        _viewModel.updateCategories(_categories, _processing); // Other updates are called in their helpers
+        setResult(SettingsActivity.DATABASE_UPDATE_INTENT_FLAG);
+    }
 
     private void saveUpdatedCategories()
     {
+        SortableItem[] sortableItems = _sortableCategoriesTable.getSortableItemList();
+        String other = _categories[_categories.length-1]; // Store "Other"
+        _categories = new String[sortableItems.length+1];
+        int i = 0;
+        for (; i < (_categories.length-1); i++)
+        {
+            _categories[i] = sortableItems[i].getText().toString();
+        }
+        _categories[i] = other;
+
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < _categories.length; i++)
+        for (i = 0; i < _categories.length; i++)
         {
             sb.append(_categories[i]).append("|");
         }
@@ -580,9 +385,8 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(getString(R.string.categories_list_key), sb.toString());
         Categories.setCategories(_categories);
-        editor.commit();
-
-        expendituresUpdated();
-        budgetsUpdated();
+        editor.apply();
     }
+
+    /// /Resort
 }

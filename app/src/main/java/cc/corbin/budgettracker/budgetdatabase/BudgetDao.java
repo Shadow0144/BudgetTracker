@@ -95,10 +95,10 @@ public interface BudgetDao
     @Query("UPDATE budgetentity SET category = (:newCategory) WHERE categoryName = (:categoryName)")
     void updateCategoryNumber(String categoryName, int newCategory);
 
-    @Query("UPDATE budgetentity SET category = (category+1) WHERE category > (:category)")
+    @Query("UPDATE budgetentity SET category = (category+1) WHERE category >= (:category)")
     void increaseCategoryNumbers(int category);
 
-    @Query("UPDATE budgetentity SET category = (category-1) WHERE category > (:category)")
+    @Query("UPDATE budgetentity SET category = (category-1) WHERE category >= (:category)")
     void decreaseCategoryNumbers(int category);
 
     @Insert

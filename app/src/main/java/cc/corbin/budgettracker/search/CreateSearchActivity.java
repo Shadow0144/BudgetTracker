@@ -36,6 +36,7 @@ import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.DatePickerFragment;
+import cc.corbin.budgettracker.auxilliary.NavigationActivity;
 import cc.corbin.budgettracker.auxilliary.NavigationDrawerHelper;
 import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
 import cc.corbin.budgettracker.day.DayViewActivity;
@@ -46,7 +47,7 @@ import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.year.YearViewActivity;
 
-public class CreateSearchActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
+public class CreateSearchActivity extends NavigationActivity
 {
     private final String TAG = "CreateSearchActivity";
 
@@ -110,22 +111,11 @@ public class CreateSearchActivity extends AppCompatActivity implements Navigatio
     private int _exactAmountCurrency;
     private int _amountRangeCurrency;
 
-    private DrawerLayout _drawerLayout;
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_search);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        ActionBar actionbar = getSupportActionBar();
-        actionbar.setDisplayHomeAsUpEnabled(true);
-        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
-        _drawerLayout = findViewById(R.id.rootLayout);
-        NavigationView navigationView = findViewById(R.id.navView);
-        navigationView.setNavigationItemSelectedListener(this);
+        super.onCreate(savedInstanceState);
 
         _includeExtrasCheckBox = findViewById(R.id.includeExtrasCheckBox);
 
@@ -302,31 +292,17 @@ public class CreateSearchActivity extends AppCompatActivity implements Navigatio
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        switch (item.getItemId())
+        if (resultCode == SettingsActivity.DATABASE_UPDATE_INTENT_FLAG)
         {
-            case android.R.id.home:
-                _drawerLayout.openDrawer(GravityCompat.START);
-                return true;
+            // TODO Update outdated elements
         }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item)
-    {
-        Intent intent = NavigationDrawerHelper.handleNavigation(item);
-
-        boolean handled = (intent != null);
-        if (handled)
+        else if (requestCode == SettingsActivity.DATABASE_NO_UPDATE_INTENT_FLAG)
         {
-            startActivity(intent);
-            _drawerLayout.closeDrawer(GravityCompat.START);
+            // Do nothing
         }
         else { }
-
-        return handled;
     }
 
     private void updateDateViews()

@@ -55,6 +55,7 @@ public class NavigationDrawerHelper
                 break;
             case R.id.settingsMenuItem:
                 intent = new Intent(BudgetTrackerApplication.getInstance(), SettingsActivity.class);
+                intent.putExtra(SettingsActivity.SETTINGS_INTENT_FLAG, true);
                 break;
             case R.id.importExportMenuItem:
                 intent = new Intent(BudgetTrackerApplication.getInstance(), ImportExportActivity.class);

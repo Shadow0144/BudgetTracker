@@ -33,7 +33,7 @@ public class SortableLinearLayout extends LinearLayout implements View.OnDragLis
 
     private int _color;
 
-    private MutableLiveData<String[]> _items;
+    private boolean _sortingEnabled;
 
     public SortableLinearLayout(Context context)
     {
@@ -60,7 +60,7 @@ public class SortableLinearLayout extends LinearLayout implements View.OnDragLis
     {
         _context = context;
 
-        _items = null;
+        _sortingEnabled = true;
 
         setOrientation(VERTICAL);
 
@@ -74,77 +74,102 @@ public class SortableLinearLayout extends LinearLayout implements View.OnDragLis
 
         _color = ContextCompat.getColor(_context, R.color.insert);
 
+        addTopView();
+    }
+
+    private void addTopView()
+    {
         TextView topLocationView = new TextView(_context);
         topLocationView.setBackgroundColor(_color);
         topLocationView.setVisibility(GONE);
         addView(topLocationView);
     }
 
-    public void setItems(MutableLiveData<String[]> items)
+    public void setSortingEnabled(boolean sortingEnabled)
     {
-        _items = items;
+        _sortingEnabled = sortingEnabled;
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++)
+        {
+            View child = getChildAt(i);
+            if (child instanceof SortableItem)
+            {
+                ((SortableItem) getChildAt(i)).setSortable(sortingEnabled);
+            }
+            else { }
+        }
+    }
+
+    public boolean getSortingEnabled()
+    {
+        return _sortingEnabled;
     }
 
     @Override
     public boolean onDrag(View v, DragEvent event)
     {
-        switch (event.getAction())
+        if (_sortingEnabled)
         {
-            case ACTION_DRAG_STARTED:
-                break;
-            case ACTION_DRAG_ENTERED:
-                updateDrag(event);
-                break;
-            case ACTION_DRAG_LOCATION:
-                updateDrag(event);
-                break;
-            case ACTION_DRAG_EXITED:
-                if (_currentLocationView != null)
-                {
-                    _currentLocationView.setVisibility(GONE);
-                }
-                else { }
-                break;
-            case ACTION_DROP:
-                View child = null;
-                View bottomDrop = null;
-                int pullLocation = -1;
-                int childCount = getChildCount();
-                for (int i = 1; i < childCount; i+=2)
-                {
-                    child = getChildAt(i);
-                    if (child == event.getLocalState())
+            switch (event.getAction())
+            {
+                case ACTION_DRAG_STARTED:
+                    break;
+                case ACTION_DRAG_ENTERED:
+                    updateDrag(event);
+                    break;
+                case ACTION_DRAG_LOCATION:
+                    updateDrag(event);
+                    break;
+                case ACTION_DRAG_EXITED:
+                    if (_currentLocationView != null)
                     {
-                        bottomDrop = getChildAt(i + 1);
-                        pullLocation = i;
-                        break;
+                        _currentLocationView.setVisibility(GONE);
                     }
                     else { }
-                }
-                if (pullLocation != -1)
-                {
-                    removeViewAt(pullLocation); // Do in this order because of reshuffling
-                    removeViewAt(pullLocation); // (Bottom view)
-                    if (_dropLocation > pullLocation)
+                    break;
+                case ACTION_DROP:
+                    View child = null;
+                    View bottomDrop = null;
+                    int pullLocation = -1;
+                    int childCount = getChildCount();
+                    for (int i = 1; i < childCount; i += 2)
                     {
-                        _dropLocation -= 2;
+                        child = getChildAt(i);
+                        if (child == event.getLocalState())
+                        {
+                            bottomDrop = getChildAt(i + 1);
+                            pullLocation = i;
+                            break;
+                        }
+                        else { }
+                    }
+                    if (pullLocation != -1)
+                    {
+                        removeViewAt(pullLocation); // Do in this order because of reshuffling
+                        removeViewAt(pullLocation); // (Bottom view)
+                        if (_dropLocation > pullLocation)
+                        {
+                            _dropLocation -= 2;
+                        }
+                        else { }
+                        addView(bottomDrop, _dropLocation);
+                        addView(child, _dropLocation); // Do in this order because of reshuffling
+                    }
+                    else
+                    {
+                    }
+                    break;
+                case ACTION_DRAG_ENDED:
+                    if (_currentLocationView != null)
+                    {
+                        _currentLocationView.setVisibility(GONE);
                     }
                     else { }
-                    addView(bottomDrop, _dropLocation);
-                    addView(child, _dropLocation); // Do in this order because of reshuffling
-                    postUpdatedList();
-                }
-                else { }
-                break;
-            case ACTION_DRAG_ENDED:
-                if (_currentLocationView != null)
-                {
-                    _currentLocationView.setVisibility(GONE);
-                }
-                else { }
-                ((SortableItem)(event.getLocalState())).finishDrop();
-                break;
+                    ((SortableItem) (event.getLocalState())).finishDrop();
+                    break;
+            }
         }
+        else { }
         return true;
     }
 
@@ -198,11 +223,11 @@ public class SortableLinearLayout extends LinearLayout implements View.OnDragLis
     public void insertSortableView(SortableItem v)
     {
         addView(v);
+        v.setSortable(_sortingEnabled);
         TextView locationView = new TextView(_context);
         locationView.setVisibility(GONE);
         locationView.setBackgroundColor(_color);
         addView(locationView);
-        postUpdatedList();
     }
 
     public void removeSortableView(SortableItem v)
@@ -218,7 +243,6 @@ public class SortableLinearLayout extends LinearLayout implements View.OnDragLis
             }
             else { }
         }
-        postUpdatedList();
     }
 
     public void removeSortableView(int index)
@@ -226,29 +250,35 @@ public class SortableLinearLayout extends LinearLayout implements View.OnDragLis
         index = (index*2)+1;
         removeViewAt(index);
         removeViewAt(index);
-        postUpdatedList();
     }
 
     public void updateItemText(int index, String newText)
     {
         SortableItem item = ((SortableItem)getChildAt((index*2)+1));
         item.setText(newText);
-        postUpdatedList();
     }
 
-    private void postUpdatedList()
+    public SortableItem[] getSortableItemList()
     {
-        int childCount = getChildCount();
-        if (_items != null)
+        int viewCount = getChildCount();
+        int count = (viewCount / 2); // Automatically subtracts one from rounding down
+        SortableItem[] sortableItems = new SortableItem[count];
+        int index = 0;
+        for (int i = 1; i < viewCount; i += 2)
         {
-            String[] revisedItems = new String[(childCount-1)/2];
-            int index = 0;
-            for (int i = 1; i < childCount; i+=2)
-            {
-                revisedItems[index++] = ((SortableItem)getChildAt(i)).getText().toString();
-            }
-            _items.postValue(revisedItems);
+            sortableItems[index++] = ((SortableItem)getChildAt(i));
         }
-        else { }
+        return sortableItems;
+    }
+
+    public void setSortableItemList(SortableItem[] sortableItems)
+    {
+        removeAllViews();
+        addTopView();
+        int count = sortableItems.length;
+        for (int i = 0; i < count; i++)
+        {
+            insertSortableView(sortableItems[i]);
+        }
     }
 }

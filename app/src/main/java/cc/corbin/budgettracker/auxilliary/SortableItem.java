@@ -28,6 +28,10 @@ public class SortableItem extends RelativeLayout
     private ImageView _sortButton;
     private TextView _textView;
 
+    private boolean _sortable;
+    private final int SORT_DISABLED_ALPHA = 25;
+    private final int SORT_ENABLED_ALPHA = 255;
+
     public SortableItem(Context context)
     {
         super(context);
@@ -53,6 +57,8 @@ public class SortableItem extends RelativeLayout
     {
         _context = context;
 
+        _sortable = true;
+
         setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
 
         _sortButton = new ImageView(_context);
@@ -76,7 +82,11 @@ public class SortableItem extends RelativeLayout
             {
                 boolean handled = false;
 
-                if (event.getAction() == MotionEvent.ACTION_DOWN)
+                if (!_sortable)
+                {
+                    handled = true;
+                }
+                else if (event.getAction() == MotionEvent.ACTION_DOWN)
                 {
                     SortableItem parent = (SortableItem) v.getTag();
                     v.setVisibility(INVISIBLE);
@@ -112,5 +122,23 @@ public class SortableItem extends RelativeLayout
     {
         setVisibility(VISIBLE);
         _sortButton.setVisibility(VISIBLE);
+    }
+
+    public void setSortable(boolean sortable)
+    {
+        _sortable = sortable;
+        if (_sortable)
+        {
+            _sortButton.setImageAlpha(SORT_ENABLED_ALPHA);
+        }
+        else
+        {
+            _sortButton.setImageAlpha(SORT_DISABLED_ALPHA);
+        }
+    }
+
+    public boolean getSortable()
+    {
+        return _sortable;
     }
 }
