@@ -116,10 +116,9 @@ public class DayViewActivity extends NavigationActivity
         startActivityForResult(intent, CREATE_EXPENDITURE);
     }
 
-    public void editItem(int index, ExpenditureEntity exp)
+    public void editItem(ExpenditureEntity exp)
     {
         Intent intent = new Intent(getApplicationContext(), ExpenditureEditActivity.class);
-        intent.putExtra(ExpenditureEditActivity.INDEX_INTENT, index);
         intent.putExtra(ExpenditureEditActivity.EXPENDITURE_INTENT, exp);
         intent.putExtra(ExpenditureEditActivity.TYPE_INTENT, EDIT_EXPENDITURE);
         startActivityForResult(intent, EDIT_EXPENDITURE);

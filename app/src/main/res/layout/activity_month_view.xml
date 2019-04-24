@@ -78,7 +78,8 @@
                 <FrameLayout
                     android:id="@+id/monthWeeklyHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"></FrameLayout>
+                    android:layout_height="wrap_content">
+                </FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
@@ -87,7 +88,8 @@
                 <FrameLayout
                     android:id="@+id/monthCategoryHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"></FrameLayout>
+                    android:layout_height="wrap_content">
+                </FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
@@ -96,7 +98,8 @@
                 <FrameLayout
                     android:id="@+id/monthExtraHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"></FrameLayout>
+                    android:layout_height="wrap_content">
+                </FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
@@ -105,7 +108,8 @@
                 <FrameLayout
                     android:id="@+id/monthAdjustmentHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"></FrameLayout>
+                    android:layout_height="wrap_content">
+                </FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
@@ -125,7 +129,8 @@
                 <FrameLayout
                     android:id="@+id/monthCategoryPieHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"></FrameLayout>
+                    android:layout_height="wrap_content">
+                </FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
@@ -134,7 +139,8 @@
                 <FrameLayout
                     android:id="@+id/monthWeeklyLineGraphHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"></FrameLayout>
+                    android:layout_height="wrap_content">
+                </FrameLayout>
 
                 <Space
                     android:layout_width="match_parent"
@@ -143,7 +149,12 @@
                 <FrameLayout
                     android:id="@+id/monthExpandableBudgetHolder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"></FrameLayout>
+                    android:layout_height="wrap_content">
+                </FrameLayout>
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="15dp" />
 
             </LinearLayout>
         </ScrollView>

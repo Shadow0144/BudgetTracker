@@ -2,7 +2,6 @@ package cc.corbin.budgettracker.day;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -17,7 +16,6 @@ import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Currency;
 import java.util.List;
 
 import cc.corbin.budgettracker.R;
@@ -32,6 +30,12 @@ public class DayList extends LinearLayout
 
     private final int PAGE_MARGIN = 4;
     private final int PROGRESS_BAR_MARGIN = 36;
+    private final int DATE_TEXT_TOP_PADDING = 24;
+    private final int DATE_TEXT_BOT_PADDING = 36;
+    private final int TOTAL_TEXT_PADDING = 12;
+
+    private final int DATE_TEXT_SIZE = 24;
+    private final int TOTAL_TEXT_SIZE = 18;
 
     private TextView _dateTextView;
     private TextView _totalTextView;
@@ -112,10 +116,10 @@ public class DayList extends LinearLayout
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         params.setMargins(1, 1, 1, 0);
         _dateTextView.setLayoutParams(params);
-        _dateTextView.setPadding(0, 24, 0, 36);
+        _dateTextView.setPadding(0, DATE_TEXT_TOP_PADDING, 0, DATE_TEXT_BOT_PADDING);
         _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryDark));
         _dateTextView.setTextColor(Color.WHITE);
-        _dateTextView.setTextSize(24);
+        _dateTextView.setTextSize(DATE_TEXT_SIZE);
         _dateTextView.setTextAlignment(TEXT_ALIGNMENT_CENTER);
         _dateTextView.setTypeface(_dateTextView.getTypeface(), Typeface.BOLD);
         addView(_dateTextView);
@@ -138,9 +142,9 @@ public class DayList extends LinearLayout
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         params.setMargins(1, 1, 1, 1);
         _totalTextView.setLayoutParams(params);
-        _totalTextView.setPadding(0, 12, 0, 12);
+        _totalTextView.setPadding(0, TOTAL_TEXT_PADDING, 0, TOTAL_TEXT_PADDING);
         _totalTextView.setBackgroundColor(Color.WHITE);
-        _totalTextView.setTextSize(18);
+        _totalTextView.setTextSize(TOTAL_TEXT_SIZE);
         _totalTextView.setTextAlignment(TEXT_ALIGNMENT_CENTER);
         addView(_totalTextView);
     }
@@ -192,13 +196,12 @@ public class DayList extends LinearLayout
     private void addExpenditureView(ExpenditureEntity exp, final int index)
     {
         final ExpenditureItem view = new ExpenditureItem(getContext(), exp);
-        view.setTag(index);
         view.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                ((DayViewActivity)_context).editItem((int)v.getTag(), ((ExpenditureItem)v).getExpenditure());
+                ((DayViewActivity)_context).editItem(((ExpenditureEntity)v.getTag()));
             }
         });
         _expHolder.addView(view);

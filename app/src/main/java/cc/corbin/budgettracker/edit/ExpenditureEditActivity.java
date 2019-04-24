@@ -57,7 +57,6 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
     public final static String MONTH_INTENT = "Month";
     public final static String YEAR_INTENT = "Year";
     public final static String EXPENDITURE_INTENT = "Expenditure";
-    public final static String INDEX_INTENT = "Index";
 
     private static final int CONNECT_TO_INTERNET_CODE = 0;
     private static boolean _connectToInternet = false;
@@ -69,7 +68,6 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
     private int _month;
     private int _year;
 
-    private int _index;
     private ExpenditureEntity _expenditure;
 
     private PopupWindow _popupWindow;
@@ -115,16 +113,14 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
                 _month = intent.getIntExtra(MONTH_INTENT, 0);
                 _year = intent.getIntExtra(YEAR_INTENT, 0);
                 _expenditure = new ExpenditureEntity(_day, _month, _year);
-                _index = 0;
                 break;
 
             case DayViewActivity.EDIT_EXPENDITURE:
                 _expenditure = intent.getParcelableExtra(EXPENDITURE_INTENT);
-                _index = intent.getIntExtra(INDEX_INTENT, -1);
 
                 findViewById(R.id.deleteButton).setEnabled(true); // Enable deleting
 
-                if (_expenditure == null || _index == -1)
+                if (_expenditure == null)
                 {
                     Log.e(TAG, "Editing error");
                     setResult(DayViewActivity.FAILURE);
@@ -231,7 +227,6 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
 
         Intent intent = new Intent();
         intent.putExtra(EXPENDITURE_INTENT, _expenditure);
-        intent.putExtra(INDEX_INTENT, _index);
 
         setResult(DayViewActivity.SUCCEED, intent);
 
@@ -276,7 +271,6 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
 
         Intent intent = new Intent();
         intent.putExtra(EXPENDITURE_INTENT, _expenditure);
-        intent.putExtra(INDEX_INTENT, _index);
 
         setResult(DayViewActivity.DELETE, intent);
 

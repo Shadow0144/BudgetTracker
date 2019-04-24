@@ -55,6 +55,7 @@ public class ExpenditureItem extends CardView
     private void setup(Context context, ExpenditureEntity expenditure)
     {
         _expenditure = expenditure;
+        setTag(_expenditure);
 
         LayoutInflater inflater = LayoutInflater.from(context);
         final View view = inflater.inflate(R.layout.item, null);

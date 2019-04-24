@@ -1,10 +1,18 @@
 package cc.corbin.budgettracker.tables;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.text.Layout;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.Space;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,14 +22,16 @@ import cc.corbin.budgettracker.day.ExpenditureItem;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.month.MonthViewActivity;
 
-public class ExtrasTable extends TableLayout
+public class ExtrasTable extends LinearLayout
 {
+    private final String TAG = "ExtrasTable";
+
+    private final int BORDER_HEIGHT = 4;
+
     private Context _context;
 
     private int _month;
     private int _year;
-
-    private List<ExpenditureEntity> _extras;
 
     public ExtrasTable(Context context)
     {
@@ -31,7 +41,7 @@ public class ExtrasTable extends TableLayout
         _year = 0;
         _month = 0;
 
-        setupTable();
+        setupEmptyTable();
     }
 
     public ExtrasTable(Context context, int year)
@@ -42,7 +52,7 @@ public class ExtrasTable extends TableLayout
         _year = year;
         _month = 0;
 
-        setupTable();
+        setupEmptyTable();
     }
 
     public ExtrasTable(Context context, int year, int month)
@@ -53,26 +63,41 @@ public class ExtrasTable extends TableLayout
         _year = year;
         _month = month;
 
-        setupTable();
+        setupEmptyTable();
     }
 
-    private void setupTable()
+    private void setupEmptyTable() // Note this gets replaced when the items arrive
     {
-        setColumnStretchable(0, true);
+        //setColumnStretchable(0, true); // No longer a table
+        setOrientation(VERTICAL);
 
+        addSpace();
         setupTitle();
         addAddButtons();
+        addSpace();
+    }
+
+    private void addSpace()
+    {
+        ViewGroup.LayoutParams params = new LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                BORDER_HEIGHT);
+        View space = new View(_context);
+        space.setBackgroundColor(Color.BLACK);
+        space.setLayoutParams(params);
+        addView(space);
     }
 
     private void setupTitle()
     {
-        TableRow extrasTableRow = new TableRow(_context);
-        TableCell extrasTableCell = new TableCell(_context, TableCell.TITLE_CELL);
-
-        extrasTableCell.setText(R.string.extras);
-
-        extrasTableRow.addView(extrasTableCell);
-        addView(extrasTableRow);
+        TextView extrasTitleTextView = new TextView(_context);
+        extrasTitleTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryDark));
+        extrasTitleTextView.setTextColor(Color.WHITE);
+        extrasTitleTextView.setTextSize(18);
+        extrasTitleTextView.setPadding(0, 18, 0, 18);
+        extrasTitleTextView.setTextAlignment(TEXT_ALIGNMENT_CENTER);
+        extrasTitleTextView.setText(R.string.extras);
+        addView(extrasTitleTextView);
     }
 
     private void addAddButtons()
@@ -90,17 +115,14 @@ public class ExtrasTable extends TableLayout
         extrasTableAddButton.setMinHeight(0);
         extrasTableAddButton.setMinimumHeight(0);
         extrasTableAddButton.setIncludeFontPadding(false);
-
-        TableRow extrasTableRow = new TableRow(_context);
-        extrasTableRow.addView(extrasTableAddButton);
-        addView(extrasTableRow);
+        addView(extrasTableAddButton);
     }
 
     public void updateExpenditures(List<ExpenditureEntity> expenditureEntities)
     {
         removeAllViews();
 
-        _extras = new ArrayList<ExpenditureEntity>();
+        addSpace();
 
         setupTitle();
 
@@ -113,8 +135,6 @@ public class ExtrasTable extends TableLayout
             if (entity.getDay() == selection)
             {
                 ExpenditureItem item = new ExpenditureItem(_context, entity);
-                item.setId(i+1); // Need to add 1
-                _extras.add(entity);
                 item.setOnClickListener(new View.OnClickListener()
                 {
                     @Override
@@ -123,14 +143,14 @@ public class ExtrasTable extends TableLayout
                         editExtraExpenditure(v);
                     }
                 });
-                TableRow extrasTableRow = new TableRow(_context);
-                extrasTableRow.addView(item);
-                addView(extrasTableRow);
+                addView(item);
             }
             else { }
         }
 
         addAddButtons();
+
+        addSpace();
     }
 
     private void createExtraExpenditure(View v)
@@ -154,13 +174,10 @@ public class ExtrasTable extends TableLayout
 
     private void editExtraExpenditure(View v)
     {
-        int index = v.getId();
-        index--;
-        ExpenditureEntity entity = _extras.get(index);
-
+        ExpenditureEntity entity = ((ExpenditureEntity)v.getTag());
         if (_month != 0) // Month Activity
         {
-            ((MonthViewActivity)_context).editExtraExpenditure(entity, index);
+            ((MonthViewActivity)_context).editExtraExpenditure(entity);
         }
         else
         {
