@@ -75,7 +75,8 @@ public class NumericalFormattedEditText extends AppCompatEditText
     {
         _callback = callback;
 
-        String text = Currencies.formatCurrency(Currencies.integer[currency], amount);
+        _amount = amount;
+        String text = Currencies.formatCurrency(Currencies.integer[currency], _amount);
         setText(text);
         setSelection(text.length()); // Place the cursor at the end for convenience
 

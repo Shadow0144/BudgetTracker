@@ -22,6 +22,8 @@ public class ExpenditureItem extends CardView
 {
     private final String TAG = "ExpenditureItem";
 
+    private final int ITEM_MARGIN = 12;
+
     private ExpenditureEntity _expenditure;
 
     public ExpenditureItem(Context context)
@@ -64,7 +66,7 @@ public class ExpenditureItem extends CardView
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         );
-        params.setMargins(12, 12, 12, 12);
+        params.setMargins(ITEM_MARGIN, ITEM_MARGIN, ITEM_MARGIN, ITEM_MARGIN);
         setLayoutParams(params);
 
         refresh(view);

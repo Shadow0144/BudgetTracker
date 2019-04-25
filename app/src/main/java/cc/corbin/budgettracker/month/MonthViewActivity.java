@@ -2,19 +2,10 @@ package cc.corbin.budgettracker.month;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Gravity;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -30,29 +21,21 @@ import java.util.List;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.NavigationActivity;
-import cc.corbin.budgettracker.auxilliary.NavigationDrawerHelper;
-import cc.corbin.budgettracker.importexport.ImportExportActivity;
 import cc.corbin.budgettracker.auxilliary.LineGraph;
 import cc.corbin.budgettracker.edit.AdjustmentEditActivity;
 import cc.corbin.budgettracker.auxilliary.PieChart;
 import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
-import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
-import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText;
-import cc.corbin.budgettracker.search.CreateSearchActivity;
 import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.tables.ExpandableBudgetTable;
 import cc.corbin.budgettracker.tables.ExtrasTable;
 import cc.corbin.budgettracker.edit.ExpenditureEditActivity;
 import cc.corbin.budgettracker.tables.CategorySummaryTable;
 import cc.corbin.budgettracker.tables.TimeSummaryTable;
-import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.year.YearViewActivity;
-import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
-import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 
 /**
@@ -96,9 +79,7 @@ public class MonthViewActivity extends NavigationActivity
     private MutableLiveData<float[]> _weeklyAmounts;
     private MutableLiveData<float[]> _categoricalAmounts;
 
-    private int _budgetId; // ID of the budget entity being edited
-    private PopupWindow _popupWindow; // For editing budgets
-    private NumericalFormattedEditText _amountEditText;
+    private MonthEditBudgetItemHelper _monthEditBudgetItemHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -111,6 +92,46 @@ public class MonthViewActivity extends NavigationActivity
 
         _viewModel = ExpenditureViewModel.getInstance();
 
+        setupHeader();
+
+        setupObservers();
+
+        setupViews();
+
+        _viewModel.getMonth(_monthExps, _year, _month);
+    }
+
+    public void refreshView()
+    {
+        _weeklyTable.resetTable();
+        _categoryTable.resetTable();
+        _expandableBudgetTable.resetTable();
+        _weeklyPieChart.clearData();
+        _categoryPieChart.clearData();
+        _weeklyLineGraph.clearData();
+
+        _viewModel.getMonth(_monthExps, _year, _month);
+    }
+
+    private void setupHeader()
+    {
+        TextView header = findViewById(R.id.monthView);
+        DateFormatSymbols dfs = new DateFormatSymbols();
+        header.setText(dfs.getMonths()[_month-1] + " " + _year);
+        header.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Intent intent = new Intent(getApplicationContext(), YearViewActivity.class);
+                intent.putExtra(YearViewActivity.YEAR_INTENT, _year);
+                startActivity(intent);
+            }
+        });
+    }
+
+    private void setupObservers()
+    {
         final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
         {
             @Override
@@ -118,7 +139,7 @@ public class MonthViewActivity extends NavigationActivity
             {
                 if (expenditureEntities != null)
                 {
-                    monthLoaded(expenditureEntities);
+                    monthExpsLoaded(expenditureEntities);
                 }
                 else { }
             }
@@ -131,24 +152,9 @@ public class MonthViewActivity extends NavigationActivity
             {
                 if (budgetEntities != null) // returning from a query
                 {
-                    refreshTables(budgetEntities);
-
-                    // Create a budget line for the line graph
-                    float budget = 0;
-                    int size = budgetEntities.size();
-                    for (int i = 0; i < size; i++)
-                    {
-                        budget += budgetEntities.get(i).getAmount();
-                    }
-                    float[] guidelineAmounts = new float[] {budget / 5}; // TODO
-                    String[] guidelineLabels = new String[] { getString(R.string.budget) };
-                    _weeklyLineGraph.addGuildelines(guidelineAmounts, guidelineLabels);
+                    monthBudgetsLoaded(budgetEntities);
                 }
-                else // else - returning from an add / edit / remove
-                {
-                    // Call for a refresh
-                    _viewModel.getMonthBudget(_budgets, _year, _month);
-                }
+                else { }
             }
         };
 
@@ -188,26 +194,19 @@ public class MonthViewActivity extends NavigationActivity
             }
         };
 
-        TextView header = findViewById(R.id.monthView);
-        DateFormatSymbols dfs = new DateFormatSymbols();
-        header.setText(dfs.getMonths()[_month-1] + " " + _year);
-        header.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent(getApplicationContext(), YearViewActivity.class);
-                intent.putExtra(YearViewActivity.YEAR_INTENT, _year);
-                startActivity(intent);
-            }
-        });
+        _monthExps = new MutableLiveData<List<ExpenditureEntity>>();
+        _monthExps.observe(this, entityObserver);
+        _budgets = new MutableLiveData<List<BudgetEntity>>();
+        _budgets.observe(this, budgetObserver);
 
         _weeklyAmounts = new MutableLiveData<float[]>();
         _weeklyAmounts.observe(this, weeklyAmountsObserver);
-
         _categoricalAmounts = new MutableLiveData<float[]>();
         _categoricalAmounts.observe(this, categoricalAmountsObserver);
+    }
 
+    private void setupViews()
+    {
         FrameLayout monthsWeeklyContainer = findViewById(R.id.monthWeeklyHolder);
         _weeklyTable = new TimeSummaryTable(this, _month, _year);
         monthsWeeklyContainer.addView(_weeklyTable);
@@ -235,43 +234,39 @@ public class MonthViewActivity extends NavigationActivity
         _weeklyLineGraph.setTitle(getString(R.string.weekly_spending));
         weeklyLineGraphHolder.addView(_weeklyLineGraph);
 
-        _monthExps = new MutableLiveData<List<ExpenditureEntity>>();
-        _monthExps.observe(this, entityObserver);
-        _budgets = new MutableLiveData<List<BudgetEntity>>();
-        _budgets.observe(this, budgetObserver);
-
-        createExtrasAndAdjustmentsTables();
-
-        _viewModel.getMonth(_monthExps, _year, _month);
-        _viewModel.getMonthBudget(_budgets, _year, _month);
+        FrameLayout extrasContainer = findViewById(R.id.monthExtraHolder);
+        _extrasTable = new ExtrasTable(this, _year, _month);
+        extrasContainer.addView(_extrasTable);
     }
 
-    public void refreshView()
-    {
-        _weeklyTable.resetTable();
-        _categoryTable.resetTable();
-        _expandableBudgetTable.resetTable();
-        _weeklyPieChart.clearData();
-        _categoryPieChart.clearData();
-        _weeklyLineGraph.clearData();
-
-        _viewModel.getMonth(_monthExps, _year, _month);
-        _viewModel.getMonthBudget(_budgets, _year, _month);
-    }
-
-    private void monthLoaded(List<ExpenditureEntity> expenditureEntities)
+    private void monthExpsLoaded(List<ExpenditureEntity> expenditureEntities)
     {
         _extrasTable.updateExpenditures(expenditureEntities);
 
-        SummationAsyncTask summationAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.weekly, _weeklyAmounts, _categoricalAmounts);
-        summationAsyncTask.execute(expenditureEntities);
+        final SummationAsyncTask weeklyAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.weekly, _weeklyAmounts);
+        final SummationAsyncTask categoryAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.categorically, _categoricalAmounts);
+        weeklyAsyncTask.execute(expenditureEntities);
+        categoryAsyncTask.execute(expenditureEntities);
+
+        _viewModel.getMonthBudget(_budgets, _year, _month);
     }
 
-    private void refreshTables(List<BudgetEntity> entities)
+    private void monthBudgetsLoaded(List<BudgetEntity> budgetEntities)
     {
-        _weeklyTable.updateBudgets(entities);
-        _categoryTable.updateBudgets(entities);
-        _expandableBudgetTable.refreshTable(entities);
+        _weeklyTable.updateBudgets(budgetEntities);
+        _categoryTable.updateBudgets(budgetEntities);
+        _expandableBudgetTable.refreshTable(budgetEntities);
+
+        // Create a budget line for the line graph
+        float budget = 0;
+        int size = budgetEntities.size();
+        for (int i = 0; i < size; i++)
+        {
+            budget += budgetEntities.get(i).getAmount();
+        }
+        float[] guidelineAmounts = new float[] {budget / 5}; // TODO
+        String[] guidelineLabels = new String[] { getString(R.string.budget) };
+        _weeklyLineGraph.addGuildelines(guidelineAmounts, guidelineLabels);
     }
 
     public void previousMonth(View v)
@@ -310,82 +305,24 @@ public class MonthViewActivity extends NavigationActivity
 
     public void editBudgetItem(int id)
     {
-        _budgetId = id;
-        BudgetEntity entity = _budgets.getValue().get(_budgetId);
-
-        final View budgetEditView = getLayoutInflater().inflate(R.layout.popup_set_budget, null);
-
-        final TextView categoryTextView = budgetEditView.findViewById(R.id.categoryTextView);
-        categoryTextView.setText(entity.getCategoryName() + ": ");
-
-        final TextView currencyTextView = budgetEditView.findViewById(R.id.currencyTextView);
-        currencyTextView.setText(Currencies.symbols[Currencies.default_currency]);
-
-        _amountEditText = budgetEditView.findViewById(R.id.amountEditText);
-        if (entity.getId() != 0)
-        {
-            _amountEditText.setup(null, Currencies.default_currency, entity.getAmount());
-            if (entity.getMonth() == _month && entity.getYear() == _year) // If the ID is not 0
-            {
-                final Button removeButton = budgetEditView.findViewById(R.id.removeButton);
-                removeButton.setEnabled(true);
-            }
-            else { }
-        }
-        else
-        {
-            _amountEditText.setup(null);
-        }
-
-        _popupWindow = new PopupWindow(budgetEditView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        _popupWindow.setFocusable(true);
-        _popupWindow.update();
-        _popupWindow.showAtLocation(findViewById(R.id.rootLayout), Gravity.CENTER, 0, 0);
+        _monthEditBudgetItemHelper = new MonthEditBudgetItemHelper(this, _budgets, id, _year, _month, _viewModel);
     }
 
     public void confirmBudgetItemEdit(View v)
     {
-        BudgetEntity entity = _budgets.getValue().get(_budgetId);
-        float amount = _amountEditText.getAmount();
-        entity.setAmount(amount);
-
-        if (entity.getMonth() == _month && entity.getYear() == _year) // Edit
-        {
-            _budgets.getValue().get(_budgetId).setAmount(amount);
-        }
-        else // Add
-        {
-            entity.setId(0);
-            entity.setMonth(_month);
-            entity.setYear(_year);
-            _budgets.getValue().add(entity);
-        }
-
-        _popupWindow.dismiss();
+        _monthEditBudgetItemHelper.confirmBudgetItemEdit(v);
+        _expandableBudgetTable.clearBudgetEntity(_monthEditBudgetItemHelper.getBudgetId());
     }
 
     public void cancelBudgetItemEdit(View v)
     {
-        _popupWindow.dismiss();
+        _monthEditBudgetItemHelper.cancelBudgetItemEdit(v);
     }
 
     public void removeBudgeItem(View v)
     {
-        BudgetEntity entity = _budgets.getValue().get(_budgetId);
-
-        _budgets.getValue().remove(_budgetId);
-        _viewModel.removeBudgetEntity(entity);
-
-        _popupWindow.dismiss();
-    }
-
-    private void createExtrasAndAdjustmentsTables()
-    {
-        FrameLayout extrasContainer = findViewById(R.id.monthExtraHolder);
-
-        // Create the extras table
-        _extrasTable = new ExtrasTable(this, _year, _month);
-        extrasContainer.addView(_extrasTable);
+        _monthEditBudgetItemHelper.removeBudgeItem(v);
+        _expandableBudgetTable.clearBudgetEntity(_monthEditBudgetItemHelper.getBudgetId());
     }
 
     public void createExtraExpenditure()
@@ -450,88 +387,12 @@ public class MonthViewActivity extends NavigationActivity
         }
         else
         {
-            if (requestCode == CREATE_EXT_EXPENDITURE)
+            if (requestCode == CREATE_EXT_EXPENDITURE || requestCode == CREATE_ADJUSTMENT ||
+                    requestCode == EDIT_EXT_EXPENDITURE || requestCode == EDIT_ADJUSTMENT)
             {
-                if (resultCode == SUCCEED)
+                if (resultCode == SUCCEED || resultCode == DELETE)
                 {
-                    //ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
-                    //_viewModel.insertExpEntity(expenditureEntity);
                     refreshView();
-                }
-                else { }
-            }
-            else if (requestCode == EDIT_EXT_EXPENDITURE)
-            {
-                if (resultCode == SUCCEED)
-                {
-                    //ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
-                    //_viewModel.updateExpEntity(expenditureEntity);
-                    refreshView();
-                }
-                else if (resultCode == DELETE) // Delete can only occur from an edit
-                {
-                    //ExpenditureEntity expenditureEntity = data.getParcelableExtra(ExpenditureEditActivity.EXPENDITURE_INTENT);
-                    //_viewModel.removeExpEntity(expenditureEntity);
-                    refreshView();
-                }
-                else { }
-            }
-            else if (requestCode == CREATE_ADJUSTMENT)
-            {
-                if (resultCode == SUCCEED)
-                {
-                    boolean transfer = data.getBooleanExtra(AdjustmentEditActivity.TRANSFER_INTENT, false);
-                    if (!transfer)
-                    {
-                        //BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
-                        //_viewModel.insertBudgetEntity(budgetEntity);
-                        refreshView();
-                    }
-                    else
-                    {
-                        //BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
-                        //BudgetEntity linkedBudgetEntity = data.getParcelableExtra(AdjustmentEditActivity.LINKED_BUDGET_INTENT);
-                        //_viewModel.insertLinkedBudgetEntities(budgetEntity, linkedBudgetEntity);
-                        refreshView();
-                    }
-                }
-                else { }
-            }
-            else if (requestCode == EDIT_ADJUSTMENT)
-            {
-                if (resultCode == SUCCEED)
-                {
-                    BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
-                    boolean transfer = data.getBooleanExtra(AdjustmentEditActivity.TRANSFER_INTENT, false);
-
-                    if (!transfer)
-                    {
-                        //_viewModel.updateBudgetEntity(budgetEntity);
-                        refreshView();
-                    }
-                    else
-                    {
-                        //BudgetEntity linkedBudgetEntity = data.getParcelableExtra(AdjustmentEditActivity.LINKED_BUDGET_INTENT);
-                        //_viewModel.updateLinkedBudgetEntities(budgetEntity, linkedBudgetEntity);
-                        refreshView();
-                    }
-                }
-                else if (resultCode == DELETE) // Delete can only occur from an edit
-                {
-                    BudgetEntity budgetEntity = data.getParcelableExtra(AdjustmentEditActivity.BUDGET_INTENT);
-                    boolean transfer = data.getBooleanExtra(AdjustmentEditActivity.TRANSFER_INTENT, false);
-
-                    if (!transfer)
-                    {
-                        //_viewModel.removeBudgetEntity(budgetEntity);
-                        refreshView();
-                    }
-                    else
-                    {
-                        //BudgetEntity linkedBudgetEntity = data.getParcelableExtra(AdjustmentEditActivity.LINKED_BUDGET_INTENT);
-                        //_viewModel.removeLinkedBudgetEntities(budgetEntity, linkedBudgetEntity);
-                        refreshView();
-                    }
                 }
                 else { }
             }

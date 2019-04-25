@@ -150,6 +150,12 @@ public class BudgetTableRow extends LinearLayout
         _contentCell.setEnabled(true); // Only enabled for rows with entities
     }
 
+    public void clearBudgetEntity()
+    {
+        _contentCell.setEnabled(false);
+        _contentCell.setLoading(true);
+    }
+
     public void setAmountAndDate(float amount, int year, int month)
     {
         _amount = amount;

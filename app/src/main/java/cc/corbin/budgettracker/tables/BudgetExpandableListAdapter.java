@@ -6,6 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,7 +66,7 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
                 @Override
                 public void onClick(View v)
                 {
-                    ((MonthViewActivity)_context).createAdjustmentExpenditure(((int)v.getTag()));
+                    ((MonthViewActivity) _context).createAdjustmentExpenditure(((int) v.getTag()));
                 }
             });
             _addAdjustmentButtons.add(addAdjustmentButton);
@@ -122,11 +124,11 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
                     @Override
                     public void onClick(View v)
                     {
-                        AdjustmentTableCell cell = ((AdjustmentTableCell)v);
+                        AdjustmentTableCell cell = ((AdjustmentTableCell) v);
                         BudgetEntity entity = cell.getBudgetEntity();
                         int groupIndex = cell.getGroupIndex();
                         int childIndex = cell.getChildIndex();
-                        ((MonthViewActivity)_context).editAdjustmentExpenditure(entity, groupIndex, childIndex);
+                        ((MonthViewActivity) _context).editAdjustmentExpenditure(entity, groupIndex, childIndex);
                     }
                 });
                 if (k == 0) // If adding an adjustment, don't hide it
@@ -173,7 +175,7 @@ public class BudgetExpandableListAdapter extends BaseExpandableListAdapter
     @Override
     public Object getGroup(int groupPosition)
     {
-        return _budgets.get(groupPosition);
+        return _budgetCells.get(groupPosition);
     }
 
     @Override

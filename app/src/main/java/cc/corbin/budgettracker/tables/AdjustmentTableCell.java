@@ -1,12 +1,14 @@
 package cc.corbin.budgettracker.tables;
 
 import android.content.Context;
+import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import cc.corbin.budgettracker.R;
@@ -84,12 +86,6 @@ public class AdjustmentTableCell extends FrameLayout
 
     private void setup()
     {
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-        );
-        setLayoutParams(params);
-
         LayoutInflater inflater = LayoutInflater.from(_context);
         final View view = inflater.inflate(R.layout.adjustment, null);
         addView(view);

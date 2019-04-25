@@ -108,10 +108,9 @@ public class ExpandableBudgetTable extends ExpandableListView
         addFooterView(_totalCell);
     }
 
-    public void resetTable() /// TODO?
+    public void resetTable()
     {
-        //removeAllViews();
-        //setupTable();
+        _budgetsListAdapter.notifyDataSetInvalidated();
     }
 
     public void refreshTable(List<BudgetEntity> budgets)
@@ -119,16 +118,11 @@ public class ExpandableBudgetTable extends ExpandableListView
         BudgetEntity totalEntity = _budgetsListAdapter.setBudgets(budgets);
 
         _totalCell.setAmountAndDate(totalEntity.getAmount(), totalEntity.getYear(), totalEntity.getMonth());
+    }
 
-        /*int count = Categories.getCategories().length;
-        for (int i = 0; i < count; i++)
-        {
-            if (_budgetsListAdapter.getChildrenCount(i) > 1)
-            {
-                expandGroup(i);
-            }
-            else { }
-        }*/
+    public void clearBudgetEntity(int budget)
+    {
+        ((BudgetTableRow)_budgetsListAdapter.getGroup(budget)).clearBudgetEntity();
     }
 
     @Override

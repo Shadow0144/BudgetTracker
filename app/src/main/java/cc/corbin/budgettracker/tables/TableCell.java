@@ -32,7 +32,7 @@ public class TableCell extends RelativeLayout
 {
     private final String TAG = "TableCell";
 
-    //private ProgressBar _progressBar;
+    private ProgressBar _progressBar;
     private AppCompatTextView _textView;
     private AppCompatTextView _ellipsisTextView;
 
@@ -117,17 +117,17 @@ public class TableCell extends RelativeLayout
 
         _ellipsisAdded = false;
 
-        //_progressBar = new ProgressBar(context);
+        _progressBar = new ProgressBar(context);
         _textView = new AppCompatTextView(context);
         int id = Integer.MAX_VALUE; // Need some non-zero ID which won't be found by a findByID search set so that the progress bar sizes correctly
         _textView.setId(id);
 
-        //_progressBar.setVisibility(INVISIBLE);
+        _progressBar.setVisibility(INVISIBLE);
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
         layoutParams.addRule(RelativeLayout.ALIGN_TOP, _textView.getId());
         layoutParams.addRule(RelativeLayout.ALIGN_BOTTOM, _textView.getId());
-        //_progressBar.setLayoutParams(layoutParams);
+        _progressBar.setLayoutParams(layoutParams);
 
         layoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
@@ -139,7 +139,7 @@ public class TableCell extends RelativeLayout
         _textView.setLines(1);
 
         addView(_textView);
-        //addView(_progressBar);
+        addView(_progressBar);
 
         setType(cellType);
     }
@@ -217,12 +217,12 @@ public class TableCell extends RelativeLayout
     {
         if (loading)
         {
-            //_progressBar.setVisibility(VISIBLE);
+            _progressBar.setVisibility(VISIBLE);
             _textView.setVisibility(INVISIBLE);
         }
         else
         {
-            //_progressBar.setVisibility(INVISIBLE);
+            _progressBar.setVisibility(INVISIBLE);
             _textView.setVisibility(VISIBLE);
         }
     }
