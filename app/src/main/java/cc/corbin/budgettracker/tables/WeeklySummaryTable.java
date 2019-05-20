@@ -130,8 +130,8 @@ public class WeeklySummaryTable extends NewTimeSummaryTable
 
         labelCell.setText("Extras"); // TODO - String
         expenseCell.setLoading(true);
-        budgetCell.setLoading(false);
-        remainingCell.setLoading(false);
+        budgetCell.setLoading(true);
+        remainingCell.setLoading(true);
 
         budgetCell.setType(TableCell.ITALIC_CELL);
 
@@ -306,7 +306,7 @@ public class WeeklySummaryTable extends NewTimeSummaryTable
         int catSize = Categories.getCategories().length;
         int buds = _budgets.size() / catSize; // The number of months
         float total = 0.0f;
-        DecimalFormat percentage = new DecimalFormat("###,###,###,###,##0.##%");
+        DecimalFormat percentage = new DecimalFormat("###,###,###,###,##0.00%");
         for (int i = 0; i < buds; i++)
         {
             float monthTotal = 0.0f;
