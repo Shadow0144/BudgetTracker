@@ -32,6 +32,7 @@ import cc.corbin.budgettracker.tables.ExtrasTable;
 import cc.corbin.budgettracker.edit.ExpenditureEditActivity;
 import cc.corbin.budgettracker.tables.CategorySummaryTable;
 import cc.corbin.budgettracker.tables.TimeSummaryTable;
+import cc.corbin.budgettracker.tables.WeeklySummaryTable;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.year.YearViewActivity;
@@ -62,7 +63,7 @@ public class MonthViewActivity extends NavigationActivity
     private int _month;
     private int _year;
 
-    private TimeSummaryTable _weeklyTable;
+    private WeeklySummaryTable _weeklyTable;
     private CategorySummaryTable _categoryTable;
     private ExtrasTable _extrasTable;
     private ExpandableBudgetTable _expandableBudgetTable;
@@ -163,7 +164,7 @@ public class MonthViewActivity extends NavigationActivity
             @Override
             public void onChanged(@Nullable float[] amounts)
             {
-                _weeklyTable.updateWeeklyExpenditures(amounts);
+                _weeklyTable.updateExpenditures(amounts);
 
                 String[] weekLabels = new String[7];
                 weekLabels[0] = getString(R.string.extras);
@@ -188,9 +189,6 @@ public class MonthViewActivity extends NavigationActivity
 
                 String[] categoryLabels = Categories.getCategories();
                 _categoryPieChart.setData(amounts, categoryLabels);
-
-                // Update the budgets
-                _viewModel.getMonthBudget(_budgets, _year, _month);
             }
         };
 
@@ -208,7 +206,7 @@ public class MonthViewActivity extends NavigationActivity
     private void setupViews()
     {
         FrameLayout monthsWeeklyContainer = findViewById(R.id.monthWeeklyHolder);
-        _weeklyTable = new TimeSummaryTable(this, _month, _year);
+        _weeklyTable = new WeeklySummaryTable(this, false);
         monthsWeeklyContainer.addView(_weeklyTable);
 
         FrameLayout monthsCategoryContainer = findViewById(R.id.monthCategoryHolder);
@@ -244,9 +242,9 @@ public class MonthViewActivity extends NavigationActivity
         _extrasTable.updateExpenditures(expenditureEntities);
 
         final SummationAsyncTask weeklyAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.weekly, _weeklyAmounts);
-        final SummationAsyncTask categoryAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.categorically, _categoricalAmounts);
+        final SummationAsyncTask categoricalAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.categorically, _categoricalAmounts);
         weeklyAsyncTask.execute(expenditureEntities);
-        categoryAsyncTask.execute(expenditureEntities);
+        categoricalAsyncTask.execute(expenditureEntities);
 
         _viewModel.getMonthBudget(_budgets, _year, _month);
     }

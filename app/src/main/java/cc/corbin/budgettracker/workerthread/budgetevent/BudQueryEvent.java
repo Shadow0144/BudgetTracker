@@ -2,6 +2,7 @@ package cc.corbin.budgettracker.workerthread.budgetevent;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.persistence.db.SimpleSQLiteQuery;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,6 +27,7 @@ public class BudQueryEvent implements BudDatabaseEvent
     private int _year;
     private int _month;
     private int _startYear;
+    private int _startMonth;
     private int _endYear;
     private int _endMonth;
     private QueryType _queryType;
@@ -49,15 +51,15 @@ public class BudQueryEvent implements BudDatabaseEvent
         _queryType = queryType;
     }
 
-    // Total
+    // Total or Months (range)
     public BudQueryEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData,
-                         int year, int month, int startYear, int endYear, QueryType queryType)
+                         int startYear, int startMonth, int endYear, int endMonth, QueryType queryType)
     {
         _mutableLiveData = mutableLiveData;
-        _year = year;
-        _month = month;
         _startYear = startYear;
+        _startMonth = startMonth;
         _endYear = endYear;
+        _endMonth = endMonth;
         _queryType = queryType;
     }
 
@@ -78,20 +80,28 @@ public class BudQueryEvent implements BudDatabaseEvent
                 entities.addAll(dbB.budgetDao().getMonthAdjustments(_year, _month));
                 break;
             case months:
-                for (int i = 0; i < categories.length; i++)
+                int y = _startYear; // TODO - Broken!
+                int m = _startMonth;
+                for (++y; y < (_endYear-1); y++)
                 {
-                    entities.add(helper.getYearCategoryBudget(dbB, _year, i));
-                    for (int j = 1; j <= 12; j++)
+                    for (int i = 1; i < categories.length; i++)
                     {
-                        entities.add(helper.getMonthCategoryBudget(dbB, j, _year, i));
-                        // TODO Add adjustments
+                        entities.add(helper.getYearCategoryBudget(dbB, _year, i));
+                        for (int j = 1; j <= 12; j++)
+                        {
+                            entities.add(helper.getMonthCategoryBudget(dbB, j, _year, i));
+                        }
                     }
                 }
+                m = _endMonth;
                 break;
             case year:
-                for (int i = 0; i < categories.length; i++)
+                for (int i = 1; i <= 12; i++)
                 {
-                    entities.add(helper.getYearCategoryBudget(dbB, _year, i));
+                    for (int j = 0; j < categories.length; j++)
+                    {
+                        entities.add(helper.getMonthCategoryBudget(dbB, i, _year, j));
+                    }
                 }
                 break;
             case total:
@@ -102,7 +112,6 @@ public class BudQueryEvent implements BudDatabaseEvent
                         entities.add(helper.getYearCategoryBudget(dbB, i, j));
                     }
                 }
-                // TODO Add adjustments
                 break;
         }
         _mutableLiveData.postValue(entities);

@@ -40,6 +40,7 @@ import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.search.CreateSearchActivity;
 import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.tables.CategorySummaryTable;
+import cc.corbin.budgettracker.tables.MonthlySummaryTable;
 import cc.corbin.budgettracker.tables.TimeSummaryTable;
 import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
@@ -68,7 +69,7 @@ public class YearViewActivity extends NavigationActivity
     private MutableLiveData<float[]> _monthlyAmounts;
     private MutableLiveData<float[]> _categoricalAmounts;
 
-    private TimeSummaryTable _monthlyTable;
+    private MonthlySummaryTable _monthlyTable;
     private CategorySummaryTable _categoryTable;
 
     private PieChart _monthlyPieChart;
@@ -89,6 +90,15 @@ public class YearViewActivity extends NavigationActivity
 
         _viewModel = ExpenditureViewModel.getInstance();
 
+        setupObservers();
+
+        setupViews();
+
+        _viewModel.getYear(_yearExps, _year);
+    }
+
+    private void setupObservers()
+    {
         final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
         {
             @Override
@@ -125,7 +135,7 @@ public class YearViewActivity extends NavigationActivity
                 else // else - returning from an add / edit / remove
                 {
                     // Call for a refresh
-                    _viewModel.getMonthsBudget(_budgets, _year);
+                    // _viewModel.getMonthsBudget(_budgets, _year); // TODO ?
                 }
             }
         };
@@ -135,7 +145,7 @@ public class YearViewActivity extends NavigationActivity
             @Override
             public void onChanged(@Nullable float[] amounts)
             {
-                _monthlyTable.updateMonthlyExpenditures(amounts);
+                _monthlyTable.updateExpenditures(amounts);
 
                 String[] monthLabels = new String[12];
                 monthLabels[0] = "January";
@@ -165,12 +175,23 @@ public class YearViewActivity extends NavigationActivity
 
                 String[] categoryLabels = Categories.getCategories();
                 _categoryPieChart.setData(amounts, categoryLabels);
-
-                // Update the budgets
-                _viewModel.getMonthsBudget(_budgets, _year);
             }
         };
 
+        _yearExps = new MutableLiveData<List<ExpenditureEntity>>();
+        _yearExps.observe(this, entityObserver);
+        _budgets = new MutableLiveData<List<BudgetEntity>>();
+        _budgets.observe(this, budgetObserver);
+
+        _monthlyAmounts = new MutableLiveData<float[]>();
+        _monthlyAmounts.observe(this, monthlyAmountsObserver);
+
+        _categoricalAmounts = new MutableLiveData<float[]>();
+        _categoricalAmounts.observe(this, categoricalAmountsObserver);
+    }
+
+    private void setupViews()
+    {
         TextView header = findViewById(R.id.yearView);
         header.setText("" + _year);
         header.setOnClickListener(new View.OnClickListener()
@@ -183,14 +204,8 @@ public class YearViewActivity extends NavigationActivity
             }
         });
 
-        _monthlyAmounts = new MutableLiveData<float[]>();
-        _monthlyAmounts.observe(this, monthlyAmountsObserver);
-
-        _categoricalAmounts = new MutableLiveData<float[]>();
-        _categoricalAmounts.observe(this, categoricalAmountsObserver);
-
         FrameLayout yearMonthlyContainer = findViewById(R.id.yearMonthlyHolder);
-        _monthlyTable = new TimeSummaryTable(this, _year);
+        _monthlyTable = new MonthlySummaryTable(this, false);
         yearMonthlyContainer.addView(_monthlyTable);
 
         FrameLayout yearsCategoryContainer = findViewById(R.id.yearCategoryHolder);
@@ -211,11 +226,6 @@ public class YearViewActivity extends NavigationActivity
         _monthlyLineGraph = new LineGraph(this);
         _monthlyLineGraph.setTitle(getString(R.string.monthly_spending));
         monthlyLineGraphHolder.addView(_monthlyLineGraph);
-
-        _yearExps = new MutableLiveData<List<ExpenditureEntity>>();
-        _yearExps.observe(this, entityObserver);
-        _budgets = new MutableLiveData<List<BudgetEntity>>();
-        _budgets.observe(this, budgetObserver);
     }
 
     @Override
@@ -234,14 +244,18 @@ public class YearViewActivity extends NavigationActivity
 
     private void yearLoaded(List<ExpenditureEntity> expenditureEntities)
     {
-        SummationAsyncTask summationAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.monthly, _monthlyAmounts, _categoricalAmounts);
-        summationAsyncTask.execute(expenditureEntities);
+        final SummationAsyncTask monthlyAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.monthly, _monthlyAmounts);
+        final SummationAsyncTask categoricalAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.categorically, _categoricalAmounts);
+        monthlyAsyncTask.execute(expenditureEntities);
+        categoricalAsyncTask.execute(expenditureEntities);
+
+        _viewModel.getYearBudget(_budgets, _year); // Gets the budgets as individual months for displaying in the time breakdown table
     }
 
     private void refreshTables(List<BudgetEntity> entities)
     {
         _monthlyTable.updateBudgets(entities);
-        _categoryTable.updateBudgetsTrim(entities);
+        _categoryTable.updateBudgets(entities);
     }
 
     public void previousYear(View v)
@@ -258,90 +272,5 @@ public class YearViewActivity extends NavigationActivity
         intent.putExtra(YearViewActivity.YEAR_INTENT, _year + 1);
         startActivity(intent);
         finish();
-    }
-
-    public void editBudgetItem(int id)
-    {
-        _budgetId = id;
-        BudgetEntity entity = _budgets.getValue().get(_budgetId);
-
-        final View budgetEditView = getLayoutInflater().inflate(R.layout.popup_set_budget, null);
-
-        final TextView categoryTextView = budgetEditView.findViewById(R.id.categoryTextView);
-        categoryTextView.setText(entity.getCategoryName() + ": ");
-
-        final TextView currencyTextView = budgetEditView.findViewById(R.id.currencyTextView);
-        currencyTextView.setText(Currencies.symbols[Currencies.default_currency]);
-
-        final EditText budgetEditText = budgetEditView.findViewById(R.id.amountEditText);
-        if (Currencies.integer[Currencies.default_currency])
-        {
-            budgetEditText.setHint("0");
-        }
-        else
-        {
-            budgetEditText.setHint("0.00");
-        }
-
-        if (entity.getId() != 0)
-        {
-            final Button removeButton = budgetEditView.findViewById(R.id.removeButton);
-            removeButton.setEnabled(true);
-        }
-        else { }
-
-        _popupWindow = new PopupWindow(budgetEditView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        _popupWindow.setFocusable(true);
-        _popupWindow.update();
-        _popupWindow.showAtLocation(findViewById(R.id.rootLayout), Gravity.CENTER, 0, 0);
-    }
-
-    public void confirmBudgetItemEdit(View v)
-    {
-        BudgetEntity entity = _budgets.getValue().get(_budgetId);
-
-        final EditText amountTextEdit = _popupWindow.getContentView().findViewById(R.id.amountEditText);
-        float amount = 0.0f;
-        try
-        {
-            amount = Float.parseFloat(amountTextEdit.getText().toString());
-        }
-        catch (Exception e)
-        {
-            Log.e(TAG, "Empty amount");
-        }
-        entity.setAmount(amount);
-
-        if (entity.getId() != 0) // Edit
-        {
-            _budgets.getValue().get(_budgetId).setAmount(amount);
-            entity.setMonth(13);
-            _viewModel.updateBudgetEntity(entity);
-        }
-        else // Add
-        {
-            entity.setId(0);
-            entity.setMonth(13);
-            entity.setYear(_year);
-            _budgets.getValue().add(entity);
-            _viewModel.insertBudgetEntity(entity, _year, 0); // TODO ?
-        }
-
-        _popupWindow.dismiss();
-    }
-
-    public void cancelBudgetItemEdit(View v)
-    {
-        _popupWindow.dismiss();
-    }
-
-    public void removeBudgeItem(View v)
-    {
-        BudgetEntity entity = _budgets.getValue().get(_budgetId);
-
-        _budgets.getValue().remove(_budgetId);
-        _viewModel.removeBudgetEntity(entity);
-
-        _popupWindow.dismiss();
     }
 }

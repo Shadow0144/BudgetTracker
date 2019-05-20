@@ -68,6 +68,23 @@ public class BudgetEntity implements Parcelable
     }
 
     @Ignore
+    public BudgetEntity(int year, int category, String categoryName)
+    {
+        this.id = 0;
+        this.month = 0;
+        this.year = year;
+        this.amount = 0.0f;
+        this.category = category;
+        this.categoryName = categoryName;
+        this.isAdjustment = 0;
+        this.linkedID = -1;
+        this.linkedMonth = -1;
+        this.linkedYear = -1;
+        this.linkedCategory = -1;
+        this.note = "";
+    }
+
+    @Ignore
     public BudgetEntity(int month, int year, float amount, int category, String categoryName)
     {
         this.id = 0;

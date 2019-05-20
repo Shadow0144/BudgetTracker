@@ -56,13 +56,14 @@ public class BudDBFuncHelper
         BudgetEntity budgetEntity = dbB.budgetDao().getYear(year, category);
         if (budgetEntity == null)
         {
-            budgetEntity = new BudgetEntity();
+            budgetEntity = new BudgetEntity(year, category, Categories.getCategories()[category]);
         }
         else { }
 
         return budgetEntity;
     }
 
+    // Not used
     public void updateTotalBudget(BudgetDatabase dbB, int category)
     {
         int min = dbB.budgetDao().getMinYear(category);

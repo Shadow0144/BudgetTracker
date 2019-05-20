@@ -44,6 +44,7 @@ public class TableCell extends RelativeLayout
     public final static int SPECIAL_CELL = 5;
     public final static int SEMI_SPECIAL_CELL = 6;
     public final static int BOLD_CELL = 7;
+    public final static int ITALIC_CELL = 8;
 
     private Context _context;
 
@@ -188,6 +189,11 @@ public class TableCell extends RelativeLayout
                 _textView.setTypeface(null, Typeface.BOLD);
                 _textView.setTextColor(_context.getColor(R.color.black));
                 break;
+            case ITALIC_CELL: // Italic
+                setBackground(_context.getDrawable(R.drawable.cell_shape));
+                _textView.setTypeface(null, Typeface.ITALIC);
+                _textView.setTextColor(_context.getColor(R.color.black));
+                break;
             default:
                 setBackground(_context.getDrawable(R.drawable.cell_shape));
                 _textView.setTypeface(null, Typeface.NORMAL);
@@ -262,5 +268,10 @@ public class TableCell extends RelativeLayout
     public void setTextBlack()
     {
         _textView.setTextColor(Color.BLACK);
+    }
+
+    public void setTextRed()
+    {
+        _textView.setTextColor(Color.RED);
     }
 }

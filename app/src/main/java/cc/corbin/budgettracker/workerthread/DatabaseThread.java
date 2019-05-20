@@ -40,19 +40,22 @@ public class DatabaseThread
 
     public void run()
     {
-        while (!_expEvents.isEmpty())
+        while (!_expEvents.isEmpty() || !_budEvents.isEmpty() || !_comEvents.isEmpty())
         {
-            processExpEvent(_expEvents.poll());
-        }
+            while (!_expEvents.isEmpty())
+            {
+                processExpEvent(_expEvents.poll());
+            }
 
-        while (!_budEvents.isEmpty())
-        {
-            processBudEvent(_budEvents.poll());
-        }
+            while (!_budEvents.isEmpty())
+            {
+                processBudEvent(_budEvents.poll());
+            }
 
-        while (!_comEvents.isEmpty())
-        {
-            processComEvent(_comEvents.poll());
+            while (!_comEvents.isEmpty())
+            {
+                processComEvent(_comEvents.poll());
+            }
         }
     }
 

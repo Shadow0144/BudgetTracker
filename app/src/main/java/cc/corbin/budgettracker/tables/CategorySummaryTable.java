@@ -28,6 +28,8 @@ public class CategorySummaryTable extends TableLayout
 
     private List<Float> _expenses;
     private float _totalExpenses;
+    private float[] _budgets;
+    private float _totalBudget;
 
     private List<TableCell> _expenseCells;
     private TableCell _totalExpenseCell;
@@ -39,6 +41,9 @@ public class CategorySummaryTable extends TableLayout
     private TableCell _totalRemainingCell;
 
     private String[] _categories;
+
+    private boolean _expendituresLoaded;
+    private boolean _budgetsLoaded;
 
     public CategorySummaryTable(Context context)
     {
@@ -62,6 +67,9 @@ public class CategorySummaryTable extends TableLayout
         _expenseCells = new ArrayList<TableCell>();
         _budgetCells = new ArrayList<TableCell>();
         _remainingCells = new ArrayList<TableCell>();
+
+        _expendituresLoaded = false;
+        _budgetsLoaded = false;
 
         _categories = Categories.getCategories();
         int rows = _categories.length;
@@ -123,18 +131,11 @@ public class CategorySummaryTable extends TableLayout
             budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
             remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
 
-            float total = 0.0f; //getCategoryTotal(totalExpenditures, categories[i]);
-            totalTotal += total;
-
-            _expenses.add(total);
             _expenseCells.add(expenseCell);
             _budgetCells.add(budgetCell);
             _remainingCells.add(remainingCell);
 
             categoryCell.setText(_categories[i]);
-            expenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
-            budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, budget[i]));
-            remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, (budget[i] - total)));
 
             expenseCell.setLoading(true);
             budgetCell.setLoading(true);
@@ -218,7 +219,7 @@ public class CategorySummaryTable extends TableLayout
 
         for (int i = 0; i < catSize; i++)
         {
-            _expenses.set(i, totals[i]);
+            _expenses.add(totals[i]);
             _expenseCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, totals[i]));
             _expenseCells.get(i).setLoading(false);
             total += totals[i];
@@ -226,6 +227,13 @@ public class CategorySummaryTable extends TableLayout
         _totalExpenses = total;
         _totalExpenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
         _totalExpenseCell.setLoading(false);
+
+        if (_budgetsLoaded)
+        {
+            updateBudgetCells();
+        }
+        else { }
+        _expendituresLoaded = true;
     }
 
     public void updateExpenditures(float[] amounts)
@@ -233,7 +241,7 @@ public class CategorySummaryTable extends TableLayout
         float total = 0.0f;
         for (int i = 0; i < amounts.length; i++)
         {
-            _expenses.set(i, amounts[i]);
+            _expenses.add(amounts[i]);
             _expenseCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, amounts[i]));
             _expenseCells.get(i).setLoading(false);
             total += amounts[i];
@@ -241,69 +249,59 @@ public class CategorySummaryTable extends TableLayout
         _totalExpenses = total;
         _totalExpenseCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
         _totalExpenseCell.setLoading(false);
+
+        if (_budgetsLoaded)
+        {
+            updateBudgetCells();
+        }
+        else { }
+        _expendituresLoaded = true;
     }
 
     public void updateBudgets(List<BudgetEntity> budgetEntities) // TODO - float
     {
-        if (_budgetCells != null)
+        int size = budgetEntities.size();
+        int catSize = Categories.getCategories().length;
+        _budgets = new float[catSize];
+        for (int i = 0; i < catSize; i++)
         {
-            float totalBudget = 0.0f;
-            int size = budgetEntities.size();
-            int catSize = Categories.getCategories().length;
-            float[] categoryBudgets = new float[catSize]; // Initialized to zero
-            for (int i = 0; i < size; i++) // Loop through each of the entities to get all the budgets and adjustments
-            {
-                BudgetEntity budgetEntity = budgetEntities.get(i);
-                categoryBudgets[budgetEntity.getCategory()] += budgetEntity.getAmount();
-            }
+            _budgets[i] = 0.0f;
+        }
+        for (int i = 0; i < size; i++) // Loop through each of the entities to get all the budgets and adjustments
+        {
+            BudgetEntity budgetEntity = budgetEntities.get(i);
+            _budgets[budgetEntity.getCategory()] += budgetEntity.getAmount();
+            _totalBudget += budgetEntity.getAmount();
+        }
 
-            for (int i = 0; i < catSize; i++)
-            {
-                TableCell budgetCell = _budgetCells.get(i);
-                budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, categoryBudgets[i]));
-                budgetCell.setLoading(false);
-                float remaining = categoryBudgets[i] - _expenses.get(i);
-                TableCell remainingCell = _remainingCells.get(i);
-                remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
-                remainingCell.setLoading(false);
-                totalBudget += categoryBudgets[i];
-            }
-
-            _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalBudget));
-            _totalBudgetCell.setLoading(false);
-            float totalRemaining = totalBudget - _totalExpenses;
-            _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
-            _totalRemainingCell.setLoading(false);
+        if (_expendituresLoaded)
+        {
+            updateBudgetCells();
         }
         else { }
+        _budgetsLoaded = true;
     }
 
-    // For use by the Year View
-    public void updateBudgetsTrim(List<BudgetEntity> budgetEntities)
+    private void updateBudgetCells()
     {
-        if (_budgetCells != null)
+        int catSize = Categories.getCategories().length;
+        float totalBudget = 0.0f;
+        for (int i = 0; i < catSize; i++)
         {
-            float totalBudget = 0.0f;
-            int catSize = Categories.getCategories().length;
-            for (int i = 0; i < catSize; i++)
-            {
-                int index = i * 13;
-                TableCell budgetCell = _budgetCells.get(i);
-                float budget = budgetEntities.get(index).getAmount();
-                budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, budget));
-                budgetCell.setLoading(false);
-                float remaining = budget - _expenses.get(i);
-                TableCell remainingCell = _remainingCells.get(i);
-                remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
-                remainingCell.setLoading(false);
-                totalBudget += budget;
-            }
-
-            _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalBudget));
-            _totalBudgetCell.setLoading(false);
-            float totalRemaining = totalBudget - _totalExpenses;
-            _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
-            _totalRemainingCell.setLoading(false);
+            TableCell budgetCell = _budgetCells.get(i);
+            budgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, _budgets[i]));
+            budgetCell.setLoading(false);
+            float remaining = _budgets[i] - _expenses.get(i);
+            TableCell remainingCell = _remainingCells.get(i);
+            remainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
+            remainingCell.setLoading(false);
+            totalBudget += _budgets[i];
         }
+
+        _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalBudget));
+        _totalBudgetCell.setLoading(false);
+        float totalRemaining = totalBudget - _totalExpenses;
+        _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
+        _totalRemainingCell.setLoading(false);
     }
 }

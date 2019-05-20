@@ -28,7 +28,7 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
 {
     private final String TAG = "TimeSummaryTable";
 
-    private Context _context;
+    protected Context _context;
 
     public enum timeframe
     {
@@ -59,16 +59,16 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
     private List<String> _remainingStrings;
     private List<String> _remainingPercentStrings;
 
-    private List<TableCell> _expenseCells;
-    private TableCell _totalExpenseCell;
+    protected List<TableCell> _expenseCells;
+    protected TableCell _totalExpenseCell;
 
-    private List<TableCell> _budgetCells;
-    private TableCell _totalBudgetCell;
+    protected List<TableCell> _budgetCells;
+    protected TableCell _totalBudgetCell;
 
-    private List<TableCell> _remainingCells;
-    private TableCell _totalRemainingCell;
+    protected List<TableCell> _remainingCells;
+    protected TableCell _totalRemainingCell;
 
-    private int _rows;
+    protected int _rows;
 
     public TimeSummaryTable(Context context, AttributeSet attrs)
     {
@@ -102,6 +102,7 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
         setupTable();
     }
 
+    // Day
     public TimeSummaryTable(Context context, int day, int month, int year)
     {
         super(context);
@@ -115,6 +116,7 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
         setupTable();
     }
 
+    // Month
     public TimeSummaryTable(Context context, int month, int year)
     {
         super(context);
@@ -128,6 +130,7 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
         setupTable();
     }
 
+    // Year
     public TimeSummaryTable(Context context, int year)
     {
         super(context);
@@ -141,6 +144,7 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
         setupTable();
     }
 
+    // Total
     public TimeSummaryTable(Context context)
     {
         super(context);
@@ -154,6 +158,7 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
         setupTable();
     }
 
+    // Range
     public TimeSummaryTable(Context context, int day, int month, int year, int endDay, int endMonth, int endYear, timeframe frame)
     {
         super(context);
@@ -174,7 +179,6 @@ public class TimeSummaryTable extends TableLayout implements View.OnClickListene
     public void onClick(View v)
     {
         Intent intent;
-        Calendar date;
 
         switch (_timeframe)
         {

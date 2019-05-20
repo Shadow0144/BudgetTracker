@@ -2,6 +2,7 @@ package cc.corbin.budgettracker.workerthread;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -44,7 +45,6 @@ public class ExpenditureViewModel
     private static ConcurrentLinkedQueue<BudDatabaseEvent> _budEvents;
     private static ConcurrentLinkedQueue<ComDatabaseEvent> _comEvents;
 
-    private static AsyncTask<Void, Void, Void> _queuer;
     private static DatabaseThread _thread;
 
     private ExpenditureViewModel()
@@ -67,11 +67,10 @@ public class ExpenditureViewModel
 
     private void processQueue()
     {
-        // Ensure the thread is setup with the databases and that the queuer is either null or not running
-        if ((_thread != null) && ((_queuer == null) || (_queuer.getStatus() != AsyncTask.Status.RUNNING)))
+        // Ensure the thread is setup with the databases
+        if ((_thread != null))// && ((_queuer == null) || (_queuer.getStatus() != AsyncTask.Status.RUNNING)))
         {
-            _queuer = new DatabaseAsyncTask(this, _thread);
-            _queuer.execute();
+            new DatabaseAsyncTask(this, _thread).execute();
         }
         else { }
     }
@@ -146,9 +145,9 @@ public class ExpenditureViewModel
         processQueue();
     }
 
-    public void getTotalBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData, int startYear, int startMonth, int endYear, int endMonth)
+    public void getTotalBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData, int startYear, int endYear)
     {
-        BudDatabaseEvent event = new BudQueryEvent(mutableLiveData, startYear, startMonth, endYear, endMonth, BudQueryEvent.QueryType.total);
+        BudDatabaseEvent event = new BudQueryEvent(mutableLiveData, startYear, 0, endYear, 12, BudQueryEvent.QueryType.total);
         _budEvents.add(event);
         processQueue();
     }

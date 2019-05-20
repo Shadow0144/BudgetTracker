@@ -15,9 +15,45 @@ import java.util.concurrent.TimeUnit;
 
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 
-public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Void, float[][]>
+public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, SummationAsyncTask.SummationResult, float[]>
 {
     private final String TAG = "SummationAsyncTask";
+
+    public class SummationResult
+    {
+        private String _title;
+        private float _amount;
+        private int _ID;
+        private boolean _isLast;
+
+        public SummationResult(String title, float amount, int ID, boolean isLast)
+        {
+            _title = title;
+            _amount = amount;
+            _ID = ID;
+            _isLast = isLast;
+        }
+
+        public String getTitle()
+        {
+            return _title;
+        }
+
+        public float getAmount()
+        {
+            return _amount;
+        }
+
+        public int getID()
+        {
+            return _ID;
+        }
+
+        public boolean getIsLast()
+        {
+            return _isLast;
+        }
+    }
 
     public enum summationType
     {
@@ -30,42 +66,30 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Void,
     private summationType _summationType;
 
     private MutableLiveData<float[]> _amounts;
-    private MutableLiveData<float[]> _categoryAmounts;
-    private boolean _dualAmounts;
+
+    private AsyncSummationCallback _callback;
+    private boolean _usingCallback;
 
     public SummationAsyncTask(summationType summation, MutableLiveData<float[]> amounts)
     {
         _summationType = summation;
         _amounts = amounts;
-        _dualAmounts = false;
+        _usingCallback = false;
     }
 
-    public SummationAsyncTask(summationType summation, MutableLiveData<float[]> timeAmounts, MutableLiveData<float[]> categoryAmounts)
+    public SummationAsyncTask(summationType summation, MutableLiveData<float[]> amounts, AsyncSummationCallback callback)
     {
         _summationType = summation;
-        _amounts = timeAmounts;
-        _categoryAmounts = categoryAmounts;
-        _dualAmounts = true;
+        _amounts = amounts;
+        _callback = callback;
+        _usingCallback = true;
     }
 
     @Override
-    protected float[][] doInBackground(List<ExpenditureEntity>... entitiesList)
+    protected float[] doInBackground(List<ExpenditureEntity>... entitiesList)
     {
         List<ExpenditureEntity> entities = entitiesList[0];
         float[] sums = new float[0];
-        float[] catSums;
-
-        float[][] amounts;
-        if (_dualAmounts)
-        {
-            amounts = new float[2][];
-            catSums = new float[Categories.getCategories().length];
-        }
-        else
-        {
-            amounts = new float[1][];
-            catSums = new float[0];
-        }
 
         switch (_summationType)
         {
@@ -81,7 +105,7 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Void,
                     endDate.set(endEntity.getYear(), endEntity.getMonth()-1, endEntity.getDay());
                     long days = TimeUnit.DAYS.convert((endDate.getTimeInMillis() - startDate.getTimeInMillis()), TimeUnit.MILLISECONDS);
                     sums = new float[(int)(days + 1)];
-                    getDailySummations(sums, catSums, entities, startDate);
+                    getDailySummations(sums, entities, startDate);
                 }
                 else
                 {
@@ -92,12 +116,12 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Void,
 
             case weekly:
                 sums = new float[6]; // + 1 for extras
-                getWeeklySummations(sums, catSums, entities);
+                getWeeklySummations(sums, entities);
                 break;
 
             case monthly:
                 sums = new float[12];
-                getMonthlySummations(sums, catSums, entities);
+                getMonthlySummations(sums, entities);
                 break;
 
             case yearly:
@@ -107,7 +131,7 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Void,
                     int minYear = entities.get(0).getYear();
                     int maxYear = entities.get(entities.size() - 1).getYear();
                     sums = new float[maxYear - minYear + 1];
-                    getYearlySummations(sums, catSums, entities, minYear);
+                    getYearlySummations(sums, entities, minYear);
                 }
                 else
                 {
@@ -122,36 +146,34 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Void,
                 break;
         }
 
-        amounts[0] = sums;
-        if (_dualAmounts)
-        {
-            amounts[1] = catSums;
-        }
-        else { }
-
-        return amounts;
+        return sums;
     }
 
     @Override
-    protected void onPostExecute(float[][] result)
+    protected void onProgressUpdate(SummationResult... results)
     {
-        _amounts.postValue(result[0]);
-        if (_dualAmounts)
+        for (int i = 0; i < results.length; i++)
         {
-            _categoryAmounts.postValue(result[1]);
+            if (_usingCallback)
+            {
+                _callback.rowComplete(_summationType, results[i].getTitle(), results[i].getAmount(),
+                        results[i].getID(), results[i].getIsLast());
+            }
+            else { }
         }
-        else { }
     }
 
-    private void getWeeklySummations(float[] weeks, float[] categories, List<ExpenditureEntity> entities)
+    @Override
+    protected void onPostExecute(float[] result)
+    {
+        _amounts.postValue(result);
+    }
+
+    private void getWeeklySummations(float[] weeks, List<ExpenditureEntity> entities)
     {
         for (int i = 0; i < weeks.length; i++)
         {
             weeks[i] = 0.0f;
-        }
-        for (int i = 0; i < categories.length; i++)
-        {
-            categories[i] = 0.0f;
         }
 
         int size = entities.size();
@@ -187,24 +209,14 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Void,
             {
                 weeks[6] += entity.getAmount();
             }*/
-            if (_dualAmounts)
-            {
-                int category = entity.getCategory();
-                categories[category] += entity.getAmount();
-            }
-            else { }
         }
     }
 
-    private void getDailySummations(float[] days, float[] categories, List<ExpenditureEntity> entities, Calendar startDate)
+    private void getDailySummations(float[] days, List<ExpenditureEntity> entities, Calendar startDate)
     {
         for (int i = 0; i < days.length; i++)
         {
             days[i] = 0.0f;
-        }
-        for (int i = 0; i < categories.length; i++)
-        {
-            categories[i] = 0.0f;
         }
         int size = entities.size();
         int index = 0;
@@ -225,24 +237,14 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Void,
                 index++;
             }
             days[index] += entity.getAmount();
-            if (_dualAmounts)
-            {
-                int category = entity.getCategory();
-                categories[category] += entity.getAmount();
-            }
-            else { }
         }
     }
 
-    private void getMonthlySummations(float[] months, float[] categories, List<ExpenditureEntity> entities)
+    private void getMonthlySummations(float[] months, List<ExpenditureEntity> entities)
     {
         for (int i = 0; i < months.length; i++)
         {
             months[i] = 0.0f;
-        }
-        for (int i = 0; i < categories.length; i++)
-        {
-            categories[i] = 0.0f;
         }
         int size = entities.size();
         for (int i = 0; i < size; i++)
@@ -250,39 +252,30 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Void,
             ExpenditureEntity entity = entities.get(i);
             int month = entity.getMonth();
             months[month-1] += entity.getAmount();
-            if (_dualAmounts)
-            {
-                int category = entity.getCategory();
-                categories[category] += entity.getAmount();
-            }
-            else { }
         }
     }
 
-    // Warning: Does not allow for total extras
-    private void getYearlySummations(float[] years, float[] categories, List<ExpenditureEntity> entities, int minYear)
+    // Warning: Results must be sorted by year
+    private void getYearlySummations(float[] years, List<ExpenditureEntity> entities, int minYear)
     {
         for (int i = 0; i < years.length; i++)
         {
             years[i] = 0.0f;
         }
-        for (int i = 0; i < categories.length; i++)
-        {
-            categories[i] = 0.0f;
-        }
         int size = entities.size();
-        for (int i = 0; i < size; i++)
+        int year = minYear;
+        for (int i = 0; i < size; i++) // Loop through every entity
         {
             ExpenditureEntity entity = entities.get(i);
-            int year = entity.getYear();
-            years[year - minYear] += entity.getAmount();
-            if (_dualAmounts)
+            int entityYear = entity.getYear(); // Check if the entity is the year currently being summed
+            while (entityYear > year) // When we've reached an entity for a new year, publish
             {
-                int category = entity.getCategory();
-                categories[category] += entity.getAmount();
+                publishProgress(new SummationResult("" + year, years[year - minYear], year, false));
+                year++;
             }
-            else { }
+            years[year - minYear] += entity.getAmount(); // Add the amount to the year
         }
+        publishProgress(new SummationResult("" + year, years[year - minYear], year, true));
     }
 
     private void getCategoricalSummations(float[] categories, List<ExpenditureEntity> entities)
