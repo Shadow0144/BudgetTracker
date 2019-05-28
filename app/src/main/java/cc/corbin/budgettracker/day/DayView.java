@@ -23,10 +23,9 @@ import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 
-// An individual day's worth of expenditures
-public class DayList extends LinearLayout
+public class DayView extends LinearLayout
 {
-    private final static String TAG = "DayList";
+    private final static String TAG = "DayView";
 
     private final int PAGE_MARGIN = 4;
     private final int PROGRESS_BAR_MARGIN = 36;
@@ -51,7 +50,7 @@ public class DayList extends LinearLayout
 
     private Calendar _date;
 
-    public DayList(Context context)
+    public DayView(Context context)
     {
         super(context);
         _context = context;
@@ -62,7 +61,7 @@ public class DayList extends LinearLayout
                 ViewGroup.LayoutParams.MATCH_PARENT);
         setLayoutParams(params);
 
-        setupDateTextView();
+        setupHeader();
 
         setupTotalTextView();
 
@@ -107,7 +106,7 @@ public class DayList extends LinearLayout
         else { }
     }
 
-    private void setupDateTextView()
+    private void setupHeader()
     {
         _dateTextView = new TextView(_context);
         _dateTextView.setText("");

@@ -9,12 +9,15 @@ import android.widget.TableRow;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
+import cc.corbin.budgettracker.BudgetTrackerApplication;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
+import cc.corbin.budgettracker.day.DayViewActivity;
 
 public class WeeklySummaryTable extends NewTimeSummaryTable
 {
@@ -28,28 +31,33 @@ public class WeeklySummaryTable extends NewTimeSummaryTable
     private boolean _expendituresFullyLoaded;
     private boolean _budgetsLoaded;
 
-    // Potentially multiple months
-    public WeeklySummaryTable(Context context, AttributeSet attrs)
+    private boolean _shortMonth;
+
+    public WeeklySummaryTable(Context context, int year, int month)
     {
-        super(context, attrs);
+        super(context, year, month, 0);
     }
 
-    // Potentially multiple months
-    public WeeklySummaryTable(Context context)
+    public WeeklySummaryTable(Context context, int[] years, int[] months)
     {
-        super(context);
-    }
-
-    public WeeklySummaryTable(Context context, boolean multimonth)
-    {
-        super(context, multimonth);
+        super(context, years, months, new int[0]);
     }
 
     @Override
     public void onClick(View v)
     {
-        Intent intent;
-        // TODO Jump to year
+        Intent intent = new Intent(BudgetTrackerApplication.getInstance(), DayViewActivity.class);
+
+        int week = ((int)v.getTag()); // TODO - Fix for multimonth and February - also the other places for February too
+        int day = ((week - 1) * 7) + 1;
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(_year, _month-1, day);
+        intent.putExtra(DayViewActivity.YEAR_INTENT, calendar.get(Calendar.YEAR));
+        intent.putExtra(DayViewActivity.MONTH_INTENT, calendar.get(Calendar.MONTH)+1);
+        intent.putExtra(DayViewActivity.DAY_INTENT, calendar.get(Calendar.DATE));
+
+        _context.startActivity(intent);
     }
 
     protected void setupTitle()
@@ -66,6 +74,7 @@ public class WeeklySummaryTable extends NewTimeSummaryTable
     {
         _expendituresFullyLoaded = false;
         _budgetsLoaded = false;
+        _rows = 0;
 
         if (_multiTime)
         {
@@ -76,8 +85,6 @@ public class WeeklySummaryTable extends NewTimeSummaryTable
         {
             setupWeekRows();
         }
-
-        _rows = 0;
     }
 
     // Called by a multi-month view
@@ -196,20 +203,66 @@ public class WeeklySummaryTable extends NewTimeSummaryTable
 
     private void setupWeekRows()
     {
-        _rows = 6; // 5 weeks + extras
+        _shortMonth = checkForShortMonth();
+        _rows = _shortMonth ? 5 : 6; // 5 weeks + extras (4 for February in non-leap year)
         String[] weeks = new String[_rows]; // TODO - Stringify
         weeks[0] = "Extras";
         weeks[1] = "Week 1";
         weeks[2] = "Week 2";
         weeks[3] = "Week 3";
         weeks[4] = "Week 4";
-        weeks[5] = "Week 5";
+        if (!_shortMonth)
+        {
+            weeks[5] = "Week 5";
+        }
+        else { }
 
         addExtrasRow();
         for (int i = 1; i < _rows; i++) // Add a row for each week
         {
-            addWeekRow(weeks[i], (i + 1));
+            addWeekRow(weeks[i], i);
         }
+
+        if (_shortMonth)
+        {
+            addEmptyWeek();
+        }
+        else { }
+    }
+
+    private boolean checkForShortMonth()
+    {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(_year, _month-1, 1);
+        boolean shortMonth = (calendar.getActualMaximum(Calendar.DAY_OF_MONTH) <= 28);
+        return shortMonth;
+    }
+
+    private void addEmptyWeek()
+    {
+        TableRow tableRow = new TableRow(_context);
+        TableCell labelCell = new TableCell(_context, TableCell.HEADER_CELL);
+        TableCell expenseCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+        TableCell budgetCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+        TableCell remainingCell = new TableCell(_context, TableCell.DEFAULT_CELL);
+
+        labelCell.setText("---");
+        expenseCell.setText("---");
+        budgetCell.setText("---");
+        remainingCell.setLoading(true);
+
+        budgetCell.setType(TableCell.ITALIC_CELL);
+
+        _expenseCells.add(expenseCell);
+        _budgetCells.add(budgetCell);
+        _remainingCells.add(remainingCell);
+
+        tableRow.addView(labelCell);
+        tableRow.addView(expenseCell);
+        tableRow.addView(budgetCell);
+        tableRow.addView(remainingCell);
+
+        addView(tableRow);
     }
 
     private void addWeekRow(String label, int id)
@@ -255,7 +308,7 @@ public class WeeklySummaryTable extends NewTimeSummaryTable
         if (!_multiTime)
         {
             _totalExpenses = 0.0f;
-            for (int i = 0; i < amounts.length; i++)
+            for (int i = 0; i < _rows; i++)
             {
                 _expenses.add(amounts[i]);
                 _expenseCells.get(i).setText(Currencies.formatCurrency(Currencies.default_currency, amounts[i]));
@@ -297,12 +350,11 @@ public class WeeklySummaryTable extends NewTimeSummaryTable
         _budgetsLoaded = true;
     }
 
-    private void updateBudgetCells() // TODO - Switch to percentages
+    private void updateBudgetCells()
     {
         // One set of category-amount budgets per month
         // Six rows per month (5 weeks plus extras)
-        int rows = 6; // Rows per month
-        int weeks = 6; // Each month's budget is divided into 5 pieces
+        int rows = 6; // Rows per month (the budgets include an empty entry for week 5 even in short months)
         int catSize = Categories.getCategories().length;
         int buds = _budgets.size() / catSize; // The number of months
         float total = 0.0f;
@@ -316,21 +368,27 @@ public class WeeklySummaryTable extends NewTimeSummaryTable
             }
             total += monthTotal;
             float remaining = monthTotal;
-            for (int j = 0; j < weeks; j++) // The extras row is set to dashes
+            for (int j = 0; j < _rows; j++) // The extras row is set to dashes
             {
                 int index = (i*rows)+j;
                 float spent = _expenses.get(index);
                 remaining -= spent;
-                float budget = (spent / monthTotal);
+                float budget = (monthTotal == 0.0f) ? 0.0f : (spent / monthTotal); // If it's zero, then don't divide by it
                 _budgetCells.get(index).setText(percentage.format(budget));
                 _budgetCells.get(index).setLoading(false);
                 _remainingCells.get(index).setText(Currencies.formatCurrency(Currencies.default_currency, remaining));
                 _remainingCells.get(index).setLoading(false);
             }
         }
+        float totalRemaining = total - _totalExpenses;
+        if (_shortMonth) // If a short month, add the remaining into the last column
+        {
+            _remainingCells.get(_rows).setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
+            _remainingCells.get(_rows).setLoading(false);
+        }
+        else { }
         _totalBudgetCell.setText(Currencies.formatCurrency(Currencies.default_currency, total));
         _totalBudgetCell.setLoading(false);
-        float totalRemaining = total - _totalExpenses;
         _totalRemainingCell.setText(Currencies.formatCurrency(Currencies.default_currency, totalRemaining));
         _totalRemainingCell.setLoading(false);
     }

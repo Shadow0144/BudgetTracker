@@ -205,7 +205,7 @@ public class YearViewActivity extends NavigationActivity
         });
 
         FrameLayout yearMonthlyContainer = findViewById(R.id.yearMonthlyHolder);
-        _monthlyTable = new MonthlySummaryTable(this, false);
+        _monthlyTable = new MonthlySummaryTable(this, _year);
         yearMonthlyContainer.addView(_monthlyTable);
 
         FrameLayout yearsCategoryContainer = findViewById(R.id.yearCategoryHolder);

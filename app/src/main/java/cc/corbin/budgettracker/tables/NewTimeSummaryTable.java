@@ -55,30 +55,33 @@ public abstract class NewTimeSummaryTable extends TableLayout implements View.On
     protected int _rows;
 
     protected boolean _multiTime;
+    protected int _year;
+    protected int _month;
+    protected int _day;
+    private int[] _years;
+    private int[] _months;
+    private int[] _days;
 
-    public NewTimeSummaryTable(Context context, AttributeSet attrs)
+    public NewTimeSummaryTable(Context context, int year, int month, int day)
     {
-        super(context, attrs);
+        super(context);
         _context = context;
-        _multiTime = true;
+        _multiTime = false;
+        _year = year;
+        _month = month;
+        _day = day;
 
         setupTable();
     }
 
-    public NewTimeSummaryTable(Context context)
+    public NewTimeSummaryTable(Context context, int[] years, int[] months, int[] days)
     {
         super(context);
         _context = context;
-        _multiTime = true;
-
-        setupTable();
-    }
-
-    public NewTimeSummaryTable(Context context, boolean multiTime)
-    {
-        super(context);
-        _context = context;
-        _multiTime = multiTime;
+        _multiTime = false;
+        _years = years;
+        _months = months;
+        _days = days;
 
         setupTable();
     }

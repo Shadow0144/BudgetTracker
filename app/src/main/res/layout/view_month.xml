@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/contentFrame"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/dateLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryDark"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/dateTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:layout_weight="2"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:textColor="@android:color/background_light"
+            android:textSize="24sp"
+            android:textStyle="normal|bold" />
+
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:id="@+id/monthLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="15dp" />
+
+            <FrameLayout
+                android:id="@+id/monthWeeklyHolder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"></FrameLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="15dp" />
+
+            <FrameLayout
+                android:id="@+id/monthCategoryHolder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"></FrameLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="15dp" />
+
+            <FrameLayout
+                android:id="@+id/monthExtraHolder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"></FrameLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="15dp" />
+
+            <FrameLayout
+                android:id="@+id/monthAdjustmentHolder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"></FrameLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="15dp" />
+
+            <FrameLayout
+                android:id="@+id/monthWeeklyPieHolder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            </FrameLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="15dp" />
+
+            <FrameLayout
+                android:id="@+id/monthCategoryPieHolder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"></FrameLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="15dp" />
+
+            <FrameLayout
+                android:id="@+id/monthWeeklyLineGraphHolder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"></FrameLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="15dp" />
+
+            <FrameLayout
+                android:id="@+id/monthExpandableBudgetHolder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"></FrameLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="15dp" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

@@ -26,15 +26,14 @@ public class YearlySummaryTable extends NewTimeSummaryTable
     private boolean _expendituresFullyLoaded;
     private boolean _budgetsLoaded;
 
-    public YearlySummaryTable(Context context, AttributeSet attrs)
-    {
-        super(context, attrs);
-    }
-
-    // Total
     public YearlySummaryTable(Context context)
     {
-        super(context);
+        super(context, 0, 0, 0);
+    }
+
+    public YearlySummaryTable(Context context, int[] years)
+    {
+        super(context, years, new int[0], new int[0]);
     }
 
     @Override

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -58,12 +59,15 @@ public class LineGraph extends RelativeLayout
 
     private final float POINT_PADDING_Y = 0.03f;
 
-    private final float GUIDELINE_LABEL_OFFSET = 0.01f;
+    private final float GUIDELINE_LABEL_OFFSET_X = 0.05f;
+    private final float GUIDELINE_LABEL_OFFSET_Y = -0.0175f;
 
     private final int BORDER_STROKE = 3;
     private final int MARKER_STROKE = 3;
     private final int POINT_STROKE = 20;
     private final int POINT_LINE_STROKE = 10;
+    private final float DASH_LENGTH = 20.0f;
+    private final float DASH_SPACING = 10.0f;
 
     private final int MAX_CHARACTERS = 7;
 
@@ -169,6 +173,7 @@ public class LineGraph extends RelativeLayout
         _guidelinePaint.setColor(Color.BLACK);
         _guidelinePaint.setStrokeWidth(POINT_LINE_STROKE);
         _guidelinePaint.setStyle(Paint.Style.STROKE);
+        _guidelinePaint.setPathEffect(new DashPathEffect(new float[] {DASH_LENGTH, DASH_SPACING}, 0));
     }
 
     public void setTitle(String title)
@@ -250,7 +255,8 @@ public class LineGraph extends RelativeLayout
             int boxH = boxB - boxT - paddingY;
             int labelY = (int)(h * LABEL_OFFSET_Y);
             int scaleOffsetY = (int)(h * SCALE_OFFSET_Y);
-            int guideLabelOffsetY = (int)(h * GUIDELINE_LABEL_OFFSET);
+            int guideLabelOffsetX = (int)(w * GUIDELINE_LABEL_OFFSET_X);
+            int guideLabelOffsetY = (int)(h * GUIDELINE_LABEL_OFFSET_Y);
 
             for (int i = 0; i < _amounts.length; i++)
             {
@@ -272,7 +278,7 @@ public class LineGraph extends RelativeLayout
                 for (int i = 0; i < _guidelines.length; i++)
                 {
                     canvas.drawLine(boxL, boxB - (boxH * _guidelines[i]), boxR, boxB - (boxH * _guidelines[i]), _guidelinePaint);
-                    canvas.drawText(_guidelineLabels[i], boxL, boxB - (boxH * _guidelines[i]) + guideLabelOffsetY, _labelPaint);
+                    canvas.drawText(_guidelineLabels[i], boxL + guideLabelOffsetX, boxB - (boxH * _guidelines[i]) + guideLabelOffsetY, _labelPaint);
                 }
             }
             else { }

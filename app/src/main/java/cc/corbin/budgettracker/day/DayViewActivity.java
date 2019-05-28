@@ -1,38 +1,28 @@
 package cc.corbin.budgettracker.day;
 
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.graphics.Color;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import java.util.Calendar;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.NavigationActivity;
-import cc.corbin.budgettracker.auxilliary.NavigationDrawerHelper;
+import cc.corbin.budgettracker.auxilliary.PagingActivity;
 import cc.corbin.budgettracker.edit.ExpenditureEditActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.settings.SettingsActivity;
-import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.month.MonthViewActivity;
 import cc.corbin.budgettracker.R;
 
-public class DayViewActivity extends NavigationActivity
+public class DayViewActivity extends PagingActivity
 {
     private final String TAG = "DayViewActivity";
 
@@ -48,18 +38,15 @@ public class DayViewActivity extends NavigationActivity
     public final static int DELETE = 2;
     public final static int FAILURE = -1;
 
-    private RecyclerView _recyclerView;
-    private LinearLayoutManager _layoutManager;
-
     private Calendar _currentDate;
-
-    private ExpenditureViewModel _viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        setContentView(R.layout.activity_day_view);
         super.onCreate(savedInstanceState);
+
+        final Button addItemButton = findViewById(R.id.addItemButton);
+        addItemButton.setVisibility(View.VISIBLE);
 
         int day = getIntent().getIntExtra(DAY_INTENT, Calendar.getInstance().get(Calendar.DATE));
         int month = getIntent().getIntExtra(MONTH_INTENT, Calendar.getInstance().get(Calendar.MONTH)+1); // Add 1 in case the intent is set or not
@@ -68,8 +55,6 @@ public class DayViewActivity extends NavigationActivity
         _currentDate.set(year, month-1, day);
 
         setupDayView();
-
-        _viewModel = ExpenditureViewModel.getInstance();
 
         if (!Categories.areCategoriesLoaded())
         {
@@ -80,34 +65,16 @@ public class DayViewActivity extends NavigationActivity
 
     private void setupDayView()
     {
-        _recyclerView = findViewById(R.id.itemsPager);
-        _recyclerView.setBackgroundColor(Color.BLACK);
-        _recyclerView.setHasFixedSize(true);
-        _layoutManager = new LinearLayoutManager(this);
-        _layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-        _recyclerView.setLayoutManager(_layoutManager);
         final DayRecyclerAdapter adapter = new DayRecyclerAdapter();
-        _recyclerView.setAdapter(adapter);
-        SnapHelper snapHelper = new PagerSnapHelper();
-        snapHelper.attachToRecyclerView(_recyclerView);
+        setupAdapterView(adapter);
         int time = ((int)(_currentDate.getTimeInMillis() / 1000 / 60 / 60 / 24));
         _recyclerView.scrollToPosition(time);
     }
 
-    public void previousDay(View v)
-    {
-        _recyclerView.smoothScrollToPosition(_layoutManager.findFirstVisibleItemPosition()-1);
-    }
-
-    public void nextDay(View v)
-    {
-        _recyclerView.smoothScrollToPosition(_layoutManager.findFirstVisibleItemPosition()+1);
-    }
-
     public void addItem(View v)
     {
-        DayList dayList = (DayList)_layoutManager.findViewByPosition(_layoutManager.findFirstVisibleItemPosition());
-        Calendar date = dayList.getDate();
+        DayView dayView = (DayView)_layoutManager.findViewByPosition(_layoutManager.findFirstVisibleItemPosition());
+        Calendar date = dayView.getDate();
         Intent intent = new Intent(getApplicationContext(), ExpenditureEditActivity.class);
         intent.putExtra(ExpenditureEditActivity.YEAR_INTENT, date.get(Calendar.YEAR));
         intent.putExtra(ExpenditureEditActivity.MONTH_INTENT, date.get(Calendar.MONTH)+1);
@@ -175,12 +142,11 @@ public class DayViewActivity extends NavigationActivity
 
     public void moveToMonthView(View v)
     {
-        DayList dayList = (DayList)_layoutManager.findViewByPosition(_layoutManager.findFirstVisibleItemPosition());
-        Calendar date = dayList.getDate();
+        DayView dayView = (DayView)_layoutManager.findViewByPosition(_layoutManager.findFirstVisibleItemPosition());
+        Calendar date = dayView.getDate();
         Intent intent = new Intent(getApplicationContext(), MonthViewActivity.class);
         intent.putExtra(ExpenditureEditActivity.YEAR_INTENT, date.get(Calendar.YEAR));
         intent.putExtra(ExpenditureEditActivity.MONTH_INTENT, date.get(Calendar.MONTH)+1);
         startActivity(intent);
-        //finish();
     }
 }

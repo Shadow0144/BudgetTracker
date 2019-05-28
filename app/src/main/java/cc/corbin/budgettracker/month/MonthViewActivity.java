@@ -3,8 +3,14 @@ package cc.corbin.budgettracker.month;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PagerSnapHelper;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SnapHelper;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +28,8 @@ import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.NavigationActivity;
 import cc.corbin.budgettracker.auxilliary.LineGraph;
+import cc.corbin.budgettracker.auxilliary.PagingActivity;
+import cc.corbin.budgettracker.day.DayRecyclerAdapter;
 import cc.corbin.budgettracker.edit.AdjustmentEditActivity;
 import cc.corbin.budgettracker.auxilliary.PieChart;
 import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
@@ -43,7 +51,7 @@ import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
  * Created by Corbin on 1/28/2018.
  */
 
-public class MonthViewActivity extends NavigationActivity
+public class MonthViewActivity extends PagingActivity
 {
     private final String TAG = "MonthViewActivity";
 
@@ -60,310 +68,83 @@ public class MonthViewActivity extends NavigationActivity
     public final static int DELETE = 2;
     public final static int FAILURE = -1;
 
-    private int _month;
-    private int _year;
-
-    private WeeklySummaryTable _weeklyTable;
-    private CategorySummaryTable _categoryTable;
-    private ExtrasTable _extrasTable;
-    private ExpandableBudgetTable _expandableBudgetTable;
-
-    private PieChart _weeklyPieChart;
-    private PieChart _categoryPieChart;
-
-    private LineGraph _weeklyLineGraph;
-
-    private ExpenditureViewModel _viewModel;
-    private MutableLiveData<List<ExpenditureEntity>> _monthExps;
-    private MutableLiveData<List<BudgetEntity>> _budgets;
-
-    private MutableLiveData<float[]> _weeklyAmounts;
-    private MutableLiveData<float[]> _categoricalAmounts;
-
-    private MonthEditBudgetItemHelper _monthEditBudgetItemHelper;
+    private Calendar _currentDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        setContentView(R.layout.activity_month_view);
         super.onCreate(savedInstanceState);
 
-        _month = getIntent().getIntExtra(MONTH_INTENT, Calendar.getInstance().get(Calendar.MONTH)+1);
-        _year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
+        int month = getIntent().getIntExtra(MONTH_INTENT, Calendar.getInstance().get(Calendar.MONTH)+1);
+        int year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
+        _currentDate = Calendar.getInstance();
+        _currentDate.set(year, month-1, 1);
 
-        _viewModel = ExpenditureViewModel.getInstance();
-
-        setupHeader();
-
-        setupObservers();
-
-        setupViews();
-
-        _viewModel.getMonth(_monthExps, _year, _month);
+        setupMonthView();
     }
 
-    public void refreshView()
+    private void setupMonthView()
     {
-        _weeklyTable.resetTable();
-        _categoryTable.resetTable();
-        _expandableBudgetTable.resetTable();
-        _weeklyPieChart.clearData();
-        _categoryPieChart.clearData();
-        _weeklyLineGraph.clearData();
-
-        _viewModel.getMonth(_monthExps, _year, _month);
-    }
-
-    private void setupHeader()
-    {
-        TextView header = findViewById(R.id.monthView);
-        DateFormatSymbols dfs = new DateFormatSymbols();
-        header.setText(dfs.getMonths()[_month-1] + " " + _year);
-        header.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent(getApplicationContext(), YearViewActivity.class);
-                intent.putExtra(YearViewActivity.YEAR_INTENT, _year);
-                startActivity(intent);
-            }
-        });
-    }
-
-    private void setupObservers()
-    {
-        final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
-        {
-            @Override
-            public void onChanged(@Nullable List<ExpenditureEntity> expenditureEntities)
-            {
-                if (expenditureEntities != null)
-                {
-                    monthExpsLoaded(expenditureEntities);
-                }
-                else { }
-            }
-        };
-
-        final Observer<List<BudgetEntity>> budgetObserver = new Observer<List<BudgetEntity>>()
-        {
-            @Override
-            public void onChanged(@Nullable List<BudgetEntity> budgetEntities)
-            {
-                if (budgetEntities != null) // returning from a query
-                {
-                    monthBudgetsLoaded(budgetEntities);
-                }
-                else { }
-            }
-        };
-
-        final Observer<float[]> weeklyAmountsObserver = new Observer<float[]>()
-        {
-            @Override
-            public void onChanged(@Nullable float[] amounts)
-            {
-                _weeklyTable.updateExpenditures(amounts);
-
-                String[] weekLabels = new String[7];
-                weekLabels[0] = getString(R.string.extras);
-                weekLabels[1] = "Week 1";
-                weekLabels[2] = "Week 2";
-                weekLabels[3] = "Week 3";
-                weekLabels[4] = "Week 4";
-                weekLabels[5] = "Week 5";
-                weekLabels[6] = "Adjustments";
-
-                _weeklyPieChart.setData(amounts, weekLabels);
-                _weeklyLineGraph.setData(amounts, weekLabels);
-            }
-        };
-
-        final Observer<float[]> categoricalAmountsObserver = new Observer<float[]>()
-        {
-            @Override
-            public void onChanged(@Nullable float[] amounts)
-            {
-                _categoryTable.updateExpenditures(amounts);
-
-                String[] categoryLabels = Categories.getCategories();
-                _categoryPieChart.setData(amounts, categoryLabels);
-            }
-        };
-
-        _monthExps = new MutableLiveData<List<ExpenditureEntity>>();
-        _monthExps.observe(this, entityObserver);
-        _budgets = new MutableLiveData<List<BudgetEntity>>();
-        _budgets.observe(this, budgetObserver);
-
-        _weeklyAmounts = new MutableLiveData<float[]>();
-        _weeklyAmounts.observe(this, weeklyAmountsObserver);
-        _categoricalAmounts = new MutableLiveData<float[]>();
-        _categoricalAmounts.observe(this, categoricalAmountsObserver);
-    }
-
-    private void setupViews()
-    {
-        FrameLayout monthsWeeklyContainer = findViewById(R.id.monthWeeklyHolder);
-        _weeklyTable = new WeeklySummaryTable(this, false);
-        monthsWeeklyContainer.addView(_weeklyTable);
-
-        FrameLayout monthsCategoryContainer = findViewById(R.id.monthCategoryHolder);
-        _categoryTable = new CategorySummaryTable(this);
-        monthsCategoryContainer.addView(_categoryTable);
-
-        FrameLayout expandableBudgetContainer = findViewById(R.id.monthExpandableBudgetHolder);
-        _expandableBudgetTable = new ExpandableBudgetTable(this, _month, _year);
-        expandableBudgetContainer.addView(_expandableBudgetTable);
-
-        FrameLayout weeklyPieContainer = findViewById(R.id.monthWeeklyPieHolder);
-        _weeklyPieChart = new PieChart(this);
-        _weeklyPieChart.setTitle(getString(R.string.weekly_spending));
-        weeklyPieContainer.addView(_weeklyPieChart);
-
-        FrameLayout categoryPieContainer = findViewById(R.id.monthCategoryPieHolder);
-        _categoryPieChart = new PieChart(this);
-        _categoryPieChart.setTitle(getString(R.string.categorical_spending));
-        categoryPieContainer.addView(_categoryPieChart);
-
-        FrameLayout weeklyLineGraphHolder = findViewById(R.id.monthWeeklyLineGraphHolder);
-        _weeklyLineGraph = new LineGraph(this);
-        _weeklyLineGraph.setTitle(getString(R.string.weekly_spending));
-        weeklyLineGraphHolder.addView(_weeklyLineGraph);
-
-        FrameLayout extrasContainer = findViewById(R.id.monthExtraHolder);
-        _extrasTable = new ExtrasTable(this, _year, _month);
-        extrasContainer.addView(_extrasTable);
-    }
-
-    private void monthExpsLoaded(List<ExpenditureEntity> expenditureEntities)
-    {
-        _extrasTable.updateExpenditures(expenditureEntities);
-
-        final SummationAsyncTask weeklyAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.weekly, _weeklyAmounts);
-        final SummationAsyncTask categoricalAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.categorically, _categoricalAmounts);
-        weeklyAsyncTask.execute(expenditureEntities);
-        categoricalAsyncTask.execute(expenditureEntities);
-
-        _viewModel.getMonthBudget(_budgets, _year, _month);
-    }
-
-    private void monthBudgetsLoaded(List<BudgetEntity> budgetEntities)
-    {
-        _weeklyTable.updateBudgets(budgetEntities);
-        _categoryTable.updateBudgets(budgetEntities);
-        _expandableBudgetTable.refreshTable(budgetEntities);
-
-        // Create a budget line for the line graph
-        float budget = 0;
-        int size = budgetEntities.size();
-        for (int i = 0; i < size; i++)
-        {
-            budget += budgetEntities.get(i).getAmount();
-        }
-        float[] guidelineAmounts = new float[] {budget / 5}; // TODO
-        String[] guidelineLabels = new String[] { getString(R.string.budget) };
-        _weeklyLineGraph.addGuildelines(guidelineAmounts, guidelineLabels);
-    }
-
-    public void previousMonth(View v)
-    {
-        Intent intent = new Intent(getApplicationContext(), MonthViewActivity.class);
-        if (_month > 1)
-        {
-            intent.putExtra(MonthViewActivity.MONTH_INTENT, _month - 1);
-            intent.putExtra(MonthViewActivity.YEAR_INTENT, _year);
-        }
-        else
-        {
-            intent.putExtra(MonthViewActivity.MONTH_INTENT, 12);
-            intent.putExtra(MonthViewActivity.YEAR_INTENT, _year - 1);
-        }
-        startActivity(intent);
-        finish();
-    }
-
-    public void nextMonth(View v)
-    {
-        Intent intent = new Intent(getApplicationContext(), MonthViewActivity.class);
-        if (_month < 12)
-        {
-            intent.putExtra(MonthViewActivity.MONTH_INTENT, _month + 1);
-            intent.putExtra(MonthViewActivity.YEAR_INTENT, _year);
-        }
-        else
-        {
-            intent.putExtra(MonthViewActivity.MONTH_INTENT, 1);
-            intent.putExtra(MonthViewActivity.YEAR_INTENT, _year + 1);
-        }
-        startActivity(intent);
-        finish();
-    }
-
-    public void editBudgetItem(int id)
-    {
-        _monthEditBudgetItemHelper = new MonthEditBudgetItemHelper(this, _budgets, id, _year, _month, _viewModel);
-    }
-
-    public void confirmBudgetItemEdit(View v)
-    {
-        _monthEditBudgetItemHelper.confirmBudgetItemEdit(v);
-        _expandableBudgetTable.clearBudgetEntity(_monthEditBudgetItemHelper.getBudgetId());
-    }
-
-    public void cancelBudgetItemEdit(View v)
-    {
-        _monthEditBudgetItemHelper.cancelBudgetItemEdit(v);
-    }
-
-    public void removeBudgeItem(View v)
-    {
-        _monthEditBudgetItemHelper.removeBudgeItem(v);
-        _expandableBudgetTable.clearBudgetEntity(_monthEditBudgetItemHelper.getBudgetId());
+        final MonthRecyclerAdapter adapter = new MonthRecyclerAdapter();
+        setupAdapterView(adapter);
+        int time = (_currentDate.get(Calendar.YEAR)*12) + (_currentDate.get(Calendar.MONTH)+1);
+        _recyclerView.scrollToPosition(time);
     }
 
     public void createExtraExpenditure()
     {
-        Intent intent = new Intent(getApplicationContext(), ExpenditureEditActivity.class);
-        intent.putExtra(ExpenditureEditActivity.YEAR_INTENT, _year);
-        intent.putExtra(ExpenditureEditActivity.MONTH_INTENT, _month);
-        intent.putExtra(ExpenditureEditActivity.DAY_INTENT, 0);
-        intent.putExtra(ExpenditureEditActivity.TYPE_INTENT, CREATE_EXT_EXPENDITURE);
-        startActivityForResult(intent, CREATE_EXT_EXPENDITURE);
+        ((MonthView)(_layoutManager.findViewByPosition(_layoutManager.findFirstVisibleItemPosition())))
+                .createExtraExpenditure();
     }
 
     public void editExtraExpenditure(ExpenditureEntity entity)
     {
-        Intent intent = new Intent(getApplicationContext(), ExpenditureEditActivity.class);
-        intent.putExtra(ExpenditureEditActivity.YEAR_INTENT, _year);
-        intent.putExtra(ExpenditureEditActivity.MONTH_INTENT, _month);
-        intent.putExtra(ExpenditureEditActivity.DAY_INTENT, 0);
-        intent.putExtra(ExpenditureEditActivity.EXPENDITURE_INTENT, entity);
-        intent.putExtra(ExpenditureEditActivity.TYPE_INTENT, EDIT_EXT_EXPENDITURE);
-        startActivityForResult(intent, EDIT_EXT_EXPENDITURE);
+        ((MonthView)(_layoutManager.findViewByPosition(_layoutManager.findFirstVisibleItemPosition())))
+                .editExtraExpenditure(entity);
+    }
+
+    public void editBudgetItem(int categoryNumber)
+    {
+        final MonthView monthView = ((MonthView)(_layoutManager.findViewByPosition(_layoutManager.findFirstVisibleItemPosition())));
+        monthView.editBudgetItem(monthView.getBudgets(), categoryNumber, monthView.getYear(), monthView.getMonth());
+    }
+
+    public void confirmBudgetItemEdit(View v)
+    {
+        ((MonthView)(_layoutManager.findViewByPosition(_layoutManager.findFirstVisibleItemPosition())))
+                .confirmBudgetItemEdit(v);
+
+    }
+
+    public void cancelBudgetItemEdit(View v)
+    {
+        ((MonthView)(_layoutManager.findViewByPosition(_layoutManager.findFirstVisibleItemPosition())))
+                .cancelBudgetItemEdit(v);
+    }
+
+    public void removeBudgeItem(View v)
+    {
+        ((MonthView)(_layoutManager.findViewByPosition(_layoutManager.findFirstVisibleItemPosition())))
+                .removeBudgeItem(v);
     }
 
     public void createAdjustmentExpenditure(int category)
     {
-        Intent intent = new Intent(getApplicationContext(), AdjustmentEditActivity.class);
-        intent.putExtra(AdjustmentEditActivity.YEAR_INTENT, _year);
-        intent.putExtra(AdjustmentEditActivity.MONTH_INTENT, _month);
-        intent.putExtra(AdjustmentEditActivity.CATEGORY_INTENT, category);
-        intent.putExtra(AdjustmentEditActivity.TYPE_INTENT, CREATE_ADJUSTMENT);
-        startActivityForResult(intent, CREATE_ADJUSTMENT);
+        ((MonthView)(_layoutManager.findViewByPosition(_layoutManager.findFirstVisibleItemPosition())))
+                .createAdjustmentExpenditure(category);
     }
 
     public void editAdjustmentExpenditure(BudgetEntity entity, int groupIndex, int childIndex)
     {
-        Intent intent = new Intent(getApplicationContext(), AdjustmentEditActivity.class);
-        intent.putExtra(AdjustmentEditActivity.YEAR_INTENT, _year);
-        intent.putExtra(AdjustmentEditActivity.MONTH_INTENT, _month);
-        intent.putExtra(AdjustmentEditActivity.BUDGET_INTENT, entity);
-        intent.putExtra(AdjustmentEditActivity.GROUP_INDEX_INTENT, groupIndex);
-        intent.putExtra(AdjustmentEditActivity.CHILD_INDEX_INTENT, childIndex);
-        intent.putExtra(AdjustmentEditActivity.TYPE_INTENT, EDIT_ADJUSTMENT);
-        startActivityForResult(intent, EDIT_ADJUSTMENT);
+        ((MonthView)(_layoutManager.findViewByPosition(_layoutManager.findFirstVisibleItemPosition())))
+                .editAdjustmentExpenditure(entity, groupIndex, childIndex);
+    }
+
+    public void moveToYearView(View v)
+    {
+        Intent intent = new Intent(getApplicationContext(), YearViewActivity.class);
+        intent.putExtra(YearViewActivity.YEAR_INTENT, _currentDate.get(Calendar.YEAR));
+        startActivity(intent);
     }
 
     @Override
@@ -371,7 +152,7 @@ public class MonthViewActivity extends NavigationActivity
     {
         if (resultCode == SettingsActivity.DATABASE_UPDATE_INTENT_FLAG)
         {
-            refreshView();
+            _recyclerView.getAdapter().notifyDataSetChanged();
         }
         else if (requestCode == SettingsActivity.DATABASE_NO_UPDATE_INTENT_FLAG)
         {
@@ -390,7 +171,7 @@ public class MonthViewActivity extends NavigationActivity
             {
                 if (resultCode == SUCCEED || resultCode == DELETE)
                 {
-                    refreshView();
+                    _recyclerView.getAdapter().notifyDataSetChanged();
                 }
                 else { }
             }

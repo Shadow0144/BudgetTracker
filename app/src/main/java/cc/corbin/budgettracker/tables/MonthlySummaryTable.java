@@ -28,21 +28,14 @@ public class MonthlySummaryTable extends NewTimeSummaryTable
     private boolean _expendituresFullyLoaded;
     private boolean _budgetsLoaded;
 
-    // Potentially multiple years
-    public MonthlySummaryTable(Context context, AttributeSet attrs)
+    public MonthlySummaryTable(Context context, int year)
     {
-        super(context, attrs);
+        super(context, year, 0, 0);
     }
 
-    // Potentially multiple years
-    public MonthlySummaryTable(Context context)
+    public MonthlySummaryTable(Context context, int[] years)
     {
-        super(context);
-    }
-
-    public MonthlySummaryTable(Context context, boolean multiyear)
-    {
-        super(context, multiyear);
+        super(context, years, new int[0], new int[0]);
     }
 
     @Override

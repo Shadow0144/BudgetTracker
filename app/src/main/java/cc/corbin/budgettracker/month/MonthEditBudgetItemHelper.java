@@ -23,7 +23,7 @@ public class MonthEditBudgetItemHelper
     private MonthViewActivity _parent;
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<BudgetEntity>> _budgets; // Changes will be posted
-    private int _budgetId; // The budget entity being edited
+    private int _categoryNumber; // The budget entity being edited
 
     private int _year;
     private int _month;
@@ -32,16 +32,16 @@ public class MonthEditBudgetItemHelper
     private NumericalFormattedEditText _amountEditText;
 
     public MonthEditBudgetItemHelper(MonthViewActivity parent, MutableLiveData<List<BudgetEntity>> budgets,
-                                     int budgetId, int year, int month, ExpenditureViewModel viewModel)
+                                     int categoryNumber, int year, int month)
     {
         _parent = parent;
-        _viewModel = viewModel;
+        _viewModel = ExpenditureViewModel.getInstance();
         _budgets = budgets;
-        _budgetId = budgetId;
+        _categoryNumber = categoryNumber;
         _year = year;
         _month = month;
 
-        BudgetEntity budgetEntity = _budgets.getValue().get(_budgetId);
+        BudgetEntity budgetEntity = _budgets.getValue().get(_categoryNumber);
 
         final View budgetEditView = _parent.getLayoutInflater().inflate(R.layout.popup_set_budget, null);
 
@@ -76,7 +76,7 @@ public class MonthEditBudgetItemHelper
     public void confirmBudgetItemEdit(View v)
     {
         float amount = _amountEditText.getAmount();
-        BudgetEntity budgetEntity = _budgets.getValue().get(_budgetId);
+        BudgetEntity budgetEntity = _budgets.getValue().get(_categoryNumber);
         budgetEntity.setAmount(amount);
 
         if (budgetEntity.getMonth() == _month && budgetEntity.getYear() == _year) // Edit
@@ -104,7 +104,7 @@ public class MonthEditBudgetItemHelper
 
     public void removeBudgeItem(View v)
     {
-        BudgetEntity budgetEntity = _budgets.getValue().get(_budgetId);
+        BudgetEntity budgetEntity = _budgets.getValue().get(_categoryNumber);
         _viewModel.removeBudgetEntity(budgetEntity);
         _viewModel.getMonthBudget(_budgets, _year, _month); // Update the budget tables etc with the correct values (including from previous months)
 
@@ -113,6 +113,6 @@ public class MonthEditBudgetItemHelper
 
     public int getBudgetId()
     {
-        return _budgetId;
+        return _categoryNumber;
     }
 }
