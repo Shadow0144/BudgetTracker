@@ -2,8 +2,6 @@ package cc.corbin.budgettracker.tables;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.TableRow;
 
@@ -17,10 +15,9 @@ import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
-import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.month.MonthViewActivity;
 
-public class MonthlySummaryTable extends NewTimeSummaryTable
+public class MonthlySummaryTable extends TimeSummaryTable
 {
     private final String TAG = "MonthlySummaryTable";
 
@@ -49,7 +46,6 @@ public class MonthlySummaryTable extends NewTimeSummaryTable
 
         int month = ((int)v.getTag());
 
-        Calendar calendar = Calendar.getInstance();
         intent.putExtra(MonthViewActivity.YEAR_INTENT, _year);
         intent.putExtra(MonthViewActivity.MONTH_INTENT, month);
 

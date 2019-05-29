@@ -2,20 +2,22 @@ package cc.corbin.budgettracker.tables;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.TableRow;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
+import cc.corbin.budgettracker.BudgetTrackerApplication;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
+import cc.corbin.budgettracker.month.MonthViewActivity;
+import cc.corbin.budgettracker.year.YearViewActivity;
 
-public class YearlySummaryTable extends NewTimeSummaryTable
+public class YearlySummaryTable extends TimeSummaryTable
 {
     private final String TAG = "YearlySummaryTable";
 
@@ -39,8 +41,13 @@ public class YearlySummaryTable extends NewTimeSummaryTable
     @Override
     public void onClick(View v)
     {
-        Intent intent;
-        // TODO Jump to year
+        Intent intent = new Intent(BudgetTrackerApplication.getInstance(), YearViewActivity.class);
+
+        int year = ((int)v.getTag());
+
+        intent.putExtra(MonthViewActivity.YEAR_INTENT, year);
+
+        _context.startActivity(intent);
     }
 
     protected void setupTitle()

@@ -2,8 +2,6 @@ package cc.corbin.budgettracker.tables;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.TableRow;
 
@@ -19,7 +17,7 @@ import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.day.DayViewActivity;
 
-public class WeeklySummaryTable extends NewTimeSummaryTable
+public class WeeklySummaryTable extends TimeSummaryTable
 {
     private final String TAG = "WeeklySummaryTable";
 
