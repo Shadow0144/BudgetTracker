@@ -45,7 +45,7 @@
                 android:layout_height="15dp" />
 
             <FrameLayout
-                android:id="@+id/monthWeeklyHolder"
+                android:id="@+id/yearMonthlyHolder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"></FrameLayout>
 
@@ -54,7 +54,7 @@
                 android:layout_height="15dp" />
 
             <FrameLayout
-                android:id="@+id/monthCategoryHolder"
+                android:id="@+id/yearCategoryHolder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"></FrameLayout>
 
@@ -63,25 +63,7 @@
                 android:layout_height="15dp" />
 
             <FrameLayout
-                android:id="@+id/monthExtraHolder"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"></FrameLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="15dp" />
-
-            <FrameLayout
-                android:id="@+id/monthAdjustmentHolder"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"></FrameLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="15dp" />
-
-            <FrameLayout
-                android:id="@+id/monthWeeklyPieHolder"
+                android:id="@+id/yearMonthlyPieHolder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -92,7 +74,7 @@
                 android:layout_height="15dp" />
 
             <FrameLayout
-                android:id="@+id/monthCategoryPieHolder"
+                android:id="@+id/yearCategoryPieHolder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"></FrameLayout>
 
@@ -101,16 +83,7 @@
                 android:layout_height="15dp" />
 
             <FrameLayout
-                android:id="@+id/monthWeeklyLineGraphHolder"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"></FrameLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="15dp" />
-
-            <FrameLayout
-                android:id="@+id/monthExpandableBudgetHolder"
+                android:id="@+id/yearMonthlyLineGraphHolder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"></FrameLayout>
 

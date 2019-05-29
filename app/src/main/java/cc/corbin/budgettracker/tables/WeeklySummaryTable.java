@@ -48,14 +48,12 @@ public class WeeklySummaryTable extends NewTimeSummaryTable
     {
         Intent intent = new Intent(BudgetTrackerApplication.getInstance(), DayViewActivity.class);
 
-        int week = ((int)v.getTag()); // TODO - Fix for multimonth and February - also the other places for February too
+        int week = ((int)v.getTag());
         int day = ((week - 1) * 7) + 1;
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(_year, _month-1, day);
-        intent.putExtra(DayViewActivity.YEAR_INTENT, calendar.get(Calendar.YEAR));
-        intent.putExtra(DayViewActivity.MONTH_INTENT, calendar.get(Calendar.MONTH)+1);
-        intent.putExtra(DayViewActivity.DAY_INTENT, calendar.get(Calendar.DATE));
+        intent.putExtra(DayViewActivity.YEAR_INTENT, _year);
+        intent.putExtra(DayViewActivity.MONTH_INTENT, _month);
+        intent.putExtra(DayViewActivity.DAY_INTENT, day);
 
         _context.startActivity(intent);
     }

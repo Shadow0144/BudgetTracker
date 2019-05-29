@@ -42,18 +42,12 @@ public class MonthView extends LinearLayout
 {
     private final String TAG = "MonthView";
 
-    public final static String MONTH_INTENT = "Month";
     public final static String YEAR_INTENT = "Year";
 
     public final static int CREATE_EXT_EXPENDITURE = 0;
     public final static int EDIT_EXT_EXPENDITURE = 1;
     public final static int CREATE_ADJUSTMENT = 2;
     public final static int EDIT_ADJUSTMENT = 3;
-
-    public final static int SUCCEED = 0;
-    public final static int CANCEL = 1;
-    public final static int DELETE = 2;
-    public final static int FAILURE = -1;
 
     private final int DATE_TEXT_TOP_PADDING = 24;
     private final int DATE_TEXT_BOT_PADDING = 36;
@@ -140,6 +134,30 @@ public class MonthView extends LinearLayout
         _viewModel.getMonth(_monthExps, _year, _month);
     }
 
+    private void setupHeader() // TODO ?
+    {
+        _dateTextView = findViewById(R.id.dateTextView);
+        LayoutParams params = new LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMargins(1, 1, 1, 0);
+        _dateTextView.setLayoutParams(params);
+        _dateTextView.setPadding(0, DATE_TEXT_TOP_PADDING, 0, DATE_TEXT_BOT_PADDING);
+        _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryDark));
+        _dateTextView.setTextColor(Color.WHITE);
+        _dateTextView.setTextSize(DATE_TEXT_SIZE);
+        _dateTextView.setTextAlignment(TEXT_ALIGNMENT_CENTER);
+        _dateTextView.setTypeface(_dateTextView.getTypeface(), Typeface.BOLD);
+        _dateTextView.setOnClickListener(new OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                ((MonthViewActivity)_context).moveToYearView(null);
+            }
+        });
+    }
+
     private void setupObservers()
     {
         final Observer<List<ExpenditureEntity>> entityObserver = new Observer<List<ExpenditureEntity>>()
@@ -210,30 +228,6 @@ public class MonthView extends LinearLayout
         _weeklyAmounts.observe(((FragmentActivity)_context), weeklyAmountsObserver);
         _categoricalAmounts = new MutableLiveData<float[]>();
         _categoricalAmounts.observe(((FragmentActivity)_context), categoricalAmountsObserver);
-    }
-
-    private void setupHeader() // TODO ?
-    {
-        _dateTextView = findViewById(R.id.dateTextView);
-        LayoutParams params = new LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMargins(1, 1, 1, 0);
-        _dateTextView.setLayoutParams(params);
-        _dateTextView.setPadding(0, DATE_TEXT_TOP_PADDING, 0, DATE_TEXT_BOT_PADDING);
-        _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryDark));
-        _dateTextView.setTextColor(Color.WHITE);
-        _dateTextView.setTextSize(DATE_TEXT_SIZE);
-        _dateTextView.setTextAlignment(TEXT_ALIGNMENT_CENTER);
-        _dateTextView.setTypeface(_dateTextView.getTypeface(), Typeface.BOLD);
-        _dateTextView.setOnClickListener(new OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                ((MonthViewActivity)_context).moveToYearView(null);
-            }
-        });
     }
 
     private void setupViews()

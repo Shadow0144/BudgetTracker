@@ -9,12 +9,16 @@ import android.widget.TableRow;
 
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
+import cc.corbin.budgettracker.BudgetTrackerApplication;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
+import cc.corbin.budgettracker.day.DayViewActivity;
+import cc.corbin.budgettracker.month.MonthViewActivity;
 
 public class MonthlySummaryTable extends NewTimeSummaryTable
 {
@@ -41,8 +45,15 @@ public class MonthlySummaryTable extends NewTimeSummaryTable
     @Override
     public void onClick(View v)
     {
-        Intent intent;
-        // TODO Jump to year
+        Intent intent = new Intent(BudgetTrackerApplication.getInstance(), MonthViewActivity.class);
+
+        int month = ((int)v.getTag());
+
+        Calendar calendar = Calendar.getInstance();
+        intent.putExtra(MonthViewActivity.YEAR_INTENT, _year);
+        intent.putExtra(MonthViewActivity.MONTH_INTENT, month);
+
+        _context.startActivity(intent);
     }
 
     protected void setupTitle()
@@ -183,6 +194,7 @@ public class MonthlySummaryTable extends NewTimeSummaryTable
     @Override
     public void updateExpenditures(float[] amounts)
     {
+        _expenses = new ArrayList<Float>();
         if (_rows == 0)
         {
             // TODO - If nothing was added, replace the loading row with the current year
@@ -193,6 +205,7 @@ public class MonthlySummaryTable extends NewTimeSummaryTable
         if (!_multiTime)
         {
             _totalExpenses = 0.0f;
+            ((ArrayList<Float>) _expenses).ensureCapacity(amounts.length);
             for (int i = 0; i < amounts.length; i++)
             {
                 _expenses.add(amounts[i]);
