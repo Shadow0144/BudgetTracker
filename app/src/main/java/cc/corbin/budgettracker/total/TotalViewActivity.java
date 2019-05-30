@@ -55,8 +55,9 @@ public class TotalViewActivity extends NavigationActivity implements AsyncSummat
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        setContentView(R.layout.activity_total_view);
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_total_view);
+        setup();
 
         _viewModel = ExpenditureViewModel.getInstance();
 

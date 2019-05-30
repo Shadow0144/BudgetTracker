@@ -21,11 +21,8 @@ public abstract class NavigationActivity extends AppCompatActivity implements Na
 
     private DrawerLayout _drawerLayout;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState)
+    protected void setup()
     {
-        super.onCreate(savedInstanceState);
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         try

@@ -42,8 +42,9 @@ public class GroupActivity extends NavigationActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        setContentView(R.layout.activity_group);
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_group);
+        setup();
 
         _viewModel = ExpenditureViewModel.getInstance();
     }

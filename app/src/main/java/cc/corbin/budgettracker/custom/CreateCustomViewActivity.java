@@ -43,8 +43,9 @@ public class CreateCustomViewActivity extends NavigationActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        setContentView(R.layout.activity_create_custom_view);
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_create_custom_view);
+        setup();
 
         Calendar calendar = Calendar.getInstance();
         _viewModel = ExpenditureViewModel.getInstance();

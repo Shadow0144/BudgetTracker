@@ -73,11 +73,11 @@ public class SearchResultsActivity extends NavigationActivity
         boolean whereAdded = false;
 
         // Date info
-        boolean extrasIncluded = intent.getBooleanExtra(CreateSearchActivity.INCLUDE_EXTRAS_INTENT, true);
-        if (intent.hasExtra(CreateSearchActivity.EXACT_DATE_INTENT))
+        boolean extrasIncluded = intent.getBooleanExtra(CreateSearchFragment.INCLUDE_EXTRAS_INTENT, true);
+        if (intent.hasExtra(CreateSearchFragment.EXACT_DATE_INTENT))
         {
             Date date = new Date();
-            date.setTime(intent.getLongExtra(CreateSearchActivity.EXACT_DATE_INTENT, -1));
+            date.setTime(intent.getLongExtra(CreateSearchFragment.EXACT_DATE_INTENT, -1));
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(date);
 
@@ -90,18 +90,18 @@ public class SearchResultsActivity extends NavigationActivity
                     ")";
             // Do not need to worry about extras here
         }
-        else if (intent.hasExtra(CreateSearchActivity.START_DATE_INTENT) /* && intent.hasExtra(CreateSearchActivity.END_DATE_INTENT) */)
+        else if (intent.hasExtra(CreateSearchFragment.START_DATE_INTENT) /* && intent.hasExtra(CreateSearchFragment.END_DATE_INTENT) */)
         {
             Date date = new Date();
             Calendar calendar = Calendar.getInstance();
 
-            date.setTime(intent.getLongExtra(CreateSearchActivity.START_DATE_INTENT, -1));
+            date.setTime(intent.getLongExtra(CreateSearchFragment.START_DATE_INTENT, -1));
             calendar.setTime(date);
             int sYear = calendar.get(Calendar.YEAR);
             int sMonth = calendar.get(Calendar.MONTH)+1;
             int sDay = calendar.get(Calendar.DATE);
 
-            date.setTime(intent.getLongExtra(CreateSearchActivity.END_DATE_INTENT, -1));
+            date.setTime(intent.getLongExtra(CreateSearchFragment.END_DATE_INTENT, -1));
             calendar.setTime(date);
             int eYear = calendar.get(Calendar.YEAR);
             int eMonth = calendar.get(Calendar.MONTH)+1;
@@ -151,10 +151,10 @@ public class SearchResultsActivity extends NavigationActivity
         }
 
         // Amount info
-        if (intent.hasExtra(CreateSearchActivity.EXACT_AMOUNT_INTENT))
+        if (intent.hasExtra(CreateSearchFragment.EXACT_AMOUNT_INTENT))
         {
-            int currency = intent.getIntExtra(CreateSearchActivity.EXACT_AMOUNT_CURRENCY_INTENT, Currencies.default_currency);
-            float amount = intent.getFloatExtra(CreateSearchActivity.EXACT_AMOUNT_INTENT, 0.0f);
+            int currency = intent.getIntExtra(CreateSearchFragment.EXACT_AMOUNT_CURRENCY_INTENT, Currencies.default_currency);
+            float amount = intent.getFloatExtra(CreateSearchFragment.EXACT_AMOUNT_INTENT, 0.0f);
 
             if (whereAdded)
             {
@@ -170,11 +170,11 @@ public class SearchResultsActivity extends NavigationActivity
                     "(amount = " + amount + ")" +
                     ")";
         }
-        else if (intent.hasExtra(CreateSearchActivity.AMOUNT_RANGE_CURRENCY_INTENT))
+        else if (intent.hasExtra(CreateSearchFragment.AMOUNT_RANGE_CURRENCY_INTENT))
         {
-            int currency = intent.getIntExtra(CreateSearchActivity.AMOUNT_RANGE_CURRENCY_INTENT, Currencies.default_currency);
-            float lowerAmount = intent.getFloatExtra(CreateSearchActivity.AMOUNT_RANGE_LOWER_INTENT, 0.0f);
-            float upperAmount = intent.getFloatExtra(CreateSearchActivity.AMOUNT_RANGE_UPPER_INTENT, 0.0f);
+            int currency = intent.getIntExtra(CreateSearchFragment.AMOUNT_RANGE_CURRENCY_INTENT, Currencies.default_currency);
+            float lowerAmount = intent.getFloatExtra(CreateSearchFragment.AMOUNT_RANGE_LOWER_INTENT, 0.0f);
+            float upperAmount = intent.getFloatExtra(CreateSearchFragment.AMOUNT_RANGE_UPPER_INTENT, 0.0f);
 
             if (whereAdded)
             {
@@ -194,10 +194,10 @@ public class SearchResultsActivity extends NavigationActivity
         else { }
 
         // Category info
-        if (intent.hasExtra(CreateSearchActivity.CATEGORIES_INTENT))
+        if (intent.hasExtra(CreateSearchFragment.CATEGORIES_INTENT))
         {
             boolean categoryAdded = false; // For adding a final parenthesis
-            boolean[] categories = intent.getBooleanArrayExtra(CreateSearchActivity.CATEGORIES_INTENT);
+            boolean[] categories = intent.getBooleanArrayExtra(CreateSearchFragment.CATEGORIES_INTENT);
             // If all categories, just leave it off
             boolean allCategories = true;
             for (int i = 0; i < categories.length; i++)
@@ -248,7 +248,7 @@ public class SearchResultsActivity extends NavigationActivity
         else { }
 
         // Note info
-        if (intent.hasExtra(CreateSearchActivity.CONTAINS_TEXT_INTENT))
+        if (intent.hasExtra(CreateSearchFragment.CONTAINS_TEXT_INTENT))
         {
             if (!whereAdded)
             {
@@ -259,10 +259,10 @@ public class SearchResultsActivity extends NavigationActivity
                 query += " AND ";
             }
 
-            String note = intent.getStringExtra(CreateSearchActivity.CONTAINS_TEXT_INTENT);
+            String note = intent.getStringExtra(CreateSearchFragment.CONTAINS_TEXT_INTENT);
             query += "(note LIKE '%" + note + "%')";
         }
-        else if (intent.hasExtra(CreateSearchActivity.EXACT_TEXT_INTENT))
+        else if (intent.hasExtra(CreateSearchFragment.EXACT_TEXT_INTENT))
         {
             if (!whereAdded)
             {
@@ -273,7 +273,7 @@ public class SearchResultsActivity extends NavigationActivity
                 query += " AND ";
             }
 
-            String note = intent.getStringExtra(CreateSearchActivity.EXACT_TEXT_INTENT);
+            String note = intent.getStringExtra(CreateSearchFragment.EXACT_TEXT_INTENT);
             query += "(note = '" + note + "')";
         }
         else { }

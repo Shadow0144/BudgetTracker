@@ -78,8 +78,9 @@ public class SettingsActivity extends NavigationActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        setContentView(R.layout.activity_settings);
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_settings);
+        setup();
 
         setResult(SettingsActivity.DATABASE_NO_UPDATE_INTENT_FLAG);
 

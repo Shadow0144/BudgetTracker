@@ -72,6 +72,7 @@ public class YearViewActivity extends PagingActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        setup();
 
         int year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
         _currentDate = Calendar.getInstance();

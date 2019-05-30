@@ -44,6 +44,7 @@ public class DayViewActivity extends PagingActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        setup();
 
         final Button addItemButton = findViewById(R.id.addItemButton);
         addItemButton.setVisibility(View.VISIBLE);

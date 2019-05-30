@@ -42,8 +42,9 @@ public class CustomViewActivity extends NavigationActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        setContentView(R.layout.activity_custom_view);
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_custom_view);
+        setup();
 
         _viewModel = ExpenditureViewModel.getInstance();
     }
