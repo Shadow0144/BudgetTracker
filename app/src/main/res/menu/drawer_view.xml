@@ -3,27 +3,27 @@
 
     <item
         android:id="@+id/searchMenuItem"
-        android:icon="@android:drawable/btn_star"
+        android:icon="@android:drawable/ic_menu_search"
         android:title="@string/search" />
 
     <item
         android:id="@+id/dayMenuItem"
-        android:icon="@android:drawable/btn_star"
+        android:icon="@android:drawable/ic_menu_day"
         android:title="@string/day" />
 
     <item
         android:id="@+id/monthMenuItem"
-        android:icon="@android:drawable/btn_star"
+        android:icon="@android:drawable/ic_menu_month"
         android:title="@string/month" />
 
     <item
         android:id="@+id/yearMenuItem"
-        android:icon="@android:drawable/btn_star"
+        android:icon="@android:drawable/ic_menu_my_calendar"
         android:title="@string/year" />
 
     <item
         android:id="@+id/totalMenuItem"
-        android:icon="@android:drawable/btn_star"
+        android:icon="@android:drawable/ic_dialog_dialer"
         android:title="@string/total" />
 
     <item
@@ -33,16 +33,16 @@
 
     <item
         android:id="@+id/groupMenuItem"
-        android:icon="@android:drawable/btn_star"
+        android:icon="@android:drawable/checkbox_on_background"
         android:title="@string/group" />
 
     <item
         android:id="@+id/settingsMenuItem"
-        android:icon="@android:drawable/btn_star"
+        android:icon="@android:drawable/ic_menu_preferences"
         android:title="@string/settings" />
 
     <item
         android:id="@+id/importExportMenuItem"
-        android:icon="@android:drawable/btn_star"
+        android:icon="@android:drawable/ic_menu_save"
         android:title="@string/import_slash_export" />
 </menu>
