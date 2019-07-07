@@ -122,6 +122,7 @@ public class CreateSearchFragment extends Fragment
     {
         return inflater.inflate(R.layout.fragment_create_search, group);
     }
+
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState)
     {

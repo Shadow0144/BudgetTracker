@@ -1,5 +1,6 @@
 package cc.corbin.budgettracker.auxilliary;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -66,7 +67,7 @@ public class LineGraph extends RelativeLayout
     private final int MARKER_STROKE = 3;
     private final int POINT_STROKE = 20;
     private final int POINT_LINE_STROKE = 10;
-    private final float DASH_LENGTH = 20.0f;
+    private final float DASH_LENGTH = 10.0f;
     private final float DASH_SPACING = 10.0f;
 
     private final int MAX_CHARACTERS = 7;

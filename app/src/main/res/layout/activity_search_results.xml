@@ -56,26 +56,11 @@
 
         </LinearLayout>
 
-        <ProgressBar
-            android:id="@+id/searchProgressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="15dp"
-            android:visibility="visible" />
-
-        <ScrollView
-            android:id="@+id/resultsScrollView"
+        <fragment
+            android:id="@+id/searchResultsFragment"
+            class="cc.corbin.budgettracker.search.SearchResultsFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <LinearLayout
-                android:id="@+id/resultsLinearLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
-
-        </ScrollView>
+            android:layout_height="match_parent" />
 
     </LinearLayout>
 

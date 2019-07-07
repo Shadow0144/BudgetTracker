@@ -83,6 +83,13 @@ public class MonthViewActivity extends PagingActivity
         setupMonthView();
     }
 
+    @Override
+    protected void setupAdapterView(RecyclerView.Adapter recyclerAdapter) // TODO
+    {
+        super.setupAdapterView(recyclerAdapter);
+        //_recyclerView.setHasFixedSize(false); // Because the keyboard opens and closes, we need to set this to false here
+    }
+
     private void setupMonthView()
     {
         final MonthRecyclerAdapter adapter = new MonthRecyclerAdapter();

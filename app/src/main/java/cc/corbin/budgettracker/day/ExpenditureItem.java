@@ -1,19 +1,15 @@
 package cc.corbin.budgettracker.day;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.CheckBox;
+import android.widget.Space;
 import android.widget.TextView;
 
-import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
@@ -25,6 +21,9 @@ public class ExpenditureItem extends CardView
     private final int ITEM_MARGIN = 12;
 
     private ExpenditureEntity _expenditure;
+
+    private CheckBox _checkBox;
+    private Space _checkSpace;
 
     public ExpenditureItem(Context context)
     {
@@ -71,6 +70,11 @@ public class ExpenditureItem extends CardView
 
         refresh(view);
 
+        _checkBox = view.findViewById(R.id.checkBox);
+        _checkSpace = view.findViewById(R.id.checkSpace);
+        _checkBox.setVisibility(GONE);
+        _checkSpace.setVisibility(GONE);
+
         addView(view);
     }
 
@@ -115,5 +119,19 @@ public class ExpenditureItem extends CardView
     {
         _expenditure.update(expenditure);
         refresh(this);
+    }
+
+    public void setCheckable(boolean checkable)
+    {
+        if (checkable)
+        {
+            _checkBox.setVisibility(VISIBLE);
+            _checkSpace.setVisibility(VISIBLE);
+        }
+        else
+        {
+            _checkBox.setVisibility(GONE);
+            _checkSpace.setVisibility(GONE);
+        }
     }
 }

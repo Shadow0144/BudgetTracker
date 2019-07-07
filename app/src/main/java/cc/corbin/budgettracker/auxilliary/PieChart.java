@@ -1,5 +1,6 @@
 package cc.corbin.budgettracker.auxilliary;
 
+import android.animation.ValueAnimator;
 import android.arch.persistence.room.ColumnInfo;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -7,14 +8,19 @@ import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
+import android.text.Layout;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.view.ViewTreeObserver;
 import android.widget.GridLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -24,7 +30,7 @@ import android.widget.TableRow;
 
 import cc.corbin.budgettracker.R;
 
-public class PieChart extends RelativeLayout
+public class PieChart extends RelativeLayout implements View.OnClickListener, View.OnScrollChangeListener
 {
     private final String TAG = "PieChart";
 
@@ -57,10 +63,20 @@ public class PieChart extends RelativeLayout
 
     private final int MAX_CHARACTERS = 10;
 
+    private final long ANIMATION_SPEED = 1000;
+
     private final double TWO_PI = 2.0 * Math.PI;
     private final double RED = Math.atan2(Math.sin(TWO_PI * 0.0 / 3.0), Math.cos(TWO_PI * 0.0 / 3.0));
     private final double GREEN = Math.atan2(Math.sin(TWO_PI * 1.0 / 3.0), Math.cos(TWO_PI * 1.0 / 3.0));
     private final double BLUE = Math.atan2(Math.sin(TWO_PI * 2.0 / 3.0), Math.cos(TWO_PI * 2.0 / 3.0));
+
+    private int _startAngle;
+    private boolean _counterClockwise;
+
+    private boolean _animatedOnDisplay;
+    private boolean _animatedOnTouch;
+    private long _animationSpeed;
+    private ValueAnimator _animator;
 
     private ProgressBar _progressBar;
 
@@ -111,6 +127,7 @@ public class PieChart extends RelativeLayout
     private void init()
     {
         setWillNotDraw(false);
+        setOnClickListener(this);
 
         _dataAvailable = false;
 
@@ -138,17 +155,79 @@ public class PieChart extends RelativeLayout
         _shadowPaint.setMaskFilter(new BlurMaskFilter(8, BlurMaskFilter.Blur.NORMAL));
 
         _emptyPiePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        _emptyPiePaint.setColor(Color.WHITE);
+        _emptyPiePaint.setColor(Color.LTGRAY);
         _emptyPiePaint.setStyle(Paint.Style.FILL);
 
         _piePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         _piePaint.setColor(Color.BLACK);
         _piePaint.setStyle(Paint.Style.STROKE);
+
+        _startAngle = 0;
+        _counterClockwise = true;
+
+        _animatedOnDisplay = true;
+        _animatedOnTouch = true;
+        _animationSpeed = ANIMATION_SPEED;
+        _animator = ValueAnimator.ofFloat(0.0f, 1.0f);
+        _animator.setDuration(_animationSpeed);
+        _animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener()
+        {
+            @Override
+            public void onAnimationUpdate(ValueAnimator updatedAnimation)
+            {
+                invalidate();
+            }
+        });
     }
 
-    public void setTitle(String title)
+    @Override
+    public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY)
     {
-        _title = title;
+        Log.e(TAG, "Hello");
+    }
+
+    @Override
+    public void onAttachedToWindow()
+    {
+        final View thisView = this;
+        super.onAttachedToWindow();
+        setOnScrollChangeListener(this);
+        ViewGroup pView = ((ViewGroup)thisView.getParent());
+        while (pView != null && !pView.isScrollContainer())
+        {
+            pView = ((ViewGroup)pView.getParent());
+        }
+        if (pView != null)
+        {
+            final Rect scrollBounds = new Rect();
+            final Rect viewBounds = new Rect();
+            thisView.getHitRect(scrollBounds);
+            final View scroller = pView;
+            scroller.getDrawingRect(viewBounds);
+            Log.e(TAG, "Adding");
+            scroller.setOnScrollChangeListener(new OnScrollChangeListener()
+            {
+                @Override
+                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY)
+                {
+                    thisView.getHitRect(scrollBounds);
+                    scroller.getDrawingRect(viewBounds);
+                    if (!Rect.intersects(scrollBounds, viewBounds))
+                    {
+                        if (!_animator.isRunning())
+                        {
+                            _animator.start();
+                        }
+                        else { }
+                    }
+                    else
+                    {
+                        Log.e(TAG, "Invisible: " + _title);
+                    }
+                }
+            });
+        }
+        else { }
     }
 
     @Override
@@ -222,16 +301,18 @@ public class PieChart extends RelativeLayout
         if (_dataAvailable)
         {
             // Draw the arcs and legend
-            int startAngle = 0;
+            int startAngle = -_startAngle;
             int x = cX + legendStartOffset;
             int textX = x + legendOffset + legendBoxSize;
             int y = cY - (_arcs.length * (textPadding + textSize) / 2) - ((_arcs.length % 2 == 1) ? 0 : (textSize / 2));
             int textY = y - (textSize / 2);
             for (int i = 0; i < _arcs.length; i++)
             {
+                float arc = ((_animator.isRunning()) ? (_animator.getAnimatedFraction()) : (1.0f))
+                                * ((_counterClockwise) ? (-_arcs[i]) : (_arcs[i]));
                 canvas.drawArc(cX - hW - pieOffset, cY - hW, cX + hW - pieOffset, cY + hW,
-                        startAngle, _arcs[i], true, _piecePaints[i % _piecePaints.length]);
-                startAngle += _arcs[i];
+                        startAngle, arc, true, _piecePaints[i % _piecePaints.length]);
+                startAngle += arc;
 
                 canvas.drawRect(x - legendBoxSize, y - legendBoxSize, x + legendBoxSize, y + legendBoxSize,
                         _piecePaints[i % _piecePaints.length]);
@@ -281,7 +362,10 @@ public class PieChart extends RelativeLayout
                     _arcs[index] += 1;
                     remainder--;
                 }
-                else { }
+                else
+                {
+                    remainder = 0.0f; // TODO - What is this?
+                }
             }
             else if (arcRemain > 0.0f) // If the remaining value is not substantial, then just place it in any non-zero slice
             {
@@ -382,5 +466,53 @@ public class PieChart extends RelativeLayout
             _piecePaints[4].setColor(Color.BLUE);
             _piecePaints[5].setColor(Color.argb(255, 128, 0, 128));
         }
+    }
+
+    public void setTitle(String title)
+    {
+        _title = title;
+        invalidate();
+    }
+
+    public String getTitle()
+    {
+        return _title;
+    }
+
+    public void setStartAngle(int startAngle)
+    {
+        _startAngle = startAngle;
+        invalidate();
+    }
+
+    public int getStartAngle()
+    {
+        return _startAngle;
+    }
+
+    public void setCounterClockwise(boolean counterClockwise)
+    {
+        _counterClockwise = counterClockwise;
+        invalidate();
+    }
+
+    public boolean getCounterClockwise()
+    {
+        return _counterClockwise;
+    }
+
+    @Override
+    public void onClick(View v)
+    {
+        if (_animatedOnTouch)
+        {
+            _animator.start();
+        }
+        else { }
+    }
+
+    public void setPieBackgroundColor(Color pieBackgroundColor)
+    {
+        _emptyPiePaint.setColor(pieBackgroundColor.toArgb());
     }
 }
