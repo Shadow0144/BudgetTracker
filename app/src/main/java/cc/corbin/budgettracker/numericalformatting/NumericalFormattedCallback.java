@@ -2,6 +2,6 @@ package cc.corbin.budgettracker.numericalformatting;
 
 public interface NumericalFormattedCallback
 {
-    // The id of the calling EditText and the new value
-    public void valueChanged(int id, float value);
+    // The tag of the calling NumbericalFormattedEditText and the new value
+    public void valueChanged(Object tag, float value);
 }

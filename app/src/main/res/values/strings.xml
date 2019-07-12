@@ -161,4 +161,6 @@
 
     <string name="processing_event">Processing Database Event...</string>
     <string name="wait_for_processing">Wait until processing action is complete</string>
+
+    <string name="adjustment_conversion_note">Note: Conversion data will not be stored; consider adding it to the note</string>
 </resources>

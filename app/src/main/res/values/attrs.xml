@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <declare-styleable name="NumericalFormattedEditText">
+    </declare-styleable>
     <declare-styleable name="TableCell">
         <attr name="cellType" format="enum">
             <enum name="defaultCell" value="0"/>

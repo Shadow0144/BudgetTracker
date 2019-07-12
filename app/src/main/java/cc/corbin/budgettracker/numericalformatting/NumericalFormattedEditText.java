@@ -216,7 +216,7 @@ public class NumericalFormattedEditText extends AppCompatEditText
 
                     if (_callback != null)
                     {
-                        _callback.valueChanged(getId(), _amount);
+                        _callback.valueChanged(getTag(), _amount);
                     }
                     else { }
 
@@ -249,11 +249,11 @@ public class NumericalFormattedEditText extends AppCompatEditText
         DecimalFormat formatter;
         if (_digits == 0)
         {
-            formatter = new DecimalFormat("");
+            formatter = new DecimalFormat("0");
         }
         else
         {
-            formatter = new DecimalFormat(".##");
+            formatter = new DecimalFormat("0.00");
         }
         setHint(formatter.format(_baseAmount));
         _moneyValueFilter.setDigits(_digits);

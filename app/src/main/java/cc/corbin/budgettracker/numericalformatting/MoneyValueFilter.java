@@ -78,7 +78,7 @@ public class MoneyValueFilter extends DigitsKeyListener
                         // Check if the amount of digits is right
                         if (((dlen - dend) + (end - (i + 1)) > _digits) || (_digits == 0))
                         {
-                            out = "";
+                            out = new SpannableStringBuilder(source, start, i); // Remove this digit and everything after
                             break;
                         }
                         else

@@ -2,7 +2,6 @@ package cc.corbin.budgettracker.edit;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -35,16 +34,11 @@ import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.ConversionRateAsyncTask;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.R;
-import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
-import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText;
 import cc.corbin.budgettracker.numericalformatting.NumericalFormattedCallback;
 import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
-import cc.corbin.budgettracker.month.MonthViewActivity;
-import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
-import cc.corbin.budgettracker.year.YearViewActivity;
 
 import static android.Manifest.permission.INTERNET;
 
@@ -61,8 +55,8 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
     private static final int CONNECT_TO_INTERNET_CODE = 0;
     private static boolean _connectToInternet = false;
 
-    private final int BASE_AMOUNT_EDIT_TEXT = 1;
-    private final int CONVERSION_RATE_EDIT_TEXT = 2;
+    private final int BASE_AMOUNT_EDIT_TAG = 1;
+    private final int CONVERSION_RATE_EDIT_TAG = 2;
 
     private int _day;
     private int _month;
@@ -301,7 +295,7 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
 
         // Setup the amount edit
         _amountEditText = findViewById(R.id.amountEditText);
-        _amountEditText.setId(BASE_AMOUNT_EDIT_TEXT);
+        _amountEditText.setTag(BASE_AMOUNT_EDIT_TAG);
         if (_expenditure != null)
         {
             _amountEditText.setup(this, _expenditure.getBaseCurrency(), _expenditure.getAmount());
@@ -323,7 +317,7 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
         _conversionRateEditText.setup(this);
         _conversionRateEditText.setDigits(2);
         _conversionRateEditText.setBaseAmount(1.0f);
-        _conversionRateEditText.setId(CONVERSION_RATE_EDIT_TEXT);
+        _conversionRateEditText.setTag(CONVERSION_RATE_EDIT_TAG);
 
         if (_expenditure != null)
         {
@@ -404,27 +398,16 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
         for (int i = 0; i < count; i++)
         {
             final RadioButton button = new RadioButton(this);
-            button.setId(i);
+            button.setTag(i);
             button.setText(categories[i]);
             categoriesHolder.addView(button);
-            categoriesHolder.check(button.getId());
+            categoriesHolder.check(((int)button.getTag()));
         }
 
         // Setup the values if they already exist
         if (_expenditure != null)
         {
-            String categoryName = _expenditure.getCategoryName();
-            for (int i = 0; i < count; i++)
-            { // TODO - Check if this is the best way to compare this
-                RadioButton button = ((RadioButton) (categoriesHolder.getChildAt(i)));
-                String category = button.getText().toString();
-                if (categoryName.equals(category))
-                {
-                    categoriesHolder.check(button.getId());
-                    break;
-                }
-                else { }
-            }
+            categoriesHolder.check(_expenditure.getCategory());
         }
         else { }
     }
@@ -453,6 +436,7 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
         else
         {
             editDate.set(_year, _month - 1, 1);
+            Toast.makeText(this, "Using the first of the month's conversion rate", Toast.LENGTH_LONG).show();
         }
 
         long end = currentDate.getTimeInMillis();
@@ -476,12 +460,12 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
             }
             else // Date older than a year
             {
-                Toast.makeText(this, "Dates more than a year old will need to have the conversion rate manually specified", Toast.LENGTH_LONG);
+                Toast.makeText(this, "Dates more than a year old will need to have the conversion rate manually specified", Toast.LENGTH_LONG).show();
             }
         }
         else // Date in the future
         {
-            Toast.makeText(this, "Future dates will need to have the conversion rate manually specified", Toast.LENGTH_LONG);
+            Toast.makeText(this, "Future dates will need to have the conversion rate manually specified", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -568,15 +552,16 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
     }
 
     @Override
-    public void valueChanged(int id, float value)
+    public void valueChanged(Object tag, float value)
     {
-        switch (id)
+        int tagInt = ((int)tag);
+        switch (tagInt)
         {
-            case BASE_AMOUNT_EDIT_TEXT:
+            case BASE_AMOUNT_EDIT_TAG:
                 _amount = value;
                 updateConversionViews();
                 break;
-            case CONVERSION_RATE_EDIT_TEXT:
+            case CONVERSION_RATE_EDIT_TAG:
                 _rateNumber = value;
                 updateConversionViews();
                 break;
