@@ -163,4 +163,12 @@
     <string name="wait_for_processing">Wait until processing action is complete</string>
 
     <string name="adjustment_conversion_note">Note: Conversion data will not be stored; consider adding it to the note</string>
+
+    <string name="budget_label">Budget:</string>
+    <string name="remaining_label">Remaining:</string>
+    <string name="category_label">Category:</string>
+    <string name="date_label">Date:</string>
+    <string name="transfer_budget_label">Transfer Budget:</string>
+    <string name="transfer_remaining_label">Transfer Remaining:</string>
+    <string name="transfer_difference">Transfer Difference</string>
 </resources>

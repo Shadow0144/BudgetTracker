@@ -1,7 +1,10 @@
 package cc.corbin.budgettracker.edit;
 
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -16,6 +19,8 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
@@ -66,6 +71,8 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
 
     private float _amount;
 
+    private NumericalFormattedEditText _amountEditText;
+
     private boolean _transferTo;
     private LinearLayout _transferLayout;
     private TextView _transferHeaderTextView;
@@ -79,6 +86,14 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
     private CurrencyConversionHelper _currencyConversionHelper;
 
     private ExpenditureViewModel _viewModel;
+    private MutableLiveData<List<BudgetEntity>> _budget;
+    private MutableLiveData<List<BudgetEntity>> _transferBudget;
+    private MutableLiveData<Float> _expenses;
+    private MutableLiveData<Float> _transferExpenses;
+    private float _budgetTotal;
+    private float _remainingTotal;
+    private float _transferBudgetTotal;
+    private float _transferRemainingTotal;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -181,6 +196,9 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
         _currentDetailsTextView = findViewById(R.id.currentDetailsTextView);
         _sisterDetailsTextView = findViewById(R.id.sisterDetailsTextView);
 
+        _viewModel = ExpenditureViewModel.getInstance();
+
+        setupBudget();
         setupAmount();
         setupCategories();
         setupNote();
@@ -192,8 +210,6 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
         _monthTextView.setText(String.format("%02d", _transferMonth)); // TODO
 
         updateTransferInformation();
-
-        _viewModel = ExpenditureViewModel.getInstance();
     }
 
     public void onAccept(View v)
@@ -374,6 +390,128 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
         finish();
     }
 
+    private void setupBudget()
+    {
+        _budget = new MutableLiveData<List<BudgetEntity>>();
+        _transferBudget = new MutableLiveData<List<BudgetEntity>>();
+        _expenses = new MutableLiveData<Float>();
+        _transferExpenses = new MutableLiveData<Float>();
+
+        final Observer<List<BudgetEntity>> budgetObserver = new Observer<List<BudgetEntity>>()
+        {
+            @Override
+            public void onChanged(@Nullable List<BudgetEntity> budgetEntities)
+            {
+                if (budgetEntities != null) // Returning from a query
+                {
+                    monthBudgetsLoaded(budgetEntities);
+                }
+                else { }
+            }
+        };
+        _budget.observe(this, budgetObserver);
+
+        final Observer<List<BudgetEntity>> transferBudgetObserver = new Observer<List<BudgetEntity>>()
+        {
+            @Override
+            public void onChanged(@Nullable List<BudgetEntity> transferBudgetEntities)
+            {
+                if (transferBudgetEntities != null) // Returning from a query
+                {
+                    transferMonthBudgetsLoaded(transferBudgetEntities);
+                }
+                else { }
+            }
+        };
+        _transferBudget.observe(this, transferBudgetObserver);
+
+        final Observer<Float> expensesObserver = new Observer<Float>()
+        {
+            @Override
+            public void onChanged(@Nullable Float expenses)
+            {
+                if (expenses != null) // Returning from a query
+                {
+                    expensesLoaded(expenses);
+                }
+                else { }
+            }
+        };
+        _expenses.observe(this, expensesObserver);
+
+        final Observer<Float> transferExpensesObserver = new Observer<Float>()
+        {
+            @Override
+            public void onChanged(@Nullable Float transferExpenses)
+            {
+                if (transferExpenses != null) // Returning from a query
+                {
+                    transferExpensesLoaded(transferExpenses);
+                }
+                else { }
+            }
+        };
+        _transferExpenses.observe(this, transferExpensesObserver);
+
+        final Button transferDifferenceButton = findViewById(R.id.transferDifferenceButton);
+        transferDifferenceButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                transferDifference(v);
+            }
+        });
+
+        _viewModel.getMonthCategoryBudget(_budget, _category, _year, _month);
+        _viewModel.getMonthCategoryBudget(_transferBudget, _transferCategory, _transferYear, _transferMonth);
+    }
+
+    private void monthBudgetsLoaded(List<BudgetEntity> budgets)
+    {
+        int count = budgets.size();
+        _budgetTotal = 0.0f;
+        for (int i = 0; i < count; i++)
+        {
+            _budgetTotal += budgets.get(i).getAmount();
+        }
+        final TextView budgetTextView = findViewById(R.id.budgetTextView);
+        budgetTextView.setText(Currencies.formatCurrency(Currencies.default_currency, _budgetTotal));
+        _viewModel.getMonthCategoryExpenses(_expenses, _category, _year, _month);
+    }
+
+    private void transferMonthBudgetsLoaded(List<BudgetEntity> transferBudgets)
+    {
+        int count = transferBudgets.size();
+        _transferBudgetTotal = 0.0f;
+        for (int i = 0; i < count; i++)
+        {
+            _transferBudgetTotal += transferBudgets.get(i).getAmount();
+        }
+        final TextView transferBudgetTextView = findViewById(R.id.transferBudgetTextView);
+        transferBudgetTextView.setText(Currencies.formatCurrency(Currencies.default_currency, _transferBudgetTotal));
+        _viewModel.getMonthCategoryExpenses(_transferExpenses, _transferCategory, _transferYear, _transferMonth);
+    }
+
+    private void expensesLoaded(Float expenses)
+    {
+        _remainingTotal = _budgetTotal - expenses;
+        final TextView remainingTextView = findViewById(R.id.remainingTextView);
+        remainingTextView.setText(Currencies.formatCurrency(Currencies.default_currency, _remainingTotal));
+    }
+
+    private void transferExpensesLoaded(Float transferExpenses)
+    {
+        _transferRemainingTotal = _transferBudgetTotal - transferExpenses;
+        final TextView transferRemainingTextView = findViewById(R.id.transferRemainingTextView);
+        transferRemainingTextView.setText(Currencies.formatCurrency(Currencies.default_currency, _transferRemainingTotal));
+    }
+
+    private void updateTransferBudget()
+    {
+        _viewModel.getMonthCategoryBudget(_transferBudget, _transferCategory, _transferYear, _transferMonth);
+    }
+
     private void setupAmount()
     {
         TextView categoryTextView = findViewById(R.id.categoryTextView);
@@ -385,16 +523,16 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
         final TextView currencyTextView = findViewById(R.id.currencyTextView);
         currencyTextView.setText(Currencies.symbols[Currencies.default_currency]);
 
-        final NumericalFormattedEditText amountEditText = findViewById(R.id.amountEditText);
+        _amountEditText = findViewById(R.id.amountEditText);
         if (_adjustment.getId() != 0)
         {
             _amount = _adjustment.getAmount();
-            amountEditText.setup(this, Currencies.default_currency, _amount);
+            _amountEditText.setup(this, Currencies.default_currency, _amount);
         }
         else
         {
             _amount = 0.0f;
-            amountEditText.setup(this);
+            _amountEditText.setup(this);
         }
     }
 
@@ -460,7 +598,7 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
                 _transferLayout.setVisibility(View.GONE);
                 break;
             case 2:
-                _signTextView.setText("");
+                _signTextView.setText(" ");
                 _transferLayout.setVisibility(View.VISIBLE);
                 break;
         }
@@ -525,10 +663,17 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
         }
     }
 
+    private void transferDifference(View v)
+    {
+        _amount = _transferRemainingTotal;
+        _amountEditText.setAmount(_amount);
+    }
+
     private void updateTransferInformation()
     {
         _currentDetailsTextView.setText(String.format("%02d", _month) + " / " + String.format("%04d", _year) + " : " + Categories.getCategories()[_category]);
         _sisterDetailsTextView.setText(String.format("%02d", _transferMonth) + " / " + String.format("%04d", _transferYear) + " : " + Categories.getCategories()[_transferCategory]);
+        updateTransferBudget();
     }
 
     public void switchSign(View v)

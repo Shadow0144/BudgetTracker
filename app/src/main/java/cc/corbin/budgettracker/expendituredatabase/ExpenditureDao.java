@@ -77,6 +77,9 @@ public interface ExpenditureDao
     @Query("SELECT * FROM expenditureentity WHERE id IN (:expenditureIds)")
     List<ExpenditureEntity> loadAllByIds(long[] expenditureIds);
 
+    @Query("SELECT SUM (amount) FROM expenditureentity WHERE ( category = (:category) AND year = (:year) AND month = (:month) )")
+    float getMonthCategory(int category, int year, int month);
+
     @Query("UPDATE expenditureentity SET categoryName = (:newCategoryName) WHERE category = (:category)")
     void renameCategory(int category, String newCategoryName);
 

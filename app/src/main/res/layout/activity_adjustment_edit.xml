@@ -10,7 +10,7 @@
         android:id="@+id/editorLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="5dp"
+        android:layout_margin="4dp"
         android:orientation="vertical"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -43,10 +43,68 @@
                 android:text="@string/transfer" />
         </android.support.design.widget.TabLayout>
 
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="8dp" />
+
         <LinearLayout
+            android:id="@+id/budgetLinearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/budgetLabelTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="@string/budget_label"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/budgetTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/remainingLinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/remainingLabelTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="@string/remaining_label"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/remainingTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="4dp" />
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="8dp"
+                android:background="?android:attr/listDivider" />
 
             <TextView
                 android:id="@+id/linkedTextView"
@@ -64,24 +122,47 @@
                 android:text="@string/linked"
                 android:visibility="gone" />
 
-            <LinearLayout
-                android:id="@+id/detailsLinearLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
+        <LinearLayout
+            android:id="@+id/detailsLinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/categoryTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+            <TextView
+                android:id="@+id/categoryLabelTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="@string/category_label"
+                android:textSize="18sp" />
 
-                <TextView
-                    android:id="@+id/dateTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-            </LinearLayout>
+            <TextView
+                android:id="@+id/categoryTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/dateLabelTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="@string/date_label"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/dateTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="0dp"
+                android:paddingEnd="12dp"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/amountLayout"
@@ -92,193 +173,257 @@
                 <Button
                     android:id="@+id/signSwitchButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="35dp"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
                     android:onClick="switchSign"
                     android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/signTextView"
-                    android:layout_width="10dp"
+                    android:layout_width="18dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_weight="0"
                     android:text="@string/positive"
                     android:textAlignment="textEnd"
+                    android:textSize="18sp"
                     android:visibility="visible" />
 
                 <TextView
                     android:id="@+id/currencyTextView"
-                    android:layout_width="30dp"
+                    android:layout_width="20dp"
                     android:layout_height="wrap_content"
                     android:textAlignment="textEnd"
-                    android:textSize="24sp" />
+                    android:textSize="18sp" />
 
                 <cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText
                     android:id="@+id/amountEditText"
                     android:layout_width="200dp"
                     android:layout_height="wrap_content"
-                    android:padding="5dp" />
+                    android:padding="4dp" />
 
                 <Button
                     android:id="@+id/convertCurrencyButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="35dp"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
                     android:onClick="getConversion"
                     android:text="@string/convert_currency"
-                    android:textSize="10sp" />
+                    android:textSize="12sp" />
 
+            </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/transferLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/transferHeaderTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/transfer_to"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/transferDateTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="@string/transfer_date"
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:id="@+id/dateLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp">
+
+                <Button
+                    android:id="@+id/monthPreviousButton"
+                    android:layout_width="16dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:onClick="previousMonth"
+                    android:text="@string/previous" />
+
+                <TextView
+                    android:id="@+id/monthTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textAlignment="center"
+                    android:textSize="18sp" />
+
+                <Button
+                    android:id="@+id/monthNextButton"
+                    android:layout_width="16dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:onClick="nextMonth"
+                    android:text="@string/next" />
+
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/yearPreviousButton"
+                    android:layout_width="20dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:onClick="previousYear"
+                    android:text="@string/previous" />
+
+                <TextView
+                    android:id="@+id/yearTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textAlignment="center"
+                    android:textSize="18sp" />
+
+                <Button
+                    android:id="@+id/yearNextButton"
+                    android:layout_width="20dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:onClick="nextYear"
+                    android:text="@string/next" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/transferCategory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/transfer_category"
+                android:textSize="18sp" />
+
+            <Spinner
+                android:id="@+id/categorySpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp" />
+
+            <TextView
+                android:id="@+id/transferDirectionTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1"
+                android:text="@string/transfer_direction"
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:id="@+id/transferDirectionLinearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/currentDetailsTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textAlignment="center"
+                    android:textSize="18sp" />
+
+                <Button
+                    android:id="@+id/transferDirectionButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:onClick="changeTransferDirection"
+                    android:text="@string/rightarrow" />
+
+                <TextView
+                    android:id="@+id/sisterDetailsTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textAlignment="center"
+                    android:textSize="18sp" />
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/transferLayout"
+                android:id="@+id/transferBudgetLinearLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
-                android:orientation="vertical"
-                android:visibility="gone">
+                android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/transferHeaderTextView"
+                    android:id="@+id/transferBudgetLabelTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:text="@string/transfer_budget_label"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/transferBudgetTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/transfer_to" />
-
-                <TextView
-                    android:id="@+id/transferDateTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingStart="15dp"
-                    android:paddingEnd="15dp"
-                    android:text="@string/transfer_date" />
-
-                <LinearLayout
-                    android:id="@+id/dateLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp">
-
-                    <Button
-                        android:id="@+id/monthPreviousButton"
-                        android:layout_width="15dp"
-                        android:layout_height="35dp"
-                        android:layout_weight="1"
-                        android:onClick="previousMonth"
-                        android:text="@string/previous" />
-
-                    <TextView
-                        android:id="@+id/monthTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textAlignment="center" />
-
-                    <Button
-                        android:id="@+id/monthNextButton"
-                        android:layout_width="15dp"
-                        android:layout_height="35dp"
-                        android:layout_weight="1"
-                        android:onClick="nextMonth"
-                        android:text="@string/next" />
-
-                    <Space
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1" />
-
-                    <Button
-                        android:id="@+id/yearPreviousButton"
-                        android:layout_width="20dp"
-                        android:layout_height="35dp"
-                        android:layout_weight="1"
-                        android:onClick="previousYear"
-                        android:text="@string/previous" />
-
-                    <TextView
-                        android:id="@+id/yearTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textAlignment="center" />
-
-                    <Button
-                        android:id="@+id/yearNextButton"
-                        android:layout_width="20dp"
-                        android:layout_height="35dp"
-                        android:layout_weight="1"
-                        android:onClick="nextYear"
-                        android:text="@string/next" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/transferCategory"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
-                    android:text="@string/transfer_category" />
-
-                <Spinner
-                    android:id="@+id/categorySpinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp" />
-
-                <TextView
-                    android:id="@+id/transferDirectionTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
-                    android:layout_weight="1"
-                    android:text="@string/transfer_direction" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/currentDetailsTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textAlignment="center" />
-
-                    <Button
-                        android:id="@+id/transferDirectionButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:onClick="changeTransferDirection"
-                        android:text="@string/rightarrow" />
-
-                    <TextView
-                        android:id="@+id/sisterDetailsTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textAlignment="center" />
-                </LinearLayout>
-
+                    android:textSize="18sp" />
             </LinearLayout>
 
-            <EditText
-                android:id="@+id/noteEditText"
+            <LinearLayout
+                android:id="@+id/transferRemainingLinearLayout"
                 android:layout_width="match_parent"
-                android:layout_height="125dp"
-                android:layout_margin="5dp"
-                android:background="@android:color/background_light"
-                android:gravity="top|left"
-                android:inputType="textMultiLine"
-                android:scrollbars="vertical" />
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/transferRemainingLabelTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:text="@string/transfer_remaining_label"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/transferRemainingTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/transferDifferenceButton"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:text="@string/transfer_difference"
+                android:textSize="12sp" />
 
         </LinearLayout>
+
+        <EditText
+            android:id="@+id/noteEditText"
+            android:layout_width="match_parent"
+            android:layout_height="124dp"
+            android:layout_margin="4dp"
+            android:background="@android:color/background_light"
+            android:gravity="top|left"
+            android:inputType="textMultiLine"
+            android:scrollbars="vertical" />
 
         <LinearLayout
             android:id="@+id/buttonLayout"

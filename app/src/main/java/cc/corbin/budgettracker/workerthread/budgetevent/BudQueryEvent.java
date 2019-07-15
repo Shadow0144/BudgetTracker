@@ -21,7 +21,8 @@ public class BudQueryEvent implements BudDatabaseEvent
         month,
         months,
         year,
-        total
+        total,
+        month_category
     };
 
     private int _year;
@@ -30,6 +31,7 @@ public class BudQueryEvent implements BudDatabaseEvent
     private int _startMonth;
     private int _endYear;
     private int _endMonth;
+    private int _category;
     private QueryType _queryType;
     private MutableLiveData<List<BudgetEntity>> _mutableLiveData;
 
@@ -38,6 +40,17 @@ public class BudQueryEvent implements BudDatabaseEvent
                          int year, int month, QueryType queryType)
     {
         _mutableLiveData = mutableLiveData;
+        _year = year;
+        _month = month;
+        _queryType = queryType;
+    }
+
+    // Month category
+    public BudQueryEvent(MutableLiveData<List<BudgetEntity>> mutableLiveData,
+                         int category, int year, int month, QueryType queryType)
+    {
+        _mutableLiveData = mutableLiveData;
+        _category = category;
         _year = year;
         _month = month;
         _queryType = queryType;
@@ -112,6 +125,10 @@ public class BudQueryEvent implements BudDatabaseEvent
                         entities.add(helper.getYearCategoryBudget(dbB, i, j));
                     }
                 }
+                break;
+            case month_category:
+                entities.add(helper.getMonthCategoryBudget(dbB, _month, _year, _category));
+                entities.addAll(dbB.budgetDao().getMonthCategoryAdjustments(_category, _year, _month));
                 break;
         }
         _mutableLiveData.postValue(entities);

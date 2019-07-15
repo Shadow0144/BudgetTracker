@@ -27,6 +27,7 @@ import cc.corbin.budgettracker.workerthread.combinedevent.ComResortCategoriesEve
 import cc.corbin.budgettracker.workerthread.expenditureevent.ExpCustomQueryEvent;
 import cc.corbin.budgettracker.workerthread.expenditureevent.ExpDatabaseEvent;
 import cc.corbin.budgettracker.workerthread.expenditureevent.ExpInsertEvent;
+import cc.corbin.budgettracker.workerthread.expenditureevent.ExpMonthCategoryEvent;
 import cc.corbin.budgettracker.workerthread.expenditureevent.ExpQueryEvent;
 import cc.corbin.budgettracker.workerthread.expenditureevent.ExpRemoveEvent;
 import cc.corbin.budgettracker.workerthread.expenditureevent.ExpUpdateEvent;
@@ -124,9 +125,24 @@ public class ExpenditureViewModel
         processQueue();
     }
 
+    public void getMonthCategoryExpenses(MutableLiveData<Float> mutableLiveData, int category, int year, int month)
+    {
+        ExpDatabaseEvent event = new ExpMonthCategoryEvent(mutableLiveData, category, year, month);
+        _expEvents.add(event);
+        processQueue();
+    }
+
     public void getMonthBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData, int year, int month)
     {
         BudDatabaseEvent event = new BudQueryEvent(mutableLiveData, year, month, BudQueryEvent.QueryType.month);
+        _budEvents.add(event);
+        processQueue();
+    }
+
+    // For use in adjustments
+    public void getMonthCategoryBudget(MutableLiveData<List<BudgetEntity>> mutableLiveData, int category, int year, int month)
+    {
+        BudDatabaseEvent event = new BudQueryEvent(mutableLiveData, category, year, month, BudQueryEvent.QueryType.month_category);
         _budEvents.add(event);
         processQueue();
     }
