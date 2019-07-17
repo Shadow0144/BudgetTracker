@@ -398,11 +398,11 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
         for (int i = 0; i < count; i++)
         {
             final RadioButton button = new RadioButton(this);
-            button.setTag(i);
+            button.setId(i);
             button.setText(categories[i]);
             categoriesHolder.addView(button);
-            categoriesHolder.check(((int)button.getTag()));
         }
+        categoriesHolder.check(count); // Check the last item
 
         // Setup the values if they already exist
         if (_expenditure != null)
