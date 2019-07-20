@@ -402,7 +402,7 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
             button.setText(categories[i]);
             categoriesHolder.addView(button);
         }
-        categoriesHolder.check(count); // Check the last item
+        categoriesHolder.check((count-1)); // Check the last item
 
         // Setup the values if they already exist
         if (_expenditure != null)
