@@ -298,7 +298,7 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
         _amountEditText.setTag(BASE_AMOUNT_EDIT_TAG);
         if (_expenditure != null)
         {
-            _amountEditText.setup(this, _expenditure.getBaseCurrency(), _expenditure.getAmount());
+            _amountEditText.setup(this, _expenditure.getBaseCurrency(), _expenditure.getBaseAmount());
         }
         else
         {
