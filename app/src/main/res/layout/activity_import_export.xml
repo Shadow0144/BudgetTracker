@@ -57,103 +57,41 @@
 
         </LinearLayout>
 
+        <android.support.design.widget.TabLayout
+            android:id="@+id/importExportTabLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.design.widget.TabItem
+                android:id="@+id/importTabItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/_import" />
+
+            <android.support.design.widget.TabItem
+                android:id="@+id/exportTabItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/_export" />
+
+        </android.support.design.widget.TabLayout>
+
         <ScrollView
             android:id="@+id/contentScrollView"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
             <LinearLayout
-                android:id="@+id/contentLinearLayout"
+                android:id="@+id/scrollViewContentFrame"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
-                <RadioGroup
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" >
+                <include layout="@layout/tab_import"/>
 
-                    <RadioButton
-                        android:id="@+id/mergeRadioButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/merge" />
+                <include layout="@layout/tab_export"/>
 
-                    <TextView
-                        android:id="@+id/mergeTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="36dp"
-                        android:layout_weight="1"
-                        android:text="@string/merge_explain" />
-
-                    <RadioButton
-                        android:id="@+id/mergeAllRadioButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/merge_all" />
-
-                    <TextView
-                        android:id="@+id/mergeAllTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="36dp"
-                        android:layout_weight="1"
-                        android:text="@string/merge_all_explain" />
-
-                    <RadioButton
-                        android:id="@+id/overwriteConflictsRadioButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/overwrite_conflicts" />
-
-                    <TextView
-                        android:id="@+id/overwriteConflictsTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="36dp"
-                        android:layout_weight="1"
-                        android:text="@string/overwrite_conflicts_explain" />
-
-                    <RadioButton
-                        android:id="@+id/overwriteAllRadioButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/overwrite_all" />
-
-                    <TextView
-                        android:id="@+id/overwriteAllTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="36dp"
-                        android:layout_weight="1"
-                        android:text="@string/overwrite_all_explain" />
-                </RadioGroup>
-
-                <Button
-                    android:id="@+id/importButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:onClick="onImport"
-                    android:text="@string/_import" />
-
-                <Button
-                    android:id="@+id/exportButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:onClick="onExport"
-                    android:text="@string/_export" />
-
-                <Button
-                    android:id="@+id/testButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:onClick="test"
-                    android:text="Test" />
             </LinearLayout>
-
         </ScrollView>
 
     </android.widget.LinearLayout>

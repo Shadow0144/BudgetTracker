@@ -10,6 +10,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import cc.corbin.budgettracker.BudgetTrackerApplication;
 import cc.corbin.budgettracker.auxilliary.Categories;
@@ -22,6 +23,8 @@ import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 @Database(entities = {BudgetEntity.class}, version = 5)
 public abstract class BudgetDatabase extends RoomDatabase
 {
+    private final static String TAG = "BudgetDatabase";
+
     public abstract BudgetDao budgetDao();
 
     private static BudgetDatabase INSTANCE;
@@ -219,6 +222,33 @@ public abstract class BudgetDatabase extends RoomDatabase
                     "RENAME TO BudgetEntity;");
         }
     };
+
+    public static void createDatabaseFile(String originalDatabase, String folder,
+                                          String databaseName, String whereQuery)
+    {
+        try
+        {
+            SQLiteDatabase db =
+                    SQLiteDatabase.openOrCreateDatabase((folder + databaseName), null);
+
+            db.execSQL("DROP TABLE IF EXISTS "
+                    + "BudgetEntity;");
+
+            // Create the new table
+            db.execSQL("ATTACH DATABASE '" + originalDatabase + "' AS transfer_db");
+            db.execSQL("CREATE TABLE " + "BudgetEntity " +
+                    "AS SELECT * FROM transfer_db."+ "BudgetEntity " +
+                    whereQuery + ";" );
+
+            db.execSQL("DETACH transfer_db");
+
+            db.close();
+        }
+        catch (Exception e)
+        {
+            Log.e(TAG, e.getLocalizedMessage());
+        }
+    }
 
     public static BudgetDatabase getBudgetDatabase()
     {

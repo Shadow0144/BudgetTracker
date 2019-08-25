@@ -1,17 +1,17 @@
 package cc.corbin.budgettracker.importexport;
 
 import android.app.Activity;
-import android.app.DatePickerDialog;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -21,7 +21,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.DatePicker;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -32,7 +36,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -41,20 +44,12 @@ import java.util.Locale;
 
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.DatePickerFragment;
-import cc.corbin.budgettracker.auxilliary.MonthPickerFragment;
 import cc.corbin.budgettracker.auxilliary.NavigationDrawerHelper;
 import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
-import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
-import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
-import cc.corbin.budgettracker.month.MonthViewActivity;
-import cc.corbin.budgettracker.search.CreateSearchActivity;
-import cc.corbin.budgettracker.settings.SettingsActivity;
-import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
-import cc.corbin.budgettracker.year.YearViewActivity;
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.format.ScriptStyle;
@@ -73,17 +68,55 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
  * Created by Corbin on 2/27/2018.
  */
 
-public class ImportExportActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
+public class ImportExportActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, TabLayout.OnTabSelectedListener
 {
     private final String TAG = "ImportExportActivity";
 
     private DrawerLayout _drawerLayout;
 
     private final int CHECK_CODE = 0; // Just check and request and return
-    private final int EXPORT_CODE = 1;
+    private final int EXPORT_ALL_CODE = 1;
     private final int IMPORT_CODE = 2;
 
+    private TabLayout _tabLayout;
+    private LinearLayout _importLayout;
+    private LinearLayout _exportLayout;
+
+    private TextView _exportToLocalStorageTextView;
+    private TextView _exportToSDCardTextView;
+    private Switch _exportLocationSwitch;
+
+    private RadioButton _exportTotalRadioButton;
+    private final int TOTAL_TAG = 1;
+    private RadioButton _exportYearRadioButton;
+    private final int YEAR_TAG = 2;
+    private RadioButton _exportMonthRadioButton;
+    private final int MONTH_TAG = 3;
+    private RadioButton _exportDayRadioButton;
+    private final int DAY_TAG = 4;
+    private RadioButton _exportCustomRadioButton;
+    private final int CUSTOM_TAG = 5;
+    private int _currentExportSetting;
+
+    private TextView _exportingTotalTextView;
+    private TextView _exportingSubsetTextView;
+    private LinearLayout _dateSelectLayout;
+    // private TextView _yearTextView; // Not used
+    private TextView _yearSelectedTextView;
+    private TextView _monthTextView;
+    private TextView _monthSelectedTextView;
+    private TextView _dayTextView;
+    private TextView _daySelectedTextView;
+
+    private boolean _sdStorage = false;
     private boolean _publicStorage = false;
+
+    private Calendar _selectedDate;
+    private boolean _yearSelected;
+    private boolean _monthSelected;
+    private boolean _daySelected;
+
+    private MutableLiveData<Date> _dateLiveData;
 
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _expenditures;
@@ -105,7 +138,115 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         NavigationView navigationView = findViewById(R.id.navView);
         navigationView.setNavigationItemSelectedListener(this);
 
+        _tabLayout = findViewById(R.id.importExportTabLayout);
+        _tabLayout.addOnTabSelectedListener(this);
+        _importLayout = findViewById(R.id.importLinearLayout);
+        _exportLayout = findViewById(R.id.exportLinearLayout);
+        switch (_tabLayout.getSelectedTabPosition())
+        {
+            case 0:
+                _importLayout.setVisibility(View.VISIBLE);
+                _exportLayout.setVisibility(View.GONE);
+                break;
+            case 1:
+                _importLayout.setVisibility(View.GONE);
+                _exportLayout.setVisibility(View.VISIBLE);
+                break;
+        }
+
+        _exportToLocalStorageTextView = findViewById(R.id.exportToLocalTextView);
+        _exportToSDCardTextView = findViewById(R.id.exportToSDTextView);
+        _exportLocationSwitch = findViewById(R.id.exportLocationSwitch);
+        _exportLocationSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+            {
+                storageCheckChanged(isChecked);
+            }
+        });
+        storageCheckChanged(_exportLocationSwitch.isChecked());
+
+        _exportTotalRadioButton = findViewById(R.id.exportTotalRadioButton);
+        _exportTotalRadioButton.setId(TOTAL_TAG);
+        _exportYearRadioButton = findViewById(R.id.exportYearRadioButton);
+        _exportYearRadioButton.setId(YEAR_TAG);
+        _exportMonthRadioButton = findViewById(R.id.exportMonthRadioButton);
+        _exportMonthRadioButton.setId(MONTH_TAG);
+        _exportDayRadioButton = findViewById(R.id.exportDayRadioButton);
+        _exportDayRadioButton.setId(DAY_TAG);
+        _exportCustomRadioButton = findViewById(R.id.exportCustomRadioButton);
+        _exportCustomRadioButton.setId(CUSTOM_TAG);
+
+        _exportingTotalTextView = findViewById(R.id.exportTotalTextView);
+        _exportingSubsetTextView = findViewById(R.id.exportSubsetTextView);
+        _dateSelectLayout = findViewById(R.id.dateSelectLayout);
+        _yearSelectedTextView = findViewById(R.id.yearSelectedTextView);
+        _monthTextView = findViewById(R.id.monthTextView);
+        _monthSelectedTextView = findViewById(R.id.monthSelectedTextView);
+        _dayTextView = findViewById(R.id.dayTextView);
+        _daySelectedTextView = findViewById(R.id.daySelectedTextView);
+
+        View.OnClickListener radioClickListener = new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                exportRadioButtonClicked(v);
+            }
+        };
+        _exportTotalRadioButton.setOnClickListener(radioClickListener);
+        _exportYearRadioButton.setOnClickListener(radioClickListener);
+        _exportMonthRadioButton.setOnClickListener(radioClickListener);
+        _exportDayRadioButton.setOnClickListener(radioClickListener);
+        _exportCustomRadioButton.setOnClickListener(radioClickListener);
+        _exportTotalRadioButton.setChecked(true);
+        _currentExportSetting = TOTAL_TAG;
+
+        _yearSelected = false;
+        _monthSelected = false;
+        _daySelected = false;
+
+        _dateLiveData = new MutableLiveData<Date>();
+        final Observer<Date> dateObserver = new Observer<Date>()
+        {
+            @Override
+            public void onChanged(@Nullable Date date)
+            {
+                dateReceived(date);
+            }
+        };
+        _dateLiveData.observe(this, dateObserver);
+
         _viewModel = ExpenditureViewModel.getInstance();
+    }
+
+    @Override
+    public void onTabReselected(TabLayout.Tab tab)
+    {
+
+    }
+
+    @Override
+    public void onTabSelected(TabLayout.Tab tab)
+    {
+        switch (_tabLayout.getSelectedTabPosition())
+        {
+            case 0:
+                _importLayout.setVisibility(View.VISIBLE);
+                _exportLayout.setVisibility(View.GONE);
+                break;
+            case 1:
+                _importLayout.setVisibility(View.GONE);
+                _exportLayout.setVisibility(View.VISIBLE);
+                break;
+        }
+    }
+
+    @Override
+    public void onTabUnselected(TabLayout.Tab tab)
+    {
+
     }
 
     @Override
@@ -176,7 +317,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     {
         switch (requestCode)
         {
-            case EXPORT_CODE:
+            case EXPORT_ALL_CODE:
                 onExport(null);
                 break;
             //case EXPORT_MONTH_CODE:
@@ -185,206 +326,109 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         }
     }
 
-    public void exportMonth(int month, int year)
+    private void storageCheckChanged(boolean isChecked)
     {
-        //_month = month;
-        //_year = year;
-        //_expenditures = expenditures;
-
-        if (!_publicStorage)
+        _sdStorage = isChecked;
+        if (_sdStorage)
         {
-            //checkPermissions(this, EXPORT_MONTH_CODE);
+            _exportToLocalStorageTextView.setTypeface(null, Typeface.NORMAL);
+            _exportToSDCardTextView.setTypeface(null, Typeface.BOLD);
         }
         else
         {
-            File sd = Environment.getExternalStorageDirectory();
+            _exportToLocalStorageTextView.setTypeface(null, Typeface.BOLD);
+            _exportToSDCardTextView.setTypeface(null, Typeface.NORMAL);
+        }
+    }
 
-            String csvFile;
-            if (month < 10)
-            {
-                csvFile = "0" + month + "_" + year + "_" + "expenditures.xls";
-            }
-            else
-            {
-                csvFile = month + "_" + year + "_" + "expenditures.xls";
-            }
+    private void exportRadioButtonClicked(View v)
+    {
+        _currentExportSetting = v.getId();
+        switch (_currentExportSetting)
+        {
+            case TOTAL_TAG:
+                _exportingTotalTextView.setVisibility(View.VISIBLE);
+                _exportingSubsetTextView.setVisibility(View.GONE);
+                _dateSelectLayout.setVisibility(View.GONE);
+                break;
+            case YEAR_TAG:
+                _exportingTotalTextView.setVisibility(View.GONE);
+                _exportingSubsetTextView.setVisibility(View.VISIBLE);
+                _dateSelectLayout.setVisibility(View.VISIBLE);
+                _monthTextView.setVisibility(View.GONE);
+                _monthSelectedTextView.setVisibility(View.GONE);
+                _dayTextView.setVisibility(View.GONE);
+                _daySelectedTextView.setVisibility(View.GONE);
+                break;
+            case MONTH_TAG:
+                _exportingTotalTextView.setVisibility(View.GONE);
+                _exportingSubsetTextView.setVisibility(View.VISIBLE);
+                _dateSelectLayout.setVisibility(View.VISIBLE);
+                _monthTextView.setVisibility(View.VISIBLE);
+                _monthSelectedTextView.setVisibility(View.VISIBLE);
+                _dayTextView.setVisibility(View.GONE);
+                _daySelectedTextView.setVisibility(View.GONE);
+                break;
+            case DAY_TAG:
+                _exportingTotalTextView.setVisibility(View.GONE);
+                _exportingSubsetTextView.setVisibility(View.VISIBLE);
+                _dateSelectLayout.setVisibility(View.VISIBLE);
+                _monthTextView.setVisibility(View.VISIBLE);
+                _monthSelectedTextView.setVisibility(View.VISIBLE);
+                _dayTextView.setVisibility(View.VISIBLE);
+                _daySelectedTextView.setVisibility(View.VISIBLE);
+                break;
+            case CUSTOM_TAG:
+                _exportingTotalTextView.setVisibility(View.GONE);
+                _exportingSubsetTextView.setVisibility(View.VISIBLE);
+                _dateSelectLayout.setVisibility(View.GONE);
+                break;
+        }
+    }
 
-            DateFormatSymbols dfs = new DateFormatSymbols();
-            String monthName = dfs.getMonths()[month - 1];
+    public void selectDate(View v)
+    {
+        DialogFragment fragment = new DatePickerFragment();
+        ((DatePickerFragment) fragment).setLiveData(_dateLiveData);
+        switch (_currentExportSetting)
+        {
+            case YEAR_TAG:
+                // TODO
+                break;
+            case MONTH_TAG:
+                // TODO
+                break;
+            case DAY_TAG:
+                // TODO
+                break;
+        }
+        fragment.show(this.getSupportFragmentManager(), "datePicker");
+    }
 
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.YEAR, year);
-            calendar.set(Calendar.MONTH, month-1);
-            int count = calendar.getActualMaximum(Calendar.DATE);
-
-            File directory = new File(sd.getAbsolutePath());
-            if (!directory.isDirectory())
-            {
-                directory.mkdirs();
-            }
-            else { }
-
-            try
-            {
-                File file = new File(directory, csvFile);
-                WorkbookSettings wbSettings = new WorkbookSettings();
-                wbSettings.setLocale(new Locale("en", "EN"));
-                WritableWorkbook workbook = Workbook.createWorkbook(file, wbSettings);
-                WritableSheet sheet = workbook.createSheet(monthName, 0);
-
-                WritableFont titleFont = new WritableFont(WritableFont.ARIAL, 10);
-                WritableFont mainHeaderFont = new WritableFont(WritableFont.ARIAL, 10);
-                WritableFont headerFont = new WritableFont(WritableFont.ARIAL, 10);
-                WritableFont defaultFont = new WritableFont(WritableFont.ARIAL, 10);
-                WritableFont superScriptFont = new WritableFont(WritableFont.ARIAL, 10);
-
-                titleFont.setItalic(true);
-                titleFont.setColour(Colour.WHITE);
-                WritableCellFormat titleFormat = new WritableCellFormat(titleFont);
-                titleFormat.setBackground(Colour.BLACK);
-
-                mainHeaderFont.setBoldStyle(WritableFont.BOLD);
-                mainHeaderFont.setUnderlineStyle(UnderlineStyle.SINGLE);
-                WritableCellFormat mainHeaderFormat = new WritableCellFormat(mainHeaderFont);
-                mainHeaderFormat.setBackground(Colour.GRAY_80);
-
-                headerFont.setBoldStyle(WritableFont.BOLD);
-                WritableCellFormat headerFormat = new WritableCellFormat(headerFont);
-                mainHeaderFormat.setBackground(Colour.GRAY_50);
-
-                WritableCellFormat defaultFormat = new WritableCellFormat(defaultFont);
-                WritableCellFormat defaultFormatAlt = new WritableCellFormat(defaultFont);
-                defaultFormatAlt.setBackground(Colour.GRAY_25);
-
-                superScriptFont.setScriptStyle(ScriptStyle.SUPERSCRIPT);
-                WritableCellFormat superScriptFormat = new WritableCellFormat(superScriptFont);
-                WritableCellFormat superScriptFormatAlt = new WritableCellFormat(superScriptFont);
-                superScriptFormatAlt.setBackground(Colour.GRAY_25);
-
-                int r = 0;
-
-                // Write the month header
-                sheet.addCell(new Label(0, r, monthName, titleFormat));
-                sheet.addCell(new Label(1, r, "", titleFormat));
-                sheet.addCell(new Label(2, r, "", titleFormat));
-                r++;
-
-                Calendar date = Calendar.getInstance();
-                Calendar expDate = Calendar.getInstance();
-                SimpleDateFormat simpleDate = new SimpleDateFormat("dd/MM/yyyy");
-                int expCount = _expenditures.getValue().size();
-                int currExp = 0;
-                int note = 1;
-                ArrayList<String> notes = new ArrayList<String>();
-                for (int i = 0; i < count; i++)
-                {
-                    date.set(year, month - 1, i+1, 0, 0, 0);
-                    date.set(Calendar.MILLISECOND, 0);
-
-                    // Print the day, if expenditures are available for that day, print them
-                    String dateString = simpleDate.format(date.getTime());
-                    sheet.addCell(new Label(0, r, dateString, mainHeaderFormat));
-                    sheet.addCell(new Label(1, r, "", mainHeaderFormat));
-                    sheet.addCell(new Label(2, r, "", mainHeaderFormat));
-                    r++;
-                    sheet.addCell(new Label(0, r, "Cost", headerFormat));
-                    sheet.addCell(new Label(1, r, "Category", headerFormat));
-                    sheet.addCell(new Label(2, r, "*", headerFormat));
-                    r++;
-
-                    boolean alt = false;
-                    do
-                    {
-                        if (currExp < expCount)
-                        {
-                            ExpenditureEntity exp = _expenditures.getValue().get(currExp);
-                            expDate.set(exp.getYear(), exp.getMonth(), exp.getDay());
-                            expDate.set(Calendar.MILLISECOND, 0);
-                            if (date.compareTo(expDate) == 0)
-                            {
-                                Log.e(TAG, ""+expDate.getTimeInMillis());
-                                WritableCellFormat format, superFormat;
-                                if (alt)
-                                {
-                                    format = defaultFormat;
-                                    superFormat = superScriptFormat;
-                                }
-                                else
-                                {
-                                    format = defaultFormatAlt;
-                                    superFormat = superScriptFormatAlt;
-                                }
-                                alt = !alt;
-                                sheet.addCell(new Label(0, r, "" + exp.getAmount(), format));
-                                sheet.addCell(new Label(1, r, "" + exp.getCategoryName(), format));
-                                if (exp.getNote().length() > 0)
-                                {
-                                    sheet.addCell(new Label(2, r, "" + note, superFormat));
-                                    notes.add(exp.getNote());
-                                    note++;
-                                }
-                                else
-                                {
-                                    sheet.addCell(new Label(2, r, "", superFormat));
-                                }
-                                r++;
-                                currExp++;
-                            }
-                            else { }
-                        }
-                        else { }
-                    }
-                    while ((date.compareTo(expDate) == 0) && (currExp < expCount));
-                } // End of main table
-
-                int noteCount = notes.size();
-                if (noteCount > 0)
-                {
-                    r++;
-
-                    // Print the table headers
-                    sheet.addCell(new Label(0, r, "Notes", mainHeaderFormat));
-                    sheet.addCell(new Label(1, r, "", mainHeaderFormat));
-                    r++;
-                    sheet.addCell(new Label(0, r, "*", headerFormat));
-                    sheet.addCell(new Label(1, r, "Note", headerFormat));
-                    r++;
-
-                    boolean alt = false;
-                    WritableCellFormat format, superFormat;
-                    for (int i = 0; i < noteCount; i++)
-                    {
-                        if (alt)
-                        {
-                            format = defaultFormat;
-                            superFormat = superScriptFormat;
-                        }
-                        else
-                        {
-                            format = defaultFormatAlt;
-                            superFormat = superScriptFormatAlt;
-                        }
-                        alt = !alt;
-
-                        sheet.addCell(new Label(0, r, "" + (i+1), superFormat));
-                        sheet.addCell(new Label(1, r, notes.get(i), format));
-                        r++;
-                    }
-                }
-                else { }
-
-                workbook.write();
-                workbook.close();
-
-                Toast.makeText(this, "Successfully exported month", Toast.LENGTH_SHORT).show();
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-                Toast.makeText(this, "Failed to export", Toast.LENGTH_SHORT).show();
-            }
-
-            _expenditures = null;
+    private void dateReceived(Date date)
+    {
+        _selectedDate = Calendar.getInstance();
+        _selectedDate.setTime(date);
+        switch (_currentExportSetting)
+        {
+            case YEAR_TAG:
+                _yearSelected = true;
+                _yearSelectedTextView.setText(""+_selectedDate.get(Calendar.YEAR));
+                break;
+            case MONTH_TAG:
+                _yearSelected = true;
+                _monthSelected = true;
+                _yearSelectedTextView.setText(""+_selectedDate.get(Calendar.YEAR));
+                _monthSelectedTextView.setText(""+(_selectedDate.get(Calendar.MONTH)+1));
+                break;
+            case DAY_TAG:
+                _yearSelected = true;
+                _monthSelected = true;
+                _daySelected = true;
+                _yearSelectedTextView.setText(""+_selectedDate.get(Calendar.YEAR));
+                _monthSelectedTextView.setText(""+(_selectedDate.get(Calendar.MONTH)+1));
+                _daySelectedTextView.setText(""+_selectedDate.get(Calendar.DATE));
+                break;
         }
     }
 
@@ -414,11 +458,12 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         Log.e(TAG, "Import: " + selectedFile.getPath());
     }
 
+    // TODO: Set where to store the files
     public void onExport(View v)
     {
         if (!_publicStorage)
         {
-            checkPermissions(this, EXPORT_CODE);
+            checkPermissions(this, EXPORT_ALL_CODE);
         }
         else
         {
@@ -445,96 +490,110 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
             }
             else
             {
-                Calendar calendar = Calendar.getInstance();
-                String expFileName = "ExpenditureDatabase-" + calendar.get(Calendar.YEAR) + "-" +
-                        (calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DATE) + ".db";
-                String budFileName = "BudgetDatabase-" + calendar.get(Calendar.YEAR) + "-" +
-                        (calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DATE) + ".db";
-
-                exportAll(folder, expFileName, budFileName);
+                switch (_currentExportSetting)
+                {
+                    case TOTAL_TAG:
+                        exportTotal(folder);
+                        break;
+                    case YEAR_TAG:
+                        exportYear(folder);
+                        break;
+                    case MONTH_TAG:
+                        exportMonth(folder);
+                        break;
+                    case DAY_TAG:
+                        exportDay(folder);
+                        break;
+                }
             }
         }
     }
 
-    public void exportAll(String folder, String expFileName, String budFileName)
+    // TODO - Format files to have two digits for months and days
+
+    private void exportTotal(String folder)
     {
-        String expPath = getDatabasePath("expenditures").getAbsolutePath();
-        String budPath = getDatabasePath("budgets").getAbsolutePath();
+        Calendar calendar = Calendar.getInstance();
+        String expFileName = "ExpenditureDatabase_as_of_" + calendar.get(Calendar.YEAR) + "_" +
+                (calendar.get(Calendar.MONTH) + 1) + "_" + calendar.get(Calendar.DATE) + ".db";
+        String budFileName = "BudgetDatabase_as_of_" + calendar.get(Calendar.YEAR) + "_" +
+                (calendar.get(Calendar.MONTH) + 1) + "_" + calendar.get(Calendar.DATE) + ".db";
 
-        File srcExp = new File(expPath);
-        File srcBud = new File(budPath);
-        File dstExp = new File(folder, expFileName);
-        File dstBud = new File(folder, budFileName);
+        ExpenditureDatabase.createDatabaseFile(
+                getDatabasePath("expenditures").getAbsolutePath(),
+                folder, expFileName, "");
+        BudgetDatabase.createDatabaseFile(
+                getDatabasePath("budgets").getAbsolutePath(),
+                folder, budFileName, "");
+    }
 
-        boolean exportSucceeded = true;
-
-        // Export the expenditures
-        try (InputStream in = new FileInputStream(srcExp))
+    private void exportYear(String folder)
+    {
+        if (_yearSelected)
         {
-            try (OutputStream out = new FileOutputStream(dstExp))
-            {
-                // Transfer bytes from in to out
-                byte[] buf = new byte[1024];
-                int len;
-                while ((len = in.read(buf)) > 0)
-                {
-                    out.write(buf, 0, len);
-                }
-            }
-        }
-        catch (IOException e)
-        {
-            Log.e(TAG, e.getLocalizedMessage());
-            exportSucceeded = false;
-        }
-
-        // Export the budgets
-        try (InputStream in = new FileInputStream(srcBud))
-        {
-            try (OutputStream out = new FileOutputStream(dstBud))
-            {
-                // Transfer bytes from in to out
-                byte[] buf = new byte[1024];
-                int len;
-                while ((len = in.read(buf)) > 0)
-                {
-                    out.write(buf, 0, len);
-                }
-            }
-        }
-        catch (IOException e)
-        {
-            Log.e(TAG, e.getLocalizedMessage());
-            exportSucceeded = false;
-        }
-
-        // Report the success or failure
-        if (exportSucceeded)
-        {
-            Toast.makeText(this, "Successfully exported to BudgetTracker/", Toast.LENGTH_LONG).show();
+            int year = _selectedDate.get(Calendar.YEAR);
+            String expFileName = "ExpenditureDatabase_" + year + ".db";
+            String budFileName = "BudgetDatabase_" + year + ".db";
+            String whereQuery = "WHERE (year == " + year + ")";
+            ExpenditureDatabase.createDatabaseFile(
+                    getDatabasePath("expenditures").getAbsolutePath(),
+                    folder, expFileName, whereQuery);
+            BudgetDatabase.createDatabaseFile(
+                    getDatabasePath("budgets").getAbsolutePath(),
+                    folder, budFileName, whereQuery);
         }
         else
         {
-            Toast.makeText(this, "Export failed", Toast.LENGTH_LONG).show();
+            Toast.makeText(this,"Select a date", Toast.LENGTH_LONG).show();
         }
     }
 
-    public void test(View v)
+    private void exportMonth(String folder)
     {
-        MutableLiveData<Date> _monthDateLive = new MutableLiveData<Date>();
-
-        final Observer<Date> monthDateObserver = new Observer<Date>()
+        if (_yearSelected && _monthSelected)
         {
-            @Override
-            public void onChanged(@Nullable Date date)
-            {
-                Log.e(TAG, date.toString());
-            }
-        };
-        _monthDateLive.observe(this, monthDateObserver);
+            int year = _selectedDate.get(Calendar.YEAR);
+            int month = _selectedDate.get(Calendar.MONTH)+1;
+            String expFileName = "ExpenditureDatabase_" + year +
+                    "_" + month + ".db";
+            String budFileName = "BudgetDatabase_" + year +
+                    "_" + month + ".db";
+            String whereQuery = "WHERE (year == " + year + ") " +
+                    "AND (month == " + month + ")";
+            ExpenditureDatabase.createDatabaseFile(
+                    getDatabasePath("expenditures").getAbsolutePath(),
+                    folder, expFileName, whereQuery);
+            BudgetDatabase.createDatabaseFile(
+                    getDatabasePath("budgets").getAbsolutePath(),
+                    folder, budFileName, whereQuery);
+        }
+        else
+        {
+            Toast.makeText(this,"Select a date", Toast.LENGTH_LONG).show();
+        }
+    }
 
-        DialogFragment fragment = new MonthPickerFragment();
-        ((MonthPickerFragment) fragment).setLiveData(_monthDateLive);
-        fragment.show(getSupportFragmentManager(), "monthPicker");
+    private void exportDay(String folder)
+    {
+        if (_yearSelected && _monthSelected && _daySelected)
+        {
+            int year = _selectedDate.get(Calendar.YEAR);
+            int month = _selectedDate.get(Calendar.MONTH)+1;
+            int day = _selectedDate.get(Calendar.DATE);
+            String expFileName = "ExpenditureDatabase_" + year +
+                    "_" + month +
+                    "_" + day + ".db";
+            String whereQuery = "WHERE (year == " + year + ") " +
+                    "AND (month == " + month + ") " +
+                    "AND (day == " + day + ")";
+            ExpenditureDatabase.createDatabaseFile(
+                    getDatabasePath("expenditures").getAbsolutePath(),
+                    folder, expFileName, whereQuery);
+            // No budget table to export
+        }
+        else
+        {
+            Toast.makeText(this,"Select a date", Toast.LENGTH_LONG).show();
+        }
     }
 }

@@ -150,6 +150,13 @@
     <string name="export_year">Export Year</string>
     <string name="export_total">Export Total</string>
     <string name="export_custom">Export Custom</string>
+    <string name="export_location">Export Location: </string>
+    <string name="export_to_local">Export to Local Storage</string>
+    <string name="export_to_sd">Export to SD Card</string>
+
+    <string name="export_total_text">Exporting the full database</string>
+    <string name="export_subset_text">Exporting a subset of the database</string>
+    <string name="export_date">Date: </string>
 
     <string name="sun">Sun</string>
     <string name="mon">Mon</string>
