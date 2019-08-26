@@ -158,6 +158,9 @@
     <string name="export_subset_text">Exporting a subset of the database</string>
     <string name="export_date">Date: </string>
 
+    <string name="exp_file_name">Expenditures File Name:</string>
+    <string name="bud_file_name">Budgets File Name:</string>
+
     <string name="sun">Sun</string>
     <string name="mon">Mon</string>
     <string name="tue">Tue</string>

@@ -85,23 +85,6 @@
             android:text="@string/export_custom" />
     </RadioGroup>
 
-    <TextView
-        android:id="@+id/exportTotalTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="@string/export_total_text"
-        android:textColor="@color/black" />
-
-    <TextView
-        android:id="@+id/exportSubsetTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="@string/export_subset_text"
-        android:textColor="@color/black"
-        android:visibility="gone" />
-
     <LinearLayout
         android:id="@+id/dateSelectLayout"
         android:layout_width="match_parent"
@@ -171,6 +154,77 @@
             android:padding="4dp" />
 
     </LinearLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="12dp"/>
+
+    <LinearLayout
+        android:id="@+id/expFileNameLinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/expFileNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/exp_file_name"
+            android:textColor="@color/black" />
+
+        <EditText
+            android:id="@+id/expFileNameEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/budFileNameLinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/budFileNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/bud_file_name"
+            android:textColor="@color/black" />
+
+        <EditText
+            android:id="@+id/budFileNameEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/exportTotalTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="@string/export_total_text"
+        android:textColor="@color/black" />
+
+    <TextView
+        android:id="@+id/exportSubsetTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="@string/export_subset_text"
+        android:textColor="@color/black"
+        android:visibility="gone" />
 
     <Button
         android:id="@+id/exportButton"

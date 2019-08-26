@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.Switch;
@@ -116,6 +117,13 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     private boolean _monthSelected;
     private boolean _daySelected;
 
+    private EditText _expFileNameEditText;
+    private EditText _budFileNameEditText;
+    private LinearLayout _budFileNameLinearLayout;
+
+    private String _expFileName;
+    private String _budFileName;
+
     private MutableLiveData<Date> _dateLiveData;
 
     private ExpenditureViewModel _viewModel;
@@ -137,6 +145,10 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         _drawerLayout = findViewById(R.id.rootLayout);
         NavigationView navigationView = findViewById(R.id.navView);
         navigationView.setNavigationItemSelectedListener(this);
+
+        _expFileNameEditText = findViewById(R.id.expFileNameEditText);
+        _budFileNameEditText = findViewById(R.id.budFileNameEditText);
+        _budFileNameLinearLayout = findViewById(R.id.budFileNameLinearLayout);
 
         _tabLayout = findViewById(R.id.importExportTabLayout);
         _tabLayout.addOnTabSelectedListener(this);
@@ -206,6 +218,8 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         _yearSelected = false;
         _monthSelected = false;
         _daySelected = false;
+
+        updateFileNames();
 
         _dateLiveData = new MutableLiveData<Date>();
         final Observer<Date> dateObserver = new Observer<Date>()
@@ -350,6 +364,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                 _exportingTotalTextView.setVisibility(View.VISIBLE);
                 _exportingSubsetTextView.setVisibility(View.GONE);
                 _dateSelectLayout.setVisibility(View.GONE);
+                _budFileNameLinearLayout.setVisibility(View.VISIBLE);
                 break;
             case YEAR_TAG:
                 _exportingTotalTextView.setVisibility(View.GONE);
@@ -359,6 +374,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                 _monthSelectedTextView.setVisibility(View.GONE);
                 _dayTextView.setVisibility(View.GONE);
                 _daySelectedTextView.setVisibility(View.GONE);
+                _budFileNameLinearLayout.setVisibility(View.VISIBLE);
                 break;
             case MONTH_TAG:
                 _exportingTotalTextView.setVisibility(View.GONE);
@@ -368,6 +384,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                 _monthSelectedTextView.setVisibility(View.VISIBLE);
                 _dayTextView.setVisibility(View.GONE);
                 _daySelectedTextView.setVisibility(View.GONE);
+                _budFileNameLinearLayout.setVisibility(View.VISIBLE);
                 break;
             case DAY_TAG:
                 _exportingTotalTextView.setVisibility(View.GONE);
@@ -377,13 +394,16 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                 _monthSelectedTextView.setVisibility(View.VISIBLE);
                 _dayTextView.setVisibility(View.VISIBLE);
                 _daySelectedTextView.setVisibility(View.VISIBLE);
+                _budFileNameLinearLayout.setVisibility(View.GONE);
                 break;
             case CUSTOM_TAG:
                 _exportingTotalTextView.setVisibility(View.GONE);
                 _exportingSubsetTextView.setVisibility(View.VISIBLE);
                 _dateSelectLayout.setVisibility(View.GONE);
+                _budFileNameLinearLayout.setVisibility(View.VISIBLE);
                 break;
         }
+        updateFileNames();
     }
 
     public void selectDate(View v)
@@ -403,6 +423,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                 break;
         }
         fragment.show(this.getSupportFragmentManager(), "datePicker");
+        updateFileNames();
     }
 
     private void dateReceived(Date date)
@@ -509,22 +530,90 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         }
     }
 
+    private void updateFileNames()
+    {
+        String yearString;
+        String monthString;
+        String dayString;
+        switch (_currentExportSetting)
+        {
+            case TOTAL_TAG:
+                Calendar calendar = Calendar.getInstance();
+                _expFileName = "ExpenditureDatabase_as_of_" + calendar.get(Calendar.YEAR) + "_" +
+                        (calendar.get(Calendar.MONTH) + 1) + "_" + calendar.get(Calendar.DATE) + ".db";
+                _budFileName = "BudgetDatabase_as_of_" + calendar.get(Calendar.YEAR) + "_" +
+                        (calendar.get(Calendar.MONTH) + 1) + "_" + calendar.get(Calendar.DATE) + ".db";
+                break;
+            case YEAR_TAG:
+                yearString = "";
+                if (_yearSelected)
+                {
+                    yearString = "" + _selectedDate.get(Calendar.YEAR);
+                }
+                else{ }
+                _expFileName = "ExpenditureDatabase_" + yearString + ".db";
+                _budFileName = "BudgetDatabase_" + yearString + ".db";
+                break;
+            case MONTH_TAG:
+                yearString = "";
+                monthString = "";
+                if (_yearSelected && _monthSelected)
+                {
+                    yearString = "" + _selectedDate.get(Calendar.YEAR);
+                    monthString = "" + (_selectedDate.get(Calendar.MONTH)+1);
+                }
+                else{ }
+                _expFileName = "ExpenditureDatabase_" + yearString + "_" + monthString + ".db";
+                _budFileName = "BudgetDatabase_" + yearString + "_" + monthString + ".db";
+                break;
+            case DAY_TAG:
+                yearString = "";
+                monthString = "";
+                dayString = "";
+                if (_yearSelected && _monthSelected && _daySelected)
+                {
+                    yearString = "" + _selectedDate.get(Calendar.YEAR);
+                    monthString = "" + (_selectedDate.get(Calendar.MONTH)+1);
+                    dayString = "" + (_selectedDate.get(Calendar.DATE));
+                }
+                else{ }
+                _expFileName = "ExpenditureDatabase_" + yearString + "_" + monthString + "_" + dayString + ".db";
+                _budFileName = "BudgetDatabase_" + yearString + "_" + monthString + "_" + dayString + ".db";
+                break;
+            case CUSTOM_TAG:
+                _expFileName = "ExpenditureDatabase_" + "custom" + ".db";
+                _budFileName = "BudgetDatabase_" + "custom" + ".db";
+                break;
+        }
+
+        _expFileNameEditText.setHint(_expFileName);
+        _budFileNameEditText.setHint(_budFileName);
+    }
+
+    private String getExpenditureFileName()
+    {
+        String expFileName = _expFileNameEditText.getText().toString();
+        expFileName = (expFileName.length() == 0) ? _expFileName : expFileName;
+        return expFileName;
+    }
+
+    private String getBudgetFileName()
+    {
+        String budFileName = _budFileNameEditText.getText().toString();
+        budFileName = (budFileName.length() == 0) ? _budFileName : budFileName;
+        return budFileName;
+    }
+
     // TODO - Format files to have two digits for months and days
 
     private void exportTotal(String folder)
     {
-        Calendar calendar = Calendar.getInstance();
-        String expFileName = "ExpenditureDatabase_as_of_" + calendar.get(Calendar.YEAR) + "_" +
-                (calendar.get(Calendar.MONTH) + 1) + "_" + calendar.get(Calendar.DATE) + ".db";
-        String budFileName = "BudgetDatabase_as_of_" + calendar.get(Calendar.YEAR) + "_" +
-                (calendar.get(Calendar.MONTH) + 1) + "_" + calendar.get(Calendar.DATE) + ".db";
-
         ExpenditureDatabase.createDatabaseFile(
                 getDatabasePath("expenditures").getAbsolutePath(),
-                folder, expFileName, "");
+                folder, getExpenditureFileName(), "");
         BudgetDatabase.createDatabaseFile(
                 getDatabasePath("budgets").getAbsolutePath(),
-                folder, budFileName, "");
+                folder, getBudgetFileName(), "");
     }
 
     private void exportYear(String folder)
@@ -532,15 +621,13 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         if (_yearSelected)
         {
             int year = _selectedDate.get(Calendar.YEAR);
-            String expFileName = "ExpenditureDatabase_" + year + ".db";
-            String budFileName = "BudgetDatabase_" + year + ".db";
             String whereQuery = "WHERE (year == " + year + ")";
             ExpenditureDatabase.createDatabaseFile(
                     getDatabasePath("expenditures").getAbsolutePath(),
-                    folder, expFileName, whereQuery);
+                    folder, getExpenditureFileName(), whereQuery);
             BudgetDatabase.createDatabaseFile(
                     getDatabasePath("budgets").getAbsolutePath(),
-                    folder, budFileName, whereQuery);
+                    folder, getBudgetFileName(), whereQuery);
         }
         else
         {
@@ -554,18 +641,14 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         {
             int year = _selectedDate.get(Calendar.YEAR);
             int month = _selectedDate.get(Calendar.MONTH)+1;
-            String expFileName = "ExpenditureDatabase_" + year +
-                    "_" + month + ".db";
-            String budFileName = "BudgetDatabase_" + year +
-                    "_" + month + ".db";
             String whereQuery = "WHERE (year == " + year + ") " +
                     "AND (month == " + month + ")";
             ExpenditureDatabase.createDatabaseFile(
                     getDatabasePath("expenditures").getAbsolutePath(),
-                    folder, expFileName, whereQuery);
+                    folder, getExpenditureFileName(), whereQuery);
             BudgetDatabase.createDatabaseFile(
                     getDatabasePath("budgets").getAbsolutePath(),
-                    folder, budFileName, whereQuery);
+                    folder, getBudgetFileName(), whereQuery);
         }
         else
         {
@@ -580,15 +663,12 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
             int year = _selectedDate.get(Calendar.YEAR);
             int month = _selectedDate.get(Calendar.MONTH)+1;
             int day = _selectedDate.get(Calendar.DATE);
-            String expFileName = "ExpenditureDatabase_" + year +
-                    "_" + month +
-                    "_" + day + ".db";
             String whereQuery = "WHERE (year == " + year + ") " +
                     "AND (month == " + month + ") " +
                     "AND (day == " + day + ")";
             ExpenditureDatabase.createDatabaseFile(
                     getDatabasePath("expenditures").getAbsolutePath(),
-                    folder, expFileName, whereQuery);
+                    folder, getBudgetFileName(), whereQuery);
             // No budget table to export
         }
         else
