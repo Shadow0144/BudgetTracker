@@ -301,6 +301,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 {
                     _externalStoragePermission = true;
+                    respondToRequestCode(requestCode); // Only respond on a success or an infinite loop may occur
                 }
                 else
                 {
@@ -309,7 +310,6 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                 }
                 break;
         }
-        respondToRequestCode(requestCode);
     }
 
     // Complete the export if the permission was given
