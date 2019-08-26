@@ -21,6 +21,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -30,18 +31,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.text.DateFormatSymbols;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.DatePickerFragment;
@@ -51,16 +43,6 @@ import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
-import jxl.Workbook;
-import jxl.WorkbookSettings;
-import jxl.format.ScriptStyle;
-import jxl.format.UnderlineStyle;
-import jxl.write.Colour;
-import jxl.write.Label;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableFont;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
@@ -75,9 +57,8 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
 
     private DrawerLayout _drawerLayout;
 
-    private final int CHECK_CODE = 0; // Just check and request and return
-    private final int EXPORT_ALL_CODE = 1;
-    private final int IMPORT_CODE = 2;
+    private final int EXTERNAL_SAVING_CODE = 0;
+    private final int IMPORT_FILE_SELECT_CODE = 1;
 
     private TabLayout _tabLayout;
     private LinearLayout _importLayout;
@@ -110,7 +91,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     private TextView _daySelectedTextView;
 
     private boolean _sdStorage = false;
-    private boolean _publicStorage = false;
+    private boolean _externalStoragePermission = false;
 
     private Calendar _selectedDate;
     private boolean _yearSelected;
@@ -124,11 +105,13 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     private String _expFileName;
     private String _budFileName;
 
+    private Button _importButton;
+    private Button _exportButton;
+
     private MutableLiveData<Date> _dateLiveData;
+    private MutableLiveData<Boolean> _databaseActionComplete;
 
     private ExpenditureViewModel _viewModel;
-    private MutableLiveData<List<ExpenditureEntity>> _expenditures;
-    private MutableLiveData<List<BudgetEntity>> _budgets;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -145,6 +128,9 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         _drawerLayout = findViewById(R.id.rootLayout);
         NavigationView navigationView = findViewById(R.id.navView);
         navigationView.setNavigationItemSelectedListener(this);
+
+        _importButton = findViewById(R.id.importButton);
+        _exportButton = findViewById(R.id.exportButton);
 
         _expFileNameEditText = findViewById(R.id.expFileNameEditText);
         _budFileNameEditText = findViewById(R.id.budFileNameEditText);
@@ -291,11 +277,6 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         return handled;
     }
 
-    public void checkPermissions(Activity activity)
-    {
-        checkPermissions(activity, CHECK_CODE);
-    }
-
     private void checkPermissions(Activity activity, int code)
     {
         if (activity.checkSelfPermission(WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
@@ -304,7 +285,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         }
         else
         {
-            _publicStorage = true;
+            _externalStoragePermission = true;
             respondToRequestCode(code);
         }
     }
@@ -313,30 +294,32 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                                            String permissions[], int[] grantResults)
     {
         // If request is cancelled, the result arrays are empty
-        if (grantResults.length > 0
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+        switch (requestCode)
         {
-            _publicStorage = true;
-            respondToRequestCode(requestCode);
+            case EXTERNAL_SAVING_CODE:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                {
+                    _externalStoragePermission = true;
+                }
+                else
+                {
+                    _externalStoragePermission = false;
+                    Toast.makeText(this, "Failed to acquire permissions", Toast.LENGTH_SHORT).show();
+                }
+                break;
         }
-        else
-        {
-            _publicStorage = false;
-            Toast.makeText(this, "Failed to acquire permissions", Toast.LENGTH_SHORT).show();
-            _expenditures = null;
-        }
+        respondToRequestCode(requestCode);
     }
 
+    // Complete the export if the permission was given
     private void respondToRequestCode(int requestCode)
     {
         switch (requestCode)
         {
-            case EXPORT_ALL_CODE:
+            case EXTERNAL_SAVING_CODE:
                 onExport(null);
                 break;
-            //case EXPORT_MONTH_CODE:
-            //    exportMonth(0, 0); // TODO
-            //    break;
         }
     }
 
@@ -460,14 +443,14 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                 .addCategory(Intent.CATEGORY_OPENABLE)
                 .setAction(Intent.ACTION_GET_CONTENT);
 
-        startActivityForResult(Intent.createChooser(intent, "Select a file"), IMPORT_CODE);
+        startActivityForResult(Intent.createChooser(intent, "Select a file"), IMPORT_FILE_SELECT_CODE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == IMPORT_CODE && resultCode == RESULT_OK)
+        if (requestCode == IMPORT_FILE_SELECT_CODE && resultCode == RESULT_OK)
         {
             continueImport(data.getData()); //The URI with the location of the file
         }
@@ -482,9 +465,9 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     // TODO: Set where to store the files
     public void onExport(View v)
     {
-        if (!_publicStorage)
+        if (!_externalStoragePermission)
         {
-            checkPermissions(this, EXPORT_ALL_CODE);
+            checkPermissions(this, EXTERNAL_SAVING_CODE);
         }
         else
         {
@@ -524,6 +507,9 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                         break;
                     case DAY_TAG:
                         exportDay(folder);
+                        break;
+                    case CUSTOM_TAG:
+                        exportCustom(folder);
                         break;
                 }
             }
@@ -675,5 +661,10 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         {
             Toast.makeText(this,"Select a date", Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void exportCustom(String folder)
+    {
+        // TODO
     }
 }
