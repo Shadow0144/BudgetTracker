@@ -20,6 +20,7 @@ import cc.corbin.budgettracker.workerthread.budgetevent.BudUpdateEvent;
 import cc.corbin.budgettracker.workerthread.budgetevent.BudUpdateTransferEvent;
 import cc.corbin.budgettracker.workerthread.combinedevent.ComAddCategoryEvent;
 import cc.corbin.budgettracker.workerthread.combinedevent.ComDatabaseEvent;
+import cc.corbin.budgettracker.workerthread.combinedevent.ComExportDatabasesEvent;
 import cc.corbin.budgettracker.workerthread.combinedevent.ComMergeCategoryEvent;
 import cc.corbin.budgettracker.workerthread.combinedevent.ComRemoveCategoryEvent;
 import cc.corbin.budgettracker.workerthread.combinedevent.ComRenameCategoryEvent;
@@ -238,7 +239,6 @@ public class ExpenditureViewModel
         processQueue();
     }
 
-
     public void updateCategories(String[] categoryNames, MutableLiveData<Boolean> processing)
     {
         ComDatabaseEvent event = new ComResortCategoriesEvent(categoryNames, processing);
@@ -257,6 +257,18 @@ public class ExpenditureViewModel
     {
         BudDatabaseEvent event = new BudCustomQueryEvent(mutableLiveData, query);
         _budEvents.add(event);
+        processQueue();
+    }
+
+    public void exportDatabases(MutableLiveData<Boolean> complete,
+                                String whereQuery, String dstFolder,
+                                String srcExpFileName, String dstExpFileName,
+                                String srcBudFileName, String dstBudFileName,
+                                boolean exportBudgets)
+    {
+        ComDatabaseEvent event = new ComExportDatabasesEvent(complete, whereQuery, dstFolder, srcExpFileName, dstExpFileName,
+                                                            srcBudFileName, dstBudFileName, exportBudgets);
+        _comEvents.add(event);
         processQueue();
     }
 }

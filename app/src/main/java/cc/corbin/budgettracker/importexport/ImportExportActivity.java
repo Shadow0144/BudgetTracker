@@ -3,6 +3,7 @@ package cc.corbin.budgettracker.importexport;
 import android.app.Activity;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
@@ -206,6 +207,24 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         _daySelected = false;
 
         updateFileNames();
+
+        _databaseActionComplete = new MutableLiveData<Boolean>();
+        final Observer<Boolean> databaseObserver = new Observer<Boolean>()
+        {
+            @Override
+            public void onChanged(@Nullable Boolean aBoolean)
+            {
+                if (aBoolean) // if - complete
+                {
+                    _importButton.setEnabled(true);
+                    _exportButton.setEnabled(true);
+                    makeCompletionToast();
+                }
+                else { } // else - not complete
+            }
+        };
+        _databaseActionComplete.observe(this, databaseObserver);
+        _databaseActionComplete.setValue(false);
 
         _dateLiveData = new MutableLiveData<Date>();
         final Observer<Date> dateObserver = new Observer<Date>()
@@ -512,6 +531,8 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                         exportCustom(folder);
                         break;
                 }
+                _importButton.setEnabled(false);
+                _exportButton.setEnabled(false);
             }
         }
     }
@@ -594,12 +615,16 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
 
     private void exportTotal(String folder)
     {
-        ExpenditureDatabase.createDatabaseFile(
+        /*ExpenditureDatabase.createDatabaseFile(
                 getDatabasePath("expenditures").getAbsolutePath(),
                 folder, getExpenditureFileName(), "");
         BudgetDatabase.createDatabaseFile(
                 getDatabasePath("budgets").getAbsolutePath(),
-                folder, getBudgetFileName(), "");
+                folder, getBudgetFileName(), "");*/
+        String whereQuery = "";
+        _viewModel.exportDatabases(_databaseActionComplete, whereQuery, folder,
+                getDatabasePath("expenditures").getAbsolutePath(), getExpenditureFileName(),
+                getDatabasePath("budgets").getAbsolutePath(), getBudgetFileName(), true);
     }
 
     private void exportYear(String folder)
@@ -608,12 +633,15 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         {
             int year = _selectedDate.get(Calendar.YEAR);
             String whereQuery = "WHERE (year == " + year + ")";
-            ExpenditureDatabase.createDatabaseFile(
+            /*ExpenditureDatabase.createDatabaseFile(
                     getDatabasePath("expenditures").getAbsolutePath(),
                     folder, getExpenditureFileName(), whereQuery);
             BudgetDatabase.createDatabaseFile(
                     getDatabasePath("budgets").getAbsolutePath(),
-                    folder, getBudgetFileName(), whereQuery);
+                    folder, getBudgetFileName(), whereQuery);*/
+            _viewModel.exportDatabases(_databaseActionComplete, whereQuery, folder,
+                    getDatabasePath("expenditures").getAbsolutePath(), getExpenditureFileName(),
+                    getDatabasePath("budgets").getAbsolutePath(), getBudgetFileName(), true);
         }
         else
         {
@@ -629,12 +657,15 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
             int month = _selectedDate.get(Calendar.MONTH)+1;
             String whereQuery = "WHERE (year == " + year + ") " +
                     "AND (month == " + month + ")";
-            ExpenditureDatabase.createDatabaseFile(
+            /*ExpenditureDatabase.createDatabaseFile(
                     getDatabasePath("expenditures").getAbsolutePath(),
                     folder, getExpenditureFileName(), whereQuery);
             BudgetDatabase.createDatabaseFile(
                     getDatabasePath("budgets").getAbsolutePath(),
-                    folder, getBudgetFileName(), whereQuery);
+                    folder, getBudgetFileName(), whereQuery);*/
+            _viewModel.exportDatabases(_databaseActionComplete, whereQuery, folder,
+                    getDatabasePath("expenditures").getAbsolutePath(), getExpenditureFileName(),
+                    getDatabasePath("budgets").getAbsolutePath(), getBudgetFileName(), true);
         }
         else
         {
@@ -652,10 +683,13 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
             String whereQuery = "WHERE (year == " + year + ") " +
                     "AND (month == " + month + ") " +
                     "AND (day == " + day + ")";
-            ExpenditureDatabase.createDatabaseFile(
+            /*ExpenditureDatabase.createDatabaseFile(
                     getDatabasePath("expenditures").getAbsolutePath(),
                     folder, getBudgetFileName(), whereQuery);
-            // No budget table to export
+            // No budget table to export*/
+            _viewModel.exportDatabases(_databaseActionComplete, whereQuery, folder,
+                    getDatabasePath("expenditures").getAbsolutePath(), getExpenditureFileName(),
+                    "", "", false);
         }
         else
         {
@@ -666,5 +700,10 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     private void exportCustom(String folder)
     {
         // TODO
+    }
+
+    private void makeCompletionToast()
+    {
+        Toast.makeText(this, "Database operation complete", Toast.LENGTH_LONG).show();
     }
 }
