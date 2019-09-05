@@ -12,6 +12,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+
 import java.util.Calendar;
 import java.util.List;
 
@@ -26,6 +28,9 @@ import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.importexport.ImportExportActivity;
 import cc.corbin.budgettracker.month.MonthViewActivity;
 import cc.corbin.budgettracker.search.CreateSearchActivity;
+import cc.corbin.budgettracker.search.CreateSearchFragment;
+import cc.corbin.budgettracker.search.SearchResultsActivity;
+import cc.corbin.budgettracker.search.SearchResultsFragment;
 import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
@@ -35,6 +40,8 @@ public class GroupActivity extends NavigationActivity
 {
     private final String TAG = "GroupActivity";
 
+    private CreateSearchFragment _createSearchFragment;
+    private SearchResultsFragment _searchResultsFragment;
 
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _expenditures;
@@ -46,7 +53,12 @@ public class GroupActivity extends NavigationActivity
         setContentView(R.layout.activity_group);
         setup();
 
+        _createSearchFragment = (CreateSearchFragment)getSupportFragmentManager().findFragmentById(R.id.createSearchFragment);
+        _searchResultsFragment = (SearchResultsFragment)getSupportFragmentManager().findFragmentById(R.id.searchResultsFragment);
+
         _viewModel = ExpenditureViewModel.getInstance();
+
+        _searchResultsFragment.enableGroupActivityMode();
     }
 
     @Override
@@ -59,6 +71,16 @@ public class GroupActivity extends NavigationActivity
         else if (requestCode == SettingsActivity.DATABASE_NO_UPDATE_INTENT_FLAG)
         {
             // Do nothing
+        }
+        else { }
+    }
+
+    // From the Fragment
+    public void search(View v)
+    {
+        if (_createSearchFragment.isDataComplete())
+        {
+            _searchResultsFragment.runQuery(_createSearchFragment.getSearchIntent());
         }
         else { }
     }

@@ -34,6 +34,9 @@ public class SearchResultsFragment extends Fragment
     private ProgressBar _progressBar;
 
     private TextView _totalTextView;
+    private TextView _searchResultsTextView;
+
+    private boolean _groupMode;
 
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _expeditures;
@@ -55,6 +58,7 @@ public class SearchResultsFragment extends Fragment
         _progressBar = view.findViewById(R.id.searchProgressBar);
         _resultsContainer = view.findViewById(R.id.resultsLinearLayout);
         _totalTextView = view.findViewById(R.id.totalTextView);
+        _searchResultsTextView = view.findViewById(R.id.searchResultsTextView);
 
         _progressBar.setVisibility(View.VISIBLE);
         _totalTextView.setText(getTotalString(0));
@@ -70,15 +74,34 @@ public class SearchResultsFragment extends Fragment
             }
         };
         _expeditures.observe(this, expenditureEntitiesObserver);
+
+        _groupMode = false;
+    }
+
+    public void enableGroupActivityMode()
+    {
+        _totalTextView.setVisibility(View.GONE);
+        _searchResultsTextView.setVisibility(View.VISIBLE);
+        _progressBar.setVisibility(View.GONE);
+        _groupMode = true;
     }
 
     public void runQuery()
     {
+        runQuery(getActivity().getIntent());
+    }
+
+    public void runQuery(Intent intent)
+    {
+        String query = new SearchHelper(intent).getQuery();
+        runQuery(query);
+    }
+
+    public void runQuery(String query)
+    {
         _resultsContainer.removeAllViews();
         _progressBar.setVisibility(View.VISIBLE);
         _totalTextView.setText(getTotalString(0));
-        Intent intent = getActivity().getIntent();
-        String query = new SearchHelper(intent).getQuery();
         _viewModel.customExpenditureQuery(_expeditures, query);
     }
 
@@ -96,16 +119,31 @@ public class SearchResultsFragment extends Fragment
                 ExpenditureEntity exp = _expenditureEntities.get(i);
                 total += exp.getAmount();
                 final ExpenditureItem view = new ExpenditureItem(getActivity(), exp);
+                view.setCheckable(_groupMode);
                 // Add an listener to jump to the date of the item
                 view.setTag(exp);
-                view.setOnClickListener(new View.OnClickListener()
+                if (_groupMode)
                 {
-                    @Override
-                    public void onClick(View view)
+                    view.setOnClickListener(new View.OnClickListener()
                     {
-                        jumpToExpDate((ExpenditureEntity)view.getTag());
-                    }
-                });
+                        @Override
+                        public void onClick(View view)
+                        {
+                            ((ExpenditureItem)view).toggleChecked();
+                        }
+                    });
+                }
+                else
+                {
+                    view.setOnClickListener(new View.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(View view)
+                        {
+                            jumpToExpDate((ExpenditureEntity) view.getTag());
+                        }
+                    });
+                }
                 _resultsContainer.addView(view);
             }
         }

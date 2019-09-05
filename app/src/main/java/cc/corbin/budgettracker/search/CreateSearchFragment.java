@@ -427,75 +427,13 @@ public class CreateSearchFragment extends Fragment
 
         if (dataComplete)
         {
-            // Create the intent
-            Intent intent = new Intent(_context.getApplicationContext(), SearchResultsActivity.class);
-
-            // First get the date information
-            if (_anyDateRadioButton.isChecked())
-            {
-                // Do nothing
-            }
-            else if (_exactDateRadioButton.isChecked())
-            {
-                intent.putExtra(EXACT_DATE_INTENT, _exactDate.getTime());
-            }
-            else if (_dateRangeRadioButton.isChecked())
-            {
-                intent.putExtra(START_DATE_INTENT, _startDate.getTime());
-                intent.putExtra(END_DATE_INTENT, _endDate.getTime());
-            }
-            else { }
-
-            intent.putExtra(INCLUDE_EXTRAS_INTENT, _includeExtrasCheckBox.isChecked());
-
-            // Next get the amount information
-            if (_anyAmountRadioButton.isChecked())
-            {
-                // Do nothing
-            }
-            else if (_exactAmountRadioButton.isChecked())
-            {
-                intent.putExtra(EXACT_AMOUNT_CURRENCY_INTENT, _exactAmountCurrency);
-                intent.putExtra(EXACT_AMOUNT_INTENT, _exactAmountEditText.getAmount());
-            }
-            else if (_amountRangeRadioButton.isChecked())
-            {
-                intent.putExtra(AMOUNT_RANGE_CURRENCY_INTENT, _amountRangeCurrency);
-                intent.putExtra(AMOUNT_RANGE_LOWER_INTENT, _amountRangeLowerEditText.getAmount());
-                intent.putExtra(AMOUNT_RANGE_UPPER_INTENT, _amountRangeUpperEditText.getAmount());
-            }
-            else {  }
-
-            // Next get the category information
-            boolean[] categories = new boolean[_categoryCheckBoxes.length];
-            for (int i = 0; i < _categoryCheckBoxes.length; i++)
-            {
-                categories[i] = _categoryCheckBoxes[i].isChecked();
-            }
-            intent.putExtra(CATEGORIES_INTENT, categories);
-
-            // Finally get the note information
-            if (_anyTextRadioButton.isChecked())
-            {
-                // Do nothing
-            }
-            else if (_containsTextRadioButton.isChecked())
-            {
-                intent.putExtra(CONTAINS_TEXT_INTENT, _containsTextEditText.getText().toString());
-            }
-            else if (_exactTextRadioButton.isChecked())
-            {
-                intent.putExtra(EXACT_TEXT_INTENT, _exactTextEditText.getText().toString());
-            }
-            else { }
-
-            startActivity(intent);
+            startActivity(getSearchIntent());
         }
         else { }
     }
 
     // Also launches a popup
-    private boolean isDataComplete()
+    public boolean isDataComplete()
     {
         boolean dataComplete = true;
         String missingDataString = "";
@@ -620,5 +558,72 @@ public class CreateSearchFragment extends Fragment
         }
 
         return dataComplete;
+    }
+
+    public Intent getSearchIntent()
+    {
+        // Create the intent
+        Intent intent = new Intent(_context.getApplicationContext(), SearchResultsActivity.class);
+
+        // First get the date information
+        if (_anyDateRadioButton.isChecked())
+        {
+            // Do nothing
+        }
+        else if (_exactDateRadioButton.isChecked())
+        {
+            intent.putExtra(EXACT_DATE_INTENT, _exactDate.getTime());
+        }
+        else if (_dateRangeRadioButton.isChecked())
+        {
+            intent.putExtra(START_DATE_INTENT, _startDate.getTime());
+            intent.putExtra(END_DATE_INTENT, _endDate.getTime());
+        }
+        else { }
+
+        intent.putExtra(INCLUDE_EXTRAS_INTENT, _includeExtrasCheckBox.isChecked());
+
+        // Next get the amount information
+        if (_anyAmountRadioButton.isChecked())
+        {
+            // Do nothing
+        }
+        else if (_exactAmountRadioButton.isChecked())
+        {
+            intent.putExtra(EXACT_AMOUNT_CURRENCY_INTENT, _exactAmountCurrency);
+            intent.putExtra(EXACT_AMOUNT_INTENT, _exactAmountEditText.getAmount());
+        }
+        else if (_amountRangeRadioButton.isChecked())
+        {
+            intent.putExtra(AMOUNT_RANGE_CURRENCY_INTENT, _amountRangeCurrency);
+            intent.putExtra(AMOUNT_RANGE_LOWER_INTENT, _amountRangeLowerEditText.getAmount());
+            intent.putExtra(AMOUNT_RANGE_UPPER_INTENT, _amountRangeUpperEditText.getAmount());
+        }
+        else {  }
+
+        // Next get the category information
+        boolean[] categories = new boolean[_categoryCheckBoxes.length];
+        for (int i = 0; i < _categoryCheckBoxes.length; i++)
+        {
+            categories[i] = _categoryCheckBoxes[i].isChecked();
+        }
+        intent.putExtra(CATEGORIES_INTENT, categories);
+
+        // Finally get the note information
+        if (_anyTextRadioButton.isChecked())
+        {
+            // Do nothing
+        }
+        else if (_containsTextRadioButton.isChecked())
+        {
+            intent.putExtra(CONTAINS_TEXT_INTENT, _containsTextEditText.getText().toString());
+        }
+        else if (_exactTextRadioButton.isChecked())
+        {
+            intent.putExtra(EXACT_TEXT_INTENT, _exactTextEditText.getText().toString());
+        }
+        else { }
+
+        return intent;
     }
 }

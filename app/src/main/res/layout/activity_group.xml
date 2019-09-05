@@ -60,9 +60,30 @@
                 android:visibility="invisible" />
         </LinearLayout>
 
+        <fragment
+            android:id="@+id/createSearchFragment"
+            android:name="cc.corbin.budgettracker.search.CreateSearchFragment"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/black" />
+
+        <fragment
+            android:id="@+id/searchResultsFragment"
+            android:name="cc.corbin.budgettracker.search.SearchResultsFragment"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
     </LinearLayout>
 
     <!-- Container for contents of drawer - use NavigationView to make configuration easier -->
+
     <android.support.design.widget.NavigationView
         android:id="@+id/navView"
         android:layout_width="wrap_content"

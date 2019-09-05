@@ -134,4 +134,9 @@ public class ExpenditureItem extends CardView
             _checkSpace.setVisibility(GONE);
         }
     }
+
+    public void toggleChecked()
+    {
+        _checkBox.setChecked(!_checkBox.isChecked());
+    }
 }
