@@ -60,25 +60,168 @@
                 android:visibility="invisible" />
         </LinearLayout>
 
-        <fragment
-            android:id="@+id/createSearchFragment"
-            android:name="cc.corbin.budgettracker.search.CreateSearchFragment"
+        <android.support.design.widget.TabLayout
+            android:id="@+id/groupTabLayout"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_height="wrap_content">
 
-        <View
-            android:id="@+id/divider"
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="@color/black" />
+            <android.support.design.widget.TabItem
+                android:id="@+id/groupTabItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/group" />
 
-        <fragment
-            android:id="@+id/searchResultsFragment"
-            android:name="cc.corbin.budgettracker.search.SearchResultsFragment"
+            <android.support.design.widget.TabItem
+                android:id="@+id/addItemsTabItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_items" />
+
+        </android.support.design.widget.TabLayout>
+
+        <LinearLayout
+            android:id="@+id/createGroupLinearLayout"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <LinearLayout
+                android:id="@+id/groupNameLinearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/groupNameTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:text="@string/group_name" />
+
+                <EditText
+                    android:id="@+id/groupNameEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textPersonName" />
+
+            </LinearLayout>
+
+            <ScrollView
+                android:id="@+id/groupSelectScrollView"
+                android:layout_width="match_parent"
+                android:layout_height="150dp">
+
+                <LinearLayout
+                    android:id="@+id/groupSelectLinearLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/newGroupTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="@string/new_group" />
+                </LinearLayout>
+            </ScrollView>
+
+            <TextView
+                android:id="@+id/itemsTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="@string/items"
+                android:textColor="@color/black" />
+
+            <Button
+                android:id="@+id/removeCheckedItemsButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:minHeight="24dip"
+                android:text="@string/remove_checked_items"
+                android:textSize="12sp" />
+
+            <ScrollView
+                android:id="@+id/itemsDisplayScrollView"
+                android:layout_width="match_parent"
+                android:layout_height="180dp">
+
+                <LinearLayout
+                    android:id="@+id/itemsDisplayLinearLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </ScrollView>
+
+            <Button
+                android:id="@+id/deleteGroupButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:text="@string/delete_group" />
+
+            <Button
+                android:id="@+id/saveGroupButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/save_group" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/addItemsLinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:id="@+id/currentGroupLinearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/currentGroupLabelTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp"
+                    android:text="@string/current_group"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/currentGroupTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/black" />
+
+            <fragment
+                android:id="@+id/createSearchFragment"
+                android:name="cc.corbin.budgettracker.search.CreateSearchFragment"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <fragment
+                android:id="@+id/searchResultsFragment"
+                android:name="cc.corbin.budgettracker.search.SearchResultsFragment"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

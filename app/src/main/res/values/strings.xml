@@ -181,4 +181,13 @@
     <string name="transfer_budget_label">Transfer Budget:</string>
     <string name="transfer_remaining_label">Transfer Remaining:</string>
     <string name="transfer_difference">Transfer Difference</string>
+
+    <string name="add_items">Add Items</string>
+    <string name="current_group">Current Group:</string>
+    <string name="group_name">Group Name:</string>
+    <string name="new_group">*New Group*</string>
+    <string name="items">Items</string>
+    <string name="remove_checked_items">Remove Checked Items</string>
+    <string name="delete_group">Delete Group</string>
+    <string name="save_group">Save Group</string>
 </resources>

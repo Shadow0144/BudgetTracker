@@ -5,6 +5,8 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabItem;
+import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -13,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import java.util.Calendar;
 import java.util.List;
@@ -36,9 +39,13 @@ import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.year.YearViewActivity;
 
-public class GroupActivity extends NavigationActivity
+public class GroupActivity extends NavigationActivity implements TabLayout.OnTabSelectedListener
 {
     private final String TAG = "GroupActivity";
+
+    private TabLayout _groupTabLayout;
+    private LinearLayout _createGroupLinearLayout;
+    private LinearLayout _addItemsLinearLayout;
 
     private CreateSearchFragment _createSearchFragment;
     private SearchResultsFragment _searchResultsFragment;
@@ -52,6 +59,11 @@ public class GroupActivity extends NavigationActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group);
         setup();
+
+        _groupTabLayout = findViewById(R.id.groupTabLayout);
+        _groupTabLayout.addOnTabSelectedListener(this);
+        _createGroupLinearLayout = findViewById(R.id.createGroupLinearLayout);
+        _addItemsLinearLayout = findViewById(R.id.addItemsLinearLayout);
 
         _createSearchFragment = (CreateSearchFragment)getSupportFragmentManager().findFragmentById(R.id.createSearchFragment);
         _searchResultsFragment = (SearchResultsFragment)getSupportFragmentManager().findFragmentById(R.id.searchResultsFragment);
@@ -75,6 +87,34 @@ public class GroupActivity extends NavigationActivity
         else { }
     }
 
+    @Override
+    public void onTabReselected(TabLayout.Tab tab)
+    {
+
+    }
+
+    @Override
+    public void onTabSelected(TabLayout.Tab tab)
+    {
+        switch (_groupTabLayout.getSelectedTabPosition())
+        {
+            case 0:
+                _createGroupLinearLayout.setVisibility(View.VISIBLE);
+                _addItemsLinearLayout.setVisibility(View.GONE);
+                break;
+            case 1:
+                _createGroupLinearLayout.setVisibility(View.GONE);
+                _addItemsLinearLayout.setVisibility(View.VISIBLE);
+                break;
+        }
+    }
+
+    @Override
+    public void onTabUnselected(TabLayout.Tab tab)
+    {
+
+    }
+
     // From the Fragment
     public void search(View v)
     {
@@ -84,4 +124,6 @@ public class GroupActivity extends NavigationActivity
         }
         else { }
     }
+
+
 }
