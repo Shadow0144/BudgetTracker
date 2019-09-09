@@ -190,4 +190,33 @@
     <string name="remove_checked_items">Remove Checked Items</string>
     <string name="delete_group">Delete Group</string>
     <string name="save_group">Save Group</string>
+
+    <string name="setup_welcome">Welcome to BudgetTracker</string>
+    <string name="setup_intro">You will need to do a one-time setup to setup the application.</string>
+    <string name="setup_intro_explain">You can change these settings at any time in Settings.</string>
+    <string name="select_language">Select Language</string>
+    <string name="english">English</string>
+    <string name="german">German</string>
+    <string name="japanese">Japanese</string>
+    <string name="korean">Korean</string>
+    <string name="select_base_currency">Select Base Currency</string>
+    <string name="base_currency_explanation">The base currency is the currency the database will be stored in and into which all foreign currency transactions must be converted.\nBudgetTracker does not support more than one base currency at a time.\nIf you choose to change the base currency later, i.e. through Settings,\nall previous database items will need to be converted to the new base currency or removed.</string>
+    <string name="setup_additional_currencies">Additional Currencies</string>
+    <string name="additional_currencies_explanation">Additional currencies are currencies you use frequently.\nYou can easily convert from them when entering a new item.</string>
+    <string name="usd_s">USD ($)</string>
+    <string name="jpy_y">JPY (¥)</string>
+    <string name="eur_e">EUR (€)</string>
+    <string name="gbp_p">GBP (£)</string>
+    <string name="krw_w">KRW (₩)</string>
+    <string name="rub_p">‎RUB (₽)</string>
+    <string name="add_currency">Add Currency</string>
+    <string name="iso_code">ISO Code:</string>
+    <string name="iso_code_eg">e.g. USD, JPY, RUB</string>
+    <string name="symbol">Symbol:</string>
+    <string name="symbol_eg">e.g. $, ¥, ₽</string>
+    <string name="other">Other</string>
+    <string name="categories_explanation">All expenditures and budgets belong to a category.\nThe \"Other\" category is always available.</string>
+    <string name="add_category">Add Category</string>
+    <string name="accept_settings">Accept these settings?</string>
+    <string name="accept_settings_explanation">These settings can be changed later in Settings.</string>
 </resources>
