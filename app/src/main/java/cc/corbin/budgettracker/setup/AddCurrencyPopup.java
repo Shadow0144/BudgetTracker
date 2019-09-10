@@ -1,6 +1,7 @@
 package cc.corbin.budgettracker.setup;
 
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +30,13 @@ public class AddCurrencyPopup extends PopupWindow
 
         _ISOCodeEditText = view.findViewById(R.id.ISOCodeEditText);
         _symbolEditText = view.findViewById(R.id.symbolEditText);
+
+        // Add a filter for all caps without removing the filter for length
+        InputFilter[] editFilters = _ISOCodeEditText.getFilters();
+        InputFilter[] allFilters = new InputFilter[editFilters.length + 1];
+        System.arraycopy(editFilters, 0, allFilters, 0, editFilters.length);
+        allFilters[editFilters.length] = new InputFilter.AllCaps();
+        _ISOCodeEditText.setFilters(allFilters);
 
         // TODO - Check for duplicates
 
