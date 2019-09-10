@@ -10,7 +10,8 @@
         android:layout_height="wrap_content"
         android:text="@string/setup_additional_currencies"
         android:textAlignment="center"
-        android:textSize="18sp"
+        android:textColor="@color/black"
+        android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/nextButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -60,25 +61,25 @@
                 android:text="@string/jpy_y" />
 
             <CheckBox
-                android:id="@+id/EURCheckBox"
+                android:id="@+id/eurCheckBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/eur_e" />
 
             <CheckBox
-                android:id="@+id/GBPCheckBox"
+                android:id="@+id/gbpCheckBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/gbp_p" />
 
             <CheckBox
-                android:id="@+id/KRWCheckBox"
+                android:id="@+id/krwCheckBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/krw_w" />
 
             <CheckBox
-                android:id="@+id/RUBCheckBox"
+                android:id="@+id/rubCheckBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/rub_p" />

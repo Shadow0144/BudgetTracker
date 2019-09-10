@@ -6,6 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.RadioButton;
+
+import java.util.Locale;
 
 import cc.corbin.budgettracker.R;
 
@@ -27,6 +30,35 @@ public class SelectLanguageFragment extends SetupFragment
                 next();
             }
         });
+
+        final RadioButton englishRadioButton = view.findViewById(R.id.englishRadioButton);
+        final RadioButton germanRadioButton = view.findViewById(R.id.germanRadioButton);
+        final RadioButton japaneseRadioButton = view.findViewById(R.id.japaneseRadioButton);
+        final RadioButton koreanRadioButton = view.findViewById(R.id.koreanRadioButton);
+        final RadioButton russianRadioButton = view.findViewById(R.id.russianRadioButton);
+
+        String language = Locale.getDefault().getISO3Language();
+        switch (language)
+        {
+            case "eng":
+                englishRadioButton.setChecked(true);
+                break;
+            case "deu":
+                germanRadioButton.setChecked(true);
+                break;
+            case "jap":
+                japaneseRadioButton.setChecked(true);
+                break;
+            case "kor":
+                koreanRadioButton.setChecked(true);
+                break;
+            case "rus":
+                russianRadioButton.setChecked(true);
+                break;
+            default:
+                englishRadioButton.setChecked(true);
+                break;
+        }
 
         return view;
     }

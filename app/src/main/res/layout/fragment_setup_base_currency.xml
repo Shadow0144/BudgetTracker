@@ -11,16 +11,20 @@
         android:layout_height="wrap_content"
         android:text="@string/select_base_currency"
         android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/nextButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.120000005" />
 
     <TextView
         android:id="@+id/baseCurrencyExplanationTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:padding="12dp"
         android:text="@string/base_currency_explanation"
         android:textAlignment="center"
         app:layout_constraintBottom_toTopOf="@+id/nextButton"
@@ -28,19 +32,74 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/selectBaseCurrencyTextView"
-        app:layout_constraintVertical_bias="0.327" />
+        app:layout_constraintVertical_bias="0.04000002" />
 
-    <RadioGroup
-        android:id="@+id/baseCurrencyRadioGroup"
+    <ScrollView
+        android:id="@+id/baseCurrencyScrollView"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="200dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/baseCurrencyExplanationTextView"
+        app:layout_constraintVertical_bias="0.07999998">
 
-    </RadioGroup>
+        <RadioGroup
+            android:id="@+id/baseCurrencyLinearLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RadioButton
+                android:id="@+id/usdRadioButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/usd_s" />
+
+            <RadioButton
+                android:id="@+id/jpyRadioButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/jpy_y" />
+
+            <RadioButton
+                android:id="@+id/EURRadioButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/eur_e" />
+
+            <RadioButton
+                android:id="@+id/gbpRadioButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/gbp_p" />
+
+            <RadioButton
+                android:id="@+id/krwRadioButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/krw_w" />
+
+            <RadioButton
+                android:id="@+id/rubRadioButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/rub_p" />
+        </RadioGroup>
+
+    </ScrollView>
+
+    <Button
+        android:id="@+id/addCurrencyButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/add_currency"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/baseCurrencyScrollView" />
 
     <Button
         android:id="@+id/previousButton"

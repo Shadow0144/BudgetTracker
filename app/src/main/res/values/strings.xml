@@ -199,6 +199,7 @@
     <string name="german">German</string>
     <string name="japanese">Japanese</string>
     <string name="korean">Korean</string>
+    <string name="russian">Russian</string>
     <string name="select_base_currency">Select Base Currency</string>
     <string name="base_currency_explanation">The base currency is the currency the database will be stored in and into which all foreign currency transactions must be converted.\nBudgetTracker does not support more than one base currency at a time.\nIf you choose to change the base currency later, i.e. through Settings,\nall previous database items will need to be converted to the new base currency or removed.</string>
     <string name="setup_additional_currencies">Additional Currencies</string>

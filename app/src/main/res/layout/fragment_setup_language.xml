@@ -34,22 +34,28 @@
             android:text="@string/english" />
 
         <RadioButton
-            android:id="@+id/radioButton2"
+            android:id="@+id/germanRadioButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/german" />
 
         <RadioButton
-            android:id="@+id/radioButton3"
+            android:id="@+id/japaneseRadioButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/japanese" />
 
         <RadioButton
-            android:id="@+id/radioButton4"
+            android:id="@+id/koreanRadioButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/korean" />
+
+        <RadioButton
+            android:id="@+id/russianRadioButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/russian" />
     </RadioGroup>
 
     <Button
