@@ -22,6 +22,7 @@ import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.month.MonthViewActivity;
 import cc.corbin.budgettracker.R;
+import cc.corbin.budgettracker.setup.SetupActivity;
 
 public class DayViewActivity extends PagingActivity
 {
@@ -47,6 +48,8 @@ public class DayViewActivity extends PagingActivity
         super.onCreate(savedInstanceState);
         setup();
 
+        launchFirstTimeSetup();
+
         final Button addItemButton = findViewById(R.id.addItemButton);
         addItemButton.setVisibility(View.VISIBLE);
 
@@ -64,6 +67,12 @@ public class DayViewActivity extends PagingActivity
             Categories.loadCategories(this);
         }
         else { }
+    }
+
+    private void launchFirstTimeSetup()
+    {
+        Intent intent = new Intent(getApplicationContext(), SetupActivity.class);
+        startActivity(intent);
     }
 
     private void setupDayView()
