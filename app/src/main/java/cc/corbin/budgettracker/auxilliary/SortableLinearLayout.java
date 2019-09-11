@@ -1,17 +1,13 @@
 package cc.corbin.budgettracker.auxilliary;
 
-import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import java.util.ArrayList;
 
 import cc.corbin.budgettracker.R;
 
@@ -94,7 +90,7 @@ public class SortableLinearLayout extends LinearLayout implements View.OnDragLis
             View child = getChildAt(i);
             if (child instanceof SortableItem)
             {
-                ((SortableItem) getChildAt(i)).setSortable(sortingEnabled);
+                ((SortableItem) getChildAt(i)).setSortEnabled(sortingEnabled);
             }
             else { }
         }
@@ -222,12 +218,22 @@ public class SortableLinearLayout extends LinearLayout implements View.OnDragLis
 
     public void insertSortableView(SortableItem v)
     {
+        insertSortableView(v, true);
+    }
+
+    // This can only disable sorting the item if it is the last on the list
+    public void insertSortableView(SortableItem v, boolean sortable)
+    {
         addView(v);
-        v.setSortable(_sortingEnabled);
-        TextView locationView = new TextView(_context);
-        locationView.setVisibility(GONE);
-        locationView.setBackgroundColor(_color);
-        addView(locationView);
+        v.setSortEnabled(_sortingEnabled);
+        if (sortable)
+        {
+            TextView locationView = new TextView(_context);
+            locationView.setVisibility(GONE);
+            locationView.setBackgroundColor(_color);
+            addView(locationView);
+        }
+        else { }
     }
 
     public void removeSortableView(SortableItem v)

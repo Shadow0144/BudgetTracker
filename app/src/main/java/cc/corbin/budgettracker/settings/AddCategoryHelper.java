@@ -1,10 +1,12 @@
 package cc.corbin.budgettracker.settings;
 
 import android.arch.lifecycle.MutableLiveData;
+import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -17,22 +19,32 @@ import cc.corbin.budgettracker.auxilliary.SortableItem;
 import cc.corbin.budgettracker.auxilliary.SortableLinearLayout;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 
-public class SettingsAddCategoryHelper
+public class AddCategoryHelper
 {
-    private final String TAG = "SettingsAddCategoryHelper";
+    private final String TAG = "AddCategoryHelper";
 
-    private SettingsActivity _parent;
+    private Context _context;
+    private SortableCategoryListInterface _parent;
+    private ExpenditureViewModel _viewModel;
+    private MutableLiveData<Boolean> _processing;
+    private SortableLinearLayout _sortableCategoriesTable;
 
     private String[] _categories;
 
     private PopupWindow _popupWindow;
 
-    public SettingsAddCategoryHelper(SettingsActivity parent)
+    public AddCategoryHelper(Context context, SortableCategoryListInterface parent, LayoutInflater layoutInflator, View rootView,
+                             ExpenditureViewModel viewModel, MutableLiveData<Boolean> processing, SortableLinearLayout sortableCategoriesTable)
     {
+        _context = context;
         _parent = parent;
         _categories = Categories.getCategories();
+        _viewModel = viewModel;
+        _processing = processing;
+        _sortableCategoriesTable = sortableCategoriesTable;
 
-        final View categoryEditView = _parent.getLayoutInflater().inflate(R.layout.popup_edit_category, null);
+        // Reuse the edit popup, but disable the remove button
+        final View categoryEditView = layoutInflator.inflate(R.layout.popup_edit_category, null);
 
         final Button confirmButton = categoryEditView.findViewById(R.id.confirmButton);
         confirmButton.setOnClickListener(new View.OnClickListener()
@@ -40,7 +52,17 @@ public class SettingsAddCategoryHelper
             @Override
             public void onClick(View v)
             {
-                _parent.confirmCategoryAdd(v);
+                confirmCategoryAdd();
+            }
+        });
+
+        final Button cancelButton = categoryEditView.findViewById(R.id.cancelButton);
+        cancelButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                cancelCategoryAdd();
             }
         });
 
@@ -83,11 +105,16 @@ public class SettingsAddCategoryHelper
         _popupWindow = new PopupWindow(categoryEditView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         _popupWindow.setFocusable(true);
         _popupWindow.update();
-        _popupWindow.showAtLocation(_parent.findViewById(R.id.rootLayout), Gravity.CENTER, 0, 0);
+        _popupWindow.showAtLocation(rootView, Gravity.CENTER, 0, 0);
     }
 
-    public PopupWindow confirmCategoryAdd(ExpenditureViewModel viewModel, MutableLiveData<Boolean> processing,
-                                   SortableLinearLayout sortableCategoriesTable)
+    private void cancelCategoryAdd()
+    {
+        _popupWindow.dismiss();
+        _parent.cancelAddCategory();
+    }
+
+    private void confirmCategoryAdd()
     {
         String[] categoriesNew = new String[_categories.length+1];
 
@@ -101,7 +128,7 @@ public class SettingsAddCategoryHelper
         categoriesNew[i++] = ((EditText)(_popupWindow.getContentView().findViewById(R.id.categoryEditText))).getText().toString();
         categoriesNew[i] = _categories[end];
 
-        SortableItem categoryCell = new SortableItem(_parent);
+        SortableItem categoryCell = new SortableItem(_context);
         categoryCell.setText(categoriesNew[end]);
         categoryCell.setOnClickListener(new View.OnClickListener()
         {
@@ -113,13 +140,13 @@ public class SettingsAddCategoryHelper
         });
         categoryCell.setId(end);
 
-        sortableCategoriesTable.insertSortableView(categoryCell);
+        _sortableCategoriesTable.insertSortableView(categoryCell);
 
-        viewModel.addCategory(end, processing);
+        _viewModel.addCategory(end, _processing);
+
+        _parent.confirmAddCategory();
 
         _popupWindow.dismiss();
-
-        return null; // Window is dismissed
     }
 
     public PopupWindow getPopupWindow()

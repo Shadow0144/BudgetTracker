@@ -7,47 +7,25 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.InputFilter;
-import android.text.Spanned;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Gravity;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.List;
 
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.auxilliary.NavigationActivity;
-import cc.corbin.budgettracker.auxilliary.NavigationDrawerHelper;
 import cc.corbin.budgettracker.auxilliary.SortableItem;
 import cc.corbin.budgettracker.auxilliary.SortableLinearLayout;
 import cc.corbin.budgettracker.tables.TableCell;
-import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
-import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 
-public class SettingsActivity extends NavigationActivity
+public class SettingsActivity extends NavigationActivity implements SortableCategoryListInterface
 {
     private final String TAG = "SettingsActivity";
 
@@ -65,12 +43,7 @@ public class SettingsActivity extends NavigationActivity
     private TableCell _cancelResortButton;
     private SortableItem[] _originalCategoriesSortedList;
 
-    private PopupWindow _popupWindow;
-
     private ExpenditureViewModel _viewModel;
-
-    private SettingsEditCategoryHelper _editCategoryHelper;
-    private SettingsAddCategoryHelper _addCategoryHelper;
 
     private MutableLiveData<Boolean> _processing;
     private PopupWindow _processingPopup;
@@ -195,7 +168,7 @@ public class SettingsActivity extends NavigationActivity
             @Override
             public void onClick(View v)
             {
-                addCategory(v);
+                addCategory();
             }
         });
         categoriesLayout.addView(categoryCell);
@@ -284,50 +257,31 @@ public class SettingsActivity extends NavigationActivity
         defaultCurrencyTable.addView(defaultCurrencyContentRow);
     }
 
-    /// Cancel
-
-    public void cancel(View v)
-    {
-        _popupWindow.dismiss(); // Should not be null
-    }
-
-    /// /Cancel
-
     /// Edit
 
     public void editCategory(View v)
     {
-        _editCategoryHelper = new SettingsEditCategoryHelper(this, v);
-        _popupWindow = _editCategoryHelper.getPopupWindow();
+        new EditCategoryHelper(this, this, this.getLayoutInflater(),
+                findViewById(R.id.rootLayout), _viewModel, _processing,
+                _sortableCategoriesTable, ((SortableItem)v));
     }
 
-    public void confirmCategoryEdit(View v)
+    @Override
+    public void cancelEditCategory()
     {
-        _popupWindow = _editCategoryHelper.confirmCategoryEdit(_viewModel, _processing, _sortableCategoriesTable);
+        // Do nothing
+    }
+
+    @Override
+    public void confirmEditCategory()
+    {
         saveUpdatedCategories();
         setResult(SettingsActivity.DATABASE_UPDATE_INTENT_FLAG);
     }
 
-    /// /Edit
-
-    /// Remove
-
-    // Called from the Remove button
-    public void recategorizeCategory(View v)
+    @Override
+    public void removeAndRecategorizeCategory()
     {
-        _popupWindow = _editCategoryHelper.recategorizeCategory();
-    }
-
-    // Called from the Confirm button of the recategorization popup
-    public void confirmRecategorize(View v)
-    {
-        _popupWindow = _editCategoryHelper.confirmRecategorize();
-    }
-
-    // Called from the final warning screen
-    public void confirmRemoveAndRecategorize(View v)
-    {
-        _popupWindow = _editCategoryHelper.confirmRemoveAndRecategorize(_viewModel, _processing, _sortableCategoriesTable);
         saveUpdatedCategories();
         setResult(SettingsActivity.DATABASE_UPDATE_INTENT_FLAG);
     }
@@ -336,15 +290,23 @@ public class SettingsActivity extends NavigationActivity
 
     /// Add
 
-    private void addCategory(View v)
+    @Override
+    public void addCategory()
     {
-        _addCategoryHelper = new SettingsAddCategoryHelper(this);
-        _popupWindow = _addCategoryHelper.getPopupWindow();
+        new AddCategoryHelper(this, this, this.getLayoutInflater(),
+                findViewById(R.id.rootLayout), _viewModel, _processing,
+                _sortableCategoriesTable);
     }
 
-    public void confirmCategoryAdd(View v)
+    @Override
+    public void cancelAddCategory()
     {
-        _popupWindow = _addCategoryHelper.confirmCategoryAdd(_viewModel, _processing, _sortableCategoriesTable);
+        // Do nothing
+    }
+
+    @Override
+    public void confirmAddCategory()
+    {
         saveUpdatedCategories();
         setResult(SettingsActivity.DATABASE_UPDATE_INTENT_FLAG);
     }

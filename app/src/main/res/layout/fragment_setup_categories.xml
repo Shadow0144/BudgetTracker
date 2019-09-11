@@ -35,40 +35,22 @@
     <ScrollView
         android:id="@+id/categoriesScrollView"
         android:layout_width="wrap_content"
-        android:layout_height="200dp"
+        android:layout_height="240dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/categoriesExplanationTextView"
-        app:layout_constraintVertical_bias="0.120000005">
+        app:layout_constraintVertical_bias="0.120000005"
+        android:scrollbarFadeDuration="0">
 
         <LinearLayout
             android:id="@+id/categoriesLinearLayout"
-            android:layout_width="wrap_content"
+            android:layout_width="280dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <CheckBox
-                android:id="@+id/otherCheckBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="@string/other" />
-        </LinearLayout>
+            android:orientation="vertical" />
 
     </ScrollView>
-
-    <Button
-        android:id="@+id/addCategoryButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/add_category"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/categoriesScrollView" />
 
     <Button
         android:id="@+id/previousButton"

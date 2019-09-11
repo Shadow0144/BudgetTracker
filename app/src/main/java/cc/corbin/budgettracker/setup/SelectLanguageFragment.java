@@ -21,6 +21,16 @@ public class SelectLanguageFragment extends SetupFragment
     {
         View view = inflater.inflate(R.layout.fragment_setup_language, parent, false);
 
+        Button previousButton = view.findViewById(R.id.previousButton);
+        previousButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                previous();
+            }
+        });
+
         Button nextButton = view.findViewById(R.id.nextButton);
         nextButton.setOnClickListener(new View.OnClickListener()
         {
