@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.text.DateFormatSymbols;
+import java.util.Calendar;
 import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
@@ -124,6 +125,24 @@ public class MonthView extends LinearLayout
         DateFormatSymbols dfs = new DateFormatSymbols();
         _dateTextView.setText(dfs.getMonths()[_month-1] + " " + _year);
 
+        // Set the header color
+        Calendar date = Calendar.getInstance();
+        Calendar compare = ((Calendar)date.clone());
+        date.set(Calendar.YEAR, _year);
+        date.set(Calendar.MONTH, _month-1);
+        if (compare.before(date)) // Future
+        {
+            _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryLight));
+        }
+        else if (compare.after(date)) // Past
+        {
+            _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryVeryDark));
+        }
+        else // Present
+        {
+            _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryDark));
+        }
+
         _weeklyTable.resetTable();
         _categoryTable.resetTable();
         _expandableBudgetTable.resetTable();
@@ -143,7 +162,6 @@ public class MonthView extends LinearLayout
         params.setMargins(1, 1, 1, 0);
         _dateTextView.setLayoutParams(params);
         _dateTextView.setPadding(0, DATE_TEXT_TOP_PADDING, 0, DATE_TEXT_BOT_PADDING);
-        _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryDark));
         _dateTextView.setTextColor(Color.WHITE);
         _dateTextView.setTextSize(DATE_TEXT_SIZE);
         _dateTextView.setTextAlignment(TEXT_ALIGNMENT_CENTER);

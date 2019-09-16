@@ -132,6 +132,23 @@ public class YearView extends LinearLayout
     {
         _dateTextView.setText("" + _year);
 
+        // Set the header color
+        Calendar date = Calendar.getInstance();
+        Calendar compare = ((Calendar)date.clone());
+        date.set(Calendar.YEAR, _year);
+        if (compare.before(date)) // Future
+        {
+            _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryLight));
+        }
+        else if (compare.after(date)) // Past
+        {
+            _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryVeryDark));
+        }
+        else // Present
+        {
+            _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryDark));
+        }
+
         _monthlyTable.resetTable();
         _categoryTable.resetTable();
         _monthlyPieChart.clearData();

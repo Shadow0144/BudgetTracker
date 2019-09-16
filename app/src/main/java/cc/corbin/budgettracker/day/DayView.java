@@ -88,10 +88,23 @@ public class DayView extends LinearLayout
         _dayListHolder.removeView(_expHolder);
         _dayListHolder.addView(_progressBar);
         _date = Calendar.getInstance();
+        Calendar compare = ((Calendar)_date.clone());
         _date.set(Calendar.YEAR, year);
         _date.set(Calendar.MONTH, month-1);
         _date.set(Calendar.DATE, day);
         _dateTextView.setText(getDateString());
+        if (compare.before(_date)) // Future
+        {
+            _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryLight));
+        }
+        else if (compare.after(_date)) // Past
+        {
+            _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryVeryDark));
+        }
+        else // Present
+        {
+            _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryDark));
+        }
         _viewModel.getDay(_entities, year, month, day);
     }
 
