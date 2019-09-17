@@ -1,7 +1,12 @@
 <resources>
     <string name="app_name">Budget Tracker</string>
+
     <string name="budget_tracker_preferences_key">BudgetTrackerPreferencesKey</string>
+    <string name="language_key">LanguageKey</string>
+    <string name="base_currency_key">BaseCurrencyKey</string>
+    <string name="additional_currencies_key">AdditionalCurrenciesKey</string>
     <string name="categories_list_key">CategoriesListKey</string>
+
     <string name="add_item">Add Item</string>
     <string name="previous">&lt;</string>
     <string name="next">&gt;</string>
@@ -9,6 +14,7 @@
     <string name="nnext">&gt;&gt;</string>
     <string name="leftarrow">&lt;-</string>
     <string name="rightarrow">-&gt;</string>
+
     <string name="total">Total</string>
     <string name="total_colon">Total:</string>
     <string name="x">X</string>
@@ -194,12 +200,14 @@
     <string name="setup_welcome">Welcome to BudgetTracker</string>
     <string name="setup_intro">You will need to do a one-time setup to setup the application.</string>
     <string name="setup_intro_explain">You can change these settings at any time in Settings.</string>
+
     <string name="select_language">Select Language</string>
     <string name="english">English</string>
-    <string name="german">German</string>
-    <string name="japanese">Japanese</string>
-    <string name="korean">Korean</string>
-    <string name="russian">Russian</string>
+    <string name="german">Deutsch</string>
+    <string name="japanese">日本語</string>
+    <string name="korean">한국어</string>
+    <string name="russian">Русский</string>
+
     <string name="select_base_currency">Select Base Currency</string>
     <string name="base_currency_explanation">The base currency is the currency the database will be stored in and into which all foreign currency transactions must be converted.\nBudgetTracker does not support more than one base currency at a time.\nIf you choose to change the base currency later, i.e. through Settings,\nall previous database items will need to be converted to the new base currency or removed.</string>
     <string name="setup_additional_currencies">Additional Currencies</string>

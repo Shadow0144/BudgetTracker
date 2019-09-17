@@ -39,10 +39,11 @@ public abstract class PagingActivity extends NavigationActivity
     protected void setupAdapterView(RecyclerView.Adapter recyclerAdapter)
     {
         _recyclerView = findViewById(R.id.itemsPager);
-        _recyclerView.setHasFixedSize(true);
+        _recyclerView.setHasFixedSize(false); // TODO
 
         _layoutManager = new LinearLayoutManager(this);
         _layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        _layoutManager.setStackFromEnd(true); // TODO
         _recyclerView.setLayoutManager(_layoutManager);
 
         _recyclerView.setAdapter(recyclerAdapter);

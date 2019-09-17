@@ -102,4 +102,9 @@ public class SetupAdditionalCurrenciesFragment extends SetupFragment
         _additionalCurrenciesLinearLayout.addView(newCurrency);
         newCurrency.setChecked(true);
     }
+
+    public String getAdditionalCurrencies()
+    {
+        return "W_KRW|Y_JPY"; // TODO
+    }
 }

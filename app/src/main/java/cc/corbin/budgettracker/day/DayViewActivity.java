@@ -1,6 +1,7 @@
 package cc.corbin.budgettracker.day;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -48,13 +49,19 @@ public class DayViewActivity extends PagingActivity
         super.onCreate(savedInstanceState);
         setup();
 
-        launchFirstTimeSetup();
+        // Launch the first time setup activity if it has not yet created a shared preferences file
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.budget_tracker_preferences_key), 0);
+        if (!sharedPreferences.contains(getString(R.string.language_key)))
+        {
+            launchFirstTimeSetup();
+        }
+        else { }
 
         final Button addItemButton = findViewById(R.id.addItemButton);
         addItemButton.setVisibility(View.VISIBLE);
 
         int day = getIntent().getIntExtra(DAY_INTENT, Calendar.getInstance().get(Calendar.DATE));
-        Log.e(TAG, "D: " + day);
+        Log.e(TAG, "D: " + day); // TODO
         int month = getIntent().getIntExtra(MONTH_INTENT, Calendar.getInstance().get(Calendar.MONTH)+1); // Add 1 in case the intent is set or not
         int year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
         _currentDate = Calendar.getInstance();

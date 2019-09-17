@@ -5,6 +5,50 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <LinearLayout
+        android:id="@+id/pageImagesLinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="120dp"
+        android:layout_marginEnd="120dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="@+id/setupViewPager"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.965"
+        tools:visibility="invisible">
+
+        <ImageView
+            android:id="@+id/page1ImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:srcCompat="@android:drawable/radiobutton_off_background" />
+
+        <ImageView
+            android:id="@+id/page2ImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:srcCompat="@android:drawable/radiobutton_off_background" />
+
+        <ImageView
+            android:id="@+id/page3ImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:srcCompat="@android:drawable/radiobutton_off_background" />
+
+        <ImageView
+            android:id="@+id/page4ImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:srcCompat="@android:drawable/radiobutton_off_background" />
+    </LinearLayout>
+
     <cc.corbin.budgettracker.auxilliary.EnhancedViewPager
         android:id="@+id/setupViewPager"
         android:layout_width="0dp"
@@ -12,5 +56,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+    </cc.corbin.budgettracker.auxilliary.EnhancedViewPager>
 </android.support.constraint.ConstraintLayout>

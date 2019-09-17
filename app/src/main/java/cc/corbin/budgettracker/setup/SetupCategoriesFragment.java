@@ -1,6 +1,8 @@
 package cc.corbin.budgettracker.setup;
 
 import android.arch.lifecycle.MutableLiveData;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -260,8 +262,11 @@ public class SetupCategoriesFragment extends SetupFragment implements SortableCa
     {
         _popupWindow.dismiss();
 
-        // TODO - Save settings
+        ((SetupActivity)getActivity()).commitSettings();
+    }
 
-        getActivity().finish();
+    public String getCategories()
+    {
+        return "Food|Travel|Other"; // TODO
     }
 }

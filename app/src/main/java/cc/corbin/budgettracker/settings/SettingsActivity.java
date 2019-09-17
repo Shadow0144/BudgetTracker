@@ -348,7 +348,7 @@ public class SettingsActivity extends NavigationActivity implements SortableCate
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(getString(R.string.categories_list_key), sb.toString());
         Categories.setCategories(_categories);
-        editor.apply();
+        //editor.apply(); // TODO
     }
 
     /// /Resort

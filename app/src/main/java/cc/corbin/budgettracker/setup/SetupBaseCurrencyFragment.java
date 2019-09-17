@@ -138,4 +138,9 @@ public class SetupBaseCurrencyFragment extends SetupFragment
         _baseCurrencyRadioGroup.addView(newCurrency);
         newCurrency.setChecked(true);
     }
+
+    public String getBaseCurrency()
+    {
+        return "$_USD"; // TODO
+    }
 }

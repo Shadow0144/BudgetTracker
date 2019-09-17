@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 
 import java.util.Locale;
@@ -15,6 +16,8 @@ import cc.corbin.budgettracker.R;
 public class SelectLanguageFragment extends SetupFragment
 {
     private final String TAG = "SelectLanguageFragment";
+
+    private String _language;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState)
@@ -52,24 +55,35 @@ public class SelectLanguageFragment extends SetupFragment
         {
             case "eng":
                 englishRadioButton.setChecked(true);
+                _language = language;
                 break;
             case "deu":
                 germanRadioButton.setChecked(true);
+                _language = language;
                 break;
             case "jap":
                 japaneseRadioButton.setChecked(true);
+                _language = language;
                 break;
             case "kor":
                 koreanRadioButton.setChecked(true);
+                _language = language;
                 break;
             case "rus":
                 russianRadioButton.setChecked(true);
+                _language = language;
                 break;
             default:
                 englishRadioButton.setChecked(true);
+                _language = "eng";
                 break;
         }
 
         return view;
+    }
+
+    public String getLanguage()
+    {
+        return _language;
     }
 }

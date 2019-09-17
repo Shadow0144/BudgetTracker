@@ -4,7 +4,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerAdapter;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
+import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.EnhancedViewPager;
 
 public class SetupFragmentPagerAdapter extends FragmentPagerAdapter
@@ -69,5 +73,25 @@ public class SetupFragmentPagerAdapter extends FragmentPagerAdapter
     public int getCount()
     {
         return 5;
+    }
+
+    public SelectLanguageFragment getLanguageFragment()
+    {
+        return _selectLanguageFragment;
+    }
+
+    public SetupBaseCurrencyFragment getBaseCurrencyFragment()
+    {
+        return _setupBaseCurrencyFragment;
+    }
+
+    public SetupAdditionalCurrenciesFragment getAdditionalCurrenciesFragment()
+    {
+        return _setupAdditionalCurrenciesFragment;
+    }
+
+    public SetupCategoriesFragment getCategoriesFragment()
+    {
+        return _setupCategoriesFragment;
     }
 }
