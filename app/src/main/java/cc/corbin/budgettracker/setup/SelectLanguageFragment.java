@@ -1,13 +1,17 @@
 package cc.corbin.budgettracker.setup;
 
+import android.app.Activity;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
 import java.util.Locale;
 
@@ -44,42 +48,86 @@ public class SelectLanguageFragment extends SetupFragment
             }
         });
 
-        final RadioButton englishRadioButton = view.findViewById(R.id.englishRadioButton);
-        final RadioButton germanRadioButton = view.findViewById(R.id.germanRadioButton);
-        final RadioButton japaneseRadioButton = view.findViewById(R.id.japaneseRadioButton);
-        final RadioButton koreanRadioButton = view.findViewById(R.id.koreanRadioButton);
-        final RadioButton russianRadioButton = view.findViewById(R.id.russianRadioButton);
-
-        String language = Locale.getDefault().getISO3Language();
+        final RadioGroup languageRadioGroup = view.findViewById(R.id.languageRadioGroup);
+        String language = Locale.getDefault().getLanguage();
         switch (language)
         {
-            case "eng":
-                englishRadioButton.setChecked(true);
-                _language = language;
+            case "en":
+                languageRadioGroup.check(R.id.englishRadioButton);
                 break;
-            case "deu":
-                germanRadioButton.setChecked(true);
-                _language = language;
+            case "de":
+                languageRadioGroup.check(R.id.germanRadioButton);
                 break;
-            case "jap":
-                japaneseRadioButton.setChecked(true);
-                _language = language;
+            case "ja":
+                languageRadioGroup.check(R.id.japaneseRadioButton);
                 break;
-            case "kor":
-                koreanRadioButton.setChecked(true);
-                _language = language;
+            case "ko":
+                languageRadioGroup.check(R.id.koreanRadioButton);
                 break;
-            case "rus":
-                russianRadioButton.setChecked(true);
-                _language = language;
+            case "ru":
+                languageRadioGroup.check(R.id.russianRadioButton);
                 break;
             default:
-                englishRadioButton.setChecked(true);
-                _language = "eng";
+                languageRadioGroup.check(R.id.englishRadioButton);
                 break;
         }
+        languageRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId)
+            {
+                switch (checkedId)
+                {
+                    case R.id.englishRadioButton:
+                        _language = "en";
+                        break;
+                    case R.id.germanRadioButton:
+                        _language = "de";
+                        break;
+                    case R.id.japaneseRadioButton:
+                        _language = "ja";
+                        break;
+                    case R.id.koreanRadioButton:
+                        _language = "ko";
+                        break;
+                    case R.id.russianRadioButton:
+                        _language = "ru";
+                        break;
+                    default:
+                        _language = "en";
+                        break;
+                }
+                setLanguage(_language);
+            }
+        });
 
         return view;
+    }
+
+    public void setLanguage(String languageToLoad)
+    {
+        Log.e(TAG, "Setting language to: " + languageToLoad);
+        String language = Locale.getDefault().getLanguage();
+        if (!language.equals(languageToLoad))
+        {
+            Log.e(TAG, "Changing language");
+            Activity context = getActivity();
+            Locale locale = new Locale(languageToLoad);
+            Locale.setDefault(locale);
+
+            Configuration configuration = context.getResources().getConfiguration();
+            configuration.setLocale(locale);
+
+            //context.createConfigurationContext(configuration);
+
+            //context.getResources().updateConfiguration(configuration, context.getResources().getDisplayMetrics());
+
+            context.recreate();
+        }
+        else
+        {
+            Log.e(TAG, "Already loaded: " + language);
+        }
     }
 
     public String getLanguage()

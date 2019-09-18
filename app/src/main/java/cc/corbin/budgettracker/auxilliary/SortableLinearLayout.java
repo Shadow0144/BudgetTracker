@@ -236,6 +236,27 @@ public class SortableLinearLayout extends LinearLayout implements View.OnDragLis
         else { }
     }
 
+    public void insertSortableView(SortableItem v, int index)
+    {
+        insertSortableView(v, index, true);
+    }
+
+    // This can only disable sorting the item if it is the last on the list
+    public void insertSortableView(SortableItem v, int index, boolean sortable)
+    {
+        index = index * 2 + 1; // Account for the sorting views
+        addView(v, index);
+        v.setSortEnabled(_sortingEnabled);
+        if (sortable)
+        {
+            TextView locationView = new TextView(_context);
+            locationView.setVisibility(GONE);
+            locationView.setBackgroundColor(_color);
+            addView(locationView, index+1);
+        }
+        else { }
+    }
+
     public void removeSortableView(SortableItem v)
     {
         int childCount = getChildCount();

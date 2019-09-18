@@ -119,14 +119,15 @@ public class AddCategoryHelper
         String[] categoriesNew = new String[_categories.length+1];
 
         int i;
-        int end = _categories.length-1;
+        int end = _categories.length-1; // Save "Other" for the end
         for (i = 0; i < end; i++)
         {
             categoriesNew[i] = _categories[i];
         }
 
-        categoriesNew[i++] = ((EditText)(_popupWindow.getContentView().findViewById(R.id.categoryEditText))).getText().toString();
-        categoriesNew[i] = _categories[end];
+        categoriesNew[i] = ((EditText)(_popupWindow.getContentView().findViewById(R.id.categoryEditText))).getText().toString();
+        categoriesNew[++i] = _categories[end]; // Add "Other"
+        _categories = categoriesNew;
 
         SortableItem categoryCell = new SortableItem(_context);
         categoryCell.setText(categoriesNew[end]);
@@ -140,7 +141,7 @@ public class AddCategoryHelper
         });
         categoryCell.setId(end);
 
-        _sortableCategoriesTable.insertSortableView(categoryCell);
+        _sortableCategoriesTable.insertSortableView(categoryCell, end);
 
         _viewModel.addCategory(end, _processing);
 

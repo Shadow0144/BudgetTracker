@@ -21,6 +21,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".setup.SetupActivity"
+            android:configChanges="locale"
             android:windowSoftInputMode="adjustPan"></activity>
         <activity android:name=".month.MonthViewActivity"
             android:windowSoftInputMode="adjustPan"></activity>

@@ -141,6 +141,11 @@ public class SetupBaseCurrencyFragment extends SetupFragment
 
     public String getBaseCurrency()
     {
-        return "$_USD"; // TODO
+        RadioButton currencyButton = _view.findViewById(_baseCurrencyRadioGroup.getCheckedRadioButtonId());
+        String currencyText = currencyButton.getText().toString();
+        String ISO = currencyText.substring(0, 3);
+        String symbol = currencyText.substring(5, 6);
+        String baseCurrency = symbol + "_" + ISO; // e.g. "$_USD"
+        return baseCurrency;
     }
 }

@@ -60,6 +60,8 @@ public class SetupAdditionalCurrenciesFragment extends SetupFragment
 
         _additionalCurrenciesLinearLayout = _view.findViewById(R.id.additionalCurrenciesLinearLayout);
 
+        // TODO - only add currencies not checked previously and any added in the last screen; update this when viewed
+
         return _view;
     }
 
@@ -105,6 +107,21 @@ public class SetupAdditionalCurrenciesFragment extends SetupFragment
 
     public String getAdditionalCurrencies()
     {
-        return "W_KRW|Y_JPY"; // TODO
+        String currencies = "";
+        final int childCount = _additionalCurrenciesLinearLayout.getChildCount();
+        for (int i = 0; i < childCount; i++)
+        {
+            CheckBox checkBox = ((CheckBox)_additionalCurrenciesLinearLayout.getChildAt(i));
+            if (checkBox.isChecked())
+            {
+                String currencyText = checkBox.getText().toString();
+                String ISO = currencyText.substring(0, 3);
+                String symbol = currencyText.substring(5, 6);
+                String currency = symbol + "_" + ISO; // e.g. "$_USD"
+                if (currencies.length() > 0) { currencies += "|"; } else { }
+                currencies += currency;
+            }
+        }
+        return currencies;
     }
 }
