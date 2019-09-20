@@ -53,7 +53,7 @@ public class DayViewActivity extends PagingActivity
         SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.budget_tracker_preferences_key), 0);
         if (!sharedPreferences.contains(getString(R.string.language_key)))
         {
-            launchFirstTimeSetup();
+            // launchFirstTimeSetup(); // TODO
         }
         else { }
 

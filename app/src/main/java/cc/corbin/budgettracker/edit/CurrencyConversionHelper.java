@@ -110,7 +110,7 @@ public class CurrencyConversionHelper extends PopupWindow implements NumericalFo
         final TextView monthTextView = conversionView.findViewById(R.id.monthTextView);
         monthTextView.setText(String.format("%02d", _month));
 
-        // Setup the days
+        // Setup the weeks
         Calendar calendar = Calendar.getInstance();
         calendar.set(_year, _month-1, _day);
         final int days = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);

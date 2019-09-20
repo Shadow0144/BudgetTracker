@@ -26,7 +26,7 @@ public class MonthRecyclerAdapter extends RecyclerView.Adapter
         {
             Calendar calendar = Calendar.getInstance();
             calendar.set(Calendar.YEAR, (date / 12));
-            calendar.set(Calendar.DATE, 1); // In case the current month is short on days
+            calendar.set(Calendar.DATE, 1); // In case the current month is short on weeks
             calendar.set(Calendar.MONTH, ((date % 12) -1));
             _monthView.setDate(calendar.get(Calendar.YEAR),
                     (calendar.get(Calendar.MONTH)+1));

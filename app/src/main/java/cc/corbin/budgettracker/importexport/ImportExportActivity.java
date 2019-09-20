@@ -481,6 +481,15 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         Log.e(TAG, "Import: " + selectedFile.getPath());
     }
 
+    private String getFolder()
+    {
+        String folder = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOCUMENTS).getAbsolutePath();
+        folder = folder.substring(0, folder.lastIndexOf("/"));
+        folder += "/BudgetTracker/";
+        return folder;
+    }
+
     // TODO: Set where to store the files
     public void onExport(View v)
     {
@@ -490,10 +499,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         }
         else
         {
-            String folder = Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_DOCUMENTS).getAbsolutePath();
-            folder = folder.substring(0, folder.lastIndexOf("/"));
-            folder += "/BudgetTracker/";
+            String folder = getFolder();
 
             File dstFolder = new File(folder);
 
@@ -611,16 +617,10 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         return budFileName;
     }
 
-    // TODO - Format files to have two digits for months and days
+    // TODO - Format files to have two digits for months and weeks
 
     private void exportTotal(String folder)
     {
-        /*ExpenditureDatabase.createDatabaseFile(
-                getDatabasePath("expenditures").getAbsolutePath(),
-                folder, getExpenditureFileName(), "");
-        BudgetDatabase.createDatabaseFile(
-                getDatabasePath("budgets").getAbsolutePath(),
-                folder, getBudgetFileName(), "");*/
         String whereQuery = "";
         _viewModel.exportDatabases(_databaseActionComplete, whereQuery, folder,
                 getDatabasePath("expenditures").getAbsolutePath(), getExpenditureFileName(),
@@ -633,12 +633,6 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         {
             int year = _selectedDate.get(Calendar.YEAR);
             String whereQuery = "WHERE (year == " + year + ")";
-            /*ExpenditureDatabase.createDatabaseFile(
-                    getDatabasePath("expenditures").getAbsolutePath(),
-                    folder, getExpenditureFileName(), whereQuery);
-            BudgetDatabase.createDatabaseFile(
-                    getDatabasePath("budgets").getAbsolutePath(),
-                    folder, getBudgetFileName(), whereQuery);*/
             _viewModel.exportDatabases(_databaseActionComplete, whereQuery, folder,
                     getDatabasePath("expenditures").getAbsolutePath(), getExpenditureFileName(),
                     getDatabasePath("budgets").getAbsolutePath(), getBudgetFileName(), true);
@@ -657,12 +651,6 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
             int month = _selectedDate.get(Calendar.MONTH)+1;
             String whereQuery = "WHERE (year == " + year + ") " +
                     "AND (month == " + month + ")";
-            /*ExpenditureDatabase.createDatabaseFile(
-                    getDatabasePath("expenditures").getAbsolutePath(),
-                    folder, getExpenditureFileName(), whereQuery);
-            BudgetDatabase.createDatabaseFile(
-                    getDatabasePath("budgets").getAbsolutePath(),
-                    folder, getBudgetFileName(), whereQuery);*/
             _viewModel.exportDatabases(_databaseActionComplete, whereQuery, folder,
                     getDatabasePath("expenditures").getAbsolutePath(), getExpenditureFileName(),
                     getDatabasePath("budgets").getAbsolutePath(), getBudgetFileName(), true);
@@ -683,10 +671,6 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
             String whereQuery = "WHERE (year == " + year + ") " +
                     "AND (month == " + month + ") " +
                     "AND (day == " + day + ")";
-            /*ExpenditureDatabase.createDatabaseFile(
-                    getDatabasePath("expenditures").getAbsolutePath(),
-                    folder, getBudgetFileName(), whereQuery);
-            // No budget table to export*/
             _viewModel.exportDatabases(_databaseActionComplete, whereQuery, folder,
                     getDatabasePath("expenditures").getAbsolutePath(), getExpenditureFileName(),
                     "", "", false);
@@ -700,6 +684,16 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     private void exportCustom(String folder)
     {
         // TODO
+        // Temporary
+        String fileName = "test";
+        String whereQuery = "WHERE (year == " + 0 + ") " +
+                "AND (month == " + 0 + ") " +
+                "AND (day == " + 0 + ")";
+        ExportXMLHelper exportXMLHelper = new ExportXMLHelper(this, _viewModel,
+                ExportXMLHelper.TimeFrame.years,
+                getFolder(), fileName, whereQuery);
+        exportXMLHelper.export();
+        Log.e(TAG, "Finished exporting");
     }
 
     private void makeCompletionToast()
