@@ -538,7 +538,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                         break;
                 }
                 _importButton.setEnabled(false);
-                _exportButton.setEnabled(false);
+                //_exportButton.setEnabled(false); // TODO Temporary
             }
         }
     }
@@ -685,7 +685,9 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     {
         // TODO
         // Temporary
-        String fileName = "test";
+        String fileName = getExpenditureFileName();
+        int index = fileName.indexOf('.');
+        fileName = fileName.substring(0, ((index == -1) ? (fileName.length()-1) : index));
         String whereQuery = "WHERE (year == " + 0 + ") " +
                 "AND (month == " + 0 + ") " +
                 "AND (day == " + 0 + ")";
@@ -694,6 +696,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                 getFolder(), fileName, whereQuery);
         exportXMLHelper.export();
         Log.e(TAG, "Finished exporting");
+        Toast.makeText(this, "Finished exporting", Toast.LENGTH_LONG).show();
     }
 
     private void makeCompletionToast()

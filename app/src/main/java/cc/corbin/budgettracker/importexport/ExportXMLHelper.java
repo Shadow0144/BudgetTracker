@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +31,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 
@@ -58,7 +60,7 @@ public class ExportXMLHelper
     private Document _document;
 
     private final int TIME_ROW_START = 5; // B5
-    private final int CAT_ROW_START_OFFSET = 3;
+    private final int CAT_ROW_START_OFFSET = 5;
     private int _timeRows;
 
     private AssetManager _assetManager;
@@ -164,6 +166,7 @@ public class ExportXMLHelper
             setupSheetNames();
             setupSummaryHeaders();
             setupTimeSummaryTable();
+            setupCategorySummaryTable();
             closeFile();
             createODS();
         }
@@ -271,6 +274,7 @@ public class ExportXMLHelper
     private void setupTimeSummaryTable()
     {
         _timeRows = 0;
+        String postElementID = "time_summary_total_row";
         switch (_timeFrame)
         {
             case day:
@@ -286,7 +290,8 @@ public class ExportXMLHelper
 
                 break;
             case years:
-                makeSummaryTableRow("2019", 1.0f, 1.0f);
+                makeSummaryTableRow(postElementID, "2019", 1.0f, 1.0f);
+                _timeRows++;
                 break;
         }
 
@@ -304,19 +309,16 @@ public class ExportXMLHelper
         }
         else
         {
-            totalExpCell.setAttribute("table:formula",
-                    "of:=0");
-            totalBudCell.setAttribute("table:formula",
-                    "of:=0");
-            totalRemCell.setAttribute("table:formula",
-                    "of:=0");
+            totalExpCell.setAttribute("table:formula", "of:=0");
+            totalBudCell.setAttribute("table:formula", "of:=0");
+            totalRemCell.setAttribute("table:formula", "of:=0");
         }
     }
 
-    private void makeSummaryTableRow(String label, float amount, float budget)
+    private void makeSummaryTableRow(String postElementID, String label, float amount, float budget)
     {
-        Node summarySheet = _document.getElementById("summarySheet");
-        Node timeSummaryTotalRow = _document.getElementById("time_summary_total_row");
+        Element summarySheet = _document.getElementById("summarySheet");
+        Element postElement = _document.getElementById(postElementID);
 
         // Append a new row
         Element row = _document.createElement("table:table-row");
@@ -336,10 +338,6 @@ public class ExportXMLHelper
         tableCell.setAttribute("office:value-type", "float");
         String amountString = Currencies.formatCurrency(Currencies.default_currency, amount);
         tableCell.setAttribute("office:value", ""+amount);
-        textCell = _document.createElement("text:p");
-        textCell.setTextContent(amountString);
-        textCell.setTextContent(label);
-        tableCell.appendChild(textCell);
         row.appendChild(tableCell);
 
         // Budget
@@ -347,10 +345,6 @@ public class ExportXMLHelper
         tableCell.setAttribute("office:value-type", "float");
         String budgetString = Currencies.formatCurrency(Currencies.default_currency, budget);
         tableCell.setAttribute("office:value", ""+budget);
-        textCell = _document.createElement("text:p");
-        textCell.setTextContent(budgetString);
-        textCell.setTextContent(label);
-        tableCell.appendChild(textCell);
         row.appendChild(tableCell);
 
         // Remaining
@@ -359,14 +353,32 @@ public class ExportXMLHelper
         float remaining = budget - amount;
         String remainingString = Currencies.formatCurrency(Currencies.default_currency, remaining);
         tableCell.setAttribute("office:value", ""+remaining);
-        textCell = _document.createElement("text:p");
-        textCell.setTextContent(remainingString);
-        textCell.setTextContent(label);
-        tableCell.appendChild(textCell);
         row.appendChild(tableCell);
 
-        summarySheet.insertBefore(row, timeSummaryTotalRow);
-        _timeRows++;
+        summarySheet.insertBefore(row, postElement);
+    }
+
+    private void setupCategorySummaryTable()
+    {
+        String postElementID = "category_summary_total_row";
+        String[] categories = Categories.getCategories();
+        for (int i = 0; i < categories.length; i++)
+        {
+            makeSummaryTableRow(postElementID, categories[i], 1.0f, 1.0f);
+        }
+
+        // There will always be at least one category
+        Element totalExpCell = _document.getElementById("category_total_exp_cell");
+        Element totalBudCell = _document.getElementById("category_total_bud_cell");
+        Element totalRemCell = _document.getElementById("category_total_rem_cell");
+        int start = TIME_ROW_START + _timeRows + CAT_ROW_START_OFFSET - 1;
+        int end = start + categories.length - 1;
+        totalExpCell.setAttribute("table:formula",
+                "of:=SUM([.B" + start + ":.B" + end + "])");
+        totalBudCell.setAttribute("table:formula",
+                "of:=SUM([.C" + start + ":.C" + end + "])");
+        totalRemCell.setAttribute("table:formula",
+                "of:=SUM([.D" + start + ":.D" + end + "])");
     }
 
     private void closeFile()
