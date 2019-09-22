@@ -4,7 +4,10 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
 
+import org.w3c.dom.Comment;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
+import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -33,6 +36,8 @@ import javax.xml.transform.stream.StreamResult;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
+import cc.corbin.budgettracker.day.ExpenditureItem;
+import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 
 public class ExportXMLHelper
@@ -67,6 +72,9 @@ public class ExportXMLHelper
     private File _zipFile;
     private File _contentFile;
 
+    private boolean _createExpenditureSheet;
+    private boolean _createBudgetSheet;
+
     public ExportXMLHelper(Context context, ExpenditureViewModel viewModel, TimeFrame timeFrame,
                            String folder, String fileName, String query)
     {
@@ -76,6 +84,8 @@ public class ExportXMLHelper
         _folder = folder;
         _fileName = fileName;
         _query = query;
+        _createExpenditureSheet = true;
+        _createBudgetSheet = false;
     }
 
     // Time summary table row
@@ -157,23 +167,44 @@ public class ExportXMLHelper
             </table:table-row>
      */
 
-    public void export()
+    public boolean export()
     {
+        boolean succeeded = false;
+
         try
         {
             copyAssets();
             openFile();
-            setupSheetNames();
+            setupSheetName();
             setupSummaryHeaders();
             setupTimeSummaryTable();
             setupCategorySummaryTable();
+            if (_createExpenditureSheet)
+            {
+                addExpendituresSheet();
+                closeExpendituresSheet();
+            }
+            else { }
+            if (_createBudgetSheet)
+            {
+
+            }
+            else { }
             closeFile();
             createODS();
+
+            succeeded = true;
+        }
+        catch (DOMException domE)
+        {
+            Log.e(TAG, ""+domE.code);
         }
         catch (Exception e)
         {
             Log.e(TAG, e.toString());
         }
+
+        return succeeded;
     }
 
     private void copyAssets()
@@ -251,10 +282,10 @@ public class ExportXMLHelper
         }
     }
 
-    private void setupSheetNames()
+    private void setupSheetName()
     {
         // Update table:name attribute
-        Element firstSheet = _document.getElementById("summarySheet");
+        Element firstSheet = _document.getElementById("summary_sheet");
         firstSheet.setAttribute("table:name", "Test");
     }
 
@@ -317,7 +348,7 @@ public class ExportXMLHelper
 
     private void makeSummaryTableRow(String postElementID, String label, float amount, float budget)
     {
-        Element summarySheet = _document.getElementById("summarySheet");
+        Element summarySheet = _document.getElementById("summary_sheet");
         Element postElement = _document.getElementById(postElementID);
 
         // Append a new row
@@ -381,6 +412,230 @@ public class ExportXMLHelper
                 "of:=SUM([.D" + start + ":.D" + end + "])");
     }
 
+    private void addExpendituresSheet()
+    {
+        Element spreadSheetElement = _document.getElementById("bt_spreadsheet");
+        Element postElement = _document.getElementById("expenditures_sheet_anchor");
+
+        Node expendituresSheetNode = _document.createDocumentFragment();
+
+        // "\n\n<!-- Expenditures Sheet -->\n\n"
+        Comment comment = _document.createComment(" Expenditures Sheet ");
+        expendituresSheetNode.appendChild(comment);
+        expendituresSheetNode.appendChild(_document.createTextNode("\n\n"));
+
+        // "<table:table table:name=\"Expenditures\" table:style-name=\"ta1\" table:print=\"false\">
+        Element tableElement = _document.createElement("table:table");
+        tableElement.setAttribute("table:name", "Expenditures");
+        tableElement.setAttribute("table:style-name", "ta1");
+        tableElement.setAttribute("table:print", "false");
+        expendituresSheetNode.appendChild(tableElement);
+
+        // "<table:table-column table:style-name=\"co1\" table:default-cell-style-name=\"ce9\"/>\n\n"
+        Element columnElement = _document.createElement("table:table-column");
+        columnElement.setAttribute("table:style-name", "co1");
+        columnElement.setAttribute("table:default-cell-style-name", "ce9");
+        tableElement.appendChild(columnElement);
+        tableElement.appendChild(_document.createTextNode("\n\n"));
+        // "<!-- Header -->\n"
+        tableElement.appendChild(_document.createComment(" Header "));
+        tableElement.appendChild(_document.createTextNode("\n"));
+
+        // "<table:table-column table:style-name=\"co1\" table:default-cell-style-name=\"ce4\"/>"
+        columnElement = _document.createElement("table:table-column");
+        columnElement.setAttribute("table:style-name", "co1");
+        columnElement.setAttribute("table:default-cell-style-name", "ce4");
+        tableElement.appendChild(columnElement);
+        // "<table:table-column table:style-name=\"co1\" table:number-columns-repeated=\"3\" table:default-cell-style-name=\"ce5\"/>"
+        columnElement = _document.createElement("table:table-column");
+        columnElement.setAttribute("table:style-name", "co1");
+        columnElement.setAttribute("table:number-columns-repeated", "3");
+        columnElement.setAttribute("table:default-cell-style-name", "ce5");
+        tableElement.appendChild(columnElement);
+        // "<table:table-row table:style-name=\"ro1\">
+        Element rowElement = _document.createElement("table:table-row");
+        rowElement.setAttribute("table:style-name", "ro1");
+        tableElement.appendChild(rowElement);
+        // <table:table-cell table:style-name=\"ce6\" office:value-type=\"string\" table:number-columns-spanned=\"5\" table:number-rows-spanned=\"1\">"
+        Element cellElement = _document.createElement("table:table-cell");
+        cellElement.setAttribute("table:default-cell-style-name", "ce6");
+        cellElement.setAttribute("office:value-type", "string");
+        cellElement.setAttribute("table:number-columns-spanned", "5");
+        cellElement.setAttribute("table:number-rows-spanned", "1");
+        rowElement.appendChild(cellElement);
+        // "<text:p>Total Expenditures</text:p>"
+        Element textElement = _document.createElement("text:p");
+        textElement.setTextContent("Total Expenditures");
+        cellElement.appendChild(textElement);
+        // "</table:table-cell>"
+        // "<table:covered-table-cell table:number-columns-repeated=\"5\" table:style-name=\"ce10\"/>"
+        Element coveredCell = _document.createElement("table:covered-table-cell");
+        coveredCell.setAttribute("table:number-columns-repeated", "5"); // TODO - Border not reaching
+        coveredCell.setAttribute("table:style-name", "ce10");
+        rowElement.appendChild(coveredCell);
+        // "</table:table-row>"
+        // "<table:table-row table:style-name=\"ro2\">"
+        rowElement = _document.createElement("table:table-row");
+        rowElement.setAttribute("table:style-name", "ro2");
+        tableElement.appendChild(rowElement);
+        // "<table:table-cell table:style-name=\"ce7\" table:number-columns-repeated=\"5\"/>
+        cellElement = _document.createElement("table:table-cell");
+        cellElement.setAttribute("table:style-name", "ce7");
+        cellElement.setAttribute("table:number-columns-repeated", "5");
+        rowElement.appendChild(cellElement);
+        // </table:table-row>
+        // \n\n
+        tableElement.appendChild(_document.createTextNode("\n\n"));
+
+        int years = 2; // TODO - Temporary!
+        ExpenditureEntity temp = new ExpenditureEntity();
+        temp.setDay(Calendar.getInstance().get(Calendar.DATE));
+        temp.setBaseAmount(1.0f);
+        temp.setCategory(0, Categories.getCategories()[0]);
+        temp.setNote("Temporary");
+        for (int i = 0; i < years; i++)
+        {
+            addExpendituresTableHeader(tableElement, (""+(i+2018)));
+            addExpenditureRow(tableElement, temp);
+            addExpenditureRow(tableElement, temp);
+            addExpenditureRow(tableElement, temp);
+            addEmptyRow(tableElement);
+            tableElement.appendChild(_document.createTextNode("\n\n"));
+        }
+
+        spreadSheetElement.insertBefore(expendituresSheetNode, postElement);
+    }
+
+    private void addExpendituresTableHeader(Element tableElement, String tableName)
+    {
+        // "<!-- " + tableName + " -->\n"
+        Comment comment = _document.createComment(" " + tableName + " ");
+        tableElement.appendChild(comment);
+        tableElement.appendChild(_document.createTextNode("\n"));
+
+        // "<table:table-row table:style-name=\"ro2\">
+        Element rowElement = _document.createElement("table:table-row");
+        rowElement.setAttribute("table:style-name", "ro2");
+        tableElement.appendChild(rowElement);
+
+        // "<table:table-cell table:style-name=\"ce8\" office:value-type=\"float\" office:value=\"">
+        Element cellElement = _document.createElement("table:table-cell");
+        cellElement.setAttribute("table:number-columns-spanned", "5");
+        cellElement.setAttribute("table:style-name", "ce8");
+        cellElement.setAttribute("office:value-type", "float");
+        cellElement.setAttribute("office:value", tableName);
+        //cellElement.setTextContent(tableName);
+        rowElement.appendChild(cellElement);
+        // </table:table-cell>
+
+        // "<table:covered-table-cell table:number-columns-repeated=\"5\" table:style-name=\"ce7\"/>"
+        Element coveredCellElement = _document.createElement("covered-table-cell");
+        coveredCellElement.setAttribute("table:number-columns-repeated", "5");
+        coveredCellElement.setAttribute("table:style-name", "ce7");
+        rowElement.appendChild(coveredCellElement);
+        // "</table:table-row>"
+
+        // "<table:table-row table:style-name=\"ro2\">"
+        rowElement = _document.createElement("table:table-row");
+        rowElement.setAttribute("table:style-name", "ro2");
+        tableElement.appendChild(rowElement);
+
+        rowElement.appendChild(createHeaderCell("Date"));
+        rowElement.appendChild(createHeaderCell("Amount"));
+        rowElement.appendChild(createHeaderCell("Conversion"));
+        rowElement.appendChild(createHeaderCell("Category"));
+        rowElement.appendChild(createHeaderCell("Note"));
+        //"</table:table-row>"
+    }
+
+    private Element createHeaderCell(String text)
+    {
+        // "<table:table-cell table:style-name=\"ce3\" office:value-type=\"string\">
+        Element cellElement = _document.createElement("table:table-cell");
+        cellElement.setAttribute("table:style-name", "ce3");
+        cellElement.setAttribute("office:value-type", "string");
+        //rowElement.appendChild(cellElement); // Handled after returning
+        // <text:p>{text}</text:p>
+        Element textElement = _document.createElement("text:p");
+        textElement.setTextContent(text);
+        cellElement.appendChild(textElement);
+        // </table:table-cell>"
+        return cellElement;
+    }
+
+    private void addExpenditureRow(Element tableElement, ExpenditureEntity entity)
+    {
+        // TODO: Currency and conversion
+        String conversion = "($1 @ " + entity.getConversionRate() + ")";
+
+        // "<table:table-row table:style-name=\"ro2\">"
+        Element rowElement = _document.createElement("table:table-row");
+        rowElement.setAttribute("table:style-name", "ro2");
+        tableElement.appendChild(rowElement);
+
+        // "<table:table-cell office:value-type=\"date\" office:date-value=\"" + entity.getDay()
+        rowElement.appendChild(createExpenditureCell("date", "office:date-value", (""+entity.getDay())));
+        // "<table:table-cell office:value-type=\"currency\" office:currency=\"USD\" office:value=\"\">" + entity.getAmount()
+        Element amountElement = createExpenditureCell("currency", "office:value", (""+entity.getBaseAmount()));
+        amountElement.setAttribute("office:currency", "USD"); // TODO Fix currency
+        rowElement.appendChild(amountElement);
+        // "<table:table-cell/><table:table-cell office:value-type=\"string\">" + conversion
+        rowElement.appendChild(createExpenditureCell("string", "", (conversion)));
+        // "<table:table-cell/><table:table-cell office:value-type=\"string\">" + entity.getCategoryName()
+        rowElement.appendChild(createExpenditureCell("string", "", (entity.getCategoryName())));
+        // "<table:table-cell/><table:table-cell office:value-type=\"string\">" + entity.getNote()
+        rowElement.appendChild(createExpenditureCell("string", "", (entity.getNote())));
+        // "</table:table-row>"
+    }
+
+    // TODO - Cleanup
+    private Element createExpenditureCell(String valueType, String valueTypeParam, String text)
+    {
+        // "<table:table-cell office:value-type=\"{valueType}\" {valueTypeParam}=\"{text}\"\>"
+        Element cellElement = _document.createElement("table:table-cell");
+        cellElement.setAttribute("office:value-type", valueType);
+        if (valueTypeParam.length() > 0)
+        {
+            cellElement.setAttribute(valueTypeParam, text);
+        }
+        else { }
+
+        // <text:p></text:p>"
+        Element textCell = _document.createElement("text:p");
+        if (!(valueTypeParam.length() > 0))
+        {
+            textCell.setTextContent(text);
+        }
+        else { }
+        cellElement.appendChild(textCell);
+        // "</table:table-cell>"
+
+        return cellElement;
+    }
+
+    private void addEmptyRow(Element tableElement)
+    {
+        // "<table:table-row table:style-name=\"ro2\">"
+        Element rowElement = _document.createElement("table:table-row");
+        rowElement.setAttribute("table:style-name", "ro2");
+        tableElement.appendChild(rowElement);
+
+        // "<table:table-cell table:style-name=\"Default\" table:number-columns-repeated=\"5\"/>"
+        Element cellElement = _document.createElement("table:table-cell");
+        cellElement.setAttribute("table:style-name", "Default");
+        cellElement.setAttribute("table:number-columns-repeated", "5");
+        rowElement.appendChild(cellElement);
+        // "</table:table-row>"
+    }
+
+    private void closeExpendituresSheet()
+    {
+        //Element rootElement = _document.getElementById("expenditures_sheet");
+
+        //Element closingElement = _document.createElement("/table:table");
+        //_document.insertBefore(closingElement, rootElement);
+    }
+
     private void closeFile()
     {
         try
@@ -430,7 +685,7 @@ public class ExportXMLHelper
 
             // Delete the temporary files
             _zipFile.delete();
-            _contentFile.delete();
+            //_contentFile.delete();
         }
         catch (IOException e)
         {

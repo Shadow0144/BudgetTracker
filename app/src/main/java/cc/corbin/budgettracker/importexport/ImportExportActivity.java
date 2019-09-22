@@ -694,9 +694,17 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         ExportXMLHelper exportXMLHelper = new ExportXMLHelper(this, _viewModel,
                 ExportXMLHelper.TimeFrame.years,
                 getFolder(), fileName, whereQuery);
-        exportXMLHelper.export();
-        Log.e(TAG, "Finished exporting");
-        Toast.makeText(this, "Finished exporting", Toast.LENGTH_LONG).show();
+        boolean exportSuccessful = exportXMLHelper.export();
+        if (exportSuccessful)
+        {
+            Log.e(TAG, "Finished exporting");
+            Toast.makeText(this, "Finished exporting", Toast.LENGTH_LONG).show();
+        }
+        else
+        {
+            Log.e(TAG, "Failed exporting");
+            Toast.makeText(this, "Exporting failed", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void makeCompletionToast()
