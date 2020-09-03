@@ -2,59 +2,35 @@ package cc.corbin.budgettracker.year;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 
-import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
-import cc.corbin.budgettracker.auxilliary.Currencies;
-import cc.corbin.budgettracker.auxilliary.NavigationActivity;
-import cc.corbin.budgettracker.auxilliary.NavigationDrawerHelper;
-import cc.corbin.budgettracker.importexport.ImportExportActivity;
 import cc.corbin.budgettracker.auxilliary.LineGraph;
 import cc.corbin.budgettracker.auxilliary.PieChart;
 import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
-import cc.corbin.budgettracker.custom.CreateCustomViewActivity;
-import cc.corbin.budgettracker.day.DayViewActivity;
-import cc.corbin.budgettracker.search.CreateSearchActivity;
-import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.tables.CategorySummaryTable;
 import cc.corbin.budgettracker.tables.MonthlySummaryTable;
 import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.R;
-import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
-import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.month.MonthViewActivity;
+import cc.corbin.budgettracker.auxilliary.SummationAsyncTask.SummationResult;
 
 /**
  * Created by Corbin on 4/15/2018.
@@ -77,8 +53,8 @@ public class YearView extends LinearLayout
     private MutableLiveData<List<ExpenditureEntity>> _yearExps;
     private MutableLiveData<List<BudgetEntity>> _budgets;
 
-    private MutableLiveData<float[]> _monthlyAmounts;
-    private MutableLiveData<float[]> _categoricalAmounts;
+    private MutableLiveData<SummationResult[]> _monthlyAmounts;
+    private MutableLiveData<SummationResult[]> _categoricalAmounts;
 
     private MonthlySummaryTable _monthlyTable;
     private CategorySummaryTable _categoryTable;
@@ -225,11 +201,17 @@ public class YearView extends LinearLayout
             }
         };
 
-        final Observer<float[]> monthlyAmountsObserver = new Observer<float[]>()
+        final Observer<SummationResult[]> monthlyAmountsObserver = new Observer<SummationResult[]>()
         {
             @Override
-            public void onChanged(@Nullable float[] amounts)
+            public void onChanged(@Nullable SummationResult[] results)
             {
+                float[] amounts = new float[results.length];
+                for (int i = 0; i < results.length; i++)
+                {
+                    amounts[i] = results[i].getAmount();
+                }
+
                 _monthlyTable.updateExpenditures(amounts);
 
                 String[] monthLabels = new String[12];
@@ -251,11 +233,17 @@ public class YearView extends LinearLayout
             }
         };
 
-        final Observer<float[]> categoricalAmountsObserver = new Observer<float[]>()
+        final Observer<SummationResult[]> categoricalAmountsObserver = new Observer<SummationResult[]>()
         {
             @Override
-            public void onChanged(@Nullable float[] amounts)
+            public void onChanged(@Nullable SummationResult[] results)
             {
+                float[] amounts = new float[results.length];
+                for (int i = 0; i < results.length; i++)
+                {
+                    amounts[i] = results[i].getAmount();
+                }
+
                 _categoryTable.updateExpenditures(amounts);
 
                 String[] categoryLabels = Categories.getCategories();
@@ -268,10 +256,10 @@ public class YearView extends LinearLayout
         _budgets = new MutableLiveData<List<BudgetEntity>>();
         _budgets.observe(((FragmentActivity)_context), budgetObserver);
 
-        _monthlyAmounts = new MutableLiveData<float[]>();
+        _monthlyAmounts = new MutableLiveData<SummationResult[]>();
         _monthlyAmounts.observe(((FragmentActivity)_context), monthlyAmountsObserver);
 
-        _categoricalAmounts = new MutableLiveData<float[]>();
+        _categoricalAmounts = new MutableLiveData<SummationResult[]>();
         _categoricalAmounts.observe(((FragmentActivity)_context), categoricalAmountsObserver);
     }
 
@@ -313,8 +301,8 @@ public class YearView extends LinearLayout
 
     private void yearLoaded(List<ExpenditureEntity> expenditureEntities)
     {
-        final SummationAsyncTask monthlyAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.monthly, _monthlyAmounts);
-        final SummationAsyncTask categoricalAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.categorically, _categoricalAmounts);
+        final SummationAsyncTask monthlyAsyncTask = new SummationAsyncTask(SummationAsyncTask.SummationType.monthly, _monthlyAmounts);
+        final SummationAsyncTask categoricalAsyncTask = new SummationAsyncTask(SummationAsyncTask.SummationType.categorically, _categoricalAmounts);
         monthlyAsyncTask.execute(expenditureEntities);
         categoricalAsyncTask.execute(expenditureEntities);
 

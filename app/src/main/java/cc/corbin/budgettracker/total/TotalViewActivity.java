@@ -25,6 +25,7 @@ import cc.corbin.budgettracker.tables.YearlySummaryTable;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
+import cc.corbin.budgettracker.auxilliary.SummationAsyncTask.SummationResult;
 
 /**
  * Created by Corbin on 4/15/2018.
@@ -38,8 +39,8 @@ public class TotalViewActivity extends NavigationActivity implements AsyncSummat
     private MutableLiveData<List<ExpenditureEntity>> _totalExps;
     private MutableLiveData<List<BudgetEntity>> _budgets;
 
-    private MutableLiveData<float[]> _yearlyAmounts;
-    private MutableLiveData<float[]> _categoricalAmounts;
+    private MutableLiveData<SummationResult[]> _yearlyAmounts;
+    private MutableLiveData<SummationResult[]> _categoricalAmounts;
 
     private YearlySummaryTable _yearlyTable;
     private CategorySummaryTable _categoryTable;
@@ -96,11 +97,17 @@ public class TotalViewActivity extends NavigationActivity implements AsyncSummat
             }
         };
 
-        final Observer<float[]> yearlyAmountsObserver = new Observer<float[]>()
+        final Observer<SummationResult[]> yearlyAmountsObserver = new Observer<SummationResult[]>()
         {
             @Override
-            public void onChanged(@Nullable float[] amounts)
+            public void onChanged(@Nullable SummationResult[] results)
             {
+                float[] amounts = new float[results.length];
+                for (int i = 0; i < results.length; i++)
+                {
+                    amounts[i] = results[i].getAmount();
+                }
+
                 _yearlyTable.updateExpenditures(amounts);
 
                 String[] yearLabels = new String[amounts.length];
@@ -114,11 +121,17 @@ public class TotalViewActivity extends NavigationActivity implements AsyncSummat
             }
         };
 
-        final Observer<float[]> categoricalAmountsObserver = new Observer<float[]>()
+        final Observer<SummationResult[]> categoricalAmountsObserver = new Observer<SummationResult[]>()
         {
             @Override
-            public void onChanged(@Nullable float[] amounts)
+            public void onChanged(@Nullable SummationResult[] results)
             {
+                float[] amounts = new float[results.length];
+                for (int i = 0; i < results.length; i++)
+                {
+                    amounts[i] = results[i].getAmount();
+                }
+
                 _categoryTable.updateExpenditures(amounts);
 
                 String[] categoryLabels = Categories.getCategories();
@@ -131,10 +144,10 @@ public class TotalViewActivity extends NavigationActivity implements AsyncSummat
         _budgets = new MutableLiveData<List<BudgetEntity>>();
         _budgets.observe(this, budgetObserver);
 
-        _yearlyAmounts = new MutableLiveData<float[]>();
+        _yearlyAmounts = new MutableLiveData<SummationResult[]>();
         _yearlyAmounts.observe(this, yearlyAmountsObserver);
 
-        _categoricalAmounts = new MutableLiveData<float[]>();
+        _categoricalAmounts = new MutableLiveData<SummationResult[]>();
         _categoricalAmounts.observe(this, categoricalAmountsObserver);
     }
 
@@ -191,9 +204,9 @@ public class TotalViewActivity extends NavigationActivity implements AsyncSummat
     }
 
     @Override
-    public void rowComplete(SummationAsyncTask.summationType summationType, String header, float amount, int id, boolean finalRow)
+    public void rowComplete(SummationAsyncTask.SummationType summationType, String header, float amount, int id, boolean finalRow)
     {
-        if (summationType == SummationAsyncTask.summationType.yearly)
+        if (summationType == SummationAsyncTask.SummationType.yearly)
         {
             _yearlyTable.addContentRow(header, amount, id, finalRow);
         }
@@ -214,8 +227,8 @@ public class TotalViewActivity extends NavigationActivity implements AsyncSummat
             _endYear = calendar.get(Calendar.YEAR);
         }
 
-        SummationAsyncTask yearlyAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.yearly, _yearlyAmounts, this);
-        SummationAsyncTask categoricalAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.categorically, _categoricalAmounts);
+        SummationAsyncTask yearlyAsyncTask = new SummationAsyncTask(SummationAsyncTask.SummationType.yearly, _yearlyAmounts, this);
+        SummationAsyncTask categoricalAsyncTask = new SummationAsyncTask(SummationAsyncTask.SummationType.categorically, _categoricalAmounts);
         yearlyAsyncTask.execute(expenditureEntities);
         categoricalAsyncTask.execute(expenditureEntities);
 

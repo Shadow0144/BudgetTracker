@@ -8,7 +8,6 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +33,7 @@ import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
+import cc.corbin.budgettracker.auxilliary.SummationAsyncTask.SummationResult;
 
 /**
  * Created by Corbin on 1/28/2018.
@@ -74,8 +74,8 @@ public class MonthView extends LinearLayout
     private MutableLiveData<List<ExpenditureEntity>> _monthExps;
     private MutableLiveData<List<BudgetEntity>> _budgets;
 
-    private MutableLiveData<float[]> _weeklyAmounts;
-    private MutableLiveData<float[]> _categoricalAmounts;
+    private MutableLiveData<SummationResult[]> _weeklyAmounts;
+    private MutableLiveData<SummationResult[]> _categoricalAmounts;
 
     private MonthEditBudgetItemHelper _monthEditBudgetItemHelper;
 
@@ -204,11 +204,17 @@ public class MonthView extends LinearLayout
             }
         };
 
-        final Observer<float[]> weeklyAmountsObserver = new Observer<float[]>()
+        final Observer<SummationResult[]> weeklyAmountsObserver = new Observer<SummationResult[]>()
         {
             @Override
-            public void onChanged(@Nullable float[] amounts)
+            public void onChanged(@Nullable SummationResult[] results)
             {
+                float[] amounts = new float[results.length];
+                for (int i = 0; i < results.length; i++)
+                {
+                    amounts[i] = results[i].getAmount();
+                }
+
                 _weeklyTable.updateExpenditures(amounts);
 
                 String[] weekLabels = new String[7];
@@ -225,11 +231,17 @@ public class MonthView extends LinearLayout
             }
         };
 
-        final Observer<float[]> categoricalAmountsObserver = new Observer<float[]>()
+        final Observer<SummationResult[]> categoricalAmountsObserver = new Observer<SummationResult[]>()
         {
             @Override
-            public void onChanged(@Nullable float[] amounts)
+            public void onChanged(@Nullable SummationResult[] results)
             {
+                float[] amounts = new float[results.length];
+                for (int i = 0; i < results.length; i++)
+                {
+                    amounts[i] = results[i].getAmount();
+                }
+
                 _categoryTable.updateExpenditures(amounts);
 
                 String[] categoryLabels = Categories.getCategories();
@@ -242,9 +254,9 @@ public class MonthView extends LinearLayout
         _budgets = new MutableLiveData<List<BudgetEntity>>();
         _budgets.observe(((FragmentActivity)_context), budgetObserver);
 
-        _weeklyAmounts = new MutableLiveData<float[]>();
+        _weeklyAmounts = new MutableLiveData<SummationResult[]>();
         _weeklyAmounts.observe(((FragmentActivity)_context), weeklyAmountsObserver);
-        _categoricalAmounts = new MutableLiveData<float[]>();
+        _categoricalAmounts = new MutableLiveData<SummationResult[]>();
         _categoricalAmounts.observe(((FragmentActivity)_context), categoricalAmountsObserver);
     }
 
@@ -286,8 +298,8 @@ public class MonthView extends LinearLayout
     {
         _extrasTable.updateExpenditures(expenditureEntities);
 
-        final SummationAsyncTask weeklyAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.weekly, _weeklyAmounts);
-        final SummationAsyncTask categoricalAsyncTask = new SummationAsyncTask(SummationAsyncTask.summationType.categorically, _categoricalAmounts);
+        final SummationAsyncTask weeklyAsyncTask = new SummationAsyncTask(SummationAsyncTask.SummationType.weekly, _weeklyAmounts);
+        final SummationAsyncTask categoricalAsyncTask = new SummationAsyncTask(SummationAsyncTask.SummationType.categorically, _categoricalAmounts);
         weeklyAsyncTask.execute(expenditureEntities);
         categoricalAsyncTask.execute(expenditureEntities);
 

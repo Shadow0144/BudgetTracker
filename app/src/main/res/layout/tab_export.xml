@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/exportLinearLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -159,55 +160,76 @@
         android:layout_width="match_parent"
         android:layout_height="8dp"/>
 
-    <LinearLayout
-        android:id="@+id/expFileNameLinearLayout"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/fileNameConstraintLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/expFileNameTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
             android:text="@string/exp_file_name"
-            android:textColor="@color/black" />
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
             android:id="@+id/expFileNameEditText"
-            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_marginStart="8dp"
             android:ems="10"
             android:inputType="textPersonName"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@+id/expFileNameExtTextView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/expFileNameTextView" />
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/budFileNameLinearLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        android:orientation="vertical">
+        <TextView
+            android:id="@+id/expFileNameExtTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:text=".db"
+            app:layout_constraintBottom_toBottomOf="@+id/expFileNameEditText"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/expFileNameEditText" />
 
         <TextView
             android:id="@+id/budFileNameTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
             android:text="@string/bud_file_name"
-            android:textColor="@color/black" />
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/expFileNameEditText" />
 
         <EditText
             android:id="@+id/budFileNameEditText"
-            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_marginStart="8dp"
             android:ems="10"
             android:inputType="textPersonName"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@+id/budFileNameExtTextView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/budFileNameTextView" />
 
-    </LinearLayout>
+        <TextView
+            android:id="@+id/budFileNameExtTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:text=".db"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/budFileNameEditText" />
+
+    </android.support.constraint.ConstraintLayout>
 
     <TextView
         android:id="@+id/exportTotalTextView"

@@ -1,15 +1,17 @@
 package cc.corbin.budgettracker.importexport;
 
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
 import org.w3c.dom.Comment;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
-import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 import java.io.File;
@@ -18,13 +20,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Calendar;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -36,10 +35,11 @@ import javax.xml.transform.stream.StreamResult;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
+import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
-import cc.corbin.budgettracker.day.ExpenditureItem;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
+import cc.corbin.budgettracker.auxilliary.SummationAsyncTask.SummationResult;
 
 public class ExportXMLHelper
 {
@@ -53,6 +53,7 @@ public class ExportXMLHelper
         months,
         years
     }
+
     private TimeFrame _timeFrame;
 
     private Context _context;
@@ -61,7 +62,21 @@ public class ExportXMLHelper
 
     private String _folder;
     private String _fileName;
-    private String _query;
+
+    private String _expQuery;
+    private String _budQuery;
+
+    private boolean _expLoaded;
+    private boolean _budLoaded;
+
+    private MutableLiveData<List<ExpenditureEntity>> _expenditureEntities;
+    private List<ExpenditureEntity> _expenditures;
+    private MutableLiveData<List<BudgetEntity>> _budgetEntities;
+    private List<BudgetEntity> _budgets;
+
+    private MutableLiveData<SummationResult[]> _timeSummationResults;
+    private MutableLiveData<SummationResult[]> _timeAmounts;
+    private MutableLiveData<SummationResult[]> _categoryAmounts;
 
     private Document _document;
 
@@ -76,101 +91,111 @@ public class ExportXMLHelper
     private boolean _createExpenditureSheet;
     private boolean _createBudgetSheet;
 
+    private MutableLiveData<Boolean> _complete;
+
     public ExportXMLHelper(Context context, ExpenditureViewModel viewModel, TimeFrame timeFrame,
-                           String folder, String fileName, String query)
+                           String folder, String fileName, boolean exportExps, boolean exportBuds,
+                           String expQuery, String budQuery, MutableLiveData<Boolean> complete)
     {
         _context = context;
         _viewModel = viewModel;
         _timeFrame = timeFrame;
         _folder = folder;
         _fileName = fileName;
-        _query = query;
-        _createExpenditureSheet = true;
-        _createBudgetSheet = true;
+        _createExpenditureSheet = exportExps;
+        _createBudgetSheet = exportBuds;
+        _expQuery = expQuery;
+        _budQuery = budQuery;
+        _expLoaded = false;
+        _budLoaded = false;
+        _complete = complete;
+        _complete.postValue(false);
     }
-
-    // Time summary table row
-    /*
-        <table:table-row table:style-name="ro2">
-            <table:table-cell office:value-type="float" office:value="2018"><text:p>2018</text:p></table:table-cell>
-            <table:table-cell table:number-columns-repeated="2" office:value-type="currency" office:currency="USD" office:value="1"><text:p>$1.00</text:p></table:table-cell>
-            <table:table-cell table:formula="of:=[.B5]-[.C5]" office:value-type="currency" office:currency="USD" office:value="0"><text:p>$0.00</text:p></table:table-cell>
-        </table:table-row>
-     */
-
-    // Category summary table row
-    /*
-        <table:table-row table:style-name="ro2">
-            <table:table-cell office:value-type="string"><text:p>Food</text:p></table:table-cell>
-            <table:table-cell table:number-columns-repeated="2" office:value-type="currency" office:currency="USD" office:value="1"><text:p>$1.00</text:p></table:table-cell>
-            <table:table-cell table:formula="of:=[.B11]-[.C11]" office:value-type="currency" office:currency="USD" office:value="0"><text:p>$0.00</text:p></table:table-cell>
-        </table:table-row>
-     */
-
-    // Expenditures table
-    /*
-        <!-- 2018 -->
-            <table:table-row table:style-name="ro2">
-                <table:table-cell table:style-name="ce8" office:value-type="float" office:value="2018" table:number-columns-spanned="5" table:number-rows-spanned="1"><text:p>2018</text:p></table:table-cell>
-                    <table:covered-table-cell table:number-columns-repeated="4" table:style-name="ce7"/>
-                </table:table-row>
-                <table:table-row table:style-name="ro2">
-                    <table:table-cell table:style-name="ce3" office:value-type="string"><text:p>Date</text:p></table:table-cell>
-                    <table:table-cell table:style-name="ce3" office:value-type="string"><text:p>Amount</text:p></table:table-cell>
-                    <table:table-cell table:style-name="ce3" office:value-type="string"><text:p>Conversion</text:p></table:table-cell>
-                    <table:table-cell table:style-name="ce3" office:value-type="string"><text:p>Category</text:p></table:table-cell>
-                    <table:table-cell table:style-name="ce3" office:value-type="string"><text:p>Note</text:p></table:table-cell>
-                </table:table-row>
-        <!-- 2018 content -->
-            <table:table-row table:style-name="ro2"><table:table-cell office:value-type="date" office:date-value="2018-01-01"><text:p>01/01/18</text:p></table:table-cell><table:table-cell office:value-type="currency" office:currency="USD" office:value="1"><text:p>$1.00</text:p></table:table-cell><table:table-cell/><table:table-cell office:value-type="string"><text:p>Food</text:p></table:table-cell><table:table-cell/></table:table-row><table:table-row table:style-name="ro2"><table:table-cell office:value-type="date" office:date-value="2018-01-01"><text:p>01/01/18</text:p></table:table-cell><table:table-cell office:value-type="currency" office:currency="USD" office:value="1"><text:p>$1.00</text:p></table:table-cell><table:table-cell table:style-name="ce11" office:value-type="string"><text:p>₩1 @ 1000.00</text:p></table:table-cell><table:table-cell office:value-type="string"><text:p>Travel</text:p></table:table-cell><table:table-cell office:value-type="string"><text:p>This is a note</text:p></table:table-cell></table:table-row><table:table-row table:style-name="ro2"><table:table-cell office:value-type="date" office:date-value="2018-01-01"><text:p>01/01/18</text:p></table:table-cell><table:table-cell office:value-type="currency" office:currency="USD" office:value="1"><text:p>$1.00</text:p></table:table-cell><table:table-cell/><table:table-cell office:value-type="string"><text:p>Travel</text:p></table:table-cell><table:table-cell/></table:table-row><table:table-row table:style-name="ro2"><table:table-cell office:value-type="date" office:date-value="2018-01-01"><text:p>01/01/18</text:p></table:table-cell><table:table-cell office:value-type="currency" office:currency="USD" office:value="1"><text:p>$1.00</text:p></table:table-cell><table:table-cell/><table:table-cell office:value-type="string"><text:p>Other</text:p></table:table-cell><table:table-cell/></table:table-row><table:table-row table:style-name="ro2"><table:table-cell table:style-name="Default" table:number-columns-repeated="5"/></table:table-row>
-    */
-
-    // Budget table
-    /*
-        <!-- 2018 -->
-            <table:table-row table:style-name="ro2">
-                <table:table-cell table:style-name="ce12" office:value-type="float" office:value="2018" table:number-columns-spanned="4" table:number-rows-spanned="1"><text:p>2018</text:p></table:table-cell>
-                    <table:covered-table-cell table:style-name="ce5"/><table:covered-table-cell table:number-columns-repeated="2"/><table:table-cell/>
-                </table:table-row>
-                <table:table-row table:style-name="ro2">
-                    <table:table-cell table:style-name="ce3" office:value-type="string"><text:p>Date</text:p></table:table-cell>
-                    <table:table-cell table:style-name="ce3" office:value-type="string"><text:p>Amount</text:p></table:table-cell>
-                    <table:table-cell table:style-name="ce3" office:value-type="string"><text:p>Category</text:p></table:table-cell>
-                    <table:table-cell table:style-name="ce3" office:value-type="string"><text:p>Note</text:p></table:table-cell><table:table-cell/>
-                </table:table-row>
-        <!-- 2018 content -->
-            <table:table-row table:style-name="ro2">
-                <table:table-cell office:value-type="date" office:date-value="2018-01-01"><text:p>01/01/18</text:p></table:table-cell>
-                <table:table-cell office:value-type="currency" office:currency="USD" office:value="1"><text:p>$1.00</text:p></table:table-cell>
-                <table:table-cell office:value-type="string"><text:p>Food</text:p></table:table-cell>
-                <table:table-cell table:number-columns-repeated="2"/>
-            </table:table-row>
-            <table:table-row table:style-name="ro2">
-                <table:table-cell office:value-type="date" office:date-value="2018-01-01"><text:p>01/01/18</text:p></table:table-cell>
-                <table:table-cell office:value-type="currency" office:currency="USD" office:value="1"><text:p>$1.00</text:p></table:table-cell>
-                <table:table-cell office:value-type="string"><text:p>Travel</text:p></table:table-cell>
-                <table:table-cell office:value-type="string"><text:p>This is a note</text:p></table:table-cell><table:table-cell/>
-            </table:table-row>
-            <table:table-row table:style-name="ro2">
-                <table:table-cell office:value-type="date" office:date-value="2018-01-01"><text:p>01/01/18</text:p></table:table-cell>
-                <table:table-cell office:value-type="currency" office:currency="USD" office:value="1"><text:p>$1.00</text:p></table:table-cell>
-                <table:table-cell office:value-type="string"><text:p>Travel</text:p></table:table-cell>
-                <table:table-cell table:number-columns-repeated="2"/>
-            </table:table-row>
-            <table:table-row table:style-name="ro2">
-                <table:table-cell office:value-type="date" office:date-value="2018-01-01"><text:p>01/01/18</text:p></table:table-cell>
-                <table:table-cell office:value-type="currency" office:currency="USD" office:value="1"><text:p>$1.00</text:p></table:table-cell>
-                <table:table-cell office:value-type="string"><text:p>Other</text:p></table:table-cell>
-                <table:table-cell table:number-columns-repeated="2"/>
-            </table:table-row>
-            <table:table-row table:style-name="ro2">
-                <table:table-cell table:style-name="Default" table:number-columns-repeated="4"/><table:table-cell/>
-            </table:table-row>
-     */
 
     public boolean export()
     {
+        boolean succeeded = true;
+
+        _expenditureEntities = new MutableLiveData<List<ExpenditureEntity>>();
+        final Observer<List<ExpenditureEntity>> expEntitiesObserver = new Observer<List<ExpenditureEntity>>()
+        {
+            @Override
+            public void onChanged(@Nullable List<ExpenditureEntity> expenditureEntities)
+            {
+                // Null check in the method
+                onLoadExpenses(expenditureEntities);
+            }
+        };
+        _expenditureEntities.observe((FragmentActivity) _context, expEntitiesObserver);
+
+        _budgetEntities = new MutableLiveData<List<BudgetEntity>>();
+        final Observer<List<BudgetEntity>> budEntitiesObserver = new Observer<List<BudgetEntity>>()
+        {
+            @Override
+            public void onChanged(@Nullable List<BudgetEntity> budgetEntities)
+            {
+                // Null check in the method
+                onLoadBudgets(budgetEntities);
+            }
+        };
+        _budgetEntities.observe((FragmentActivity) _context, budEntitiesObserver);
+
+        _viewModel.customExpenditureQuery(_expenditureEntities, _expQuery);
+        _viewModel.customBudgetQuery(_budgetEntities, _budQuery);
+
+        return succeeded;
+    }
+
+    private void onLoadExpenses(List<ExpenditureEntity> expenditureEntities)
+    {
+        _expenditures = expenditureEntities;
+
+        _timeSummationResults = new MutableLiveData<SummationAsyncTask.SummationResult[]>();
+        final Observer<SummationAsyncTask.SummationResult[]> timeEntitiesObserver =
+                new Observer<SummationAsyncTask.SummationResult[]>()
+                {
+                    @Override
+                    public void onChanged(@Nullable SummationAsyncTask.SummationResult[] timeEntities)
+                    {
+                        // Null check in the method
+                        onLoadTimeSummaries(timeEntities);
+                    }
+                };
+        _timeAmounts = new MutableLiveData<SummationResult[]>();
+        _categoryAmounts = new MutableLiveData<SummationResult[]>();
+        SummationAsyncTask yearlyAsyncTask = new SummationAsyncTask(SummationAsyncTask.SummationType.yearly, _timeSummationResults);
+        SummationAsyncTask categoricalAsyncTask = new SummationAsyncTask(SummationAsyncTask.SummationType.categorically, _categoryAmounts);
+        yearlyAsyncTask.execute(expenditureEntities);
+        categoricalAsyncTask.execute(expenditureEntities);
+    }
+
+    private void onLoadTimeSummaries(SummationAsyncTask.SummationResult[] timeEntities)
+    {
+        _expLoaded = true;
+        if (_expLoaded && _budLoaded)
+        {
+            exportThreaded();
+        }
+        else { }
+    }
+
+    private void onLoadBudgets(List<BudgetEntity> budgetEntities)
+    {
+        _budgets = budgetEntities;
+        _budLoaded = true;
+
+        if (_expLoaded && _budLoaded)
+        {
+            exportThreaded();
+        }
+        else { }
+    }
+
+    private boolean exportThreaded()
+    {
         boolean succeeded = false;
+
+        Log.e(TAG, "Queries complete");
 
         try
         {
@@ -203,6 +228,10 @@ public class ExportXMLHelper
         {
             Log.e(TAG, e.toString());
         }
+
+        _complete.postValue(true);
+
+        Log.e(TAG, "Export complete");
 
         return succeeded;
     }
@@ -422,20 +451,25 @@ public class ExportXMLHelper
         int colSpan = 5;
         Element tableElement = createSheetNode(postElement, commentString, sheetName, headerString, colSpan);
 
-        int years = 2; // TODO - Temporary!
-        ExpenditureEntity temp = new ExpenditureEntity();
-        temp.setDay(Calendar.getInstance().get(Calendar.DATE));
-        temp.setBaseAmount(1.0f);
-        temp.setCategory(0, Categories.getCategories()[0]);
-        temp.setNote("Temporary");
         String[] headers = { "Date", "Amount", "Conversion", "Category", "Note" };
-        for (int i = 0; i < years; i++)
+
+        int year = 0; // TODO Temporary - use different variables for different time frames
+        int count = _expenditures.size();
+        for (int i = 0; i < count; i++)
         {
-            addTableTitleAndHeaders(tableElement, (""+(i+2018)), headers);
-            addExpenditureRow(tableElement, temp);
-            addExpenditureRow(tableElement, temp);
-            addExpenditureRow(tableElement, temp);
-            addEmptyRow(tableElement, colSpan);
+            ExpenditureEntity entity = _expenditures.get(i);
+            if (year < entity.getYear())
+            {
+                if (year != 0)
+                {
+                    addEmptyRow(tableElement, colSpan);
+                }
+                else { }
+                addTableTitleAndHeaders(tableElement, (""+entity.getYear()), headers);
+                year = entity.getYear();
+            }
+            else { }
+            addExpenditureRow(tableElement, entity);
         }
     }
 
@@ -449,20 +483,25 @@ public class ExportXMLHelper
         int colSpan = 4;
         Element tableElement = createSheetNode(postElement, commentString, sheetName, headerString, colSpan);
 
-        int years = 2; // TODO - Temporary!
-        BudgetEntity temp = new BudgetEntity();
-        temp.setMonth(Calendar.getInstance().get(Calendar.MONTH)+1);
-        temp.setAmount(1.0f);
-        temp.setCategory(0, Categories.getCategories()[0]);
-        temp.setNote("Temporary");
         String[] headers = { "Date", "Amount", "Category", "Note" };
-        for (int i = 0; i < years; i++)
+
+        int year = 0; // TODO Temporary - use different variables for different time frames
+        int count = _budgets.size();
+        for (int i = 0; i < count; i++)
         {
-            addTableTitleAndHeaders(tableElement, (""+(i+2018)), headers);
-            addBudgetRow(tableElement, temp);
-            addBudgetRow(tableElement, temp);
-            addBudgetRow(tableElement, temp);
-            addEmptyRow(tableElement, colSpan);
+            BudgetEntity entity = _budgets.get(i);
+            if (year < entity.getYear())
+            {
+                if (year != 0)
+                {
+                    addEmptyRow(tableElement, colSpan);
+                }
+                else { }
+                addTableTitleAndHeaders(tableElement, (""+entity.getYear()), headers);
+                year = entity.getYear();
+            }
+            else { }
+            addBudgetRow(tableElement, entity);
         }
     }
 
@@ -623,7 +662,7 @@ public class ExportXMLHelper
         rowElement.setAttribute("table:style-name", "ro2");
         tableElement.appendChild(rowElement);
 
-        // "<table:table-cell office:value-type=\"date\" office:date-value=\"" + entity.getDay()
+        // "<table:table-cell office:value-type=\"date\" office:date-value=\"" + entity.getDay() // TODO Fix
         rowElement.appendChild(createCell("date", "office:date-value", (""+entity.getDay())));
         // "<table:table-cell office:value-type=\"currency\" office:currency=\"USD\" office:value=\"\">" + entity.getAmount()
         Element amountElement = createCell("currency", "office:value", (""+entity.getBaseAmount()));
@@ -648,7 +687,7 @@ public class ExportXMLHelper
         rowElement.setAttribute("table:style-name", "ro2");
         tableElement.appendChild(rowElement);
 
-        // "<table:table-cell office:value-type=\"date\" office:date-value=\"" + entity.getDay()
+        // "<table:table-cell office:value-type=\"date\" office:date-value=\"" + entity.getDay() // TODO Fix
         rowElement.appendChild(createCell("date", "office:date-value", (""+entity.getMonth())));
         // "<table:table-cell office:value-type=\"currency\" office:currency=\"USD\" office:value=\"\">" + entity.getAmount()
         Element amountElement = createCell("currency", "office:value", (""+entity.getAmount()));

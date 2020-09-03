@@ -223,7 +223,7 @@ public class SearchHelper
         }
         else { }
 
-        _query += ";";
+        _query += " ORDER BY year ASC, month ASC, day ASC, id ASC;";
     }
 
     public String getQuery()

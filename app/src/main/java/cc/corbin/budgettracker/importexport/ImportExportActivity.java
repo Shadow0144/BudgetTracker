@@ -3,7 +3,6 @@ package cc.corbin.budgettracker.importexport;
 import android.app.Activity;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
@@ -19,6 +18,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.support.constraint.ConstraintLayout;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,15 +34,11 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.DatePickerFragment;
 import cc.corbin.budgettracker.auxilliary.NavigationDrawerHelper;
-import cc.corbin.budgettracker.budgetdatabase.BudgetDatabase;
-import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
-import cc.corbin.budgettracker.expendituredatabase.ExpenditureDatabase;
-import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
+import cc.corbin.budgettracker.search.SearchHelper;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -101,7 +97,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
 
     private EditText _expFileNameEditText;
     private EditText _budFileNameEditText;
-    private LinearLayout _budFileNameLinearLayout;
+    private ConstraintLayout _fileNameConstraintLayout;
 
     private String _expFileName;
     private String _budFileName;
@@ -135,7 +131,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
 
         _expFileNameEditText = findViewById(R.id.expFileNameEditText);
         _budFileNameEditText = findViewById(R.id.budFileNameEditText);
-        _budFileNameLinearLayout = findViewById(R.id.budFileNameLinearLayout);
+        _fileNameConstraintLayout = findViewById(R.id.fileNameConstraintLayout);
 
         _tabLayout = findViewById(R.id.importExportTabLayout);
         _tabLayout.addOnTabSelectedListener(this);
@@ -366,7 +362,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                 _exportingTotalTextView.setVisibility(View.VISIBLE);
                 _exportingSubsetTextView.setVisibility(View.GONE);
                 _dateSelectLayout.setVisibility(View.GONE);
-                _budFileNameLinearLayout.setVisibility(View.VISIBLE);
+                _fileNameConstraintLayout.setVisibility(View.VISIBLE);
                 break;
             case YEAR_TAG:
                 _exportingTotalTextView.setVisibility(View.GONE);
@@ -376,7 +372,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                 _monthSelectedTextView.setVisibility(View.GONE);
                 _dayTextView.setVisibility(View.GONE);
                 _daySelectedTextView.setVisibility(View.GONE);
-                _budFileNameLinearLayout.setVisibility(View.VISIBLE);
+                _fileNameConstraintLayout.setVisibility(View.VISIBLE);
                 break;
             case MONTH_TAG:
                 _exportingTotalTextView.setVisibility(View.GONE);
@@ -386,7 +382,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                 _monthSelectedTextView.setVisibility(View.VISIBLE);
                 _dayTextView.setVisibility(View.GONE);
                 _daySelectedTextView.setVisibility(View.GONE);
-                _budFileNameLinearLayout.setVisibility(View.VISIBLE);
+                _fileNameConstraintLayout.setVisibility(View.VISIBLE);
                 break;
             case DAY_TAG:
                 _exportingTotalTextView.setVisibility(View.GONE);
@@ -396,13 +392,13 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                 _monthSelectedTextView.setVisibility(View.VISIBLE);
                 _dayTextView.setVisibility(View.VISIBLE);
                 _daySelectedTextView.setVisibility(View.VISIBLE);
-                _budFileNameLinearLayout.setVisibility(View.GONE);
+                _fileNameConstraintLayout.setVisibility(View.GONE);
                 break;
             case CUSTOM_TAG:
                 _exportingTotalTextView.setVisibility(View.GONE);
                 _exportingSubsetTextView.setVisibility(View.VISIBLE);
                 _dateSelectLayout.setVisibility(View.GONE);
-                _budFileNameLinearLayout.setVisibility(View.VISIBLE);
+                _fileNameConstraintLayout.setVisibility(View.VISIBLE);
                 break;
         }
         updateFileNames();
@@ -685,15 +681,20 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     {
         // TODO
         // Temporary
+        MutableLiveData<Boolean> _completed = new MutableLiveData<Boolean>();
         String fileName = getExpenditureFileName();
         int index = fileName.indexOf('.');
         fileName = fileName.substring(0, ((index == -1) ? (fileName.length()-1) : index));
-        String whereQuery = "WHERE (year == " + 0 + ") " +
-                "AND (month == " + 0 + ") " +
-                "AND (day == " + 0 + ")";
+        Intent intent = new Intent();
+        SearchHelper searchHelper = new SearchHelper(intent);
+        String whereExpQuery = searchHelper.getQuery();
+        // Remove the yearly budget sums, i.e. where month == 0
+        String whereBudQuery = "SELECT * FROM budgetentity WHERE (month != 0) ORDER BY year ASC, month ASC, id ASC;";
+        Log.e(TAG, whereExpQuery);
         ExportXMLHelper exportXMLHelper = new ExportXMLHelper(this, _viewModel,
-                ExportXMLHelper.TimeFrame.years,
-                getFolder(), fileName, whereQuery);
+                ExportXMLHelper.TimeFrame.years, getFolder(), fileName,
+                true, true, whereExpQuery, whereBudQuery,
+                _completed);
         boolean exportSuccessful = exportXMLHelper.export();
         if (exportSuccessful)
         {
