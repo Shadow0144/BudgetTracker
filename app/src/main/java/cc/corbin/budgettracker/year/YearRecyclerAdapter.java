@@ -8,9 +8,13 @@ import android.view.ViewGroup;
 import java.util.Calendar;
 import java.util.Date;
 
+import cc.corbin.budgettracker.auxilliary.PagingActivity;
+
 public class YearRecyclerAdapter extends RecyclerView.Adapter
 {
     private final static String TAG = "YearRecyclerAdapter";
+
+    private PagingActivity _activity;
 
     public static class YearViewHolder extends RecyclerView.ViewHolder
     {
@@ -30,11 +34,16 @@ public class YearRecyclerAdapter extends RecyclerView.Adapter
         }
     }
 
+    public YearRecyclerAdapter(PagingActivity activity)
+    {
+        _activity = activity;
+    }
+
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i)
     {
-        return (new YearViewHolder(new YearView(viewGroup.getContext())));
+        return (new YearViewHolder(new YearView(viewGroup.getContext(), _activity)));
     }
 
     @Override

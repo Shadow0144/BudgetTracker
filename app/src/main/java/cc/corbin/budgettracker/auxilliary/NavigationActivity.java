@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.settings.SettingsActivity;
 
+// Activity with a navigation drawer, allowing access to other activities quickly
 public abstract class NavigationActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
 {
     private final String TAG = "NavigationActivity";

@@ -16,6 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
+// Class for asynchronously getting conversion rates
 public class ConversionRateAsyncTask extends AsyncTask<String, Void, String>
 {
     private final String TAG = "ConversionRateAsyncTask";
@@ -40,7 +41,7 @@ public class ConversionRateAsyncTask extends AsyncTask<String, Void, String>
         execute(_request);
     }
 
-    // This is a function that we are overriding from AsyncTask. It takes Strings as parameters because that is what we defined for the parameters of our async task
+    // This is a function that we are overriding from AsyncTask; it takes Strings as parameters because that is what we defined for the parameters of our async task
     @Override
     protected String doInBackground(String... URLStrings)
     {

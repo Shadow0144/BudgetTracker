@@ -8,6 +8,7 @@ import java.util.Set;
 
 import cc.corbin.budgettracker.R;
 
+// Helper class for loading and holding categories of expenses and budgets
 public class Categories
 {
     private final static String TAG = "Categories";

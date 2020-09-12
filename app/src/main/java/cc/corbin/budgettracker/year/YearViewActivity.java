@@ -83,7 +83,7 @@ public class YearViewActivity extends PagingActivity
 
     private void setupYearView()
     {
-        final YearRecyclerAdapter adapter = new YearRecyclerAdapter();
+        final YearRecyclerAdapter adapter = new YearRecyclerAdapter(this);
         setupAdapterView(adapter);
         int time = _currentDate.get(Calendar.YEAR);
         _recyclerView.scrollToPosition(time);
@@ -131,5 +131,11 @@ public class YearViewActivity extends PagingActivity
             }
             else { }
         }
+    }
+
+    public void currentView(View v)
+    {
+        int time = _currentDate.get(Calendar.YEAR);
+        _recyclerView.smoothScrollToPosition(time);
     }
 }

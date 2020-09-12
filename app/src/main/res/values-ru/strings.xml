@@ -14,6 +14,7 @@
     <string name="nnext">&gt;&gt;</string>
     <string name="leftarrow">&lt;-</string>
     <string name="rightarrow">-&gt;</string>
+    <string name="current">|</string>
 
     <string name="total">Total</string>
     <string name="total_colon">Total:</string>

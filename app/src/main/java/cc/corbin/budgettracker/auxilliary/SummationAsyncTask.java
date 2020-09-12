@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 
+// Performs summations of data and returns results periodically
 public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, SummationAsyncTask.SummationResult, SummationAsyncTask.SummationResult[]>
 {
     private final String TAG = "SummationAsyncTask";

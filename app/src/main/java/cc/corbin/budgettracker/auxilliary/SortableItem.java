@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+// Item in a sortable list for use by SortableLinearLayout
 public class SortableItem extends RelativeLayout
 {
     private final String TAG = "SortableItem";

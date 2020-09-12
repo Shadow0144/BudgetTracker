@@ -6,6 +6,7 @@ import java.text.DecimalFormat;
  * Created by Corbin on 2/18/2018.
  */
 
+// Enum holder and formatting helper
 public final class Currencies
 {
     public enum currencies

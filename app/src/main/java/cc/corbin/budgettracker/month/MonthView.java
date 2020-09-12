@@ -21,6 +21,7 @@ import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.LineGraph;
+import cc.corbin.budgettracker.auxilliary.PagingActivity;
 import cc.corbin.budgettracker.auxilliary.PieChart;
 import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
 import cc.corbin.budgettracker.edit.AdjustmentEditActivity;
@@ -50,12 +51,8 @@ public class MonthView extends LinearLayout
     public final static int CREATE_ADJUSTMENT = 2;
     public final static int EDIT_ADJUSTMENT = 3;
 
-    private final int DATE_TEXT_TOP_PADDING = 24;
-    private final int DATE_TEXT_BOT_PADDING = 36;
-
-    private final int DATE_TEXT_SIZE = 24;
-
     private Context _context;
+    private PagingActivity _activity;
 
     private int _month;
     private int _year;
@@ -83,10 +80,11 @@ public class MonthView extends LinearLayout
 
     private boolean _firstRun;
 
-    public MonthView(Context context)
+    public MonthView(Context context, PagingActivity activity)
     {
         super(context);
         _context = context;
+        _activity = activity;
 
         _firstRun = true;
 
@@ -130,17 +128,24 @@ public class MonthView extends LinearLayout
         Calendar compare = ((Calendar)date.clone());
         date.set(Calendar.YEAR, _year);
         date.set(Calendar.MONTH, _month-1);
+
         if (compare.before(date)) // Future
         {
-            _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryLight));
+            _activity.setHeaderColor(_context.getColor(R.color.colorPrimaryLight));
+            _activity.showLeftCurrentButton();
+            _activity.hideRightCurrentButton();
         }
         else if (compare.after(date)) // Past
         {
-            _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryVeryDark));
+            _activity.setHeaderColor(_context.getColor(R.color.colorPrimaryVeryDark));
+            _activity.hideLeftCurrentButton();
+            _activity.showRightCurrentButton();
         }
         else // Present
         {
-            _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryDark));
+            _activity.setHeaderColor(_context.getColor(R.color.colorPrimaryDark));
+            _activity.hideLeftCurrentButton();
+            _activity.hideRightCurrentButton();
         }
 
         _weeklyTable.resetTable();
@@ -153,19 +158,9 @@ public class MonthView extends LinearLayout
         _viewModel.getMonth(_monthExps, _year, _month);
     }
 
-    private void setupHeader() // TODO ?
+    private void setupHeader()
     {
-        _dateTextView = findViewById(R.id.dateTextView);
-        LayoutParams params = new LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMargins(1, 1, 1, 0);
-        _dateTextView.setLayoutParams(params);
-        _dateTextView.setPadding(0, DATE_TEXT_TOP_PADDING, 0, DATE_TEXT_BOT_PADDING);
-        _dateTextView.setTextColor(Color.WHITE);
-        _dateTextView.setTextSize(DATE_TEXT_SIZE);
-        _dateTextView.setTextAlignment(TEXT_ALIGNMENT_CENTER);
-        _dateTextView.setTypeface(_dateTextView.getTypeface(), Typeface.BOLD);
+        _dateTextView = _activity.findViewById(R.id.dateTextView);
         _dateTextView.setOnClickListener(new OnClickListener()
         {
             @Override

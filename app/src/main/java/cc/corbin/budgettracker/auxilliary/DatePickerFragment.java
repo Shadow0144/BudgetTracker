@@ -14,6 +14,7 @@ import android.widget.FrameLayout;
 import java.util.Calendar;
 import java.util.Date;
 
+// Fragment for selecting a date (i.e. a day, month, and year) from a calender
 public class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener
 {
     private final String TAG = "DatePickerFragment";

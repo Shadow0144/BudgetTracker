@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
@@ -20,6 +21,7 @@ import java.util.List;
 
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Currencies;
+import cc.corbin.budgettracker.auxilliary.PagingActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 
@@ -29,11 +31,8 @@ public class DayView extends LinearLayout
 
     private final int PAGE_MARGIN = 4;
     private final int PROGRESS_BAR_MARGIN = 36;
-    private final int DATE_TEXT_TOP_PADDING = 24;
-    private final int DATE_TEXT_BOT_PADDING = 36;
     private final int TOTAL_TEXT_PADDING = 12;
 
-    private final int DATE_TEXT_SIZE = 24;
     private final int TOTAL_TEXT_SIZE = 18;
 
     private TextView _dateTextView;
@@ -41,19 +40,23 @@ public class DayView extends LinearLayout
     private ScrollView _dayListHolder;
     private ProgressBar _progressBar;
     private LinearLayout _expHolder;
+    private Button _todayLeftButton;
+    private Button _todayRightButton;
 
     private List<ExpenditureEntity> _expenditureEntities;
     private MutableLiveData<List<ExpenditureEntity>> _entities;
     private ExpenditureViewModel _viewModel;
 
     private Context _context;
+    private PagingActivity _activity;
 
     private Calendar _date;
 
-    public DayView(Context context)
+    public DayView(Context context, PagingActivity activity)
     {
         super(context);
         _context = context;
+        _activity = activity;
 
         setOrientation(VERTICAL);
         LayoutParams params = new LayoutParams(
@@ -93,18 +96,26 @@ public class DayView extends LinearLayout
         _date.set(Calendar.MONTH, month-1);
         _date.set(Calendar.DATE, day);
         _dateTextView.setText(getDateString());
+
         if (compare.before(_date)) // Future
         {
-            _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryLight));
+            _activity.setHeaderColor(_context.getColor(R.color.colorPrimaryLight));
+            _activity.showLeftCurrentButton();
+            _activity.hideRightCurrentButton();
         }
         else if (compare.after(_date)) // Past
         {
-            _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryVeryDark));
+            _activity.setHeaderColor(_context.getColor(R.color.colorPrimaryVeryDark));
+            _activity.hideLeftCurrentButton();
+            _activity.showRightCurrentButton();
         }
         else // Present
         {
-            _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryDark));
+            _activity.setHeaderColor(_context.getColor(R.color.colorPrimaryDark));
+            _activity.hideLeftCurrentButton();
+            _activity.hideRightCurrentButton();
         }
+
         _viewModel.getDay(_entities, year, month, day);
     }
 
@@ -121,20 +132,7 @@ public class DayView extends LinearLayout
 
     private void setupHeader()
     {
-        _dateTextView = new TextView(_context);
-        _dateTextView.setText("");
-        LayoutParams params = new LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMargins(1, 1, 1, 0);
-        _dateTextView.setLayoutParams(params);
-        _dateTextView.setPadding(0, DATE_TEXT_TOP_PADDING, 0, DATE_TEXT_BOT_PADDING);
-        _dateTextView.setBackgroundColor(_context.getColor(R.color.colorPrimaryDark));
-        _dateTextView.setTextColor(Color.WHITE);
-        _dateTextView.setTextSize(DATE_TEXT_SIZE);
-        _dateTextView.setTextAlignment(TEXT_ALIGNMENT_CENTER);
-        _dateTextView.setTypeface(_dateTextView.getTypeface(), Typeface.BOLD);
-        addView(_dateTextView);
+        _dateTextView = _activity.findViewById(R.id.dateTextView);
         _dateTextView.setOnClickListener(new OnClickListener()
         {
             @Override

@@ -30,6 +30,7 @@ import android.widget.TableRow;
 
 import cc.corbin.budgettracker.R;
 
+// Draws and animates a pie chart
 public class PieChart extends RelativeLayout implements View.OnClickListener, View.OnScrollChangeListener
 {
     private final String TAG = "PieChart";

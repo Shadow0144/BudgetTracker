@@ -42,6 +42,7 @@
                 android:id="@+id/dateLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/colorPrimary"
                 android:orientation="horizontal"
                 app:layout_constraintTop_toTopOf="parent">
 
@@ -53,11 +54,36 @@
                     android:onClick="previousView"
                     android:text="@string/previous" />
 
-                <Space
-                    android:id="@+id/buttonSpace"
+                <Button
+                    android:id="@+id/jumpToCurrentLeftButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="currentView"
+                    android:text="@string/current"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/dateTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="2" />
+                    android:layout_marginTop="4dp"
+                    android:layout_weight="2"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="12dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/white"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/jumpToCurrentRightButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="currentView"
+                    android:text="@string/current"
+                    tools:visibility="visible" />
 
                 <Button
                     android:id="@+id/nextButton"

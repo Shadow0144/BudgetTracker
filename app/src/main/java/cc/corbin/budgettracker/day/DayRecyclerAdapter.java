@@ -7,9 +7,13 @@ import android.view.ViewGroup;
 import java.util.Calendar;
 import java.util.Date;
 
+import cc.corbin.budgettracker.auxilliary.PagingActivity;
+
 public class DayRecyclerAdapter extends RecyclerView.Adapter
 {
     private final static String TAG = "DayRecyclerAdapter";
+
+    private PagingActivity _activity;
 
     public static class DayViewHolder extends RecyclerView.ViewHolder
     {
@@ -32,11 +36,16 @@ public class DayRecyclerAdapter extends RecyclerView.Adapter
         }
     }
 
+    public DayRecyclerAdapter(PagingActivity activity)
+    {
+        _activity = activity;
+    }
+
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i)
     {
-        DayView v = new DayView(viewGroup.getContext());
+        DayView v = new DayView(viewGroup.getContext(), _activity);
         DayViewHolder vh = new DayViewHolder(v);
         return vh;
     }

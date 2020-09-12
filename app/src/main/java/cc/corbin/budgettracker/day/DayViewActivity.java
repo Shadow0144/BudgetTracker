@@ -49,6 +49,8 @@ public class DayViewActivity extends PagingActivity
         super.onCreate(savedInstanceState);
         setup();
 
+        // Layout is set in parent class
+
         // Launch the first time setup activity if it has not yet created a shared preferences file
         SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.budget_tracker_preferences_key), 0);
         if (!sharedPreferences.contains(getString(R.string.language_key)))
@@ -84,7 +86,7 @@ public class DayViewActivity extends PagingActivity
 
     private void setupDayView()
     {
-        final DayRecyclerAdapter adapter = new DayRecyclerAdapter();
+        final DayRecyclerAdapter adapter = new DayRecyclerAdapter(this);
         setupAdapterView(adapter);
         int time = ((int)(_currentDate.getTimeInMillis() / 1000 / 60 / 60 / 24));
         _recyclerView.scrollToPosition(time);
@@ -167,5 +169,11 @@ public class DayViewActivity extends PagingActivity
         intent.putExtra(ExpenditureEditActivity.YEAR_INTENT, date.get(Calendar.YEAR));
         intent.putExtra(ExpenditureEditActivity.MONTH_INTENT, date.get(Calendar.MONTH)+1);
         startActivity(intent);
+    }
+
+    public void currentView(View v)
+    {
+        int time = ((int)(_currentDate.getTimeInMillis() / 1000 / 60 / 60 / 24));
+        _recyclerView.smoothScrollToPosition(time);
     }
 }

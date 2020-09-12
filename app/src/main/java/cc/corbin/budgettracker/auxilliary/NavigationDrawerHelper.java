@@ -17,6 +17,7 @@ import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.year.YearViewActivity;
 
+// Helper class for navigating to Activities from the navigation drawer
 public class NavigationDrawerHelper
 {
     // Set and pass back the intent

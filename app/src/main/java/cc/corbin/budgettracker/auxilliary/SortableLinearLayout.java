@@ -18,6 +18,7 @@ import static android.view.DragEvent.ACTION_DRAG_LOCATION;
 import static android.view.DragEvent.ACTION_DRAG_STARTED;
 import static android.view.DragEvent.ACTION_DROP;
 
+// Container for holding items that can be dragged and dropped to be resorted
 public class SortableLinearLayout extends LinearLayout implements View.OnDragListener
 {
     private final String TAG = "SortableLinearLayout";

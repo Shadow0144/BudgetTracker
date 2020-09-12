@@ -92,7 +92,7 @@ public class MonthViewActivity extends PagingActivity
 
     private void setupMonthView()
     {
-        final MonthRecyclerAdapter adapter = new MonthRecyclerAdapter();
+        final MonthRecyclerAdapter adapter = new MonthRecyclerAdapter(this);
         setupAdapterView(adapter);
         int time = (_currentDate.get(Calendar.YEAR)*12) + (_currentDate.get(Calendar.MONTH)+1);
         _recyclerView.scrollToPosition(time);
@@ -190,5 +190,11 @@ public class MonthViewActivity extends PagingActivity
             }
             else { }
         }
+    }
+
+    public void currentView(View v)
+    {
+        int time = (_currentDate.get(Calendar.YEAR)*12) + (_currentDate.get(Calendar.MONTH)+1);
+        _recyclerView.smoothScrollToPosition(time);
     }
 }

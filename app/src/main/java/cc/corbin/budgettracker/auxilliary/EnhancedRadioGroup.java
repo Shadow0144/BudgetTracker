@@ -10,6 +10,7 @@ import android.widget.Checkable;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 
+// Allows for checkable Views to be nested within a Radio Group
 public class EnhancedRadioGroup extends RadioGroup
 {
     private ArrayList<View> _checkables = new ArrayList<View>();
@@ -37,6 +38,7 @@ public class EnhancedRadioGroup extends RadioGroup
         parseChild(child);
     }
 
+    // Adds the View to a list of checkables if it can be checked, or checks the children if the View is a container
     public void parseChild(final View child)
     {
         if(child instanceof Checkable)
@@ -68,6 +70,7 @@ public class EnhancedRadioGroup extends RadioGroup
         else { }
     }
 
+    // Checks if the children of a container are checkable or containers themselves
     public void parseChildren(final ViewGroup child)
     {
         for (int i = 0; i < child.getChildCount(); i++)

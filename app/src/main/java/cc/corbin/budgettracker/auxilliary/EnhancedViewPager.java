@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+// Gives callbacks to switch the page via Buttons etc. or to disable swiping via gesture
 public class EnhancedViewPager extends ViewPager
 {
     private final String TAG = "EnhancedViewPager";

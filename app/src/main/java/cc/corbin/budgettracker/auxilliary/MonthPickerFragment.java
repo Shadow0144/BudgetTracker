@@ -21,6 +21,7 @@ import java.util.Date;
 
 import cc.corbin.budgettracker.R;
 
+// Fragment for selecting a a month (i.e. a month and year) from a calendar
 public class MonthPickerFragment extends DialogFragment
 {
     private final String TAG = "DatePickerFragment";

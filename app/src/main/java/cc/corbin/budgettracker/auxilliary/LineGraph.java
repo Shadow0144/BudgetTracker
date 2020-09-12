@@ -14,6 +14,7 @@ import android.widget.RelativeLayout;
 
 import cc.corbin.budgettracker.R;
 
+// Draws and animates a line graph
 public class LineGraph extends RelativeLayout
 {
     private final String TAG = "LineGraph";
