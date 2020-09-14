@@ -1,50 +1,20 @@
 package cc.corbin.budgettracker.month;
 
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.Observer;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SnapHelper;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.PopupWindow;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import java.text.DateFormatSymbols;
-import java.util.Calendar;
-import java.util.List;
+import java.time.LocalDate;
 
-import cc.corbin.budgettracker.auxilliary.Categories;
-import cc.corbin.budgettracker.auxilliary.Currencies;
-import cc.corbin.budgettracker.auxilliary.NavigationActivity;
-import cc.corbin.budgettracker.auxilliary.LineGraph;
-import cc.corbin.budgettracker.auxilliary.PagingActivity;
-import cc.corbin.budgettracker.day.DayRecyclerAdapter;
-import cc.corbin.budgettracker.edit.AdjustmentEditActivity;
-import cc.corbin.budgettracker.auxilliary.PieChart;
-import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
-import cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText;
+import cc.corbin.budgettracker.paging.PagingActivity;
 import cc.corbin.budgettracker.settings.SettingsActivity;
-import cc.corbin.budgettracker.tables.ExpandableBudgetTable;
-import cc.corbin.budgettracker.tables.ExtrasTable;
-import cc.corbin.budgettracker.edit.ExpenditureEditActivity;
-import cc.corbin.budgettracker.tables.CategorySummaryTable;
-import cc.corbin.budgettracker.tables.WeeklySummaryTable;
-import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
-import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.year.YearViewActivity;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
+import cc.corbin.budgettracker.R;
 
 /**
  * Created by Corbin on 1/28/2018.
@@ -67,18 +37,15 @@ public class MonthViewActivity extends PagingActivity
     public final static int DELETE = 2;
     public final static int FAILURE = -1;
 
-    private Calendar _currentDate;
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setup();
 
-        int month = getIntent().getIntExtra(MONTH_INTENT, Calendar.getInstance().get(Calendar.MONTH)+1);
-        int year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
-        _currentDate = Calendar.getInstance();
-        _currentDate.set(year, month-1, 1);
+        int month = getIntent().getIntExtra(MONTH_INTENT, LocalDate.now().getMonthValue());
+        int year = getIntent().getIntExtra(YEAR_INTENT, LocalDate.now().getYear());
+        _currentDate = LocalDate.of(year, month, 1);
 
         setupMonthView();
     }
@@ -94,7 +61,7 @@ public class MonthViewActivity extends PagingActivity
     {
         final MonthRecyclerAdapter adapter = new MonthRecyclerAdapter(this);
         setupAdapterView(adapter);
-        int time = (_currentDate.get(Calendar.YEAR)*12) + (_currentDate.get(Calendar.MONTH)+1);
+        int time = (_currentDate.getYear() * 12) + (_currentDate.getMonthValue() - 1);
         _recyclerView.scrollToPosition(time);
     }
 
@@ -150,7 +117,7 @@ public class MonthViewActivity extends PagingActivity
     public void moveToYearView(View v)
     {
         Intent intent = new Intent(getApplicationContext(), YearViewActivity.class);
-        intent.putExtra(YearViewActivity.YEAR_INTENT, _currentDate.get(Calendar.YEAR));
+        intent.putExtra(YearViewActivity.YEAR_INTENT, _currentDate.getYear());
         startActivity(intent);
     }
 
@@ -194,7 +161,7 @@ public class MonthViewActivity extends PagingActivity
 
     public void currentView(View v)
     {
-        int time = (_currentDate.get(Calendar.YEAR)*12) + (_currentDate.get(Calendar.MONTH)+1);
+        int time = (_currentDate.getYear() * 12) + (_currentDate.getMonthValue() - 1);
         _recyclerView.smoothScrollToPosition(time);
     }
 }

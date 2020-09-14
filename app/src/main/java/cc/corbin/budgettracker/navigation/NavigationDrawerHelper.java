@@ -1,4 +1,4 @@
-package cc.corbin.budgettracker.auxilliary;
+package cc.corbin.budgettracker.navigation;
 
 import android.content.Intent;
 import android.view.MenuItem;

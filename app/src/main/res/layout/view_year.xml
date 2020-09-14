@@ -1,98 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/contentFrame"
+    android:id="@+id/yearScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
     android:fitsSystemWindows="true"
-    android:orientation="vertical">
+    android:fillViewport="true">
 
     <LinearLayout
-        android:id="@+id/dateLayout"
+        android:id="@+id/yearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimaryDark"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/dateTextView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
-            android:layout_weight="2"
-            android:gravity="center"
-            android:textAlignment="center"
-            android:textColor="@android:color/background_light"
-            android:textSize="24sp"
-            android:textStyle="normal|bold" />
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="15dp" />
+
+        <FrameLayout
+            android:id="@+id/yearMonthlyHolder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"></FrameLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="15dp" />
+
+        <FrameLayout
+            android:id="@+id/yearCategoryHolder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"></FrameLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="15dp" />
+
+        <FrameLayout
+            android:id="@+id/yearMonthlyPieHolder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </FrameLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="15dp" />
+
+        <FrameLayout
+            android:id="@+id/yearCategoryPieHolder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"></FrameLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="15dp" />
+
+        <FrameLayout
+            android:id="@+id/yearMonthlyLineGraphHolder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"></FrameLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="15dp" />
 
     </LinearLayout>
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
-
-        <LinearLayout
-            android:id="@+id/yearLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="15dp" />
-
-            <FrameLayout
-                android:id="@+id/yearMonthlyHolder"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"></FrameLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="15dp" />
-
-            <FrameLayout
-                android:id="@+id/yearCategoryHolder"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"></FrameLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="15dp" />
-
-            <FrameLayout
-                android:id="@+id/yearMonthlyPieHolder"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-            </FrameLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="15dp" />
-
-            <FrameLayout
-                android:id="@+id/yearCategoryPieHolder"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"></FrameLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="15dp" />
-
-            <FrameLayout
-                android:id="@+id/yearMonthlyLineGraphHolder"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"></FrameLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="15dp" />
-
-        </LinearLayout>
-
-    </ScrollView>
-
-</LinearLayout>
+</ScrollView>

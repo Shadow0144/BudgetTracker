@@ -2,13 +2,9 @@ package cc.corbin.budgettracker.year;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.ViewGroup;
 
-import java.util.Calendar;
-import java.util.Date;
-
-import cc.corbin.budgettracker.auxilliary.PagingActivity;
+import cc.corbin.budgettracker.paging.PagingActivity;
 
 public class YearRecyclerAdapter extends RecyclerView.Adapter
 {
@@ -18,6 +14,7 @@ public class YearRecyclerAdapter extends RecyclerView.Adapter
 
     public static class YearViewHolder extends RecyclerView.ViewHolder
     {
+        private int _date;
         private YearView _yearView;
 
         public YearViewHolder(YearView yearView)
@@ -28,9 +25,13 @@ public class YearRecyclerAdapter extends RecyclerView.Adapter
 
         public void setDate(int date)
         {
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.YEAR, date);
-            _yearView.setDate(calendar.get(Calendar.YEAR));
+            _date = date;
+            _yearView.setDate(date);
+        }
+
+        public int getDate()
+        {
+            return _date;
         }
     }
 

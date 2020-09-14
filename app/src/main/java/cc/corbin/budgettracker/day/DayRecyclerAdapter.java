@@ -4,10 +4,11 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
 
-import cc.corbin.budgettracker.auxilliary.PagingActivity;
+import cc.corbin.budgettracker.paging.PagingActivity;
+import cc.corbin.budgettracker.paging.PagingView;
+import cc.corbin.budgettracker.paging.PagingViewHolder;
 
 public class DayRecyclerAdapter extends RecyclerView.Adapter
 {
@@ -15,24 +16,18 @@ public class DayRecyclerAdapter extends RecyclerView.Adapter
 
     private PagingActivity _activity;
 
-    public static class DayViewHolder extends RecyclerView.ViewHolder
+    public static class DayViewHolder extends PagingViewHolder
     {
-        private DayView _dayView;
-
-        public DayViewHolder(DayView dayView)
+        public DayViewHolder(PagingView pagingView)
         {
-            super(dayView);
-            _dayView = dayView;
+            super(pagingView);
+            _pagingView = pagingView;
         }
 
         public void setDate(int date)
         {
-            Date time = new Date(((long)date)*24*60*60*1000);
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(time);
-            _dayView.setDate(calendar.get(Calendar.YEAR),
-                    calendar.get(Calendar.MONTH)+1,
-                    calendar.get(Calendar.DATE));
+            LocalDate time = LocalDate.ofEpochDay(date);
+            _pagingView.setDate(time.getYear(), time.getMonthValue(), time.getDayOfMonth());
         }
     }
 
@@ -53,7 +48,7 @@ public class DayRecyclerAdapter extends RecyclerView.Adapter
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int i)
     {
-        // i represents the number of milliseconds since the UNIX epoch
+        // i represents the number of days since the UNIX epoch
         ((DayViewHolder)viewHolder).setDate(i);
     }
 

@@ -4,67 +4,52 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.List;
 
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Currencies;
-import cc.corbin.budgettracker.auxilliary.PagingActivity;
+import cc.corbin.budgettracker.paging.PagingActivity;
+import cc.corbin.budgettracker.paging.PagingView;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 
-public class DayView extends LinearLayout
+public class DayView extends PagingView
 {
     private final static String TAG = "DayView";
 
-    private final int PAGE_MARGIN = 4;
-    private final int PROGRESS_BAR_MARGIN = 36;
     private final int TOTAL_TEXT_PADDING = 12;
-
     private final int TOTAL_TEXT_SIZE = 18;
 
-    private TextView _dateTextView;
-    private TextView _totalTextView;
-    private ScrollView _dayListHolder;
-    private ProgressBar _progressBar;
-    private LinearLayout _expHolder;
-    private Button _todayLeftButton;
-    private Button _todayRightButton;
+    private final int PAGE_MARGIN = 4;
+    private final int PROGRESS_BAR_MARGIN = 36;
 
     private List<ExpenditureEntity> _expenditureEntities;
     private MutableLiveData<List<ExpenditureEntity>> _entities;
     private ExpenditureViewModel _viewModel;
 
-    private Context _context;
-    private PagingActivity _activity;
-
-    private Calendar _date;
+    protected TextView _totalTextView;
+    protected ScrollView _dayListHolder;
+    protected ProgressBar _progressBar;
+    protected LinearLayout _expHolder;
 
     public DayView(Context context, PagingActivity activity)
     {
-        super(context);
+        super(context, activity);
         _context = context;
         _activity = activity;
 
-        setOrientation(VERTICAL);
-        LayoutParams params = new LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
-        setLayoutParams(params);
-
-        setupHeader();
+        ignoreMonth = false;
+        ignoreDay = false;
 
         setupTotalTextView();
 
@@ -87,34 +72,11 @@ public class DayView extends LinearLayout
 
     public void setDate(int year, int month, int day)
     {
+        super.setDate(year, month, day);
+
         _expHolder.removeAllViews();
         _dayListHolder.removeView(_expHolder);
         _dayListHolder.addView(_progressBar);
-        _date = Calendar.getInstance();
-        Calendar compare = ((Calendar)_date.clone());
-        _date.set(Calendar.YEAR, year);
-        _date.set(Calendar.MONTH, month-1);
-        _date.set(Calendar.DATE, day);
-        _dateTextView.setText(getDateString());
-
-        if (compare.before(_date)) // Future
-        {
-            _activity.setHeaderColor(_context.getColor(R.color.colorPrimaryLight));
-            _activity.showLeftCurrentButton();
-            _activity.hideRightCurrentButton();
-        }
-        else if (compare.after(_date)) // Past
-        {
-            _activity.setHeaderColor(_context.getColor(R.color.colorPrimaryVeryDark));
-            _activity.hideLeftCurrentButton();
-            _activity.showRightCurrentButton();
-        }
-        else // Present
-        {
-            _activity.setHeaderColor(_context.getColor(R.color.colorPrimaryDark));
-            _activity.hideLeftCurrentButton();
-            _activity.hideRightCurrentButton();
-        }
 
         _viewModel.getDay(_entities, year, month, day);
     }
@@ -130,9 +92,10 @@ public class DayView extends LinearLayout
         else { }
     }
 
-    private void setupHeader()
+    protected void setupHeader()
     {
-        _dateTextView = _activity.findViewById(R.id.dateTextView);
+        super.setupHeader();
+
         _dateTextView.setOnClickListener(new OnClickListener()
         {
             @Override
@@ -217,23 +180,11 @@ public class DayView extends LinearLayout
         _expHolder.addView(view);
     }
 
-    private String getDateString()
-    {
-        SimpleDateFormat simpleDate = new SimpleDateFormat("yyyy/MM/dd");
-        String dateString = simpleDate.format(getDate().getTime());
-        return dateString;
-    }
-
     private String getTotalString()
     {
         String totalString = _context.getString(R.string.total_colon) + " " +
                 Currencies.formatCurrency(Currencies.default_currency, getCurrentTotal());
         return totalString;
-    }
-
-    public Calendar getDate()
-    {
-        return _date;
     }
 
     public float getCurrentTotal()

@@ -37,7 +37,7 @@ import java.util.Date;
 
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.DatePickerFragment;
-import cc.corbin.budgettracker.auxilliary.NavigationDrawerHelper;
+import cc.corbin.budgettracker.navigation.NavigationDrawerHelper;
 import cc.corbin.budgettracker.search.SearchHelper;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 

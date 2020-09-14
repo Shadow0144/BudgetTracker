@@ -4,47 +4,36 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import java.util.Calendar;
 import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.LineGraph;
-import cc.corbin.budgettracker.auxilliary.PagingActivity;
+import cc.corbin.budgettracker.paging.PagingActivity;
 import cc.corbin.budgettracker.auxilliary.PieChart;
 import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
 import cc.corbin.budgettracker.budgetdatabase.BudgetEntity;
+import cc.corbin.budgettracker.paging.PagingView;
 import cc.corbin.budgettracker.tables.CategorySummaryTable;
 import cc.corbin.budgettracker.tables.MonthlySummaryTable;
 import cc.corbin.budgettracker.total.TotalViewActivity;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
-import cc.corbin.budgettracker.month.MonthViewActivity;
 import cc.corbin.budgettracker.auxilliary.SummationAsyncTask.SummationResult;
 
 /**
  * Created by Corbin on 4/15/2018.
  */
 
-public class YearView extends LinearLayout
+public class YearView extends PagingView
 {
     private final String TAG = "YearView";
-
-    private Context _context;
-
-    private int _year;
-    private PagingActivity _activity;
 
     private ExpenditureViewModel _viewModel;
     private MutableLiveData<List<ExpenditureEntity>> _yearExps;
@@ -61,23 +50,18 @@ public class YearView extends LinearLayout
 
     private LineGraph _monthlyLineGraph;
 
-    private TextView _dateTextView;
-
     private boolean _firstRun;
 
     public YearView(Context context, PagingActivity activity)
     {
-        super(context);
-        _context = context;
-        _activity = activity;
+        super(context, activity);
 
         _firstRun = true;
 
-        setOrientation(VERTICAL);
-        LayoutParams params = new LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
-        setLayoutParams(params);
+        ignoreMonth = true;
+        ignoreDay = true;
+
+        _viewModel = ExpenditureViewModel.getInstance();
 
         LayoutInflater inflater = LayoutInflater.from(context);
         final View view = inflater.inflate(R.layout.view_year, null);
@@ -86,7 +70,7 @@ public class YearView extends LinearLayout
 
     public void setDate(int year)
     {
-        _year = year;
+        super.setDate(year, 0, 0);
 
         _viewModel = ExpenditureViewModel.getInstance();
 
@@ -104,32 +88,6 @@ public class YearView extends LinearLayout
 
     public void refreshView()
     {
-        _dateTextView.setText("" + _year);
-
-        // Set the header color
-        Calendar date = Calendar.getInstance();
-        Calendar compare = ((Calendar)date.clone());
-        date.set(Calendar.YEAR, _year);
-
-        if (compare.before(date)) // Future
-        {
-            _activity.setHeaderColor(_context.getColor(R.color.colorPrimaryLight));
-            _activity.showLeftCurrentButton();
-            _activity.hideRightCurrentButton();
-        }
-        else if (compare.after(date)) // Past
-        {
-            _activity.setHeaderColor(_context.getColor(R.color.colorPrimaryVeryDark));
-            _activity.hideLeftCurrentButton();
-            _activity.showRightCurrentButton();
-        }
-        else // Present
-        {
-            _activity.setHeaderColor(_context.getColor(R.color.colorPrimaryDark));
-            _activity.hideLeftCurrentButton();
-            _activity.hideRightCurrentButton();
-        }
-
         _monthlyTable.resetTable();
         _categoryTable.resetTable();
         _monthlyPieChart.clearData();
@@ -139,15 +97,16 @@ public class YearView extends LinearLayout
         _viewModel.getYear(_yearExps, _year);
     }
 
-    private void setupHeader()
+    protected void setupHeader()
     {
-        _dateTextView = _activity.findViewById(R.id.dateTextView);
+        super.setupHeader();
+
         _dateTextView.setOnClickListener(new OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                ((MonthViewActivity)_context).moveToYearView(null);
+                ((YearViewActivity)_context).moveToTotalView(null);
             }
         });
     }
@@ -307,15 +266,5 @@ public class YearView extends LinearLayout
     {
         _monthlyTable.updateBudgets(entities);
         _categoryTable.updateBudgets(entities);
-    }
-
-    public void previousYear(View v)
-    {
-
-    }
-
-    public void nextYear(View v)
-    {
-
     }
 }

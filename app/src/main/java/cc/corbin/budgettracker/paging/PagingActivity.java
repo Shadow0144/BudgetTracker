@@ -1,6 +1,7 @@
-package cc.corbin.budgettracker.auxilliary;
+package cc.corbin.budgettracker.paging;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
@@ -9,7 +10,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import java.time.LocalDate;
+
 import cc.corbin.budgettracker.R;
+import cc.corbin.budgettracker.navigation.NavigationActivity;
 
 // Parent class for an Activity that implements a page swiping system, e.g. DayView, MonthView, YearView, etc.
 // The content view is set here as well
@@ -24,6 +28,8 @@ public abstract class PagingActivity extends NavigationActivity
     protected Button _leftCurrentButton;
     protected Button _rightCurrentButton;
 
+    protected LocalDate _currentDate;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -35,6 +41,15 @@ public abstract class PagingActivity extends NavigationActivity
     {
         _recyclerView = findViewById(R.id.itemsPager);
         _recyclerView.setHasFixedSize(false); // TODO
+        _recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener()
+        {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy)
+            {
+                super.onScrolled(recyclerView, dx, dy);
+                onScroll();
+            }
+        });
 
         _layoutManager = new LinearLayoutManager(this);
         _layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -63,11 +78,6 @@ public abstract class PagingActivity extends NavigationActivity
     // Jumps to the current view
     public abstract void currentView(View v);
 
-    public void setHeaderColor(int color)
-    {
-        _dateLayout.setBackgroundColor(color);
-    }
-
     public void showLeftCurrentButton()
     {
         _leftCurrentButton.setVisibility(View.VISIBLE);
@@ -86,5 +96,46 @@ public abstract class PagingActivity extends NavigationActivity
     public void hideRightCurrentButton()
     {
         _rightCurrentButton.setVisibility(View.INVISIBLE);
+    }
+
+    protected void onScroll()
+    {
+        PagingView currentView = ((PagingView)(_layoutManager.findViewByPosition(_layoutManager.findFirstVisibleItemPosition())));
+
+        if (currentView != null)
+        {
+            LocalDate date = currentView.getDate();
+
+            // For comparison
+            if (!currentView.getIgnoreDay())
+            {
+                // Do nothing
+            }
+            else if (!currentView.getIgnoreMonth())
+            {
+                date = LocalDate.of(date.getYear(), date.getMonth(), LocalDate.now().getDayOfMonth());
+            }
+            else
+            {
+                date = LocalDate.of(date.getYear(), LocalDate.now().getMonth(), LocalDate.now().getDayOfMonth());
+            }
+
+            if (date.isAfter(LocalDate.now())) // Future
+            {
+                showLeftCurrentButton();
+                hideRightCurrentButton();
+            }
+            else if (date.isBefore(LocalDate.now())) // Past
+            {
+                hideLeftCurrentButton();
+                showRightCurrentButton();
+            }
+            else // Present
+            {
+                hideLeftCurrentButton();
+                hideRightCurrentButton();
+            }
+        }
+        else { }
     }
 }

@@ -2,28 +2,22 @@ package cc.corbin.budgettracker.day;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.PagerSnapHelper;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SnapHelper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import java.util.Calendar;
+import java.time.LocalDate;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
-import cc.corbin.budgettracker.auxilliary.NavigationActivity;
-import cc.corbin.budgettracker.auxilliary.PagingActivity;
+import cc.corbin.budgettracker.paging.PagingActivity;
 import cc.corbin.budgettracker.edit.ExpenditureEditActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
 import cc.corbin.budgettracker.settings.SettingsActivity;
 import cc.corbin.budgettracker.month.MonthViewActivity;
-import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.setup.SetupActivity;
+import cc.corbin.budgettracker.R;
 
 public class DayViewActivity extends PagingActivity
 {
@@ -40,8 +34,6 @@ public class DayViewActivity extends PagingActivity
     public final static int CANCEL = 1;
     public final static int DELETE = 2;
     public final static int FAILURE = -1;
-
-    private Calendar _currentDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -62,12 +54,11 @@ public class DayViewActivity extends PagingActivity
         final Button addItemButton = findViewById(R.id.addItemButton);
         addItemButton.setVisibility(View.VISIBLE);
 
-        int day = getIntent().getIntExtra(DAY_INTENT, Calendar.getInstance().get(Calendar.DATE));
-        Log.e(TAG, "D: " + day); // TODO
-        int month = getIntent().getIntExtra(MONTH_INTENT, Calendar.getInstance().get(Calendar.MONTH)+1); // Add 1 in case the intent is set or not
-        int year = getIntent().getIntExtra(YEAR_INTENT, Calendar.getInstance().get(Calendar.YEAR));
-        _currentDate = Calendar.getInstance();
-        _currentDate.set(year, month-1, day);
+        LocalDate now = LocalDate.now();
+        int day = getIntent().getIntExtra(DAY_INTENT, now.getDayOfMonth());
+        int month = getIntent().getIntExtra(MONTH_INTENT, now.getMonthValue());
+        int year = getIntent().getIntExtra(YEAR_INTENT, now.getYear());
+        _currentDate = LocalDate.of(year, month, day);
 
         setupDayView();
 
@@ -84,22 +75,33 @@ public class DayViewActivity extends PagingActivity
         startActivity(intent);
     }
 
+    // Returns the set date as an int for use by the RecyclerAdapter
+    private long getDate()
+    {
+        return _currentDate.toEpochDay(); //((int)(_currentDate.getTimeInMillis() / 1000 / 60 / 60 / 24));
+    }
+
+    // Returns the current date as a long int for use by the RecyclerAdapter
+    private long getToday()
+    {
+        return LocalDate.now().toEpochDay(); //((int)(Calendar.getInstance().getTimeInMillis() / 1000 / 60 / 60 / 24));
+    }
+
     private void setupDayView()
     {
         final DayRecyclerAdapter adapter = new DayRecyclerAdapter(this);
         setupAdapterView(adapter);
-        int time = ((int)(_currentDate.getTimeInMillis() / 1000 / 60 / 60 / 24));
-        _recyclerView.scrollToPosition(time);
+        _recyclerView.scrollToPosition((int)getDate());
     }
 
     public void addItem(View v)
     {
         DayView dayView = (DayView)_layoutManager.findViewByPosition(_layoutManager.findFirstVisibleItemPosition());
-        Calendar date = dayView.getDate();
+        LocalDate date = dayView.getDate();
         Intent intent = new Intent(getApplicationContext(), ExpenditureEditActivity.class);
-        intent.putExtra(ExpenditureEditActivity.YEAR_INTENT, date.get(Calendar.YEAR));
-        intent.putExtra(ExpenditureEditActivity.MONTH_INTENT, date.get(Calendar.MONTH)+1);
-        intent.putExtra(ExpenditureEditActivity.DAY_INTENT, date.get(Calendar.DATE));
+        intent.putExtra(ExpenditureEditActivity.YEAR_INTENT, date.getYear());
+        intent.putExtra(ExpenditureEditActivity.MONTH_INTENT, date.getMonthValue());
+        intent.putExtra(ExpenditureEditActivity.DAY_INTENT, date.getDayOfMonth());
         intent.putExtra(ExpenditureEditActivity.TYPE_INTENT, CREATE_EXPENDITURE);
         startActivityForResult(intent, CREATE_EXPENDITURE);
     }
@@ -164,16 +166,15 @@ public class DayViewActivity extends PagingActivity
     public void moveToMonthView(View v)
     {
         DayView dayView = (DayView)_layoutManager.findViewByPosition(_layoutManager.findFirstVisibleItemPosition());
-        Calendar date = dayView.getDate();
+        LocalDate date = dayView.getDate();
         Intent intent = new Intent(getApplicationContext(), MonthViewActivity.class);
-        intent.putExtra(ExpenditureEditActivity.YEAR_INTENT, date.get(Calendar.YEAR));
-        intent.putExtra(ExpenditureEditActivity.MONTH_INTENT, date.get(Calendar.MONTH)+1);
+        intent.putExtra(ExpenditureEditActivity.YEAR_INTENT, date.getYear());
+        intent.putExtra(ExpenditureEditActivity.MONTH_INTENT, date.getMonthValue());
         startActivity(intent);
     }
 
     public void currentView(View v)
     {
-        int time = ((int)(_currentDate.getTimeInMillis() / 1000 / 60 / 60 / 24));
-        _recyclerView.smoothScrollToPosition(time);
+        _recyclerView.smoothScrollToPosition((int)getToday());
     }
 }

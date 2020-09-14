@@ -4,15 +4,12 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.text.DateFormatSymbols;
@@ -21,7 +18,9 @@ import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.LineGraph;
-import cc.corbin.budgettracker.auxilliary.PagingActivity;
+import cc.corbin.budgettracker.day.DayViewActivity;
+import cc.corbin.budgettracker.paging.PagingActivity;
+import cc.corbin.budgettracker.paging.PagingView;
 import cc.corbin.budgettracker.auxilliary.PieChart;
 import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
 import cc.corbin.budgettracker.edit.AdjustmentEditActivity;
@@ -40,7 +39,7 @@ import cc.corbin.budgettracker.auxilliary.SummationAsyncTask.SummationResult;
  * Created by Corbin on 1/28/2018.
  */
 
-public class MonthView extends LinearLayout
+public class MonthView extends PagingView
 {
     private final String TAG = "MonthView";
 
@@ -51,11 +50,12 @@ public class MonthView extends LinearLayout
     public final static int CREATE_ADJUSTMENT = 2;
     public final static int EDIT_ADJUSTMENT = 3;
 
-    private Context _context;
-    private PagingActivity _activity;
+    private ExpenditureViewModel _viewModel;
+    private MutableLiveData<List<ExpenditureEntity>> _monthExps;
+    private MutableLiveData<List<BudgetEntity>> _budgets;
 
-    private int _month;
-    private int _year;
+    private MutableLiveData<SummationResult[]> _weeklyAmounts;
+    private MutableLiveData<SummationResult[]> _categoricalAmounts;
 
     private WeeklySummaryTable _weeklyTable;
     private CategorySummaryTable _categoryTable;
@@ -67,32 +67,20 @@ public class MonthView extends LinearLayout
 
     private LineGraph _weeklyLineGraph;
 
-    private ExpenditureViewModel _viewModel;
-    private MutableLiveData<List<ExpenditureEntity>> _monthExps;
-    private MutableLiveData<List<BudgetEntity>> _budgets;
-
-    private MutableLiveData<SummationResult[]> _weeklyAmounts;
-    private MutableLiveData<SummationResult[]> _categoricalAmounts;
-
     private MonthEditBudgetItemHelper _monthEditBudgetItemHelper;
-
-    private TextView _dateTextView;
 
     private boolean _firstRun;
 
     public MonthView(Context context, PagingActivity activity)
     {
-        super(context);
-        _context = context;
-        _activity = activity;
+        super(context, activity);
 
         _firstRun = true;
 
-        setOrientation(VERTICAL);
-        LayoutParams params = new LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
-        setLayoutParams(params);
+        _viewModel = ExpenditureViewModel.getInstance();
+
+        ignoreMonth = false;
+        ignoreDay = true;
 
         LayoutInflater inflater = LayoutInflater.from(context);
         final View view = inflater.inflate(R.layout.view_month, null);
@@ -101,14 +89,10 @@ public class MonthView extends LinearLayout
 
     public void setDate(int year, int month)
     {
-        _year = year;
-        _month = month;
-
-        _viewModel = ExpenditureViewModel.getInstance();
+        super.setDate(year, month, 0);
 
         if (_firstRun)
         {
-            setupHeader();
             setupObservers();
             setupViews();
             _firstRun = false;
@@ -120,34 +104,6 @@ public class MonthView extends LinearLayout
 
     public void refreshView()
     {
-        DateFormatSymbols dfs = new DateFormatSymbols();
-        _dateTextView.setText(dfs.getMonths()[_month-1] + " " + _year);
-
-        // Set the header color
-        Calendar date = Calendar.getInstance();
-        Calendar compare = ((Calendar)date.clone());
-        date.set(Calendar.YEAR, _year);
-        date.set(Calendar.MONTH, _month-1);
-
-        if (compare.before(date)) // Future
-        {
-            _activity.setHeaderColor(_context.getColor(R.color.colorPrimaryLight));
-            _activity.showLeftCurrentButton();
-            _activity.hideRightCurrentButton();
-        }
-        else if (compare.after(date)) // Past
-        {
-            _activity.setHeaderColor(_context.getColor(R.color.colorPrimaryVeryDark));
-            _activity.hideLeftCurrentButton();
-            _activity.showRightCurrentButton();
-        }
-        else // Present
-        {
-            _activity.setHeaderColor(_context.getColor(R.color.colorPrimaryDark));
-            _activity.hideLeftCurrentButton();
-            _activity.hideRightCurrentButton();
-        }
-
         _weeklyTable.resetTable();
         _categoryTable.resetTable();
         _expandableBudgetTable.resetTable();
@@ -158,9 +114,10 @@ public class MonthView extends LinearLayout
         _viewModel.getMonth(_monthExps, _year, _month);
     }
 
-    private void setupHeader()
+    protected void setupHeader()
     {
-        _dateTextView = _activity.findViewById(R.id.dateTextView);
+        super.setupHeader();
+
         _dateTextView.setOnClickListener(new OnClickListener()
         {
             @Override

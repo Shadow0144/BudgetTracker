@@ -14,7 +14,7 @@ import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.AsyncSummationCallback;
 import cc.corbin.budgettracker.auxilliary.Categories;
-import cc.corbin.budgettracker.auxilliary.NavigationActivity;
+import cc.corbin.budgettracker.navigation.NavigationActivity;
 import cc.corbin.budgettracker.auxilliary.LineGraph;
 import cc.corbin.budgettracker.auxilliary.PieChart;
 import cc.corbin.budgettracker.auxilliary.SummationAsyncTask;
