@@ -32,8 +32,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
 
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.DatePickerFragment;
@@ -90,7 +89,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     private boolean _sdStorage = false;
     private boolean _externalStoragePermission = false;
 
-    private Calendar _selectedDate;
+    private LocalDate _selectedDate;
     private boolean _yearSelected;
     private boolean _monthSelected;
     private boolean _daySelected;
@@ -105,7 +104,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     private Button _importButton;
     private Button _exportButton;
 
-    private MutableLiveData<Date> _dateLiveData;
+    private MutableLiveData<LocalDate> _dateLiveData;
     private MutableLiveData<Boolean> _databaseActionComplete;
 
     private ExpenditureViewModel _viewModel;
@@ -222,11 +221,11 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         _databaseActionComplete.observe(this, databaseObserver);
         _databaseActionComplete.setValue(false);
 
-        _dateLiveData = new MutableLiveData<Date>();
-        final Observer<Date> dateObserver = new Observer<Date>()
+        _dateLiveData = new MutableLiveData<LocalDate>();
+        final Observer<LocalDate> dateObserver = new Observer<LocalDate>()
         {
             @Override
-            public void onChanged(@Nullable Date date)
+            public void onChanged(@Nullable LocalDate date)
             {
                 dateReceived(date);
             }
@@ -424,29 +423,28 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         updateFileNames();
     }
 
-    private void dateReceived(Date date)
+    private void dateReceived(LocalDate date)
     {
-        _selectedDate = Calendar.getInstance();
-        _selectedDate.setTime(date);
+        _selectedDate = date;
         switch (_currentExportSetting)
         {
             case YEAR_TAG:
                 _yearSelected = true;
-                _yearSelectedTextView.setText(""+_selectedDate.get(Calendar.YEAR));
+                _yearSelectedTextView.setText(""+_selectedDate.getYear());
                 break;
             case MONTH_TAG:
                 _yearSelected = true;
                 _monthSelected = true;
-                _yearSelectedTextView.setText(""+_selectedDate.get(Calendar.YEAR));
-                _monthSelectedTextView.setText(""+(_selectedDate.get(Calendar.MONTH)+1));
+                _yearSelectedTextView.setText(""+_selectedDate.getYear());
+                _monthSelectedTextView.setText(""+(_selectedDate.getMonthValue()));
                 break;
             case DAY_TAG:
                 _yearSelected = true;
                 _monthSelected = true;
                 _daySelected = true;
-                _yearSelectedTextView.setText(""+_selectedDate.get(Calendar.YEAR));
-                _monthSelectedTextView.setText(""+(_selectedDate.get(Calendar.MONTH)+1));
-                _daySelectedTextView.setText(""+_selectedDate.get(Calendar.DATE));
+                _yearSelectedTextView.setText(""+_selectedDate.getYear());
+                _monthSelectedTextView.setText(""+(_selectedDate.getMonthValue()));
+                _daySelectedTextView.setText(""+_selectedDate.getDayOfMonth());
                 break;
         }
     }
@@ -547,17 +545,17 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         switch (_currentExportSetting)
         {
             case TOTAL_TAG:
-                Calendar calendar = Calendar.getInstance();
-                _expFileName = "ExpenditureDatabase_as_of_" + calendar.get(Calendar.YEAR) + "_" +
-                        (calendar.get(Calendar.MONTH) + 1) + "_" + calendar.get(Calendar.DATE) + ".db";
-                _budFileName = "BudgetDatabase_as_of_" + calendar.get(Calendar.YEAR) + "_" +
-                        (calendar.get(Calendar.MONTH) + 1) + "_" + calendar.get(Calendar.DATE) + ".db";
+                LocalDate calendar = LocalDate.now();
+                _expFileName = "ExpenditureDatabase_as_of_" + calendar.getYear() + "_" +
+                        calendar.getMonthValue() + "_" + calendar.getDayOfMonth() + ".db";
+                _budFileName = "BudgetDatabase_as_of_" + calendar.getYear() + "_" +
+                        calendar.getMonthValue() + "_" + calendar.getDayOfMonth() + ".db";
                 break;
             case YEAR_TAG:
                 yearString = "";
                 if (_yearSelected)
                 {
-                    yearString = "" + _selectedDate.get(Calendar.YEAR);
+                    yearString = "" + _selectedDate.getYear();
                 }
                 else{ }
                 _expFileName = "ExpenditureDatabase_" + yearString + ".db";
@@ -568,8 +566,8 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                 monthString = "";
                 if (_yearSelected && _monthSelected)
                 {
-                    yearString = "" + _selectedDate.get(Calendar.YEAR);
-                    monthString = "" + (_selectedDate.get(Calendar.MONTH)+1);
+                    yearString = "" + _selectedDate.getYear();
+                    monthString = "" + (_selectedDate.getMonthValue());
                 }
                 else{ }
                 _expFileName = "ExpenditureDatabase_" + yearString + "_" + monthString + ".db";
@@ -581,9 +579,9 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
                 dayString = "";
                 if (_yearSelected && _monthSelected && _daySelected)
                 {
-                    yearString = "" + _selectedDate.get(Calendar.YEAR);
-                    monthString = "" + (_selectedDate.get(Calendar.MONTH)+1);
-                    dayString = "" + (_selectedDate.get(Calendar.DATE));
+                    yearString = "" + _selectedDate.getYear();
+                    monthString = "" + _selectedDate.getMonthValue();
+                    dayString = "" + _selectedDate.getDayOfMonth();
                 }
                 else{ }
                 _expFileName = "ExpenditureDatabase_" + yearString + "_" + monthString + "_" + dayString + ".db";
@@ -627,7 +625,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     {
         if (_yearSelected)
         {
-            int year = _selectedDate.get(Calendar.YEAR);
+            int year = _selectedDate.getYear();
             String whereQuery = "WHERE (year == " + year + ")";
             _viewModel.exportDatabases(_databaseActionComplete, whereQuery, folder,
                     getDatabasePath("expenditures").getAbsolutePath(), getExpenditureFileName(),
@@ -643,8 +641,8 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     {
         if (_yearSelected && _monthSelected)
         {
-            int year = _selectedDate.get(Calendar.YEAR);
-            int month = _selectedDate.get(Calendar.MONTH)+1;
+            int year = _selectedDate.getYear();
+            int month = _selectedDate.getMonthValue();
             String whereQuery = "WHERE (year == " + year + ") " +
                     "AND (month == " + month + ")";
             _viewModel.exportDatabases(_databaseActionComplete, whereQuery, folder,
@@ -661,9 +659,9 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
     {
         if (_yearSelected && _monthSelected && _daySelected)
         {
-            int year = _selectedDate.get(Calendar.YEAR);
-            int month = _selectedDate.get(Calendar.MONTH)+1;
-            int day = _selectedDate.get(Calendar.DATE);
+            int year = _selectedDate.getYear();
+            int month = _selectedDate.getMonthValue();
+            int day = _selectedDate.getDayOfMonth();
             String whereQuery = "WHERE (year == " + year + ") " +
                     "AND (month == " + month + ") " +
                     "AND (day == " + day + ")";

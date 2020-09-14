@@ -1,9 +1,9 @@
 package cc.corbin.budgettracker.search;
 
 import android.content.Intent;
+import android.location.Location;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
 
 import cc.corbin.budgettracker.auxilliary.Currencies;
 
@@ -21,36 +21,30 @@ public class SearchHelper
         boolean extrasIncluded = intent.getBooleanExtra(CreateSearchFragment.INCLUDE_EXTRAS_INTENT, true);
         if (intent.hasExtra(CreateSearchFragment.EXACT_DATE_INTENT))
         {
-            Date date = new Date();
-            date.setTime(intent.getLongExtra(CreateSearchFragment.EXACT_DATE_INTENT, -1));
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(date);
+            // TODO: Fix milliseconds
+            LocalDate calendar = LocalDate.ofEpochDay(intent.getLongExtra(CreateSearchFragment.EXACT_DATE_INTENT, -1));
 
             _query += " WHERE ";
             whereAdded = true;
             _query += "(" +
-                    "year = " + calendar.get(Calendar.YEAR) +
-                    " AND month = " + (calendar.get(Calendar.MONTH)+1) +
-                    " AND day = " + (calendar.get(Calendar.DATE)) +
+                    "year = " + calendar.getYear() +
+                    " AND month = " + calendar.getMonthValue() +
+                    " AND day = " + calendar.getDayOfMonth() +
                     ")";
             // Do not need to worry about extras here
         }
         else if (intent.hasExtra(CreateSearchFragment.START_DATE_INTENT) /* && intent.hasExtra(CreateSearchFragment.END_DATE_INTENT) */)
         {
-            Date date = new Date();
-            Calendar calendar = Calendar.getInstance();
+            // TODO Milliseconds
+            LocalDate calendar = LocalDate.ofEpochDay(intent.getLongExtra(CreateSearchFragment.START_DATE_INTENT, -1));
+            int sYear = calendar.getYear();
+            int sMonth = calendar.getMonthValue();
+            int sDay = calendar.getDayOfMonth();
 
-            date.setTime(intent.getLongExtra(CreateSearchFragment.START_DATE_INTENT, -1));
-            calendar.setTime(date);
-            int sYear = calendar.get(Calendar.YEAR);
-            int sMonth = calendar.get(Calendar.MONTH)+1;
-            int sDay = calendar.get(Calendar.DATE);
-
-            date.setTime(intent.getLongExtra(CreateSearchFragment.END_DATE_INTENT, -1));
-            calendar.setTime(date);
-            int eYear = calendar.get(Calendar.YEAR);
-            int eMonth = calendar.get(Calendar.MONTH)+1;
-            int eDay = calendar.get(Calendar.DATE);
+            calendar = LocalDate.ofEpochDay(intent.getLongExtra(CreateSearchFragment.END_DATE_INTENT, -1));
+            int eYear = calendar.getYear();
+            int eMonth = calendar.getMonthValue();
+            int eDay = calendar.getDayOfMonth();
 
             _query += " WHERE ";
             whereAdded = true;

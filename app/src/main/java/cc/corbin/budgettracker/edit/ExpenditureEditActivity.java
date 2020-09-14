@@ -26,9 +26,9 @@ import android.widget.Toast;
 
 import java.math.RoundingMode;
 import java.text.NumberFormat;
-import java.util.Calendar;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.time.LocalDate;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.ConversionRateAsyncTask;
@@ -426,21 +426,21 @@ public class ExpenditureEditActivity extends AppCompatActivity implements Numeri
 
     private void getConversionRate()
     {
-        Calendar currentDate = Calendar.getInstance();
-        Calendar editDate = Calendar.getInstance();
+        LocalDate currentDate = LocalDate.now();
+        LocalDate editDate = LocalDate.now();
 
         if (_day != 0) // For use in the Month Activity
         {
-            editDate.set(_year, _month - 1, _day);
+            editDate = LocalDate.of(_year, _month, _day);
         }
         else
         {
-            editDate.set(_year, _month - 1, 1);
+            editDate = LocalDate.of(_year, _month, 1);
             Toast.makeText(this, "Using the first of the month's conversion rate", Toast.LENGTH_LONG).show();
         }
 
-        long end = currentDate.getTimeInMillis();
-        long start = editDate.getTimeInMillis();
+        long end = currentDate.toEpochDay();
+        long start = editDate.toEpochDay();
 
         if (end >= start)
         {

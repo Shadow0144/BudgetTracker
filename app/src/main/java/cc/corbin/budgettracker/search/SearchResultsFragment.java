@@ -13,7 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.util.Calendar;
+import java.time.LocalDate;
 import java.util.List;
 
 import cc.corbin.budgettracker.R;
@@ -163,8 +163,7 @@ public class SearchResultsFragment extends Fragment
         if (exp.getDay() != 0)
         {
             Intent intent = new Intent(getActivity(), DayViewActivity.class);
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(exp.getYear(), exp.getMonth() - 1, exp.getDay());
+            LocalDate calendar = LocalDate.of(exp.getYear(), exp.getMonth(), exp.getDay());
             intent.putExtra(DayViewActivity.YEAR_INTENT, exp.getYear());
             intent.putExtra(DayViewActivity.MONTH_INTENT, exp.getMonth());
             intent.putExtra(DayViewActivity.DAY_INTENT, exp.getDay());

@@ -7,7 +7,7 @@ import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Calendar;
+import java.time.LocalDate;
 
 import cc.corbin.budgettracker.auxilliary.Currencies;
 
@@ -267,13 +267,11 @@ public class ExpenditureEntity implements Parcelable
     @Ignore
     private void convertDateToDMY(long date)
     {
-        Calendar currentDate = Calendar.getInstance();
+        LocalDate currentDate = LocalDate.ofEpochDay(date / 24 / 60 / 60 / 1000); // Convert to milliseconds
 
-        currentDate.setTimeInMillis(date);
-
-        day = currentDate.get(Calendar.DATE);
-        month = currentDate.get(Calendar.MONTH)+1;
-        year = currentDate.get(Calendar.YEAR);
+        day = currentDate.getDayOfMonth();
+        month = currentDate.getMonthValue();
+        year = currentDate.getYear();
     }
 
     @Ignore

@@ -7,8 +7,8 @@ import android.widget.TableRow;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
+import java.time.LocalDate;
 
 import cc.corbin.budgettracker.BudgetTrackerApplication;
 import cc.corbin.budgettracker.R;
@@ -228,9 +228,8 @@ public class WeeklySummaryTable extends TimeSummaryTable
 
     private boolean checkForShortMonth()
     {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(_year, _month-1, 1);
-        boolean shortMonth = (calendar.getActualMaximum(Calendar.DAY_OF_MONTH) <= 28);
+        LocalDate calendar = LocalDate.of(_year, _month, 1);
+        boolean shortMonth = (calendar.lengthOfMonth() <= 28);
         return shortMonth;
     }
 

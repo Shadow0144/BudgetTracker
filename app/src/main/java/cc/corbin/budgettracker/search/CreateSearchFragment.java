@@ -25,8 +25,7 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
 
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Categories;
@@ -90,12 +89,12 @@ public class CreateSearchFragment extends Fragment
     private TextView _endDateMonthTextView;
     private TextView _endDateDayTextView;
 
-    private MutableLiveData<Date> _exactDateLive;
-    private MutableLiveData<Date> _startDateLive;
-    private MutableLiveData<Date> _endDateLive;
-    private Date _exactDate;
-    private Date _startDate;
-    private Date _endDate;
+    private MutableLiveData<LocalDate> _exactDateLive;
+    private MutableLiveData<LocalDate> _startDateLive;
+    private MutableLiveData<LocalDate> _endDateLive;
+    private LocalDate _exactDate;
+    private LocalDate _startDate;
+    private LocalDate _endDate;
 
     private int _exactAmountCurrency;
     private int _amountRangeCurrency;
@@ -232,50 +231,44 @@ public class CreateSearchFragment extends Fragment
         _endDateMonthTextView = view.findViewById(R.id.endMonthTextView);
         _endDateDayTextView = view.findViewById(R.id.endDayTextView);
 
-        _exactDateLive = new MutableLiveData<Date>();
-        final Observer<Date> _exactDateObserver = new Observer<Date>()
+        _exactDateLive = new MutableLiveData<LocalDate>();
+        final Observer<LocalDate> _exactDateObserver = new Observer<LocalDate>()
         {
             @Override
-            public void onChanged(@Nullable Date date)
+            public void onChanged(@Nullable LocalDate date)
             {
                 _exactDate = date;
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(_exactDate);
-                _exactDateYearTextView.setText("" + calendar.get(Calendar.YEAR));
-                _exactDateMonthTextView.setText("" + (calendar.get(Calendar.MONTH)+1));
-                _exactDateDayTextView.setText("" + calendar.get(Calendar.DATE));
+                _exactDateYearTextView.setText("" + _exactDate.getYear());
+                _exactDateMonthTextView.setText("" + _exactDate.getMonthValue());
+                _exactDateDayTextView.setText("" + _exactDate.getDayOfMonth());
             }
         };
         _exactDateLive.observe(this, _exactDateObserver);
 
-        _startDateLive = new MutableLiveData<Date>();
-        final Observer<Date> _startDateObserver = new Observer<Date>()
+        _startDateLive = new MutableLiveData<LocalDate>();
+        final Observer<LocalDate> _startDateObserver = new Observer<LocalDate>()
         {
             @Override
-            public void onChanged(@Nullable Date date)
+            public void onChanged(@Nullable LocalDate date)
             {
                 _startDate = date;
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(_startDate);
-                _startDateYearTextView.setText("" + calendar.get(Calendar.YEAR));
-                _startDateMonthTextView.setText("" + (calendar.get(Calendar.MONTH)+1));
-                _startDateDayTextView.setText("" + calendar.get(Calendar.DATE));
+                _startDateYearTextView.setText("" + _exactDate.getYear());
+                _startDateMonthTextView.setText("" + _exactDate.getMonthValue());
+                _startDateDayTextView.setText("" + _exactDate.getDayOfMonth());
             }
         };
         _startDateLive.observe(this, _startDateObserver);
 
-        _endDateLive = new MutableLiveData<Date>();
-        final Observer<Date> _endDateObserver = new Observer<Date>()
+        _endDateLive = new MutableLiveData<LocalDate>();
+        final Observer<LocalDate> _endDateObserver = new Observer<LocalDate>()
         {
             @Override
-            public void onChanged(@Nullable Date date)
+            public void onChanged(@Nullable LocalDate date)
             {
                 _endDate = date;
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(_endDate);
-                _endDateYearTextView.setText("" + calendar.get(Calendar.YEAR));
-                _endDateMonthTextView.setText("" + (calendar.get(Calendar.MONTH)+1));
-                _endDateDayTextView.setText("" + calendar.get(Calendar.DATE));
+                _endDateYearTextView.setText("" + _exactDate.getYear());
+                _endDateMonthTextView.setText("" + _exactDate.getMonthValue());
+                _endDateDayTextView.setText("" + _exactDate.getDayOfMonth());
             }
         };
         _endDateLive.observe(this, _endDateObserver);
@@ -450,7 +443,7 @@ public class CreateSearchFragment extends Fragment
                 dataComplete = false;
                 missingDataString = "Missing end date";
             }
-            else if (_startDate.after(_endDate))
+            else if (_startDate.isAfter(_endDate))
             {
                 dataComplete = false;
                 missingDataString = "Start date must occur before end date";
@@ -555,12 +548,12 @@ public class CreateSearchFragment extends Fragment
         }
         else if (_exactDateRadioButton.isChecked())
         {
-            intent.putExtra(EXACT_DATE_INTENT, _exactDate.getTime());
+            intent.putExtra(EXACT_DATE_INTENT, _exactDate.toEpochDay());
         }
         else if (_dateRangeRadioButton.isChecked())
         {
-            intent.putExtra(START_DATE_INTENT, _startDate.getTime());
-            intent.putExtra(END_DATE_INTENT, _endDate.getTime());
+            intent.putExtra(START_DATE_INTENT, _startDate.toEpochDay());
+            intent.putExtra(END_DATE_INTENT, _endDate.toEpochDay());
         }
         else { }
 

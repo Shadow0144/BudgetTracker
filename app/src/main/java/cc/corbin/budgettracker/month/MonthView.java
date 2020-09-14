@@ -8,17 +8,12 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
-import java.text.DateFormatSymbols;
-import java.util.Calendar;
 import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.LineGraph;
-import cc.corbin.budgettracker.day.DayViewActivity;
 import cc.corbin.budgettracker.paging.PagingActivity;
 import cc.corbin.budgettracker.paging.PagingView;
 import cc.corbin.budgettracker.auxilliary.PieChart;

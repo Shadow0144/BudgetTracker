@@ -22,10 +22,9 @@ import android.widget.Toast;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Calendar;
-import java.util.Currency;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.time.LocalDate;
 
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.ConversionRateAsyncTask;
@@ -111,9 +110,8 @@ public class CurrencyConversionHelper extends PopupWindow implements NumericalFo
         monthTextView.setText(String.format("%02d", _month));
 
         // Setup the weeks
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(_year, _month-1, _day);
-        final int days = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        LocalDate calendar = LocalDate.of(_year, _month, _day);
+        final int days = calendar.lengthOfMonth();
         String[] daysArray = new String[days];
         for (int i = 0; i < days; i++)
         {
@@ -244,12 +242,11 @@ public class CurrencyConversionHelper extends PopupWindow implements NumericalFo
 
     private void getConversionRate()
     {
-        Calendar currentDate = Calendar.getInstance();
-        Calendar editDate = Calendar.getInstance();
-        editDate.set(_year, _month-1, _day);
+        LocalDate currentDate = LocalDate.now();
+        LocalDate editDate = LocalDate.of(_year, _month, _day);
 
-        long end = currentDate.getTimeInMillis();
-        long start = editDate.getTimeInMillis();
+        long end = currentDate.toEpochDay();
+        long start = editDate.toEpochDay();
 
         if (end >= start)
         {

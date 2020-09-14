@@ -3,8 +3,7 @@ package cc.corbin.budgettracker.auxilliary;
 import android.arch.lifecycle.MutableLiveData;
 import android.os.AsyncTask;
 
-import java.util.ArrayList;
-import java.util.Calendar;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -108,11 +107,9 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Summa
                     // Assume entities are sorted
                     ExpenditureEntity startEntity = entities.get(0);
                     ExpenditureEntity endEntity = entities.get(entities.size() - 1);
-                    Calendar startDate = Calendar.getInstance();
-                    Calendar endDate = Calendar.getInstance();
-                    startDate.set(startEntity.getYear(), startEntity.getMonth()-1, startEntity.getDay());
-                    endDate.set(endEntity.getYear(), endEntity.getMonth()-1, endEntity.getDay());
-                    long days = TimeUnit.DAYS.convert((endDate.getTimeInMillis() - startDate.getTimeInMillis()), TimeUnit.MILLISECONDS);
+                    LocalDate startDate = LocalDate.of(startEntity.getYear(), startEntity.getMonth(), startEntity.getDay());
+                    LocalDate endDate = LocalDate.of(endEntity.getYear(), endEntity.getMonth(), endEntity.getDay());
+                    long days = TimeUnit.DAYS.convert((endDate.toEpochDay() - startDate.toEpochDay()), TimeUnit.DAYS);
                     sums = new SummationResult[(int)(days + 1)];
                     getDailySummations(sums, entities, startDate);
                 }
@@ -225,7 +222,7 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Summa
         }
     }
 
-    private void getDailySummations(SummationResult[] days, List<ExpenditureEntity> entities, Calendar startDate)
+    private void getDailySummations(SummationResult[] days, List<ExpenditureEntity> entities, LocalDate startDate)
     {
         for (int i = 0; i < days.length; i++)
         {
@@ -233,9 +230,9 @@ public class SummationAsyncTask extends AsyncTask<List<ExpenditureEntity>, Summa
         }
         int size = entities.size();
         int index = 0;
-        int currentDay = startDate.get(Calendar.DATE);
-        int currentMonth = startDate.get(Calendar.MONTH)+1;
-        int currentYear = startDate.get(Calendar.YEAR);
+        int currentYear = startDate.getYear();
+        int currentMonth = startDate.getMonthValue();
+        int currentDay = startDate.getDayOfMonth();
         for (int i = 0; i < size; i++)
         {
             ExpenditureEntity entity = entities.get(i);

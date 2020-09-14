@@ -9,8 +9,8 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import java.util.Calendar;
 import java.util.List;
+import java.time.LocalDate;
 
 import cc.corbin.budgettracker.auxilliary.AsyncSummationCallback;
 import cc.corbin.budgettracker.auxilliary.Categories;
@@ -222,9 +222,9 @@ public class TotalViewActivity extends NavigationActivity implements AsyncSummat
         }
         else
         {
-            Calendar calendar = Calendar.getInstance();
-            _startYear = calendar.get(Calendar.YEAR);
-            _endYear = calendar.get(Calendar.YEAR);
+            LocalDate calendar = LocalDate.now();
+            _startYear = calendar.getYear();
+            _endYear = calendar.getYear();
         }
 
         SummationAsyncTask yearlyAsyncTask = new SummationAsyncTask(SummationAsyncTask.SummationType.yearly, _yearlyAmounts, this);

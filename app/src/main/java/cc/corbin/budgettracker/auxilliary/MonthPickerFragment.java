@@ -1,9 +1,6 @@
 package cc.corbin.budgettracker.auxilliary;
 
-import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.arch.lifecycle.MutableLiveData;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
@@ -13,11 +10,8 @@ import android.view.ViewGroup;
 import android.widget.DatePicker;
 import android.widget.TextView;
 
-import java.lang.reflect.Field;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
 
 import cc.corbin.budgettracker.R;
 
@@ -28,8 +22,8 @@ public class MonthPickerFragment extends DialogFragment
 
     private View _calendarView;
 
-    private MutableLiveData<Date> _date;
-    private Date _currentDate; // The current date the calendar is displaying
+    private MutableLiveData<LocalDate> _date;
+    private LocalDate _currentDate; // The current date the calendar is displaying
 
     public enum timeSpan
     {
@@ -68,14 +62,14 @@ public class MonthPickerFragment extends DialogFragment
         }
 
         // Check if it was set in the Bundle
-        _currentDate = Calendar.getInstance().getTime();
+        _currentDate = LocalDate.now();
 
         updateDisplay();
 
         return _calendarView;
     }
 
-    public void setDate(Date date)
+    public void setDate(LocalDate date)
     {
         _currentDate = date;
         updateDisplay();
@@ -104,9 +98,9 @@ public class MonthPickerFragment extends DialogFragment
         TextView monthTextView = _calendarView.findViewById(R.id.monthTextView);
         monthTextView.setText(monthString);
 
-        Calendar calendar = Calendar.getInstance();
-        Calendar previousMonth = Calendar.getInstance();
-        previousMonth.set(Calendar.MONTH, calendar.get(Calendar.MONTH)-1);
+        // TODO
+        /*LocalDate calendar = LocalDate.now();
+        LocalDate previousMonth = LocalDate.of(Calendar.MONTH, calendar.getMonthValue()-1);
         calendar.setTime(_currentDate);
         int startDay = calendar.getFirstDayOfWeek();
         int endDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)+1; // Add one to fix the last date
@@ -130,7 +124,7 @@ public class MonthPickerFragment extends DialogFragment
                     _dayTextViews[i].setText("" + (i - startDay));
                 }
             }
-        }
+        }*/
     }
 
     private void updateYearDisplay()
@@ -143,7 +137,7 @@ public class MonthPickerFragment extends DialogFragment
 
     }
 
-    public void setLiveData(MutableLiveData<Date> date)
+    public void setLiveData(MutableLiveData<LocalDate> date)
     {
         _date = date;
     }
@@ -152,10 +146,8 @@ public class MonthPickerFragment extends DialogFragment
     {
         if (_date != null)
         {
-            Calendar c = Calendar.getInstance();
-            c.set(year, month, day);
-            Date date = c.getTime();
-            _date.postValue(date);
+            LocalDate c = LocalDate.of(year, month, day);
+            _date.postValue(c);
         }
         else { }
     }

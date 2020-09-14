@@ -1,11 +1,8 @@
 package cc.corbin.budgettracker.workerthread.budgetevent;
 
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.persistence.db.SimpleSQLiteQuery;
-import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import cc.corbin.budgettracker.auxilliary.Categories;

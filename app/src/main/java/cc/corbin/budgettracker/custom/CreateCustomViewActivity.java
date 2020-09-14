@@ -4,7 +4,6 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Intent;
 import android.os.Bundle;
 
-import java.util.Calendar;
 import java.util.List;
 
 import cc.corbin.budgettracker.R;
@@ -29,7 +28,6 @@ public class CreateCustomViewActivity extends NavigationActivity
         setContentView(R.layout.activity_create_custom_view);
         setup();
 
-        Calendar calendar = Calendar.getInstance();
         _viewModel = ExpenditureViewModel.getInstance();
     }
 

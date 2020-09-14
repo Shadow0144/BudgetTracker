@@ -3,7 +3,7 @@ package cc.corbin.budgettracker.navigation;
 import android.content.Intent;
 import android.view.MenuItem;
 
-import java.util.Calendar;
+import java.time.LocalDate;
 
 import cc.corbin.budgettracker.BudgetTrackerApplication;
 import cc.corbin.budgettracker.R;
@@ -24,7 +24,7 @@ public class NavigationDrawerHelper
     public static Intent handleNavigation(MenuItem item)
     {
         Intent intent = null;
-        Calendar calendar = Calendar.getInstance();
+        LocalDate calendar = LocalDate.now();
         switch (item.getItemId())
         {
             case R.id.searchMenuItem:
@@ -32,18 +32,18 @@ public class NavigationDrawerHelper
                 break;
             case R.id.dayMenuItem:
                 intent = new Intent(BudgetTrackerApplication.getInstance(), DayViewActivity.class);
-                intent.putExtra(DayViewActivity.YEAR_INTENT, calendar.get(Calendar.YEAR));
-                intent.putExtra(DayViewActivity.MONTH_INTENT, calendar.get(Calendar.MONTH)+1);
-                intent.putExtra(DayViewActivity.DAY_INTENT, calendar.get(Calendar.DATE));
+                intent.putExtra(DayViewActivity.YEAR_INTENT, calendar.getYear());
+                intent.putExtra(DayViewActivity.MONTH_INTENT, calendar.getMonthValue());
+                intent.putExtra(DayViewActivity.DAY_INTENT, calendar.getDayOfMonth());
                 break;
             case R.id.monthMenuItem:
                 intent = new Intent(BudgetTrackerApplication.getInstance(), MonthViewActivity.class);
-                intent.putExtra(MonthViewActivity.YEAR_INTENT, calendar.get(Calendar.YEAR));
-                intent.putExtra(MonthViewActivity.MONTH_INTENT, calendar.get(Calendar.MONTH)+1);
+                intent.putExtra(MonthViewActivity.YEAR_INTENT, calendar.getYear());
+                intent.putExtra(MonthViewActivity.MONTH_INTENT, calendar.getMonthValue());
                 break;
             case R.id.yearMenuItem:
                 intent = new Intent(BudgetTrackerApplication.getInstance(), YearViewActivity.class);
-                intent.putExtra(YearViewActivity.YEAR_INTENT, calendar.get(Calendar.YEAR));
+                intent.putExtra(YearViewActivity.YEAR_INTENT, calendar.getYear());
                 break;
             case R.id.totalMenuItem:
                 intent = new Intent(BudgetTrackerApplication.getInstance(), TotalViewActivity.class);

@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.TableRow;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import cc.corbin.budgettracker.BudgetTrackerApplication;
