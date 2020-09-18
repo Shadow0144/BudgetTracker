@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/upButton"
+        android:id="@+id/previousMonthButton"
         android:icon="@android:drawable/arrow_up_float"
         android:title="@string/up"
         app:showAsAction="ifRoom"></item>

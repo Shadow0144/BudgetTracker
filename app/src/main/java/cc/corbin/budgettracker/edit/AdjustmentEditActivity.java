@@ -206,7 +206,7 @@ public class AdjustmentEditActivity extends AppCompatActivity implements Numeric
         _yearTextView = findViewById(R.id.yearTextView);
         _yearTextView.setText("" + _transferYear);
 
-        _monthTextView = findViewById(R.id.monthTextView);
+        _monthTextView = findViewById(R.id.monthYearTextView);
         _monthTextView.setText(String.format("%02d", _transferMonth)); // TODO
 
         updateTransferInformation();

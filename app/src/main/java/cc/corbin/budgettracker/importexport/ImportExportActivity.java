@@ -35,7 +35,7 @@ import java.io.File;
 import java.time.LocalDate;
 
 import cc.corbin.budgettracker.R;
-import cc.corbin.budgettracker.auxilliary.DatePickerFragment;
+import cc.corbin.budgettracker.datepicker.DayPickerFragment;
 import cc.corbin.budgettracker.navigation.NavigationDrawerHelper;
 import cc.corbin.budgettracker.search.SearchHelper;
 import cc.corbin.budgettracker.workerthread.ExpenditureViewModel;
@@ -176,7 +176,7 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
         _exportingSubsetTextView = findViewById(R.id.exportSubsetTextView);
         _dateSelectLayout = findViewById(R.id.dateSelectLayout);
         _yearSelectedTextView = findViewById(R.id.yearSelectedTextView);
-        _monthTextView = findViewById(R.id.monthTextView);
+        _monthTextView = findViewById(R.id.monthYearTextView);
         _monthSelectedTextView = findViewById(R.id.monthSelectedTextView);
         _dayTextView = findViewById(R.id.dayTextView);
         _daySelectedTextView = findViewById(R.id.daySelectedTextView);
@@ -405,8 +405,8 @@ public class ImportExportActivity extends AppCompatActivity implements Navigatio
 
     public void selectDate(View v)
     {
-        DialogFragment fragment = new DatePickerFragment();
-        ((DatePickerFragment) fragment).setLiveData(_dateLiveData);
+        DialogFragment fragment = new DayPickerFragment();
+        ((DayPickerFragment) fragment).setLiveData(_dateLiveData);
         switch (_currentExportSetting)
         {
             case YEAR_TAG:

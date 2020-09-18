@@ -30,7 +30,7 @@ import java.time.LocalDate;
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Categories;
 import cc.corbin.budgettracker.auxilliary.Currencies;
-import cc.corbin.budgettracker.auxilliary.DatePickerFragment;
+import cc.corbin.budgettracker.datepicker.DayPickerFragment;
 import cc.corbin.budgettracker.numericalformatting.NumericalFormattedEditText;
 
 public class CreateSearchFragment extends Fragment
@@ -361,22 +361,22 @@ public class CreateSearchFragment extends Fragment
 
     public void selectExactDate(View v)
     {
-        DialogFragment fragment = new DatePickerFragment();
-        ((DatePickerFragment) fragment).setLiveData(_exactDateLive);
+        DialogFragment fragment = new DayPickerFragment();
+        ((DayPickerFragment) fragment).setLiveData(_exactDateLive);
         fragment.show(_context.getSupportFragmentManager(), "exactDatePicker");
     }
 
     public void selectStartDate(View v)
     {
-        DialogFragment fragment = new DatePickerFragment();
-        ((DatePickerFragment) fragment).setLiveData(_startDateLive);
+        DialogFragment fragment = new DayPickerFragment();
+        ((DayPickerFragment) fragment).setLiveData(_startDateLive);
         fragment.show(_context.getSupportFragmentManager(), "startDatePicker");
     }
 
     public void selectEndDate(View v)
     {
-        DialogFragment fragment = new DatePickerFragment();
-        ((DatePickerFragment) fragment).setLiveData(_endDateLive);
+        DialogFragment fragment = new DayPickerFragment();
+        ((DayPickerFragment) fragment).setLiveData(_endDateLive);
         fragment.show(_context.getSupportFragmentManager(), "endDatePicker");
     }
 

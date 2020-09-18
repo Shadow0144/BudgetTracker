@@ -106,7 +106,7 @@ public class CurrencyConversionHelper extends PopupWindow implements NumericalFo
         final TextView yearTextView = conversionView.findViewById(R.id.yearTextView);
         yearTextView.setText(String.format("%04d", _year));
 
-        final TextView monthTextView = conversionView.findViewById(R.id.monthTextView);
+        final TextView monthTextView = conversionView.findViewById(R.id.monthYearTextView);
         monthTextView.setText(String.format("%02d", _month));
 
         // Setup the weeks

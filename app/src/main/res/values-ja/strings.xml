@@ -39,6 +39,7 @@
     <string name="alert_title">Remove Expense</string>
     <string name="alert_body">Confirm Removing Expense</string>
     <string name="accept">Accept</string>
+    <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
 
     <string name="editing_warning">Editing a category will take some time. Proceed?</string>

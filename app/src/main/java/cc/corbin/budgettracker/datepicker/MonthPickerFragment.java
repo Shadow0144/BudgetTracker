@@ -1,4 +1,4 @@
-package cc.corbin.budgettracker.auxilliary;
+package cc.corbin.budgettracker.datepicker;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.os.Bundle;
@@ -15,10 +15,10 @@ import java.time.LocalDate;
 
 import cc.corbin.budgettracker.R;
 
-// Fragment for selecting a a month (i.e. a month and year) from a calendar
+// Fragment for selecting a specific month from a calendar
 public class MonthPickerFragment extends DialogFragment
 {
-    private final String TAG = "DatePickerFragment";
+    private final String TAG = "MonthPickerFragment";
 
     private View _calendarView;
 
@@ -95,7 +95,7 @@ public class MonthPickerFragment extends DialogFragment
     {
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM yyyy");
         String monthString = dateFormat.format(_currentDate);
-        TextView monthTextView = _calendarView.findViewById(R.id.monthTextView);
+        TextView monthTextView = _calendarView.findViewById(R.id.monthYearTextView);
         monthTextView.setText(monthString);
 
         // TODO

@@ -127,7 +127,7 @@
             android:padding="4dp" />
 
         <TextView
-            android:id="@+id/monthTextView"
+            android:id="@+id/monthYearTextView"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center"

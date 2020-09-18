@@ -1,11 +1,15 @@
 package cc.corbin.budgettracker.month;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.DatePicker;
 import android.widget.Toast;
 
 import java.time.LocalDate;
@@ -173,7 +177,7 @@ public class MonthViewActivity extends PagingActivity
 
     public void selectJumpDate(View v)
     {
-
+        createDialogWithoutDateField().show();
     }
 
     public void currentView(View v)
@@ -194,5 +198,13 @@ public class MonthViewActivity extends PagingActivity
                 return true;
             }
         });
+    }
+
+    private DatePickerDialog createDialogWithoutDateField()
+    {
+        DatePickerDialog dpd = new DatePickerDialog(this, null, 2014, 1, 24);
+        View day = dpd.getDatePicker().findViewById(Resources.getSystem().getIdentifier("day", "id", "android"));
+        day.setVisibility(View.GONE);
+        return dpd;
     }
 }

@@ -18,7 +18,7 @@
         app:layout_constraintTop_toBottomOf="@+id/baseCurrencyScrollView" />
 
     <Button
-        android:id="@+id/previousButton"
+        android:id="@+id/previousMonthButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="64dp"
@@ -29,7 +29,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/nextButton"
+        android:id="@+id/nextMonthButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="64dp"

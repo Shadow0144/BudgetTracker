@@ -256,7 +256,7 @@
                     android:text="@string/previous" />
 
                 <TextView
-                    android:id="@+id/monthTextView"
+                    android:id="@+id/monthYearTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"

@@ -1,8 +1,12 @@
 package cc.corbin.budgettracker.day;
 
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,6 +16,7 @@ import android.widget.Toast;
 import java.time.LocalDate;
 
 import cc.corbin.budgettracker.auxilliary.Categories;
+import cc.corbin.budgettracker.datepicker.DayPickerFragment;
 import cc.corbin.budgettracker.paging.PagingActivity;
 import cc.corbin.budgettracker.edit.ExpenditureEditActivity;
 import cc.corbin.budgettracker.expendituredatabase.ExpenditureEntity;
@@ -24,9 +29,9 @@ public class DayViewActivity extends PagingActivity
 {
     private final String TAG = "DayViewActivity";
 
-    public final static String DAY_INTENT = "Day";
-    public final static String MONTH_INTENT = "Month";
     public final static String YEAR_INTENT = "Year";
+    public final static String MONTH_INTENT = "Month";
+    public final static String DAY_INTENT = "Day";
 
     public final static int CREATE_EXPENDITURE = 0;
     public final static int EDIT_EXPENDITURE = 1;
@@ -35,6 +40,8 @@ public class DayViewActivity extends PagingActivity
     public final static int CANCEL = 1;
     public final static int DELETE = 2;
     public final static int FAILURE = -1;
+
+    private MutableLiveData<LocalDate> _dateLiveData; // For picking a day to jump to
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -58,9 +65,10 @@ public class DayViewActivity extends PagingActivity
         addItemButton.setVisibility(View.VISIBLE);
 
         LocalDate now = LocalDate.now();
-        int day = getIntent().getIntExtra(DAY_INTENT, now.getDayOfMonth());
-        int month = getIntent().getIntExtra(MONTH_INTENT, now.getMonthValue());
-        int year = getIntent().getIntExtra(YEAR_INTENT, now.getYear());
+        Intent intent = getIntent();
+        int year = intent.getIntExtra(YEAR_INTENT, now.getYear());
+        int month = intent.getIntExtra(MONTH_INTENT, now.getMonthValue());
+        int day = intent.getIntExtra(DAY_INTENT, now.getDayOfMonth());
         _currentDate = LocalDate.of(year, month, day);
 
         setupDayView();
@@ -79,6 +87,17 @@ public class DayViewActivity extends PagingActivity
             Categories.loadCategories(this);
         }
         else { }
+
+        _dateLiveData = new MutableLiveData<LocalDate>();
+        final Observer<LocalDate> dateObserver = new Observer<LocalDate>()
+        {
+            @Override
+            public void onChanged(@Nullable LocalDate date)
+            {
+                jumpDateReceived(date);
+            }
+        };
+        _dateLiveData.observe(this, dateObserver);
     }
 
     private void launchFirstTimeSetup()
@@ -187,7 +206,17 @@ public class DayViewActivity extends PagingActivity
 
     public void selectJumpDate(View v)
     {
+        DayPickerFragment fragment = new DayPickerFragment();
+        DayView dayView = (DayView)_layoutManager.findViewByPosition(_layoutManager.findFirstVisibleItemPosition());
+        LocalDate date = dayView.getDate();
+        fragment.setDate(date.getYear(), date.getMonthValue());
+        fragment.setLiveData(_dateLiveData);
+        fragment.show(this.getSupportFragmentManager(), "dayPicker");
+    }
 
+    private void jumpDateReceived(LocalDate date)
+    {
+        _recyclerView.scrollToPosition(((int)(date.toEpochDay())));
     }
 
     public void currentView(View v)
