@@ -11,7 +11,6 @@ import android.widget.LinearLayout;
 
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.auxilliary.Categories;
-import cc.corbin.budgettracker.auxilliary.EnhancedViewPager;
 
 public class SetupActivity extends AppCompatActivity
 {

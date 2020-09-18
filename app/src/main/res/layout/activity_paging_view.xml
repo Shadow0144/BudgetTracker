@@ -98,7 +98,7 @@
                 android:id="@+id/addItemButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:onClick="addItem"
+                android:onClick="addExpenditure"
                 android:text="@string/add_item"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent" />

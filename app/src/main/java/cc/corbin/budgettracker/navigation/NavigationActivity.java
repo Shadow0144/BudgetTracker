@@ -8,7 +8,10 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.TextView;
 
 import cc.corbin.budgettracker.R;
 import cc.corbin.budgettracker.settings.SettingsActivity;
@@ -19,9 +22,12 @@ public abstract class NavigationActivity extends AppCompatActivity implements Na
     private final String TAG = "NavigationActivity";
 
     private DrawerLayout _drawerLayout;
+    protected boolean _hasUpButton;
+    protected MenuItem _upButton;
 
     protected void setup()
     {
+        _hasUpButton = false; // Default to false
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         try
@@ -72,5 +78,23 @@ public abstract class NavigationActivity extends AppCompatActivity implements Na
         else { }
 
         return handled;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        if (_hasUpButton)
+        {
+            getMenuInflater().inflate(R.menu.nagivation_view, menu);
+            _upButton = menu.getItem(0);
+            setupUpButton();
+        }
+        else { }
+        return true;
+    }
+
+    protected void setupUpButton()
+    {
+        // Override if needed
     }
 }

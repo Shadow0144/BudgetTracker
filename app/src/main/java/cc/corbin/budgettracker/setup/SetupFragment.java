@@ -2,8 +2,6 @@ package cc.corbin.budgettracker.setup;
 
 import android.support.v4.app.Fragment;
 
-import cc.corbin.budgettracker.auxilliary.EnhancedViewPager;
-
 public class SetupFragment extends Fragment
 {
     private final String Tag = "WelcomeFragment";

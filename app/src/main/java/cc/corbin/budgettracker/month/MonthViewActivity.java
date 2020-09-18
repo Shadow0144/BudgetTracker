@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -43,11 +44,22 @@ public class MonthViewActivity extends PagingActivity
         super.onCreate(savedInstanceState);
         setup();
 
+        _hasUpButton = true;
+
         int month = getIntent().getIntExtra(MONTH_INTENT, LocalDate.now().getMonthValue());
         int year = getIntent().getIntExtra(YEAR_INTENT, LocalDate.now().getYear());
         _currentDate = LocalDate.of(year, month, 1);
 
         setupMonthView();
+
+        _dateTextView.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                selectJumpDate(null);
+            }
+        });
     }
 
     @Override
@@ -159,9 +171,28 @@ public class MonthViewActivity extends PagingActivity
         }
     }
 
+    public void selectJumpDate(View v)
+    {
+
+    }
+
     public void currentView(View v)
     {
         int time = (_currentDate.getYear() * 12) + (_currentDate.getMonthValue() - 1);
         _recyclerView.smoothScrollToPosition(time);
+    }
+
+    @Override
+    protected void setupUpButton()
+    {
+        _upButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener()
+        {
+            @Override
+            public boolean onMenuItemClick(MenuItem item)
+            {
+                moveToYearView(null);
+                return true;
+            }
+        });
     }
 }

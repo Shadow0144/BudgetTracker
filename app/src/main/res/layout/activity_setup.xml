@@ -49,7 +49,7 @@
             app:srcCompat="@android:drawable/radiobutton_off_background" />
     </LinearLayout>
 
-    <cc.corbin.budgettracker.auxilliary.EnhancedViewPager
+    <cc.corbin.budgettracker.setup.EnhancedViewPager
         android:id="@+id/setupViewPager"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -58,5 +58,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-    </cc.corbin.budgettracker.auxilliary.EnhancedViewPager>
+    </cc.corbin.budgettracker.setup.EnhancedViewPager>
 </android.support.constraint.ConstraintLayout>

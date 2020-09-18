@@ -13,7 +13,6 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 import cc.corbin.budgettracker.R;
@@ -92,20 +91,6 @@ public class DayView extends PagingView
         else { }
     }
 
-    protected void setupHeader()
-    {
-        super.setupHeader();
-
-        _dateTextView.setOnClickListener(new OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                ((DayViewActivity)_context).moveToMonthView(null);
-            }
-        });
-    }
-
     private void setupTotalTextView()
     {
         _totalTextView = new TextView(_context);
@@ -174,7 +159,7 @@ public class DayView extends PagingView
             @Override
             public void onClick(View v)
             {
-                ((DayViewActivity)_context).editItem(((ExpenditureEntity)v.getTag()));
+                ((DayViewActivity)_context).editExpenditure(((ExpenditureEntity)v.getTag()));
             }
         });
         _expHolder.addView(view);

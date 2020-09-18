@@ -9,6 +9,7 @@ import android.support.v7.widget.SnapHelper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.time.LocalDate;
 
@@ -27,6 +28,7 @@ public abstract class PagingActivity extends NavigationActivity
 
     protected Button _leftCurrentButton;
     protected Button _rightCurrentButton;
+    protected TextView _dateTextView;
 
     protected LocalDate _currentDate;
 
@@ -63,6 +65,8 @@ public abstract class PagingActivity extends NavigationActivity
         _dateLayout = findViewById(R.id.dateLayout);
         _leftCurrentButton = findViewById(R.id.jumpToCurrentLeftButton);
         _rightCurrentButton = findViewById(R.id.jumpToCurrentRightButton);
+
+        _dateTextView = findViewById(R.id.dateTextView); // This does not actually hold the date, the individual DayViews' dateTextViews do
     }
 
     public void previousView(View v)

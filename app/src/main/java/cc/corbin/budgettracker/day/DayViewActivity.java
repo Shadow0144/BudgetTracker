@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -41,15 +42,17 @@ public class DayViewActivity extends PagingActivity
         super.onCreate(savedInstanceState);
         setup();
 
-        // Layout is set in parent class
+        // Layout is set in a parent class
 
         // Launch the first time setup activity if it has not yet created a shared preferences file
         SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.budget_tracker_preferences_key), 0);
         if (!sharedPreferences.contains(getString(R.string.language_key)))
         {
-            // launchFirstTimeSetup(); // TODO
+            //launchFirstTimeSetup();
         }
         else { }
+
+        _hasUpButton = true;
 
         final Button addItemButton = findViewById(R.id.addItemButton);
         addItemButton.setVisibility(View.VISIBLE);
@@ -61,6 +64,15 @@ public class DayViewActivity extends PagingActivity
         _currentDate = LocalDate.of(year, month, day);
 
         setupDayView();
+
+        _dateTextView.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                selectJumpDate(null);
+            }
+        });
 
         if (!Categories.areCategoriesLoaded())
         {
@@ -78,13 +90,13 @@ public class DayViewActivity extends PagingActivity
     // Returns the set date as an int for use by the RecyclerAdapter
     private long getDate()
     {
-        return _currentDate.toEpochDay(); //((int)(_currentDate.getTimeInMillis() / 1000 / 60 / 60 / 24));
+        return _currentDate.toEpochDay();
     }
 
     // Returns the current date as a long int for use by the RecyclerAdapter
     private long getToday()
     {
-        return LocalDate.now().toEpochDay(); //((int)(Calendar.getInstance().getTimeInMillis() / 1000 / 60 / 60 / 24));
+        return LocalDate.now().toEpochDay();
     }
 
     private void setupDayView()
@@ -94,7 +106,7 @@ public class DayViewActivity extends PagingActivity
         _recyclerView.scrollToPosition((int)getDate());
     }
 
-    public void addItem(View v)
+    public void addExpenditure(View v)
     {
         DayView dayView = (DayView)_layoutManager.findViewByPosition(_layoutManager.findFirstVisibleItemPosition());
         LocalDate date = dayView.getDate();
@@ -106,7 +118,7 @@ public class DayViewActivity extends PagingActivity
         startActivityForResult(intent, CREATE_EXPENDITURE);
     }
 
-    public void editItem(ExpenditureEntity exp)
+    public void editExpenditure(ExpenditureEntity exp)
     {
         Intent intent = new Intent(getApplicationContext(), ExpenditureEditActivity.class);
         intent.putExtra(ExpenditureEditActivity.EXPENDITURE_INTENT, exp);
@@ -173,8 +185,27 @@ public class DayViewActivity extends PagingActivity
         startActivity(intent);
     }
 
+    public void selectJumpDate(View v)
+    {
+
+    }
+
     public void currentView(View v)
     {
         _recyclerView.smoothScrollToPosition((int)getToday());
+    }
+
+    @Override
+    protected void setupUpButton()
+    {
+        _upButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener()
+        {
+            @Override
+            public boolean onMenuItemClick(MenuItem item)
+            {
+                moveToMonthView(null);
+                return true;
+            }
+        });
     }
 }

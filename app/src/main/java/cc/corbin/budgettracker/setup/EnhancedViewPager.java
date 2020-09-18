@@ -1,4 +1,4 @@
-package cc.corbin.budgettracker.auxilliary;
+package cc.corbin.budgettracker.setup;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
